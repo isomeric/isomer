@@ -1,1 +1,0 @@
-"""Garden components for HFOS"""
