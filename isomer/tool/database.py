@@ -27,9 +27,9 @@ import click
 import pymongo
 from click_didyoumean import DYMGroup
 
-from hfos.logger import warn, error
-from hfos.migration import make_migrations
-from hfos.tool import log, _ask
+from isomer.logger import warn, error
+from isomer.migration import make_migrations
+from isomer.tool import log, ask
 
 
 @click.group(cls=DYMGroup)
@@ -37,7 +37,7 @@ from hfos.tool import log, _ask
 def db(ctx):
     """[GROUP] Database management operations"""
 
-    from hfos import database
+    from isomer import database
     database.initialize(ctx.obj['dbhost'], ctx.obj['dbname'])
     ctx.obj['db'] = database
 
@@ -48,7 +48,7 @@ def list_all(ctx):
     from pymongo import MongoClient
 
     client = MongoClient(ctx.obj['dbhost'])
-    log(client.database_names())
+    log(client.list_database_names())
     log('Done')
 
 
@@ -63,14 +63,14 @@ def rename(ctx, source, destination, keep, clear_target):
 
     client = MongoClient(ctx.obj['dbhost'])
 
-    if source not in client.database_names():
+    if source not in client.list_database_names():
         log('Source database', source, 'does not exist!', lvl=warn)
         sys.exit(-1)
 
     database = client.admin
     log('Copying', source, 'to', destination)
 
-    if destination in client.database_names():
+    if destination in client.list_database_names():
         log('Destination exists')
         if clear_target:
             log('Clearing')
@@ -94,7 +94,7 @@ def rename(ctx, source, destination, keep, clear_target):
 def clear(ctx, schema):
     """Clears an entire database collection irrevocably. Use with caution!"""
 
-    response = _ask('Are you sure you want to delete the collection "%s"' % (
+    response = ask('Are you sure you want to delete the collection "%s"' % (
         schema), default='N', data_type='bool')
     if response is True:
         host, port = ctx.obj['dbhost'].split(':')
