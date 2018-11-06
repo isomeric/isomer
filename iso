@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 
 # HFOS - Hackerfleet Operating System - Dev Plugin
@@ -31,8 +31,43 @@ isomer instances.
 __author__ = "Heiko 'riot' Weinen"
 __license__ = "AGPLv3"
 
+import sys
 
-from hfos.tool.tool import isotool
+from isomer.tool import ask, check_root, run_process
+
+pkgs = {
+    'debian': [
+        'mongodb', 'python3.5', 'python3-pip', 'python3-grib',
+        'python3-bson', 'python3-pymongo', 'python3-serial',
+        'python3-pymongo-ext', 'python3-bson-ext', 'python3-dev',
+        'nodejs', 'enchant', 'nginx-full', 'virtualenv',
+        'gdal-bin', 'python-gdal'
+    ]
+}
+
+
+def install_dependencies():
+    """Installs all dependencies"""
+    if not ask('Dependencies not installed, do you want to install them', default=False, data_type='bool', show_hint=True):
+        sys.exit()
+
+    check_root()
+
+    def debian():
+        run_process('.', ['apt-get', 'install', '-y'] + pkgs['debian'], verbose=True)
+
+    def common():
+        run_process('.', ['python3', 'setup.py', 'develop'])
+        run_process('.', ['pip3', 'install', '-r', 'requirements.txt'], verbose=True)
+
+    debian()
+    common()
+
+
+try:
+    from isomer.tool.tool import isotool
+except ImportError:
+    install_dependencies()
 
 if __name__ == '__main__':
     isotool(obj={})
