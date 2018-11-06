@@ -19,7 +19,6 @@ wheel
 
 # Generating Documentation
 MarkupSafe
-gitdb
 funcparserlib
 webcolors
 
