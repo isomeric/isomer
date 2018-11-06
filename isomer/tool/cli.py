@@ -21,13 +21,17 @@
 __author__ = "Heiko 'riot' Weinen"
 __license__ = "AGPLv3"
 
+import os.path
+from os import makedirs
 import click
 from click_didyoumean import DYMGroup
 from click_plugins import with_plugins
+
 from pkg_resources import iter_entry_points
 
-from hfos.logger import verbosity
-from hfos.tool import db_host_default, db_host_help, db_host_metavar, db_default, db_help, db_metavar
+from isomer.logger import verbosity, warn, debug
+from isomer.tool import log, db_host_default, db_host_help, db_host_metavar, db_default, db_help, db_metavar
+from isomer.tool.etc import read_configuration, write_configuration, configuration_template
 
 
 @click.group(context_settings={'help_option_names': ['-h', '--help']},
@@ -44,8 +48,10 @@ from hfos.tool import db_host_default, db_host_help, db_host_metavar, db_default
               metavar=db_host_metavar)
 @click.option('--dbname', default=db_default, help=db_help,
               metavar=db_metavar)
+@click.option('--config', '-c', default='/etc/isomer/instances.conf',
+              help='Specify configuration for instance management')
 @click.pass_context
-def cli(ctx, instance, quiet, verbose, log_level, dbhost, dbname):
+def cli(ctx, instance, quiet, verbose, log_level, dbhost, dbname, config):
     """Isomer Management Tool
 
     This tool supports various operations to manage isomer instances.
@@ -77,11 +83,35 @@ def cli(ctx, instance, quiet, verbose, log_level, dbhost, dbname):
     ctx.obj['dbhost'] = dbhost
     ctx.obj['dbname'] = dbname
 
+    log('Loading configuration:', config, lvl=debug)
+
+    if os.path.exists(config):
+        ctx.obj['config'] = read_configuration(config)
+        ctx.obj['config_filename'] = config
+    else:
+        log('Creating new configuration from template', lvl=verbose)
+
+        base_directory = os.path.dirname(config)
+        log('Base configuration directory:', base_directory, lvl=debug)
+
+        if not os.path.exists(base_directory):
+            try:
+                makedirs(base_directory)
+            except PermissionError:
+                log('PermissionError: Could not create configuration directory "%s"' % base_directory, lvl=warn)
+                return
+
+        if write_configuration(config, configuration_template):
+            ctx.obj['config'] = configuration_template
+            ctx.obj['config_filename'] = config
+        else:
+            ctx.obj['config_filename'] = None
+
 
 @with_plugins(iter_entry_points('isomer.management'))
 @cli.group(cls=DYMGroup)
 def plugin():
-    """Plugin commands"""
+    """[GROUP] Plugin commands"""
 
 
 cli.add_command(plugin)
