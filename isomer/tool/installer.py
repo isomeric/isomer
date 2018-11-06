@@ -17,30 +17,32 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-from isomer.provisions.base import provisionList
+from hfos.provisions.base import provisionList
 
 __author__ = "Heiko 'riot' Weinen"
 __license__ = "AGPLv3"
 
-import click
-import os
-import shutil
+import grp
+import pwd
 import sys
+import time
 import networkx
-
+from _socket import gethostname
 from distutils.dir_util import copy_tree
 from subprocess import Popen
 
+import click
+import os
+import shutil
+from OpenSSL import crypto
 from click_didyoumean import DYMGroup
 
-from isomer.tool.etc import NonExistentKey
-from isomer.logger import error, warn, debug
-from isomer.tool import check_root, log, ask
-from isomer.misc.path import get_path, set_instance
-from isomer.ui.builder import install_frontend
+from hfos.logger import error, warn, debug
+from hfos.tool import _check_root, log, _get_system_configuration, _ask, run_process
+from hfos.tool.templates import write_template_file
+from hfos.tool.defaults import service_template, cert_file, key_file, distribution, nginx_configuration, combined_file
 
-from git import Repo, exc
-from isomer.version import version
+from hfos.ui.builder import install_frontend
 
 
 @click.group(cls=DYMGroup)
@@ -49,39 +51,7 @@ from isomer.version import version
 def install(ctx, port):
     """[GROUP] Install various aspects of HFOS"""
 
-    set_instance(ctx.obj['instance'], "blue")  # Initially start with a blue instance
-
-    log('Configuration:', ctx.obj['config'])
-    log('Instance:', ctx.obj['instance'])
-
-    try:
-        instance = ctx.obj['config']['instances'][ctx.obj['instance']]
-    except NonExistentKey:
-        log('Instance unknown, so far.', lvl=warn)
-
-        instance = ctx.obj['config']['defaults']
-        log('New instance configuration:', instance)
-
-    environment_name = instance['environment']
-    environment = instance['environments'][environment_name]
-
-    environment['port'] = port
-
-    # TODO: Remove sparse&superfluous environment info from context
     ctx.obj['port'] = port
-
-    try:
-        repository = Repo('./')
-        ctx.obj['repository'] = repository
-        log('Repo:', repository)
-        environment['version'] = repository.git.describe()
-    except exc.InvalidGitRepositoryError:
-        log('Not running from a git repository; Using hfos.version', lvl=warn)
-        environment['version'] = version
-
-    ctx.obj['environment'] = environment
-
-    ctx.obj['instance_config'] = instance
 
 
 @install.command(short_help='build and install docs')
@@ -97,7 +67,7 @@ def docs(ctx, clear_target):
 def install_docs(instance, clear_target):
     """Builds and installs the complete HFOS documentation."""
 
-    check_root()
+    _check_root()
 
     def make_docs():
         """Trigger a Sphinx make command to build the documentation."""
@@ -145,6 +115,63 @@ def install_docs(instance, clear_target):
     log("Done: Install Docs")
 
 
+@install.command(short_help='create structures in /var')
+@click.option('--clear-target', '--clear', help='Clears already existing cache '
+                                                'directories', is_flag=True, default=False)
+@click.option('--clear-all', help='Clears all already existing '
+                                  'directories', is_flag=True, default=False)
+@click.pass_context
+def var(ctx, clear_target, clear_all):
+    """Install variable data to /var/[lib,cache]/hfos"""
+
+    install_var(str(ctx.obj['instance']), clear_target, clear_all)
+
+
+def install_var(instance, clear_target, clear_all):
+    """Install required folders in /var"""
+    _check_root()
+
+    log("Checking frontend library and cache directories",
+        emitter='MANAGE')
+
+    uid = pwd.getpwnam("hfos").pw_uid
+    gid = grp.getgrnam("hfos").gr_gid
+
+    join = os.path.join
+
+    # If these need changes, make sure they are watertight and don't remove
+    # wanted stuff!
+    target_paths = (
+        '/var/www/challenges',  # For LetsEncrypt acme certificate challenges
+        join('/var/lib/hfos', instance),
+        join('/var/local/hfos', instance),
+        join('/var/local/hfos', instance, 'backup'),
+        join('/var/cache/hfos', instance),
+        join('/var/cache/hfos', instance, 'tilecache'),
+        join('/var/cache/hfos', instance, 'rastertiles'),
+        join('/var/cache/hfos', instance, 'rastercache')
+    )
+    logfile = "/var/log/hfos-" + instance + ".log"
+
+    for item in target_paths:
+        if os.path.exists(item):
+            log("Path already exists: " + item)
+            if clear_all or (clear_target and 'cache' in item):
+                log("Cleaning up: " + item, lvl=warn)
+                shutil.rmtree(item)
+
+        if not os.path.exists(item):
+            log("Creating path: " + item)
+            os.mkdir(item)
+            os.chown(item, uid, gid)
+
+    # Touch logfile to make sure it exists
+    open(logfile, "a").close()
+    os.chown(logfile, uid, gid)
+
+    log("Done: Install Var")
+
+
 @install.command(short_help='install provisions')
 @click.option('--provision', '-p', help="Specify a provision (default=install "
                                         "all)",
@@ -170,10 +197,10 @@ def install_provisions(ctx, provision, clear_provisions=False, overwrite=False, 
     # from hfos.logger import verbosity, events
     # verbosity['console'] = verbosity['global'] = events
 
-    from isomer import database
+    from hfos import database
     database.initialize(ctx.obj['dbhost'], ctx.obj['dbname'])
 
-    from isomer.provisions import build_provision_store
+    from hfos.provisions import build_provision_store
 
     provision_store = build_provision_store()
 
@@ -269,7 +296,7 @@ def install_modules(wip):
     # TODO: Sort module dependencies via topological sort or let pip do this in future.
     # # To get the module dependencies:
     # packages = {}
-    # for provision_entrypoint in iter_entry_points(group='isomer.provisions',
+    # for provision_entrypoint in iter_entry_points(group='hfos.provisions',
     #                                               name=None):
     #     log("Found packages: ", provision_entrypoint.dist.project_name, lvl=warn)
     #
@@ -345,11 +372,251 @@ def install_modules(wip):
     log('Done: Install Modules')
 
 
+@install.command(short_help='install systemd service')
+@click.pass_context
+def service(ctx):
+    """Install systemd service configuration"""
+
+    install_service(ctx.obj['instance'], ctx.obj['dbhost'], ctx.obj['dbname'], ctx.obj['port'])
+
+
+def install_service(instance, dbhost, dbname, port):
+    """Install systemd service configuration"""
+
+    _check_root()
+
+    log("Installing systemd service")
+
+    launcher = os.path.realpath(__file__).replace('manage', 'launcher')
+    executable = sys.executable + " " + launcher
+    executable += " --instance " + instance
+    executable += " --dbname " + dbname + " --dbhost " + dbhost
+    executable += " --port " + port
+    executable += " --dolog --logfile /var/log/hfos-" + instance + ".log"
+    executable += " --logfileverbosity 30 -q"
+
+    definitions = {
+        'instance': instance,
+        'executable': executable
+    }
+    service_name = 'hfos-' + instance + '.service'
+
+    write_template_file(os.path.join('dev/templates', service_template),
+                        os.path.join('/etc/systemd/system/', service_name),
+                        definitions)
+
+    Popen([
+        'systemctl',
+        'enable',
+        service_name
+    ])
+
+    log('Launching service')
+
+    Popen([
+        'systemctl',
+        'start',
+        service_name
+    ])
+
+    log("Done: Install Service")
+
+
+@install.command(short_help='install nginx configuration')
+@click.option('--hostname', default=None,
+              help='Override public Hostname (FQDN) Default from active system '
+                   'configuration')
+@click.pass_context
+def nginx(ctx, hostname):
+    """Install nginx configuration"""
+
+    install_nginx(ctx.obj['dbhost'], ctx.obj['dbname'], ctx.obj['port'], hostname)
+
+
+def install_nginx(instance, dbhost, dbname, port, hostname=None):
+    """Install nginx configuration"""
+
+    _check_root()
+
+    log("Installing nginx configuration")
+
+    if hostname is None:
+        try:
+            configuration = _get_system_configuration(dbhost, dbname)
+            hostname = configuration.hostname
+        except Exception as e:
+            log('Exception:', e, type(e), exc=True, lvl=error)
+            log("""Could not determine public fully qualified hostname!
+Check systemconfig (see db view and db modify commands) or specify
+manually with --hostname host.domain.tld
+
+Using 'localhost' for now""", lvl=warn)
+            hostname = 'localhost'
+
+    definitions = {
+        'instance': instance,
+        'server_public_name': hostname,
+        'ssl_certificate': cert_file,
+        'ssl_key': key_file,
+        'host_url': 'http://127.0.0.1:%i/' % port
+    }
+
+    if distribution == 'DEBIAN':
+        configuration_file = '/etc/nginx/sites-available/hfos.%s.conf' % instance
+        configuration_link = '/etc/nginx/sites-enabled/hfos.%s.conf' % instance
+    elif distribution == 'ARCH':
+        configuration_file = '/etc/nginx/nginx.conf'
+        configuration_link = None
+    else:
+        log('Unsure how to proceed, you may need to specify your '
+            'distribution', lvl=error)
+        return
+
+    log('Writing nginx HFOS site definition')
+    write_template_file(os.path.join('dev/templates', nginx_configuration),
+                        configuration_file,
+                        definitions)
+
+    if configuration_link is not None:
+        log('Enabling nginx HFOS site (symlink)')
+        if not os.path.exists(configuration_link):
+            os.symlink(configuration_file, configuration_link)
+
+    log('Restarting nginx service')
+    Popen([
+        'systemctl',
+        'restart',
+        'nginx.service'
+    ])
+
+    log("Done: Install nginx configuration")
+
+
+@install.command(short_help='create system user')
+def system_user():
+    """Install HFOS system user (hfos.hfos)"""
+
+    install_system_user()
+    log("Done: Setup User")
+
+
+def install_system_user():
+    """Install HFOS system user (hfos.hfos)"""
+
+    _check_root()
+
+    Popen([
+        '/usr/sbin/adduser',
+        '--system',
+        '--quiet',
+        '--home',
+        '/var/run/hfos',
+        '--group',
+        '--disabled-password',
+        '--disabled-login',
+        'hfos'
+    ])
+    time.sleep(2)
+
+
+@install.command(short_help='install ssl certificate')
+@click.option('--selfsigned', help="Use a self-signed certificate",
+              default=True, is_flag=True)
+def cert(selfsigned):
+    """Install a local SSL certificate"""
+
+    install_cert(selfsigned)
+
+
+def install_cert(selfsigned):
+    """Install a local SSL certificate"""
+
+    _check_root()
+
+    if selfsigned:
+        log('Generating self signed (insecure) certificate/key '
+            'combination')
+
+        try:
+            os.mkdir('/etc/ssl/certs/hfos')
+        except FileExistsError:
+            pass
+        except PermissionError:
+            log("Need root (e.g. via sudo) to generate ssl certificate")
+            sys.exit(1)
+
+        def create_self_signed_cert():
+            """Create a simple self signed SSL certificate"""
+
+            # create a key pair
+            k = crypto.PKey()
+            k.generate_key(crypto.TYPE_RSA, 1024)
+
+            if os.path.exists(cert_file):
+                try:
+                    certificate = open(cert_file, "rb").read()
+                    old_cert = crypto.load_certificate(crypto.FILETYPE_PEM,
+                                                       certificate)
+                    serial = old_cert.get_serial_number() + 1
+                except (crypto.Error, OSError) as e:
+                    log('Could not read old certificate to increment '
+                        'serial:', type(e), e, exc=True, lvl=warn)
+                    serial = 1
+            else:
+                serial = 1
+
+            # create a self-signed certificate
+            certificate = crypto.X509()
+            certificate.get_subject().C = "DE"
+            certificate.get_subject().ST = "Berlin"
+            certificate.get_subject().L = "Berlin"
+            # noinspection PyPep8
+            certificate.get_subject().O = "Hackerfleet"
+            certificate.get_subject().OU = "Hackerfleet"
+            certificate.get_subject().CN = gethostname()
+            certificate.set_serial_number(serial)
+            certificate.gmtime_adj_notBefore(0)
+            certificate.gmtime_adj_notAfter(10 * 365 * 24 * 60 * 60)
+            certificate.set_issuer(certificate.get_subject())
+            certificate.set_pubkey(k)
+            certificate.sign(k, b'sha512')
+
+            open(key_file, "wt").write(str(
+                crypto.dump_privatekey(crypto.FILETYPE_PEM, k),
+                encoding="ASCII"))
+
+            open(cert_file, "wt").write(str(
+                crypto.dump_certificate(crypto.FILETYPE_PEM, certificate),
+                encoding="ASCII"))
+
+            open(combined_file, "wt").write(str(
+                crypto.dump_certificate(crypto.FILETYPE_PEM, certificate),
+                encoding="ASCII") + str(
+                crypto.dump_privatekey(crypto.FILETYPE_PEM, k),
+                encoding="ASCII"))
+
+        create_self_signed_cert()
+
+        log('Done: Install Cert')
+    else:
+
+        # TODO
+
+        log('Not implemented yet. You can build your own certificate and '
+            'store it in /etc/ssl/certs/hfos/server-cert.pem - it should '
+            'be a certificate with key, as this is used server side and '
+            'there is no way to enter a separate key.', lvl=error)
+
+
 @install.command(short_help='build and install frontend')
-@click.option('--dev', help="Use frontend development location", default=True, is_flag=True)
-@click.option('--rebuild', help="Rebuild frontend before installation", default=False, is_flag=True)
-@click.option('--no-install', help="Do not install requirements", default=False, is_flag=True)
-@click.option('--build-type', help="Specify frontend build type. Either dist(default) or build", default='dist')
+@click.option('--dev', help="Use frontend development location",
+              default=True, is_flag=True)
+@click.option('--rebuild', help="Rebuild frontend before installation",
+              default=False, is_flag=True)
+@click.option('--no-install', help="Do not install requirements",
+              default=False, is_flag=True)
+@click.option('--build-type', help="Specify frontend build type. Either dist(default) or build",
+              default='dist')
 @click.pass_context
 def frontend(ctx, dev, rebuild, no_install, build_type):
     """Build and install frontend"""
@@ -380,23 +647,23 @@ def install_all(ctx, clear_all):
 
     It does NOT build and install the HTML5 frontend."""
 
-    check_root()
+    _check_root()
 
     instance = ctx.obj['instance']
-    # dbhost = ctx.obj['dbhost']
-    # dbname = ctx.obj['dbname']
-    # port = ctx.obj['port']
+    dbhost = ctx.obj['dbhost']
+    dbname = ctx.obj['dbname']
+    port = ctx.obj['port']
 
-    # install_system_user()
-    # install_cert(selfsigned=True)
+    install_system_user()
+    install_cert(selfsigned=True)
 
-    # install_var(instance, clear_target=clear_all, clear_all=clear_all)
+    install_var(instance, clear_target=clear_all, clear_all=clear_all)
     install_modules(wip=False)
-    install_provisions(ctx, provision=None, clear_provisions=clear_all)
+    install_provisions(provision=None, clear_provisions=clear_all)
     install_docs(instance, clear_target=clear_all)
 
-    # install_service(instance, dbhost, dbname, port)
-    # install_nginx(instance, dbhost, dbname, port)
+    install_service(instance, dbhost, dbname, port)
+    install_nginx(instance, dbhost, dbname, port)
 
     log('Done')
 
@@ -405,12 +672,44 @@ def install_all(ctx, clear_all):
 def uninstall():
     """Uninstall data and resource locations"""
 
-    check_root()
+    _check_root()
 
-    response = ask("This will delete all data of your HFOS installations! Type"
+    response = _ask("This will delete all data of your HFOS installations! Type"
                     "YES to continue:", default="N", show_hint=False)
     if response == 'YES':
         shutil.rmtree('/var/lib/hfos')
         shutil.rmtree('/var/cache/hfos')
 
 
+@click.command(short_help='Manage updates')
+@click.option('--no-restart', help='Do not restart service', is_flag=True, default=False)
+@click.option('--no-rebuild', help='Do not rebuild frontend', is_flag=True, default=False)
+@click.pass_context
+def update(ctx, no_restart, no_rebuild):
+    """Update a HFOS node"""
+
+    # 0. (NOT YET! MAKE A BACKUP OF EVERYTHING)
+    # 1. update repository
+    # 2. update frontend repository
+    # 3. (Not yet: update venv)
+    # 4. rebuild frontend
+    # 5. restart service
+
+    instance = ctx.obj['instance']
+
+    log('Pulling github updates')
+    run_process('.', ['git', 'pull', 'origin', 'master'])
+    run_process('./frontend', ['git', 'pull', 'origin', 'master'])
+
+    if not no_rebuild:
+        log('Rebuilding frontend')
+        install_frontend(instance, forcerebuild=True, install=False, development=True)
+
+    if not no_restart:
+        log('Restaring service')
+        if instance != 'hfos':
+            instance = 'hfos-' + instance
+
+        run_process('.', ['sudo', 'systemctl', 'restart', instance])
+
+    log('Done')
