@@ -35,14 +35,14 @@ Basic functionality around provisioning.
 """
 
 from jsonschema import ValidationError
-from hfos.logger import hfoslog, debug, verbose, warn, error
+from isomer.logger import isolog, debug, verbose, warn, error
 
 
 def log(*args, **kwargs):
     """Log as Emitter:MANAGE"""
 
     kwargs.update({'emitter': 'PROVISIONS', 'frame_ref': 2})
-    hfoslog(*args, **kwargs)
+    isolog(*args, **kwargs)
 
 
 def provisionList(items, database_name, overwrite=False, clear=False, skip_user_check=False):
@@ -83,7 +83,7 @@ def provisionList(items, database_name, overwrite=False, clear=False, skip_user_
         return False
 
     import pymongo
-    from hfos.database import objectmodels, dbhost, dbport, dbname
+    from isomer.database import objectmodels, dbhost, dbport, dbname
 
     database_object = objectmodels[database_name]
 

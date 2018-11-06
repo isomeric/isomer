@@ -40,19 +40,19 @@ from collections import namedtuple
 from uuid import uuid4
 from base64 import b64decode
 
-from hfos.component import handler
+from isomer.component import handler
 from circuits.net.events import write
 from circuits import Event, Timer
-from hfos.events.system import get_anonymous_events, get_user_events, authorizedevent, anonymousevent
-from hfos.events.client import authenticationrequest, send, clientdisconnect, \
+from isomer.events.system import get_anonymous_events, get_user_events, authorized_event, anonymous_event
+from isomer.events.client import authenticationrequest, send, clientdisconnect, \
     userlogin, userlogout
-from hfos.component import ConfigurableComponent
-from hfos.database import objectmodels
-from hfos.logger import error, warn, critical, debug, info, network, \
+from isomer.component import ConfigurableComponent
+from isomer.database import objectmodels
+from isomer.logger import error, warn, critical, debug, info, network, \
     verbose, hilight
-from hfos.ui.clientobjects import Socket, Client, User
-from hfos.debugger import cli_register_event
-from hfos.misc import std_table, i18n as _, all_languages, language_token_to_name
+from isomer.ui.clientobjects import Socket, Client, User
+from isomer.debugger import cli_register_event
+from isomer.misc import std_table, i18n as _, all_languages, language_token_to_name
 
 
 class cli_users(Event):
@@ -95,15 +95,15 @@ class reset_flood_offenders(Event):
 
 # Ping for latency measurement
 
-class ping(authorizedevent):
+class ping(authorized_event):
     pass
 
 
-class selectlanguage(anonymousevent):
+class selectlanguage(anonymous_event):
     pass
 
 
-class getlanguages(anonymousevent):
+class getlanguages(anonymous_event):
     pass
 
 
@@ -121,7 +121,7 @@ class ClientManager(ConfigurableComponent):
     communication.
     """
 
-    channel = "hfosweb"
+    channel = 'isomer-web'
 
     def __init__(self, *args):
         super(ClientManager, self).__init__('CM', *args)

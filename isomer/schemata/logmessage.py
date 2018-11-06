@@ -33,8 +33,8 @@ LogMessage: LogMessage to store messages in rooms and private logs
 
 """
 
-from hfos.schemata.defaultform import readonlyform
-from hfos.schemata.base import base_object
+from isomer.schemata.defaultform import readonlyform
+from isomer.schemata.base import base_object
 
 LogMessageSchema = base_object('logmessage', no_perms=True)
 

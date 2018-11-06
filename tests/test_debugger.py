@@ -33,10 +33,10 @@ Test HFOS Launcher
 
 from circuits import Manager
 # import pytest
-from hfos.debugger import HFDebugger
-from hfos.events.system import debugrequest
-from hfos.ui.clientobjects import User
-from hfos import logger
+from isomer.debugger import HFDebugger
+from isomer.events.system import debugrequest
+from isomer.ui.clientobjects import User
+from isomer import logger
 from time import sleep
 
 # from pprint import pprint

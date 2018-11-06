@@ -19,7 +19,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import pyinotify
 
-from hfos import component
+from isomer import component
 
 __author__ = "Heiko 'riot' Weinen"
 __license__ = "AGPLv3"
@@ -56,14 +56,14 @@ from circuits.web.websockets.dispatcher import WebSocketsDispatcher
 
 # from circuits.web.errors import redirect
 # from circuits.app.daemon import Daemon
-from hfos.component import handler, ConfigurableComponent
+from isomer.component import handler, ConfigurableComponent
 # from hfos.schemata.component import ComponentBaseConfigSchema
-from hfos.database import initialize  # , schemastore
-from hfos.events.system import populate_user_events, frontendbuildrequest
-from hfos.logger import hfoslog, verbose, debug, warn, error, critical, \
+from isomer.database import initialize  # , schemastore
+from isomer.events.system import populate_user_events, frontendbuildrequest
+from isomer.logger import isolog, verbose, debug, warn, error, critical, \
     setup_root, verbosity, set_logfile
-from hfos.debugger import cli_register_event
-from hfos.ui.builder import install_frontend
+from isomer.debugger import cli_register_event
+from isomer.ui.builder import install_frontend
 
 
 # from pprint import pprint
@@ -117,12 +117,11 @@ class FrontendHandler(pyinotify.ProcessEvent):
         install_frontend(self.launcher.instance, install=False, development=True)
 
 
-
-def drop_privileges(uid_name='hfos', gid_name='hfos'):
+def drop_privileges(uid_name='isomer', gid_name='isomer'):
     """Attempt to drop privileges and change user to 'hfos' user/group"""
 
     if os.getuid() != 0:
-        hfoslog("Not root, cannot drop privileges", lvl=warn, emitter='CORE')
+        isolog("Not root, cannot drop privileges", lvl=warn, emitter='CORE')
         return
 
     try:
@@ -139,9 +138,9 @@ def drop_privileges(uid_name='hfos', gid_name='hfos'):
 
         # Ensure a very conservative umask
         # old_umask = os.umask(22)
-        hfoslog('Privileges dropped', emitter='CORE')
+        isolog('Privileges dropped', emitter='CORE')
     except Exception as e:
-        hfoslog('Could not drop privileges:', e, type(e), exc=True, lvl=error, emitter='CORE')
+        isolog('Could not drop privileges:', e, type(e), exc=True, lvl=error, emitter='CORE')
 
 
 class Core(ConfigurableComponent):
@@ -174,6 +173,7 @@ class Core(ConfigurableComponent):
         super(Core, self).__init__("CORE", args, **kwargs)
         self.log("Starting system (channel ", self.channel, ")")
 
+        # TODO: Take this from the given instance configuration (via i.t.etc)
         self.insecure = args['insecure']
         self.quiet = args['quiet']
         self.development = args['dev']
@@ -189,15 +189,13 @@ class Core(ConfigurableComponent):
                          "cannot be found!", lvl=error)
                 sys.exit(17)  # TODO: Define exit codes
 
-        self.frontendroot = os.path.abspath(os.path.dirname(os.path.realpath(
-            __file__)) + "/../frontend")
+        # TODO: Get Paths from i.m.path:
+        self.frontendroot = os.path.abspath(os.path.dirname(os.path.realpath(__file__)) + "/../frontend")
         self.frontendtarget = os.path.join('/var/lib/hfos', self.instance, 'frontend')
+        self.moduleroot = os.path.abspath(os.path.dirname(os.path.realpath(__file__)) + "/../modules")
 
         self.loadable_components = {}
         self.runningcomponents = {}
-
-        self.moduleroot = os.path.abspath(os.path.dirname(os.path.realpath(
-            __file__)) + "/../modules")
 
         self.frontendrunning = False
         self.frontend_watcher = None
@@ -247,7 +245,7 @@ class Core(ConfigurableComponent):
         """All components have initialized, set up the component
         configuration schema-store, run the local server and drop privileges"""
 
-        from hfos.database import configschemastore
+        from isomer.database import configschemastore
         configschemastore[self.name] = self.configschema
 
         self._start_server()
@@ -266,7 +264,7 @@ class Core(ConfigurableComponent):
     def trigger_frontend_build(self, event):
         """Event hook to trigger a new frontend build"""
 
-        from hfos.database import instance
+        from isomer.database import instance
         install_frontend(instance=instance,
                          forcerebuild=event.force,
                          install=event.install,
@@ -303,7 +301,7 @@ class Core(ConfigurableComponent):
         self.update_components(forcereload=True)
         initialize()
 
-        from hfos.debugger import cli_compgraph
+        from isomer.debugger import cli_compgraph
         self.fireEvent(cli_compgraph())
 
     @handler('cli_quit')
@@ -374,9 +372,9 @@ class Core(ConfigurableComponent):
             from pkg_resources import iter_entry_points
 
             entry_point_tuple = (
-                iter_entry_points(group='hfos.base', name=None),
-                iter_entry_points(group='hfos.sails', name=None),
-                iter_entry_points(group='hfos.components', name=None)
+                iter_entry_points(group='isomer.base', name=None),
+                iter_entry_points(group='isomer.management', name=None),
+                iter_entry_points(group='isomer.components', name=None)
             )
 
             for iterator in entry_point_tuple:
@@ -528,7 +526,7 @@ class Core(ConfigurableComponent):
         self.log("Started event origin: ", component, lvl=verbose)
         populate_user_events()
 
-        from hfos.events.system import AuthorizedEvents
+        from isomer.events.system import AuthorizedEvents
         self.log(len(AuthorizedEvents), "authorized event sources:",
                  list(AuthorizedEvents.keys()), lvl=debug)
 
@@ -546,7 +544,7 @@ def construct_graph(args):
 
     if args['debug']:
         from circuits import Debugger
-        hfoslog("Starting circuits debugger", lvl=warn, emitter='GRAPH')
+        isolog("Starting circuits debugger", lvl=warn, emitter='GRAPH')
         dbg = Debugger().register(app)
         # TODO: Make these configurable from modules, navdata is _very_ noisy
         # but should not be listed _here_
@@ -562,7 +560,7 @@ def construct_graph(args):
             "keepalive"  # IRC Gateway
         ])
 
-    hfoslog("Beginning graph assembly.", emitter='GRAPH')
+    isolog("Beginning graph assembly.", emitter='GRAPH')
 
     if args['drawgraph']:
         from circuits.tools import graph
@@ -574,7 +572,7 @@ def construct_graph(args):
         # TODO: Fix up that url:
         webbrowser.open("http://%s:%i/" % (args['host'], args['port']))
 
-    hfoslog("Graph assembly done.", emitter='GRAPH')
+    isolog("Graph assembly done.", emitter='GRAPH')
 
     return app
 
@@ -620,17 +618,17 @@ def launch(run=True, **args):
     set_logfile(args['logfilepath'], args['instance'])
 
     if args['livelog'] is True:
-        from hfos import logger
+        from isomer import logger
         logger.live = True
 
-    hfoslog("Running with Python", sys.version.replace("\n", ""),
-            sys.platform, lvl=debug, emitter='CORE')
-    hfoslog("Interpreter executable:", sys.executable, emitter='CORE')
+    isolog("Running with Python", sys.version.replace("\n", ""),
+           sys.platform, lvl=debug, emitter='CORE')
+    isolog("Interpreter executable:", sys.executable, emitter='CORE')
     if args['cert'] is not None:
-        hfoslog("Warning! Using SSL without nginx is currently not broken!",
-                lvl=critical, emitter='CORE')
+        isolog("Warning! Using SSL without nginx is currently not broken!",
+               lvl=critical, emitter='CORE')
 
-    hfoslog("Initializing database access", emitter='CORE', lvl=debug)
+    isolog("Initializing database access", emitter='CORE', lvl=debug)
     initialize(args['dbhost'], args['dbname'], args['instance'])
 
     server = construct_graph(args)

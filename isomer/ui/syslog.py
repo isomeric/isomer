@@ -1,17 +1,17 @@
 # coding=utf-8
 from circuits import Event, Timer
 
-from hfos.component import ConfigurableComponent, handler
-from hfos.events.client import send # , clientdisconnect
-from hfos.events.system import authorizedevent
-from hfos.logger import error, debug
+from isomer.component import ConfigurableComponent, handler
+from isomer.events.client import send # , clientdisconnect
+from isomer.events.system import authorized_event
+from isomer.logger import error, debug
 
 
-class history(authorizedevent):
+class history(authorized_event):
     pass
 
 
-class subscribe(authorizedevent):
+class subscribe(authorized_event):
     pass
 
 

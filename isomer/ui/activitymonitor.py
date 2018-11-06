@@ -42,8 +42,8 @@ Should be user configurable and toggleable, at least most parts/bits.
 
 """
 
-from hfos.component import handler, ConfigurableComponent
-from hfos.logger import error, verbose  # , warn, critical
+from isomer.component import handler, ConfigurableComponent
+from isomer.logger import error, verbose  # , warn, critical
 
 
 class ActivityMonitor(ConfigurableComponent):
@@ -55,7 +55,7 @@ class ActivityMonitor(ConfigurableComponent):
     * ActivityMonitor broadcasts
     """
 
-    channel = "hfosweb"
+    channel = 'isomer-web'
 
     def __init__(self, *args):
         super(ActivityMonitor, self).__init__('ACTIVITY', *args)

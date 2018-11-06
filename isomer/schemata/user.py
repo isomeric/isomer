@@ -35,8 +35,8 @@ User: Useraccount object
 
 
 """
-from hfos.schemata.defaultform import noform
-from hfos.schemata.base import base_object
+from isomer.schemata.defaultform import noform
+from isomer.schemata.base import base_object
 
 UserSchema = base_object('user', roles_list=['crew'])
 

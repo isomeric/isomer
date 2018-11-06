@@ -29,9 +29,9 @@ import deepdiff
 import click
 from click_didyoumean import DYMGroup
 
-from hfos.logger import error, debug, warn
-from hfos.tool import log, _ask
-from hfos.tool.database import db
+from isomer.logger import error, debug, warn
+from isomer.tool import log, ask
+from isomer.tool.database import db
 
 
 @db.group(cls=DYMGroup)
@@ -140,8 +140,8 @@ def delete(ctx, schema, uuid, object_filter, yes):
         log('No objects to delete found')
         return
 
-    if not yes and not _ask("Are you sure you want to delete %i objects" % count,
-                            default=False, data_type="bool", show_hint=True):
+    if not yes and not ask("Are you sure you want to delete %i objects" % count,
+                           default=False, data_type="bool", show_hint=True):
         return
 
     for item in obj:
@@ -201,7 +201,7 @@ def find_field(ctx, search, by_type, obj):
     if search is not None:
         search = search
     else:
-        search = _ask("Enter search term")
+        search = ask("Enter search term")
 
     database = ctx.obj['db']
 
@@ -357,7 +357,7 @@ def dupcheck(ctx, delete_duplicates, merge, schema):
                             log('Conflict at', path, key, ':', a[key], '<->', b[key])
                             resolve = ''
                             while resolve not in ('a', 'b'):
-                                resolve = _ask('Choose? (a or b)')
+                                resolve = ask('Choose? (a or b)')
                             if resolve == 'a':
                                 b[key] = a[key]
                             else:
@@ -377,7 +377,7 @@ def dupcheck(ctx, delete_duplicates, merge, schema):
                     for index, dupe in enumerate(dupes[item]):
                         log('Candidate #', index, ':')
                         log(dupe._fields, pretty=True)
-                    request = _ask('(d)iff, (m)erge, (r)emove, (i)gnore, (q)uit?')
+                    request = ask('(d)iff, (m)erge, (r)emove, (i)gnore, (q)uit?')
                     if request == 'q':
                         log('Done')
                         return
@@ -387,8 +387,8 @@ def dupcheck(ctx, delete_duplicates, merge, schema):
                     elif request == 'r':
                         delete_request = -2
                         while delete_request == -2 or -1 > delete_request > len(dupes[item]):
-                            delete_request = _ask('Which one? (0-%i or -1 to cancel)' % (len(dupes[item]) - 1),
-                                                  data_type='int')
+                            delete_request = ask('Which one? (0-%i or -1 to cancel)' % (len(dupes[item]) - 1),
+                                                 data_type='int')
                         if delete_request == -1:
                             continue
                         else:
@@ -400,14 +400,14 @@ def dupcheck(ctx, delete_duplicates, merge, schema):
                         merge_request_b = -2
 
                         while merge_request_a == -2 or -1 > merge_request_a > len(dupes[item]):
-                            merge_request_a = _ask('Merge from? (0-%i or -1 to cancel)' % (len(dupes[item]) - 1),
-                                                   data_type='int')
+                            merge_request_a = ask('Merge from? (0-%i or -1 to cancel)' % (len(dupes[item]) - 1),
+                                                  data_type='int')
                         if merge_request_a == -1:
                             continue
 
                         while merge_request_b == -2 or -1 > merge_request_b > len(dupes[item]):
-                            merge_request_b = _ask('Merge into? (0-%i or -1 to cancel)' % (len(dupes[item]) - 1),
-                                                   data_type='int')
+                            merge_request_b = ask('Merge into? (0-%i or -1 to cancel)' % (len(dupes[item]) - 1),
+                                                  data_type='int')
                         if merge_request_b == -1:
                             continue
 
@@ -426,7 +426,7 @@ def dupcheck(ctx, delete_duplicates, merge, schema):
                             log('Candidate after merge:', dupes[item][merge_request_b]._fields, pretty=True)
                             store = ''
                             while store not in ('n', 'y'):
-                                store = _ask('Store?')
+                                store = ask('Store?')
                             if store == 'y':
                                 dupes[item][merge_request_b].save()
                                 dupes[item][merge_request_a].delete()

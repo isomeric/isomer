@@ -31,7 +31,7 @@ Test HFOS Basic Provisioning
 
 """
 
-from hfos.database import _build_schemastore_new
+from isomer.database import _build_schemastore_new
 
 # from pprint import pprint
 

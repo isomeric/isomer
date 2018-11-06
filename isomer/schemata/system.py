@@ -32,8 +32,8 @@ System: Global systemwide settings
 
 
 """
-from hfos.schemata.defaultform import savebutton, lookup_field
-from hfos.schemata.base import base_object, uuid_object, language_field
+from isomer.schemata.defaultform import savebutton, lookup_field
+from isomer.schemata.base import base_object, uuid_object, language_field
 
 SystemconfigSchema = base_object('systemconfig', roles_read=['admin', 'crew'], roles_write=['admin'])
 

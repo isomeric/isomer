@@ -17,7 +17,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-from hfos.misc import all_languages
+from isomer.misc import all_languages
 
 __author__ = "Heiko 'riot' Weinen"
 __license__ = "AGPLv3"
@@ -55,28 +55,30 @@ from circuits import Timer, Event
 from os import statvfs, walk
 from os.path import join, getsize
 from pkg_resources import iter_entry_points, DistributionNotFound
+
+# TODO: Kick out 2.x compat
 # noinspection PyUnresolvedReferences
 from six.moves import \
     input  # noqa - Lazily loaded, may be marked as error, e.g. in IDEs
 
-from hfos.component import ConfigurableComponent, handler
-from hfos.logger import hfoslog, debug, warn, error, critical, verbose
-from hfos.misc import i18n as _
+from isomer.component import ConfigurableComponent, handler
+from isomer.logger import isolog, debug, warn, error, critical, verbose
+from isomer.misc import i18n as _
 
 
 def db_log(*args, **kwargs):
     kwargs.update({'emitter': 'DB', 'frame_ref': 2})
-    hfoslog(*args, **kwargs)
+    isolog(*args, **kwargs)
 
 
 def backup_log(*args, **kwargs):
     kwargs.update({'emitter': 'BACKUP', 'frame_ref': 2})
-    hfoslog(*args, **kwargs)
+    isolog(*args, **kwargs)
 
 
 def schemata_log(*args, **kwargs):
     kwargs.update({'emitter': 'SCHEMATA', 'frame_ref': 2})
-    hfoslog(*args, **kwargs)
+    isolog(*args, **kwargs)
 
 
 try:  # PY 2/3
@@ -121,7 +123,7 @@ def clear_all():
 def _build_schemastore_new():
     available = {}
 
-    for schema_entrypoint in iter_entry_points(group='hfos.schemata',
+    for schema_entrypoint in iter_entry_points(group='isomer.schemata',
                                                name=None):
         try:
             schemata_log("Schemata found: ", schema_entrypoint.name, lvl=verbose)
@@ -349,7 +351,7 @@ def _build_collections(store):
     return result
 
 
-def initialize(address='127.0.0.1:27017', database_name='hfos', instance_name="default", reload=False):
+def initialize(address='127.0.0.1:27017', database_name='isomer-default', instance_name="default", reload=False):
     """Initializes the database connectivity, schemata and finally object models"""
 
     global schemastore
@@ -363,7 +365,7 @@ def initialize(address='127.0.0.1:27017', database_name='hfos', instance_name="d
     global initialized
 
     if initialized and not reload:
-        hfoslog('Already initialized and not reloading.', lvl=warn, emitter="DB", frame_ref=2)
+        isolog('Already initialized and not reloading.', lvl=warn, emitter="DB", frame_ref=2)
         return
 
     dbhost = address.split(':')[0]
@@ -455,6 +457,7 @@ class Maintenance(ConfigurableComponent):
     """Regularly checks a few basic system maintenance tests like used
     storage space of collections and other data"""
 
+    # TODO: Decouple filesystem checks from configuration, those have been fixed down via isomer.misc.path
     configprops = {
         'locations': {
             'type': 'object',

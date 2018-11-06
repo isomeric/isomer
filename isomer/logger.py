@@ -170,7 +170,7 @@ def setup_root(newroot):
     root = newroot
 
 
-def hfoslog(*what, **kwargs):
+def isolog(*what, **kwargs):
     """Logs all *what arguments.
 
     :param *what: Loggable objects (i.e. they have a string representation)
@@ -295,10 +295,10 @@ def hfoslog(*what, **kwargs):
             print(output)
         except UnicodeEncodeError as e:
             print(output.encode("utf-8"))
-            hfoslog("Bad encoding encountered on previous message:", e,
-                    lvl=error)
+            isolog("Bad encoding encountered on previous message:", e,
+                   lvl=error)
         except BlockingIOError:
-            hfoslog("Too long log line encountered:", output[:20], lvl=warn)
+            isolog("Too long log line encountered:", output[:20], lvl=warn)
 
     if live:
         item = [now, lvl, runtime, count, emitter, str(content)]

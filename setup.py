@@ -50,56 +50,56 @@ def prune(thing):
 
 
 def add_datafiles(*paths):
-    manifest = open('MANIFEST.in', 'w')
+    with open('MANIFEST.in', 'w') as manifest:
+        for path in paths:
+            files = []
+            manifest.write('recursive-include ' + path + ' *\n')
 
-    for path in paths:
-        files = []
-        manifest.write('recursive-include ' + path + ' *\n')
+            for root, dirnames, filenames in os.walk(path):
+                for filename in filenames:
+                    datafile = os.path.join(root, filename)
 
-        for root, dirnames, filenames in os.walk(path):
-            for filename in filenames:
-                datafile = os.path.join(root, filename)
+                    if not prune(datafile):
+                        files.append(datafile)
+                        manifestfiles.append(datafile)
 
-                if not prune(datafile):
-                    files.append(datafile)
-                    manifestfiles.append(datafile)
+            datafiles.append((path, files))
 
-        datafiles.append((path, files))
-
-    for part in ignore:
-        if part.startswith('/'):
-            manifest.write('prune ' + part[1:] + '\n')
-        else:
-            manifest.write('global-exclude ' + part + '/*\n')
+        for part in ignore:
+            if part.startswith('/'):
+                manifest.write('prune ' + part[1:] + '\n')
+            else:
+                manifest.write('global-exclude ' + part + '/*\n')
 
 
 add_datafiles('frontend', 'docs')
 
-setup(name="hfos",
-      description="hfos",
-      version="1.2.0",
-      author="Hackerfleet Community",
+setup(name="isomer",
+      description="isomer",
+      version="1.0.0",
+      author="Isomer Community",
       author_email="riot@c-base.org",
-      maintainer="Hackerfleet Community",
+      maintainer="Isomer Community",
       maintainer_email="riot@c-base.org",
-      url="https://hackerfleet.github.io",
+      url="https://isomeric.github.io",
       license="GNU Affero General Public License v3",
-      packages=['hfos',
-                'hfos.schemata',
-                'hfos.ui',
-                'hfos.provisions'],
-      namespace_packages=['hfos'],
+      packages=['isomer',
+                'isomer.schemata',
+                'isomer.ui',
+                'isomer.provisions'],
+      namespace_packages=['isomer'],
       scripts=[
           'iso',
       ],
-      long_description="""HFOS - The Hackerfleet Operating System
-=======================================
+      long_description="""
+Isomer - A distributed application framework
+============================================
 
-A modern, opensource approach to maritime navigation.
+A modern, opensource approach to collaborative productivity.
 
 This software package is supposed to run on your ship/car/plane/ufo's board
 computer.
-See https://github.com/hackerfleet/hfos""",
+See https://github.com/isomeric/isomer""",
       dependency_links=[
           'https://github.com/Hackerfleet/warmongo/archive/master.zip#egg'
           '=warmongo-0.5.5.hf'
@@ -109,45 +109,50 @@ See https://github.com/hackerfleet/hfos""",
                         'jsonschema>=2.6.0',
                         'pystache>=0.5.4',
                         'click>=6.7.0',
+                        'click-didyoumean>=0.0.3',
+                        'click-repl>=0.1.2',
+                        'click-plugins>=1.0.3',
+                        'prompt-toolkit>=1.0.15',
+                        'tomlkit>=0.4.6',
+                        # TODO: Kick out 2.x compat
                         'six'
                         ],
       data_files=datafiles,
       entry_points="""[console_scripts]
-    hfos_launcher=hfos.launcher:launch
-    hfos_manage=hfos_manage:cli
-    
-    [hfos.base]
-    debugger=hfos.debugger:HFDebugger
-    cli=hfos.debugger:CLI
-    syslog=hfos.ui.syslog:Syslog
-    maintenance=hfos.database:Maintenance
-    backup=hfos.database:BackupManager
+    iso=iso
 
-    [hfos.sails]
-    auth=hfos.ui.auth:Authenticator
-    clientmanager=hfos.ui.clientmanager:ClientManager
-    objectmanager=hfos.ui.objectmanager:ObjectManager
-    schemamanager=hfos.ui.schemamanager:SchemaManager
-    tagmanager=hfos.ui.tagmanager:TagManager
-    configurator=hfos.ui.configurator:Configurator
+    [isomer.base]
+    debugger=isomer.debugger:HFDebugger
+    cli=isomer.debugger:CLI
+    syslog=isomer.ui.syslog:Syslog
+    maintenance=isomer.database:Maintenance
+    backup=isomer.database:BackupManager
 
-    [hfos.schemata]
-    systemconfig=hfos.schemata.system:Systemconfig
-    client=hfos.schemata.client:Client
-    profile=hfos.schemata.profile:Profile
-    user=hfos.schemata.user:User
-    logmessage=hfos.schemata.logmessage:LogMessage
-    tag=hfos.schemata.tag:Tag
+    [isomer.sails]
+    auth=isomer.ui.auth:Authenticator
+    clientmanager=isomer.ui.clientmanager:ClientManager
+    objectmanager=isomer.ui.objectmanager:ObjectManager
+    schemamanager=isomer.ui.schemamanager:SchemaManager
+    tagmanager=isomer.ui.tagmanager:TagManager
+    configurator=isomer.ui.configurator:Configurator
 
-    [hfos.provisions]
-    system=hfos.provisions.system:provision
-    user=hfos.provisions.user:provision
+    [isomer.schemata]
+    systemconfig=isomer.schemata.system:Systemconfig
+    client=isomer.schemata.client:Client
+    profile=isomer.schemata.profile:Profile
+    user=isomer.schemata.user:User
+    logmessage=isomer.schemata.logmessage:LogMessage
+    tag=isomer.schemata.tag:Tag
+
+    [isomer.provisions]
+    system=isomer.provisions.system:provision
+    user=isomer.provisions.user:provision
     """,
-      # use_scm_version={
-      #       "write_to": "hfos/version.py",
-      # },
-      # setup_requires=[
-      #       "setuptools_scm"
-      # ],
+      use_scm_version={
+            "write_to": "isomer/scm_version.py",
+      },
+      setup_requires=[
+            "setuptools_scm"
+      ],
       test_suite="tests.main.main",
       )

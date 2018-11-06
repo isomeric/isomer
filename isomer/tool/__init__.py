@@ -27,8 +27,8 @@ import sys
 import hashlib
 import os
 
-from hfos.logger import hfoslog, error, verbose, debug
-from hfos.tool.defaults import db_host_default, db_host_help, db_host_metavar, db_default, db_help, db_metavar
+from isomer.logger import isolog, error, verbose, debug
+from isomer.tool.defaults import db_host_default, db_host_help, db_host_metavar, db_default, db_help, db_metavar
 
 from subprocess import Popen, PIPE, STDOUT, check_output, CalledProcessError
 
@@ -37,7 +37,7 @@ def log(*args, **kwargs):
     """Log as Emitter:MANAGE"""
 
     kwargs.update({'emitter': 'MANAGE', 'frame_ref': 2})
-    hfoslog(*args, **kwargs)
+    isolog(*args, **kwargs)
 
 
 def check_root():
@@ -120,7 +120,7 @@ def _get_credentials(username=None, password=None, dbhost=None):
 
 
 def _get_system_configuration(dbhost, dbname):
-    from hfos import database
+    from isomer import database
     database.initialize(dbhost, dbname)
     systemconfig = database.objectmodels['systemconfig'].find_one({
         'active': True

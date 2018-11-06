@@ -33,10 +33,10 @@ Test HFOS Auth
 
 from circuits import Manager
 import pytest
-from hfos.ui.auth import Authenticator
-from hfos.events.client import authenticationrequest, authentication
-from hfos.misc import std_uuid
-import hfos.logger as logger
+from isomer.ui.auth import Authenticator
+from isomer.events.client import authenticationrequest, authentication
+from isomer.misc import std_uuid
+import isomer.logger as logger
 
 # from pprint import pprint
 

@@ -26,10 +26,10 @@ from uuid import uuid4
 import click
 from click_didyoumean import DYMGroup
 
-from hfos.logger import warn
-from hfos.misc import std_now
-from hfos.tool import _get_credentials, log, _ask
-from hfos.tool.database import db
+from isomer.logger import warn
+from isomer.misc import std_now
+from isomer.tool import _get_credentials, log, ask
+from isomer.tool.database import db
 
 
 @db.group(cls=DYMGroup)
@@ -103,12 +103,12 @@ def delete_user(ctx, yes):
     """Delete a local user"""
 
     if ctx.obj['username'] is None:
-        username = _ask("Please enter username:")
+        username = ask("Please enter username:")
     else:
         username = ctx.obj['username']
 
     del_user = ctx.obj['db'].objectmodels['user'].find_one({'name': username})
-    if yes or _ask('Confirm deletion', default=False, data_type='bool'):
+    if yes or ask('Confirm deletion', default=False, data_type='bool'):
         try:
             del_user.delete()
             log("Done")
@@ -155,7 +155,6 @@ def list_users(ctx, search, uuid, active):
 
     for found_user in users.find():
         if not search or (search and search in found_user.name):
-            # TODO: Not 2.x compatible
             print(found_user.name, end=' ' if active or uuid else '\n')
             if uuid:
                 print(found_user.uuid, end=' ' if active else '\n')

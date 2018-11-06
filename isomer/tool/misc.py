@@ -25,8 +25,8 @@ import click
 from click_repl import repl
 from prompt_toolkit.history import FileHistory
 
-from hfos.tool import run_process
-from hfos.tool.cli import cli
+from isomer.tool import run_process
+from isomer.tool.cli import cli
 
 
 @cli.command(short_help='Start interactive management shell')

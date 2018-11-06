@@ -35,7 +35,7 @@ geometry: Any valid GeoJSON geometry (Points, Multipoints, Linestrings, Multilin
 
 
 """
-from hfos.schemata.defaultform import noform
+from isomer.schemata.defaultform import noform
 
 GeometrySchema = {
     "$schema": "http://json-schema.org/draft-04/schema#",

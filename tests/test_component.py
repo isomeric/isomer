@@ -34,8 +34,8 @@ Test HFOS Basic Provisioning
 import pytest
 from uuid import uuid4
 from circuits import Manager
-import hfos.logger as logger
-import hfos.component
+import isomer.logger as logger
+import isomer.component
 
 
 def test_uniquename():
@@ -150,14 +150,14 @@ def test_write_none_config():
 def test_configurable_controller():
     """Test instantiation of the configurable controller"""
 
-    c = hfos.component.ConfigurableController()
+    c = isomer.component.ConfigurableController()
 
-    assert type(c) == hfos.component.ConfigurableController
+    assert type(c) == isomer.component.ConfigurableController
 
 
 def test_example_component():
     """Test instantiation of the example component"""
 
-    c = hfos.component.ExampleComponent()
+    c = isomer.component.ExampleComponent()
 
-    assert type(c) == hfos.component.ExampleComponent
+    assert type(c) == isomer.component.ExampleComponent

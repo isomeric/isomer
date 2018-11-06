@@ -36,10 +36,10 @@ from circuits import Manager
 import pytest
 from uuid import uuid4
 
-from hfos.database import objectmodels
-from hfos.ui.clientobjects import User, Client
-from hfos.ui.objectmanager import ObjectManager
-from hfos.events.objectmanager import change, get, delete, put, getlist, search, \
+from isomer.database import objectmodels
+from isomer.ui.clientobjects import User, Client
+from isomer.ui.objectmanager import ObjectManager
+from isomer.events.objectmanager import change, get, delete, put, getlist, search, \
     subscribe, unsubscribe
 # objectchange, objectcreation, objectdeletion, objectevent,
 # updatesubscriptions,

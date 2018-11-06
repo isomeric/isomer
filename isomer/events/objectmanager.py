@@ -34,9 +34,9 @@ Major HFOS event declarations
 
 from circuits.core import Event
 
-from hfos.logger import hfoslog, events
+from isomer.logger import isolog, events
 # from hfos.ui.clientobjects import User
-from hfos.events.system import authorizedevent
+from isomer.events.system import authorized_event
 
 
 # Object Management
@@ -51,8 +51,8 @@ class objectevent(Event):
         self.schema = schema
         self.client = client
 
-        hfoslog("Object event created: ", self.__doc__,
-                self.__dict__, lvl=events, emitter="OBJECT-EVENT")
+        isolog("Object event created: ", self.__doc__,
+               self.__dict__, lvl=events, emitter="OBJECT-EVENT")
 
 
 class objectchange(objectevent):
@@ -80,43 +80,43 @@ class updatesubscriptions(Event):
         self.schema = schema
         self.data = data
 
-        hfoslog("Object event created: ", self.__doc__,
-                self.__dict__, lvl=events, emitter="OBJECT-EVENT")
+        isolog("Object event created: ", self.__doc__,
+               self.__dict__, lvl=events, emitter="OBJECT-EVENT")
 
 
-class search(authorizedevent):
+class search(authorized_event):
     """A client requires a schema to validate data or display a form"""
 
 
-class getlist(authorizedevent):
+class getlist(authorized_event):
     """A client requires a schema to validate data or display a form"""
 
 
-class get(authorizedevent):
+class get(authorized_event):
     """A client requires a schema to validate data or display a form"""
 
 
-class put(authorizedevent):
+class put(authorized_event):
     """A client requires a schema to validate data or display a form"""
 
 
-class change(authorizedevent):
+class change(authorized_event):
     """A client requires a schema to validate data or display a form"""
 
 
-class delete(authorizedevent):
+class delete(authorized_event):
     """A client requires a schema to validate data or display a form"""
 
 
-class subscribe(authorizedevent):
+class subscribe(authorized_event):
     """A client requires a schema to validate data or display a form"""
 
 
-class unsubscribe(authorizedevent):
+class unsubscribe(authorized_event):
     """A client requires a schema to validate data or display a form"""
 
-class remove_role(authorizedevent):
+class remove_role(authorized_event):
     pass
 
-class add_role(authorizedevent):
+class add_role(authorized_event):
     pass

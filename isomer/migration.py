@@ -29,7 +29,7 @@ Module: Migration
 """
 
 # from hfos.database import schemastore
-from hfos.logger import hfoslog, warn, debug  # , error, verbose, critical
+from isomer.logger import isolog, warn, debug  # , error, verbose, critical
 from deepdiff.diff import DeepDiff
 from pkg_resources import iter_entry_points, DistributionNotFound
 import dpath
@@ -91,28 +91,28 @@ def make_migrations(schema=None):
                 for addition in additions:
                     path = get_path(addition)
                     entry = additions[addition]
-                    hfoslog('Adding:', entry, 'at', path)
+                    isolog('Adding:', entry, 'at', path)
                     dpath.util.new(result, path, entry)
                 return result
 
             if changetype == 'type_changes':
-                hfoslog('Creating new object')
+                isolog('Creating new object')
                 result = change['root']['new_value']
                 return result
 
             if changetype == 'dictionary_item_added':
-                hfoslog('Adding items')
+                isolog('Adding items')
                 result = apply_additions(change, result)
             elif changetype == 'dictionary_item_removed':
-                hfoslog('Removing items')
+                isolog('Removing items')
                 result = apply_removes(change, result)
             elif changetype == 'values_changed':
-                hfoslog("Changing items' types")
+                isolog("Changing items' types")
                 for item in change:
                     path = get_path(item)
-                    hfoslog('Changing', path, 'from',
-                            change[item]['old_value'], ' to',
-                            change[item]['new_value'])
+                    isolog('Changing', path, 'from',
+                           change[item]['old_value'], ' to',
+                           change[item]['new_value'])
                     assert dpath.util.get(result, path) == change[item][
                         'old_value']
                     amount = dpath.util.set(result, path, change[item][
@@ -124,7 +124,7 @@ def make_migrations(schema=None):
         def get_renames(migrations):
             """Check migrations for renamed fields"""
 
-            hfoslog('Checking for rename operations:')
+            isolog('Checking for rename operations:')
             pprint(migrations)
             for entry in migrations:
 
@@ -139,15 +139,15 @@ def make_migrations(schema=None):
                     for removal in removed:
                         removed_path = get_path(removal)
                         if path[:-1] == removed_path[:-1]:
-                            hfoslog('Possible rename detected:', removal, '->',
-                                    addition)
+                            isolog('Possible rename detected:', removal, '->',
+                                   addition)
                             renames.append((removed_path, path))
             return renames
 
         result = {}
         for no, migration in enumerate(migrations):
-            hfoslog('Migrating', no)
-            hfoslog('Migration:', migration, lvl=debug)
+            isolog('Migrating', no)
+            isolog('Migration:', migration, lvl=debug)
             renamed = get_renames(migrations)
 
             for entry in migration:
@@ -162,7 +162,7 @@ def make_migrations(schema=None):
         filename = "%s_%04i.json" % (schema, counter)
         migration = DeepDiff(previous, current, verbose_level=2).json
         if migration == "{}":
-            hfoslog('Nothing changed - no new migration data.', lvl=warn)
+            isolog('Nothing changed - no new migration data.', lvl=warn)
             return
 
         print('Writing migration: ', os.path.join(path, filename))
@@ -174,8 +174,8 @@ def make_migrations(schema=None):
     for schema_entrypoint in iter_entry_points(group='hfos.schemata',
                                                name=None):
         try:
-            hfoslog("Schemata found: ", schema_entrypoint.name, lvl=debug,
-                    emitter='DB')
+            isolog("Schemata found: ", schema_entrypoint.name, lvl=debug,
+                   emitter='DB')
             if schema is not None and schema_entrypoint.name != schema:
                 continue
 
@@ -194,11 +194,11 @@ def make_migrations(schema=None):
                     if not file.endswith('.json'):
                         continue
                     fullpath = os.path.join(path, file)
-                    hfoslog('Importing migration', fullpath)
+                    isolog('Importing migration', fullpath)
                     with open(fullpath, 'r') as f:
                         migration = DeepDiff.from_json(f.read())
                     migrations.append(migration)
-                    hfoslog('Successfully imported')
+                    isolog('Successfully imported')
 
                 if len(migrations) == 0:
                     raise ImportError
@@ -207,19 +207,19 @@ def make_migrations(schema=None):
                 write_migration(schema, len(migrations) + 1, path, model,
                                 new_model)
             except ImportError as e:
-                hfoslog('No previous migrations for', schema, e,
-                        type(e), exc=True)
+                isolog('No previous migrations for', schema, e,
+                       type(e), exc=True)
 
             if len(migrations) == 0:
                 write_migration(schema, 1, path, None, new_model)
 
         except (ImportError, DistributionNotFound) as e:
-            hfoslog("Problematic schema: ", e, type(e),
-                    schema_entrypoint.name, exc=True, lvl=warn,
-                    emitter='SCHEMATA')
+            isolog("Problematic schema: ", e, type(e),
+                   schema_entrypoint.name, exc=True, lvl=warn,
+                   emitter='SCHEMATA')
 
-    hfoslog("Found schemata: ", sorted(entrypoints.keys()), lvl=debug,
-            emitter='SCHEMATA')
+    isolog("Found schemata: ", sorted(entrypoints.keys()), lvl=debug,
+           emitter='SCHEMATA')
 
     pprint(entrypoints)
 

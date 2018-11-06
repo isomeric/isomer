@@ -31,13 +31,13 @@ Test HFOS Launcher
 
 """
 
-from hfos.database import schemastore
-from hfos.ui.clientobjects import User, Client
+from isomer.database import schemastore
+from isomer.ui.clientobjects import User, Client
 from circuits import Manager
 import pytest
 from uuid import uuid4
-from hfos.ui.schemamanager import SchemaManager
-from hfos.events.schemamanager import get, all, configuration
+from isomer.ui.schemamanager import SchemaManager
+from isomer.events.schemamanager import get, all, configuration
 # from hfos.events.client import send
 
 # from pprint import pprint

@@ -34,12 +34,12 @@ Authentication (and later Authorization) system
 from uuid import uuid4
 from circuits import Event, Timer
 
-from hfos.component import handler
-from hfos.events.client import authentication, send
-from hfos.component import ConfigurableComponent
-from hfos.database import objectmodels
-from hfos.logger import error, warn, debug
-from hfos.misc import std_hash, std_salt, std_uuid, std_now, std_human_uid
+from isomer.component import handler
+from isomer.events.client import authentication, send
+from isomer.component import ConfigurableComponent
+from isomer.database import objectmodels
+from isomer.logger import error, warn, debug
+from isomer.misc import std_hash, std_salt, std_uuid, std_now, std_human_uid
 
 
 class AuthenticationError(Exception):
@@ -61,7 +61,7 @@ class Authenticator(ConfigurableComponent):
     Authenticates users against the database.
     """
 
-    channel = "hfosweb"
+    channel = 'isomer-web'
 
     configprops = {}
 

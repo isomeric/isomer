@@ -30,8 +30,8 @@ import os
 import shutil
 from collections import OrderedDict
 
-from hfos.tool import log, _ask
-from hfos.tool.templates import write_template_file
+from isomer.tool import log, ask
+from isomer.tool.templates import write_template_file
 
 try:
     # noinspection PyUnresolvedReferences,PyUnboundLocalVariable
@@ -132,7 +132,7 @@ def _ask_questionnaire():
     pprint(questions.items())
 
     for question, default in questions.items():
-        response = _ask(question, default, str(type(default)), show_hint=True)
+        response = ask(question, default, str(type(default)), show_hint=True)
         if type(default) == unicode and type(response) != str:
             response = response.decode('utf-8')
         answers[question] = response
@@ -162,7 +162,7 @@ def create_module(clear_target, target):
     while not done:
         info = _ask_questionnaire()
         pprint(info)
-        done = _ask('Is the above correct', default='y', data_type='bool')
+        done = ask('Is the above correct', default='y', data_type='bool')
 
     augmented_info = _augment_info(info)
 

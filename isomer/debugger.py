@@ -39,11 +39,11 @@ from circuits.core.events import Event
 from circuits.core.handlers import reprhandler
 from circuits.io import stdin
 
-from hfos.component import ConfigurableComponent, handler
-from hfos.events.client import send
-from hfos.events.system import frontendbuildrequest, componentupdaterequest, \
+from isomer.component import ConfigurableComponent, handler
+from isomer.events.client import send
+from isomer.events.system import frontendbuildrequest, componentupdaterequest, \
     logtailrequest, debugrequest
-from hfos.logger import hfoslog, critical, error, warn, debug, verbose, verbosity
+from isomer.logger import isolog, critical, error, warn, debug, verbose, verbosity
 
 try:
     import objgraph
@@ -117,13 +117,13 @@ class HFDebugger(ConfigurableComponent):
             'items': {'type': 'string'}
         }
     }
-    channel = "hfosweb"
+    channel = 'isomer-web'
 
     def __init__(self, root=None, *args):
         super(HFDebugger, self).__init__("DBG", *args)
 
         if not root:
-            from hfos.logger import root
+            from isomer.logger import root
             self.root = root
         else:
             self.root = root
@@ -149,7 +149,7 @@ class HFDebugger(ConfigurableComponent):
     @handler("cli_errors")
     def cli_errors(self, *args):
         self.log('All errors since startup:')
-        from hfos.logger import LiveLog
+        from isomer.logger import LiveLog
         for logline in LiveLog:
             if logline[1] >= error:
                 self.log(logline, pretty=True)
@@ -227,7 +227,7 @@ class HFDebugger(ConfigurableComponent):
 
             if event.data == "storejson":
                 self.log("Storing received object to /tmp", lvl=critical)
-                fp = open('/tmp/hfosdebugger_' + str(
+                fp = open('/tmp/isomer_debugger_' + str(
                     event.user.useruuid) + "_" + str(uuid4()), "w")
                 json.dump(event.data, fp, indent=True)
                 fp.close()
@@ -256,7 +256,7 @@ class HFDebugger(ConfigurableComponent):
                 self.fireEvent(logtailrequest(event.user, None, None,
                                               event.client), "logger")
             if event.data == "trigger_anchorwatch":
-                from hfos.anchor.anchorwatcher import cli_trigger_anchorwatch
+                from isomer.anchor.anchorwatcher import cli_trigger_anchorwatch
                 self.fireEvent(cli_trigger_anchorwatch())
 
         except Exception as e:

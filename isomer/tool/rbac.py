@@ -26,9 +26,9 @@ import sys
 
 import click
 
-from hfos.logger import warn, error
-from hfos.tool import log
-from hfos.tool.database import db
+from isomer.logger import warn, error
+from isomer.tool import log
+from isomer.tool.database import db
 
 
 @db.group()

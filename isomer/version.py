@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-# HFOS - Hackerfleet Operating System
+# ISOMER - Hackerfleet Operating System
 # ===================================
 # Copyright (C) 2011-2018 Heiko 'riot' Weinen <riot@c-base.org> and others.
 #
@@ -23,12 +23,15 @@ __license__ = "AGPLv3"
 
 """Version Module
 
-Unified HFOS wide version number.
+Unified ISOMER wide version number.
 """
 
-version_info = (1, 2, 1, "dev")  # (major, minor, patch, dev?)
-version = (
-    ".".join(map(str, version_info))
-    if version_info[-1] != "dev"
-    else "dev"
-)
+try:
+    from isomer.scm_version import version
+except ImportError:
+    version_info = (1, 2, 1, "dev")  # (major, minor, patch, dev?)
+    version = (
+        ".".join(map(str, version_info))
+        if version_info[-1] != "dev"
+        else "dev"
+    )

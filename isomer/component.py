@@ -53,9 +53,9 @@ from pymongo.errors import ServerSelectionTimeoutError
 from random import randint
 from warmongo import model_factory
 
-from hfos.events.system import hfosEvent, authorizedevent, anonymousevent
-from hfos.logger import hfoslog, warn, critical, error, verbose
-from hfos.schemata.component import ComponentBaseConfigSchema
+from isomer.events.system import isomer_ui_event, authorized_event, anonymous_event
+from isomer.logger import isolog, warn, critical, error, verbose
+from isomer.schemata.component import ComponentBaseConfigSchema
 
 
 # from pprint import pprint
@@ -123,7 +123,7 @@ def handler(*names, **kwargs):
             return f
 
         if len(names) > 0 and inspect.isclass(names[0]) and \
-                issubclass(names[0], hfosEvent):
+                issubclass(names[0], isomer_ui_event):
             f.names = (str(names[0].realname()),)
         else:
             f.names = names
@@ -160,8 +160,8 @@ class LoggingMeta(object):
                 self.uniquename = uniquename
                 self.names.append(uniquename)
             else:
-                hfoslog("Unique component added twice: ", uniquename,
-                        lvl=critical, emitter="CORE")
+                isolog("Unique component added twice: ", uniquename,
+                       lvl=critical, emitter="CORE")
         else:
             while True:
                 uniquename = "%s%s" % (self.__class__.__name__,
@@ -191,7 +191,7 @@ class LoggingMeta(object):
             func.co_filename,
             line_no
         )
-        hfoslog(sourceloc=sourceloc, emitter=self.uniquename, *args, **kwargs)
+        isolog(sourceloc=sourceloc, emitter=self.uniquename, *args, **kwargs)
 
 
 class ConfigurableMeta(LoggingMeta):
@@ -242,7 +242,7 @@ class ConfigurableMeta(LoggingMeta):
         store"""
 
         super(ConfigurableMeta, self).register(*args)
-        from hfos.database import configschemastore
+        from isomer.database import configschemastore
         # self.log('ADDING SCHEMA:')
         # pprint(self.configschema)
         configschemastore[self.name] = self.configschema

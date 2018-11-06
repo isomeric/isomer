@@ -32,9 +32,9 @@ Client: Clientprofile to store client specific settings
 
 
 """
-from hfos.schemata.defaultform import savebutton, lookup_field
-from hfos.schemata.base import base_object, uuid_object, language_field
-from hfos.misc import i18n as _
+from isomer.schemata.defaultform import savebutton, lookup_field
+from isomer.schemata.base import base_object, uuid_object, language_field
+from isomer.misc import i18n as _
 
 ScreenRotationSchema = {
     'id': '#screenrotation',

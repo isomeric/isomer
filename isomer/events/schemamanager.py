@@ -32,18 +32,18 @@ Major HFOS event declarations
 
 """
 
-from hfos.events.system import authorizedevent
+from isomer.events.system import authorized_event
 
 
 # Schema client services
 
-class configuration(authorizedevent):
+class configuration(authorized_event):
     """A client requires a schema to validate data or display a form"""
 
 
-class all(authorizedevent):
+class all(authorized_event):
     """A client requires a schema to validate data or display a form"""
 
 
-class get(authorizedevent):
+class get(authorized_event):
     """A client requires a schema to validate data or display a form"""

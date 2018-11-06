@@ -35,7 +35,7 @@ Test HFOS Basic Provisioning
 def test_systemconfig_provision():
     """Tests correct instantiation"""
 
-    from hfos.provisions.system import provision
+    from isomer.provisions.system import provision
 
     assert isinstance(provision, dict)
 
@@ -43,6 +43,6 @@ def test_systemconfig_provision():
 def test_user_provision():
     """Tests base object user provisioning"""
 
-    from hfos.provisions.user import provision
+    from isomer.provisions.user import provision
 
     assert isinstance(provision, dict)

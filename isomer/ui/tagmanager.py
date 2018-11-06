@@ -17,7 +17,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-from hfos.events.system import authorizedevent
+from isomer.events.system import authorized_event
 
 __author__ = "Heiko 'riot' Weinen"
 __license__ = "AGPLv3"
@@ -32,13 +32,13 @@ Module: TagManager
 
 from circuits import Timer, Event
 
-from hfos.events.client import send
-from hfos.component import ConfigurableComponent
-from hfos.database import objectmodels
-from hfos.logger import warn, debug, verbose  # , error, hilight
-from hfos.component import handler
+from isomer.events.client import send
+from isomer.component import ConfigurableComponent
+from isomer.database import objectmodels
+from isomer.logger import warn, debug, verbose  # , error, hilight
+from isomer.component import handler
 
-class get_tagged(authorizedevent):
+class get_tagged(authorized_event):
     pass
 
 class TagManager(ConfigurableComponent):
@@ -46,7 +46,7 @@ class TagManager(ConfigurableComponent):
     Various tag related operations.
     """
 
-    channel = "hfosweb"
+    channel = 'isomer-web'
 
     configprops = {}
 

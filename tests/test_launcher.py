@@ -31,7 +31,7 @@ Test HFOS Launcher
 
 """
 
-from hfos.launcher import Core
+from isomer.launcher import Core
 
 args = {
     'insecure': False,

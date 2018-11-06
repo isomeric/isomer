@@ -39,7 +39,7 @@ from circuits.net.events import read  # , write
 from json import dumps  # , loads
 import pytest
 from uuid import uuid4
-from hfos.ui.clientmanager import ClientManager
+from isomer.ui.clientmanager import ClientManager
 # from hfos.events.client import authenticationrequest
 
 from pprint import pprint

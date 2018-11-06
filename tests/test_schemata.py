@@ -32,7 +32,7 @@ Test HFOS Basic Provisioning
 """
 
 import pytest
-from hfos.database import schemastore
+from isomer.database import schemastore
 
 schemata = schemastore.keys()
 

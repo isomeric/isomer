@@ -26,10 +26,10 @@ import json
 import bson
 import click
 
-from hfos.database import backup as internal_backup
-from hfos.logger import warn
-from hfos.tool import log
-from hfos.tool.database import db
+from isomer.database import backup as internal_backup
+from isomer.logger import warn
+from isomer.tool import log
+from isomer.tool.database import db
 
 
 @db.command('export', short_help='export objects to json')
@@ -83,7 +83,7 @@ def db_import(ctx, schema, uuid, object_filter, import_format, filename, all_sch
     else:
         schemata = [schema]
 
-    from hfos import database
+    from isomer import database
     database.initialize(ctx.obj['dbhost'], ctx.obj['dbname'])
 
     all_items = {}

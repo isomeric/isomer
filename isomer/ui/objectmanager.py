@@ -35,14 +35,14 @@ from uuid import uuid4
 from circuits import Event
 from pymongo import ASCENDING, DESCENDING
 
-from hfos.events.objectmanager import objectcreation, objectchange, \
+from isomer.events.objectmanager import objectcreation, objectchange, \
     objectdeletion, getlist, search, get, change, put, delete, subscribe, \
     unsubscribe, remove_role, add_role
-from hfos.events.client import send
-from hfos.debugger import cli_register_event
-from hfos.component import handler, ConfigurableComponent
-from hfos.database import objectmodels, ValidationError, schemastore
-from hfos.logger import verbose, debug, error, warn, critical  # , hilight
+from isomer.events.client import send
+from isomer.debugger import cli_register_event
+from isomer.component import handler, ConfigurableComponent
+from isomer.database import objectmodels, ValidationError, schemastore
+from isomer.logger import verbose, debug, error, warn, critical  # , hilight
 
 # from pprint import pprint
 
@@ -59,7 +59,7 @@ class ObjectManager(ConfigurableComponent):
     Handles object requests and updates.
     """
 
-    channel = "hfosweb"
+    channel = 'isomer-web'
 
     configprops = {}
 

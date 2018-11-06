@@ -12,7 +12,7 @@ This contains tilelayer urls, api stuff etc.
 
 """
 
-from hfos.logger import hfoslog, debug, warn  # , verbose, error, warn
+from isomer.logger import isolog, debug, warn  # , verbose, error, warn
 from pkg_resources import iter_entry_points
 
 __author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
@@ -22,17 +22,17 @@ __author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
 def build_provision_store():
     available = {}
 
-    for provision_entrypoint in iter_entry_points(group='hfos.provisions',
+    for provision_entrypoint in iter_entry_points(group='isomer.provisions',
                                                   name=None):
-        hfoslog("Provisions found: ", provision_entrypoint.name, lvl=debug,
-                emitter='DB')
+        isolog("Provisions found: ", provision_entrypoint.name, lvl=debug,
+               emitter='DB')
         try:
             available[provision_entrypoint.name] = provision_entrypoint.load()
         except ImportError:
-            hfoslog("Problematic provision: ", provision_entrypoint.name, exc=True, lvl=warn,
-                    emitter='PROVISIONS', frame_ref=2)
+            isolog("Problematic provision: ", provision_entrypoint.name, exc=True, lvl=warn,
+                   emitter='PROVISIONS', frame_ref=2)
 
-    hfoslog("Found provisions: ", sorted(list(available.keys())), emitter='PROVISIONS')
+    isolog("Found provisions: ", sorted(list(available.keys())), emitter='PROVISIONS')
     # pprint(available)
 
     return available

@@ -27,7 +27,7 @@ import click
 from click_didyoumean import DYMGroup
 from warmongo import model_factory
 
-from hfos.tool import log
+from isomer.tool import log
 
 
 @click.group(cls=DYMGroup)
@@ -35,10 +35,10 @@ from hfos.tool import log
 def config(ctx):
     """[GROUP] Configuration management operations"""
 
-    from hfos import database
+    from isomer import database
     database.initialize(ctx.obj['dbhost'], ctx.obj['dbname'])
 
-    from hfos.schemata.component import ComponentConfigSchemaTemplate
+    from isomer.schemata.component import ComponentConfigSchemaTemplate
     ctx.obj['col'] = model_factory(ComponentConfigSchemaTemplate)
 
 

@@ -29,12 +29,12 @@ Module: Configurator
 
 """
 
-from hfos.events.client import send
-from hfos.events.system import reload_configuration
-from hfos.component import ConfigurableComponent, authorizedevent, handler
-from hfos.schemata.component import ComponentConfigSchemaTemplate as Schema
-from hfos.database import ValidationError
-from hfos.logger import error, warn
+from isomer.events.client import send
+from isomer.events.system import reload_configuration
+from isomer.component import ConfigurableComponent, authorized_event, handler
+from isomer.schemata.component import ComponentConfigSchemaTemplate as Schema
+from isomer.database import ValidationError
+from isomer.logger import error, warn
 from warmongo import model_factory
 
 try:
@@ -45,19 +45,19 @@ except NameError:  # pragma: no cover
         pass
 
 
-class getlist(authorizedevent):
+class getlist(authorized_event):
     """A client requires a schema to validate data or display a form"""
 
     roles = ['admin']
 
 
-class get(authorizedevent):
+class get(authorized_event):
     """A client requires a schema to validate data or display a form"""
 
     roles = ['admin']
 
 
-class put(authorizedevent):
+class put(authorized_event):
     """A client requires a schema to validate data or display a form"""
 
     roles = ['admin']
@@ -70,7 +70,7 @@ class Configurator(ConfigurableComponent):
     (You're probably looking at it right now)
     """
 
-    channel = "hfosweb"
+    channel = 'isomer-web'
 
     configprops = {}
 

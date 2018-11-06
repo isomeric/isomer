@@ -23,6 +23,6 @@
 __author__ = "Heiko 'riot' Weinen"
 __license__ = "AGPLv3"
 
-from hfos.database import initialize
+from isomer.database import initialize
 
 initialize(database_name='hfos-test')

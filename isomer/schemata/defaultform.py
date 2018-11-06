@@ -21,7 +21,7 @@
 __author__ = "Heiko 'riot' Weinen"
 __license__ = "AGPLv3"
 
-from hfos.logger import hfoslog, warn
+from isomer.logger import isolog, warn
 from pycountry import countries, currencies, languages, subdivisions
 
 """
@@ -167,8 +167,8 @@ def section(rows, columns, items, label=None):
                 item = items[horizontal][vertical]
                 column_items.append(item)
             except IndexError:
-                hfoslog('Field in', label, 'omitted, due to missing row/column:', vertical, horizontal,
-                        lvl=warn, emitter='FORMS', tb=True, frame=2)
+                isolog('Field in', label, 'omitted, due to missing row/column:', vertical, horizontal,
+                       lvl=warn, emitter='FORMS', tb=True, frame=2)
 
         column = {
             'type': 'section',

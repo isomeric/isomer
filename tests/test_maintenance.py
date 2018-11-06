@@ -33,8 +33,8 @@ Test HFOS Maintenance
 
 from circuits import Manager
 import pytest
-from hfos.database import Maintenance
-import hfos.logger as logger
+from isomer.database import Maintenance
+import isomer.logger as logger
 
 m = Manager()
 

@@ -35,7 +35,7 @@ User:
 
 """
 
-from hfos.misc import std_human_uid
+from isomer.misc import std_human_uid
 
 
 class Socket(object):

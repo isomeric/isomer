@@ -17,7 +17,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-from hfos.misc import all_languages
+from isomer.misc import all_languages
 
 __author__ = "Heiko 'riot' Weinen"
 __license__ = "AGPLv3"

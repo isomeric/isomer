@@ -34,7 +34,7 @@ Major HFOS event declarations
 
 from circuits.core import Event
 
-from hfos.logger import hfoslog, events
+from isomer.logger import isolog, events
 
 # from hfos.ui.clientobjects import User
 
@@ -96,28 +96,28 @@ def populate_user_events():
     # well as normal events, so they can be processed by Automat
 
     # NormalEvents = inheritors(Event)
-    AuthorizedEvents = inheritors(authorizedevent)
-    AnonymousEvents = inheritors(anonymousevent)
+    AuthorizedEvents = inheritors(authorized_event)
+    AnonymousEvents = inheritors(anonymous_event)
 
     # AuthorizedEvents.update(NormalEvents)
 
 
-class hfosEvent(Event):
+class isomer_ui_event(Event):
     """Basic HFOS event class"""
 
     pass
 
 
-class reload_configuration(hfosEvent):
+class reload_configuration(isomer_ui_event):
     """Instructs a component to reload its configuration"""
 
     def __init__(self, target, *args, **kwargs):
         super(reload_configuration, self).__init__(*args, **kwargs)
         self.target = target
-        hfoslog('Reload of configuration triggered', lvl=events)
+        isolog('Reload of configuration triggered', lvl=events)
 
 
-class anonymousevent(hfosEvent):
+class anonymous_event(isomer_ui_event):
     """Base class for events for logged in users."""
 
     def __init__(self, action, data, client, *args):
@@ -132,11 +132,11 @@ class anonymousevent(hfosEvent):
         """
 
         self.name = self.__module__ + '.' + self.__class__.__name__
-        super(anonymousevent, self).__init__(*args)
+        super(anonymous_event, self).__init__(*args)
         self.action = action
         self.data = data
         self.client = client
-        hfoslog('AnonymousEvent created:', self.name, lvl=events)
+        isolog('AnonymousEvent created:', self.name, lvl=events)
 
     @classmethod
     def realname(cls):
@@ -146,7 +146,7 @@ class anonymousevent(hfosEvent):
         return cls.__module__ + '.' + cls.__name__
 
 
-class authorizedevent(hfosEvent):
+class authorized_event(isomer_ui_event):
     """Base class for events for logged in users."""
 
     roles = ['admin', 'crew']
@@ -166,12 +166,12 @@ class authorizedevent(hfosEvent):
         # assert isinstance(user, User)
 
         self.name = self.__module__ + '.' + self.__class__.__name__
-        super(authorizedevent, self).__init__(*args)
+        super(authorized_event, self).__init__(*args)
         self.user = user
         self.action = action
         self.data = data
         self.client = client
-        hfoslog('AuthorizedEvent created:', self.name, lvl=events)
+        isolog('AuthorizedEvent created:', self.name, lvl=events)
 
     @classmethod
     def realname(cls):
@@ -183,7 +183,7 @@ class authorizedevent(hfosEvent):
 
 # Authenticator Events
 
-class profilerequest(authorizedevent):
+class profilerequest(authorized_event):
     """A user has changed his profile"""
 
     def __init__(self, *args):
@@ -194,8 +194,8 @@ class profilerequest(authorizedevent):
         """
         super(profilerequest, self).__init__(*args)
 
-        hfoslog("Profile update request: ", self.__dict__,
-                lvl=events, emitter="PROFILE-EVENT")
+        isolog("Profile update request: ", self.__dict__,
+               lvl=events, emitter="PROFILE-EVENT")
 
 
 # Frontend assembly events
@@ -217,15 +217,15 @@ class componentupdaterequest(frontendbuildrequest):
 
 # Debugger
 
-class logtailrequest(authorizedevent):
+class logtailrequest(authorized_event):
     """Request the logger's latest output"""
     pass
 
 
-class debugrequest(authorizedevent):
+class debugrequest(authorized_event):
     """Debugging event"""
 
     def __init__(self, *args):
         super(debugrequest, self).__init__(*args)
 
-        hfoslog('Created debugrequest', lvl=events, emitter="DEBUG-EVENT")
+        isolog('Created debugrequest', lvl=events, emitter="DEBUG-EVENT")

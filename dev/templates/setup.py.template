@@ -23,9 +23,9 @@ setup(name="hfos-{{plugin_name}}",
       ],
       dependency_links=[],
       install_requires=['hfos==1.1.0'],
-      entry_points="""[hfos.components]
+      entry_points="""[isomer.components]
           {{component_name}}=hfos.{{plugin_name}}.{{plugin_name}}:{{component_name}}Component
-[hfos.schemata]
+[isomer.schemata]
     {{component_name}}Schema=hfos.{{plugin_name}}.schemata:{{component_name}}Schema
 """,
       test_suite="tests.main.main",

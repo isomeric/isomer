@@ -33,7 +33,7 @@ Test HFOS Launcher
 
 from circuits import Manager
 import pytest
-from hfos import logger
+from isomer import logger
 # from time import sleep
 
 # from pprint import pprint
@@ -60,7 +60,7 @@ def test_component_logging():
 def test_script_logging():
     logger.live = True
 
-    logger.hfoslog('FOOBAR')
+    logger.isolog('FOOBAR')
 
     lastlog = logger.LiveLog[-1][-1]
 

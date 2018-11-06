@@ -1,17 +1,19 @@
-from hfos.tool.create_module import create_module
-from hfos.tool.configuration import config
-from hfos.tool.backup import db_export, db_import
-from hfos.tool.database import db
-from hfos.tool.objects import objects
-from hfos.tool.installer import install, uninstall, update
-from hfos.tool.rbac import rbac
-from hfos.tool.user import user
-from hfos.tool.misc import cmdmap, shell
-from hfos.tool.cli import cli
-from hfos.launcher import launch
+from isomer.tool.create_module import create_module
+from isomer.tool.configuration import config
+from isomer.tool.backup import db_export, db_import
+from isomer.tool.database import db
+from isomer.tool.objects import objects
+from isomer.tool.installer import install, uninstall
+from isomer.tool.instance import instance, environment
+from isomer.tool.rbac import rbac
+from isomer.tool.user import user
+from isomer.tool.misc import cmdmap, shell
+from isomer.tool.cli import cli
+from isomer.launcher import launch
 
 cli.add_command(create_module)
-cli.add_command(update)
+cli.add_command(instance)
+cli.add_command(environment)
 cli.add_command(config)
 cli.add_command(install)
 cli.add_command(uninstall)

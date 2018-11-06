@@ -31,13 +31,13 @@ Module: SchemaManager
 
 from circuits import Event
 
-from hfos.events.client import send
-from hfos.events.schemamanager import get, all, configuration
-from hfos.debugger import cli_register_event
-from hfos.component import ConfigurableComponent
-from hfos.database import schemastore, l10n_schemastore, configschemastore
-from hfos.logger import warn, debug, error  # , hilight
-from hfos.component import handler
+from isomer.events.client import send
+from isomer.events.schemamanager import get, all, configuration
+from isomer.debugger import cli_register_event
+from isomer.component import ConfigurableComponent
+from isomer.database import schemastore, l10n_schemastore, configschemastore
+from isomer.logger import warn, debug, error  # , hilight
+from isomer.component import handler
 
 
 class cli_schema(Event):
@@ -70,7 +70,7 @@ class SchemaManager(ConfigurableComponent):
     Handles schemata requests from clients.
     """
 
-    channel = "hfosweb"
+    channel = 'isomer-web'
 
     configprops = {}
 

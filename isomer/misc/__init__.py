@@ -1,3 +1,30 @@
+#!/usr/bin/env python
+# -*- coding: UTF-8 -*-
+
+# HFOS - Hackerfleet Operating System
+# ===================================
+# Copyright (C) 2011-2018 Heiko 'riot' Weinen <riot@c-base.org> and others.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+__author__ = "Heiko 'riot' Weinen"
+__license__ = "AGPLv3"
+
+"""
+Miscellaneous utility functions for Isomer
+"""
+
 import gettext
 import json
 
@@ -9,7 +36,7 @@ from uuid import uuid4
 from hashlib import sha512
 from random import choice
 
-from hfos.logger import hfoslog, verbose, warn
+from isomer.logger import isolog, verbose, warn
 
 localedir = os.path.abspath(os.path.join(os.path.abspath(os.path.dirname(__file__)), '..', '..', 'locale'))
 
@@ -18,7 +45,7 @@ def l10n_log(*args, **kwargs):
     """Log as L10N emitter"""
 
     kwargs.update({'emitter': 'L10N', 'frame_ref': 2})
-    hfoslog(*args, **kwargs)
+    isolog(*args, **kwargs)
 
 
 def all_languages():
