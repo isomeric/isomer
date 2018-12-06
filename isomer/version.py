@@ -26,9 +26,13 @@ __license__ = "AGPLv3"
 Unified ISOMER wide version number.
 """
 
+from isomer.logger import isolog, error
+
 try:
     from isomer.scm_version import version
-except ImportError:
+    version_info = version
+except ImportError as e:
+    isolog('Could not import scm version:', e, lvl=error)
     version_info = (1, 2, 1, "dev")  # (major, minor, patch, dev?)
     version = (
         ".".join(map(str, version_info))
