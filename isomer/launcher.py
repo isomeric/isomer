@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-# HFOS - Hackerfleet Operating System
-# ===================================
+# Isomer - The distributed application framework
+# ==============================================
 # Copyright (C) 2011-2018 Heiko 'riot' Weinen <riot@c-base.org> and others.
 #
 # This program is free software: you can redistribute it and/or modify
@@ -17,15 +17,12 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-import pyinotify
-
-from isomer import component
 
 __author__ = "Heiko 'riot' Weinen"
 __license__ = "AGPLv3"
 
 """
-Hackerfleet Operating System - Backend
+Isomer - Backend
 
 Application
 ===========
@@ -38,8 +35,8 @@ URLs & Contact
 Mail: riot@c-base.org
 IRC: #hackerfleet@irc.freenode.org
 
-Project repository: http://github.com/hackerfleet/hfos
-Frontend repository: http://github.com/hackerfleet/hfos-frontend
+Project repository: http://github.com/isomeric/isomer
+Frontend repository: http://github.com/isomeric/isomer-frontend
 
 
 """
@@ -47,23 +44,27 @@ Frontend repository: http://github.com/hackerfleet/hfos-frontend
 import grp
 import pwd
 import sys
+import pyinotify
 
 import click
 import os
 from circuits import Event
 from circuits.web import Server, Static
 from circuits.web.websockets.dispatcher import WebSocketsDispatcher
-
 # from circuits.web.errors import redirect
 # from circuits.app.daemon import Daemon
+
+from isomer.misc.path import set_instance, get_path
 from isomer.component import handler, ConfigurableComponent
-# from hfos.schemata.component import ComponentBaseConfigSchema
+# from isomer.schemata.component import ComponentBaseConfigSchema
 from isomer.database import initialize  # , schemastore
 from isomer.events.system import populate_user_events, frontendbuildrequest
 from isomer.logger import isolog, verbose, debug, warn, error, critical, \
     setup_root, verbosity, set_logfile
 from isomer.debugger import cli_register_event
 from isomer.ui.builder import install_frontend
+from isomer.tool.defaults import EXIT_NO_CERTIFICATE
+from isomer.tool.etc import load_instance
 
 
 # from pprint import pprint
@@ -118,7 +119,7 @@ class FrontendHandler(pyinotify.ProcessEvent):
 
 
 def drop_privileges(uid_name='isomer', gid_name='isomer'):
-    """Attempt to drop privileges and change user to 'hfos' user/group"""
+    """Attempt to drop privileges and change user to 'isomer' user/group"""
 
     if os.getuid() != 0:
         isolog("Not root, cannot drop privileges", lvl=warn, emitter='CORE')
@@ -144,7 +145,7 @@ def drop_privileges(uid_name='isomer', gid_name='isomer'):
 
 
 class Core(ConfigurableComponent):
-    """HFOS Core Backend Application"""
+    """ISOMER Core Backend Application"""
     # TODO: Move most of this stuff over to a new FrontendBuilder
 
     configprops = {
@@ -169,35 +170,43 @@ class Core(ConfigurableComponent):
         }
     }
 
-    def __init__(self, args, **kwargs):
-        super(Core, self).__init__("CORE", args, **kwargs)
+    def __init__(self, name, instance, **kwargs):
+        super(Core, self).__init__("CORE", **kwargs)
         self.log("Starting system (channel ", self.channel, ")")
 
-        # TODO: Take this from the given instance configuration (via i.t.etc)
-        self.insecure = args['insecure']
-        self.quiet = args['quiet']
-        self.development = args['dev']
-        self.instance = args['instance']
+        self.insecure = kwargs['insecure']
+        self.quiet = kwargs['quiet']
+        self.development = kwargs['dev']
 
-        self.host = args['host']
-        self.port = args['port']
-        self.certificate = certificate = args['cert']
+        self.instance = name
+
+        self.host = instance['web_hostname']
+        self.port = instance['web_port']
+
+        self.certificate = certificate = instance['web_certificate'] if instance['web_certificate'] != '' else None
 
         if certificate:
             if not os.path.exists(certificate):
                 self.log("SSL certificate usage requested but certificate "
                          "cannot be found!", lvl=error)
-                sys.exit(17)  # TODO: Define exit codes
+                sys.exit(EXIT_NO_CERTIFICATE)
 
-        # TODO: Get Paths from i.m.path:
-        self.frontendroot = os.path.abspath(os.path.dirname(os.path.realpath(__file__)) + "/../frontend")
-        self.frontendtarget = os.path.join('/var/lib/hfos', self.instance, 'frontend')
-        self.moduleroot = os.path.abspath(os.path.dirname(os.path.realpath(__file__)) + "/../modules")
+        # TODO: Find a way to synchronize this with the paths in i.u.builder
+        if self.development:
+            self.frontend_root = os.path.abspath(os.path.dirname(os.path.realpath(__file__)) + "/../frontend")
+            self.frontend_target = get_path('lib', 'frontend-dev')
+            self.module_root = os.path.abspath(os.path.dirname(os.path.realpath(__file__)) + "/../modules")
+        else:
+            self.frontend_root = get_path('lib', 'repository/frontend')
+            self.frontend_target = get_path('lib', 'frontend')
+            self.module_root = ""
+
+        self.log('PATHS:', self.frontend_root, self.frontend_target, self.module_root)
 
         self.loadable_components = {}
-        self.runningcomponents = {}
+        self.running_components = {}
 
-        self.frontendrunning = False
+        self.frontend_running = False
         self.frontend_watcher = None
         self.frontend_watchmanager = None
 
@@ -229,7 +238,7 @@ class Core(ConfigurableComponent):
             # 'machineroom'
         ]
 
-        self.component_blacklist += args['blacklist']
+        self.component_blacklist += kwargs['blacklist']
 
         self.update_components()
         self._write_config()
@@ -282,7 +291,7 @@ class Core(ConfigurableComponent):
     def cli_components(self, event):
         """List all running components"""
 
-        self.log('Running components: ', sorted(self.runningcomponents.keys()))
+        self.log('Running components: ', sorted(self.running_components.keys()))
 
     @handler('cli_reload_db')
     def cli_reload_db(self, event):
@@ -322,7 +331,7 @@ class Core(ConfigurableComponent):
                  'Host:', self.host,
                  'Port:', self.port,
                  'Insecure:', self.insecure,
-                 'Frontend:', self.frontendtarget)
+                 'Frontend:', self.frontend_target)
 
     def _start_server(self, *args):
         """Run the node local server"""
@@ -373,12 +382,13 @@ class Core(ConfigurableComponent):
 
             entry_point_tuple = (
                 iter_entry_points(group='isomer.base', name=None),
-                iter_entry_points(group='isomer.management', name=None),
+                iter_entry_points(group='isomer.sails', name=None),
                 iter_entry_points(group='isomer.components', name=None)
             )
-
+            self.log('Entrypoints:', entry_point_tuple, pretty=True, lvl=verbose)
             for iterator in entry_point_tuple:
                 for entry_point in iterator:
+                    self.log('Entrypoint:', entry_point, pretty=True, lvl=verbose)
                     try:
                         name = entry_point.name
                         location = entry_point.dist.location
@@ -429,7 +439,7 @@ class Core(ConfigurableComponent):
         #    self.log("Error: ", e, type(e), lvl=error, exc=True)
         #    return
 
-        self.log("Checking component frontend bits in ", self.frontendroot,
+        self.log("Checking component frontend bits in ", self.frontend_root,
                  lvl=verbose)
 
         # pprint(self.config._fields)
@@ -449,33 +459,33 @@ class Core(ConfigurableComponent):
         """Check if it is enabled and start the frontend http & websocket"""
 
         self.log(self.config, self.config.frontendenabled, lvl=verbose)
-        if self.config.frontendenabled and not self.frontendrunning or restart:
+        if self.config.frontendenabled and not self.frontend_running or restart:
             self.log("Restarting webfrontend services on",
-                     self.frontendtarget)
+                     self.frontend_target)
 
             self.static = Static("/",
-                                 docroot=self.frontendtarget).register(
+                                 docroot=self.frontend_target).register(
                 self)
             self.websocket = WebSocketsDispatcher("/websocket").register(self)
-            self.frontendrunning = True
+            self.frontend_running = True
 
             if self.development:
                 self.frontend_watchmanager = pyinotify.WatchManager()
                 self.frontend_watcher = pyinotify.ThreadedNotifier(self.frontend_watchmanager, FrontendHandler(self))
                 self.frontend_watcher.start()
                 mask = pyinotify.IN_DELETE | pyinotify.IN_CREATE | pyinotify.IN_CLOSE_WRITE
-                self.log('ROOT:', self.frontendroot, lvl=error)
-                self.frontend_watchmanager.add_watch(self.moduleroot, mask, rec=True)
+                self.log('ROOT:', self.frontend_root, lvl=error)
+                self.frontend_watchmanager.add_watch(self.module_root, mask, rec=True)
 
     def _instantiate_components(self, clear=True):
         """Inspect all loadable components and run them"""
 
         if clear:
-            import objgraph
-            from copy import deepcopy
+            #import objgraph
+            #from copy import deepcopy
             from circuits.tools import kill
             from circuits import Component
-            for comp in self.runningcomponents.values():
+            for comp in self.running_components.values():
                 self.log(comp, type(comp), isinstance(comp, Component), pretty=True)
                 kill(comp)
             # removables = deepcopy(list(self.runningcomponents.keys()))
@@ -494,7 +504,7 @@ class Core(ConfigurableComponent):
             #                            filename='backref-graph_%s.png' % comp.uniquename)
             #     del comp
             # del removables
-            self.runningcomponents = {}
+            self.running_components = {}
 
         self.log('Not running blacklisted components: ',
                  self.component_blacklist,
@@ -508,13 +518,13 @@ class Core(ConfigurableComponent):
                 continue
             self.log("Running component: ", name, lvl=verbose)
             try:
-                if name in self.runningcomponents:
+                if name in self.running_components:
                     self.log("Component already running: ", name,
                              lvl=warn)
                 else:
                     runningcomponent = componentdata()
                     runningcomponent.register(self)
-                    self.runningcomponents[name] = runningcomponent
+                    self.running_components[name] = runningcomponent
             except Exception as e:
                 self.log("Could not register component: ", name, e,
                          type(e), lvl=error, exc=True)
@@ -532,13 +542,13 @@ class Core(ConfigurableComponent):
 
         self._instantiate_components()
         self._start_frontend()
-        self.fire(ready(), "hfosweb")
+        self.fire(ready(), "isomer-web")
 
 
-def construct_graph(args):
-    """Preliminary HFOS application Launcher"""
+def construct_graph(name, instance, args):
+    """Preliminary ISOMER application Launcher"""
 
-    app = Core(args)
+    app = Core(name, instance, **args)
 
     setup_root(app)
 
@@ -578,60 +588,66 @@ def construct_graph(args):
 
 
 @click.command()
-@click.option("--port", "-p", help="Define port for server", type=int,
-              default=8055)
-@click.option("--host", help="Define hostname for server", type=str,
-              default='127.0.0.1')
-@click.option("--cert", "--certificate", '-c', help="Certificate file path",
-              type=str, default=None)
-@click.option("--dbhost", help="Define hostname for database server",
-              type=str, default='127.0.0.1:27017')
-@click.option('--dbname', default='hfos', help='Define name of database (default: hfos)',
-              metavar='<name>')
+#@click.option("--port", "-p", help="Define port for server", type=int,
+#              default=8055)
+#@click.option("--host", help="Define hostname for server", type=str,
+#              default='127.0.0.1')
+#@click.option("--cert", "--certificate", '-c', help="Certificate file path",
+#              type=str, default=None)
+#@click.option("--dbhost", help="Define hostname for database server",
+#              type=str, default='127.0.0.1:27017')
+#@click.option('--dbname', default='isomer-default', help='Define name of database (default: isomer-default)',
+#              metavar='<name>')
 @click.option("--profile", help="Enable profiler", is_flag=True)
 @click.option("--opengui", help="Launch webbrowser for GUI inspection after "
                                 "startup", is_flag=True)
 @click.option("--drawgraph", help="Draw a snapshot of the component graph "
                                   "after construction", is_flag=True)
 @click.option("--quiet", "-q", help="Suppress console output", is_flag=True)
-@click.option("--log", help="Define console log level (0-100)", type=int,
-              default=20)
-@click.option("--logfileverbosity", help="Define file log level (0-100)",
-              type=int, default=20)
-@click.option("--logfilepath", default="/var/log/", help="Logfile path")
-@click.option("--dolog", help="Write to logfile", is_flag=True)
-@click.option("--livelog", help="Log to in memory structure as well", is_flag=True)
+#@click.option("--log", help="Define console log level (0-100)", type=int,
+#              default=20)
+#@click.option("--logfileverbosity", help="Define file log level (0-100)",
+#              type=int, default=20)
+#@click.option("--logfilepath", default="/var/log/", help="Logfile path")
+#@click.option("--dolog", help="Write to logfile", is_flag=True)
+@click.option("--livelog", help="Log to in-memory structure as well", is_flag=True)
 @click.option("--debug", help="Run circuits debugger", is_flag=True)
 @click.option("--dev", help="Run development server", is_flag=True, default=True)
-@click.option('--instance', default='default', help='Define name of instance',
-              metavar='<name>')
+#@click.option('--instance', default='default', help='Define name of instance',
+#              metavar='<name>')
 @click.option("--insecure", help="Keep privileges - INSECURE", is_flag=True)
 @click.option("--norun", help="Only assemble system, do not run", is_flag=True)
 @click.option("--blacklist", "-b", help="Blacklist a component", multiple=True, default=[])
-def launch(run=True, **args):
+@click.pass_context
+def launch(ctx, run=True, **args):
     """Bootstrap basics, assemble graph and hand over control to the Core
     component"""
 
-    verbosity['console'] = args['log'] if not args['quiet'] else 100
-    verbosity['global'] = min(args['log'], args['logfileverbosity'])
-    verbosity['file'] = args['logfileverbosity'] if args['dolog'] else 100
-    set_logfile(args['logfilepath'], args['instance'])
+    # isolog(ctx.__dict__, pretty=True)
 
-    if args['livelog'] is True:
+    instance_name = ctx.obj['instance']
+    instance = load_instance(instance_name)
+    environment_name = ctx.obj['environment']
+    environment = instance['environments'][environment_name]
+    isolog('Launching instance %s - (%s)' % (instance_name, environment_name))
+    isolog(environment, pretty=True)
+    database_host = "%s:%i" % (instance['database_host'], instance['database_port'])
+    database_name = environment['database']
+
+    if ctx.params['livelog'] is True:
         from isomer import logger
         logger.live = True
 
-    isolog("Running with Python", sys.version.replace("\n", ""),
-           sys.platform, lvl=debug, emitter='CORE')
-    isolog("Interpreter executable:", sys.executable, emitter='CORE')
-    if args['cert'] is not None:
-        isolog("Warning! Using SSL without nginx is currently not broken!",
-               lvl=critical, emitter='CORE')
+    #if args['cert'] is not None:
+    #    isolog("Warning! Using SSL on the backend is currently not recommended!",
+    #           lvl=critical, emitter='CORE')
 
     isolog("Initializing database access", emitter='CORE', lvl=debug)
-    initialize(args['dbhost'], args['dbname'], args['instance'])
+    initialize(database_host, database_name, instance_name)
+    isolog('Setting instance paths', emitter='CORE', lvl=debug)
+    set_instance(instance_name, environment_name)
 
-    server = construct_graph(args)
+    server = construct_graph(instance_name, instance, args)
     if run and not args['norun']:
         server.run()
 
