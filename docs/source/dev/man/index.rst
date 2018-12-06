@@ -1,6 +1,6 @@
 =====================
-HFOS Developer Manual
-=====================
+Isomer Developer Manual
+=======================
 
 
 Core Library

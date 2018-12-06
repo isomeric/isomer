@@ -17,7 +17,7 @@ don't have it already, then invoke the script with root permissions:
 
 .. code-block:: sh
 
-    $ sudo ./install
+    sudo ./install
 
 If you run into trouble or get any unexpected errors, :ref:`try the complex installation procedure <complex_install>`.
 
@@ -28,7 +28,7 @@ We're providing a Docker image for installation.
 
 The command to get the current testing release is:
 
-  ``$ docker run -i -t hackerfleet/hfos hfos_launcher.py``
+  ``docker run -i -t isomeric/isomer iso launch``
 
 
 Planned Installations

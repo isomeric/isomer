@@ -1,6 +1,6 @@
 ==================
-HFOS Documentation
-==================
+Isomer Documentation
+====================
 
 :Version: |version|
 :Release: |release|

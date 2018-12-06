@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-# HFOS - Hackerfleet Operating System
-# ===================================
+# Isomer - The distributed application framework
+# ==============================================
 # Copyright (C) 2011-2018 Heiko 'riot' Weinen <riot@c-base.org> and others.
 #
 # This program is free software: you can redistribute it and/or modify
@@ -178,7 +178,7 @@ class ClientManager(ConfigurableComponent):
             self.log(self._users, pretty=True)
 
     @handler('cli_sources')
-    def sourcess_list(self, *args):
+    def sources_list(self, *args):
         """Display a list of all registered events"""
 
         from pprint import pprint
@@ -471,7 +471,7 @@ class ClientManager(ConfigurableComponent):
             self.log('Authorized event roles:', event.roles, lvl=verbose)
             if not self._checkPermissions(user, event):
                 result = {
-                    'component': 'hfos.ui.clientmanager',
+                    'component': 'isomer.ui.clientmanager',
                     'action': 'Permission',
                     'data': _('You have no role that allows this action.', lang='de')
                 }
@@ -590,7 +590,7 @@ class ClientManager(ConfigurableComponent):
 
         if self._flood_counter[clientuuid] > 100:
             packet = {
-                'component': 'hfos.ui.clientmanager',
+                'component': 'isomer.ui.clientmanager',
                 'action': 'Flooding',
                 'data': True
             }
@@ -604,6 +604,7 @@ class ClientManager(ConfigurableComponent):
         appropriate components"""
 
         self.log("Beginning new transaction: ", args, lvl=network)
+
         try:
             sock, msg = args[0], args[1]
             user = password = client = clientuuid = useruuid = requestdata = \
@@ -613,6 +614,7 @@ class ClientManager(ConfigurableComponent):
             clientuuid = self._sockets[sock].clientuuid
         except Exception as e:
             self.log("Receiving error: ", e, type(e), lvl=error)
+            # return
 
         if clientuuid in self._flooding:
             return
@@ -684,7 +686,7 @@ class ClientManager(ConfigurableComponent):
             try:
                 user = self._users[useruuid]
             except KeyError:
-                if not (requestaction == 'ping' and requestcomponent == 'hfos.ui.clientmanager'):
+                if not (requestaction == 'ping' and requestcomponent == 'isomer.ui.clientmanager'):
                     self.log("User not logged in.", lvl=warn)
 
                 return
@@ -827,7 +829,7 @@ class ClientManager(ConfigurableComponent):
 
         self.log('Client requests all languages.', lvl=verbose)
         result = {
-            'component': 'hfos.ui.clientmanager',
+            'component': 'isomer.ui.clientmanager',
             'action': 'getlanguages',
             'data': language_token_to_name(all_languages())
         }
@@ -839,7 +841,7 @@ class ClientManager(ConfigurableComponent):
 
         self.log('Client ping received:', event.data, lvl=verbose)
         response = {
-            'component': 'hfos.ui.clientmanager',
+            'component': 'isomer.ui.clientmanager',
             'action': 'pong',
             'data': [event.data, time() * 1000]
         }

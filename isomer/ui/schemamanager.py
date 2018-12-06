@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-# HFOS - Hackerfleet Operating System
-# ===================================
+# Isomer - The distributed application framework
+# ==============================================
 # Copyright (C) 2011-2018 Heiko 'riot' Weinen <riot@c-base.org> and others.
 #
 # This program is free software: you can redistribute it and/or modify
@@ -201,7 +201,7 @@ class SchemaManager(ConfigurableComponent):
         self.log("Schemarequest for all schemata from",
                  event.user, lvl=debug)
         response = {
-            'component': 'hfos.events.schemamanager',
+            'component': 'isomer.events.schemamanager',
             'action': 'all',
             'data': l10n_schemastore[event.client.language]
         }
@@ -214,7 +214,7 @@ class SchemaManager(ConfigurableComponent):
                  event.user, lvl=debug)
         if event.data in schemastore:
             response = {
-                'component': 'hfos.events.schemamanager',
+                'component': 'isomer.events.schemamanager',
                 'action': 'get',
                 'data': l10n_schemastore[event.client.language][event.data]
             }
@@ -230,7 +230,7 @@ class SchemaManager(ConfigurableComponent):
             self.log("Schemarequest for all configuration schemata from",
                      event.user.account.name, lvl=debug)
             response = {
-                'component': 'hfos.events.schemamanager',
+                'component': 'isomer.events.schemamanager',
                 'action': 'configuration',
                 'data': configschemastore
             }

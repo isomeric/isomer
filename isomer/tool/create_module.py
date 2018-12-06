@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-# HFOS - Hackerfleet Operating System
-# ===================================
+# Isomer - The distributed application framework
+# ==============================================
 # Copyright (C) 2011-2018 Heiko 'riot' Weinen <riot@c-base.org> and others.
 #
 # This program is free software: you can redistribute it and/or modify
@@ -40,26 +40,26 @@ except NameError:
     unicode = str
 
 paths = [
-    'hfos',
-    'hfos/{plugin_name}',
-    'hfos-frontend/{plugin_name}/scripts/controllers',
-    'hfos-frontend/{plugin_name}/views'
+    'isomer',
+    'isomer/{plugin_name}',
+    'isomer-frontend/{plugin_name}/scripts/controllers',
+    'isomer-frontend/{plugin_name}/views'
 ]
 
 templates = {
     'setup_file': ('setup.py.template', 'setup.py'),
     'package_file': ('package.json.template', 'package.json'),
     'component': (
-        'component.py.template', 'hfos/{plugin_name}/{plugin_name}.py'),
-    'module_init': ('init.py.template', 'hfos/__init__.py'),
-    'package_init': ('init.py.template', 'hfos/{plugin_name}/__init__.py'),
-    'schemata': ('schemata.py.template', 'hfos/{plugin_name}/schemata.py'),
+        'component.py.template', 'isomer/{plugin_name}/{plugin_name}.py'),
+    'module_init': ('init.py.template', 'isomer/__init__.py'),
+    'package_init': ('init.py.template', 'isomer/{plugin_name}/__init__.py'),
+    'schemata': ('schemata.py.template', 'isomer/{plugin_name}/schemata.py'),
     'controller': ('controller.js.template',
-                   'hfos-frontend/{plugin_name}/scripts/controllers/{'
+                   'isomer-frontend/{plugin_name}/scripts/controllers/{'
                    'plugin_name}.js'),
     'view': (
         'view.html.template',
-        'hfos-frontend/{plugin_name}/views/{plugin_name}.html')
+        'isomer-frontend/{plugin_name}/views/{plugin_name}.html')
 }
 
 questions = OrderedDict({
@@ -69,20 +69,20 @@ questions = OrderedDict({
     'description': u'Description',
     'long_description': u'Very long description, use \\n to get multilines.',
     'version': '0.0.1',
-    'github_url': 'hackerfleet/example',
+    'github_url': 'isomeric/example',
     'license': 'GPLv3',
-    'keywords': 'hfos example plugin'
+    'keywords': 'Isomer example plugin'
 
 })
 
-info_header = """The manage command guides you through setting up a new HFOS
+info_header = """The manage command guides you through setting up a new isomer
 package.
 It provides basic setup. If you need dependencies or have other special
 needs, edit the resulting files by hand.
 
 You can press Ctrl-C any time to cancel this process.
 
-See hfos_manage --help for more details.
+See iso create-module --help for more details.
 """
 
 
@@ -125,7 +125,7 @@ def _construct_module(info, target):
 
 
 def _ask_questionnaire():
-    """Asks questions to fill out a HFOS plugin template"""
+    """Asks questions to fill out a Isomer plugin template"""
 
     answers = {}
     print(info_header)
@@ -146,7 +146,7 @@ def _ask_questionnaire():
 @click.option("--target", help="Create module in the given folder (uses ./ "
                                "if omitted)", default=".", metavar='<folder>')
 def create_module(clear_target, target):
-    """Creates a new template HFOS plugin module"""
+    """Creates a new template Isomer plugin module"""
 
     if os.path.exists(target):
         if clear_target:

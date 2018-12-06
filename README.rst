@@ -1,25 +1,25 @@
-.. image:: https://travis-ci.org/Hackerfleet/hfos.svg?branch=master
-    :target: https://travis-ci.org/Hackerfleet/hfos
+.. image:: https://travis-ci.org/isomeric/isomer.svg?branch=master
+    :target: https://travis-ci.org/isomeric/isomer
     :alt: Build Status
 
-.. image:: https://landscape.io/github/Hackerfleet/hfos/master/landscape.svg?style=flat
-    :target: https://landscape.io/github/Hackerfleet/hfos/master
+.. image:: https://landscape.io/github/isomeric/isomer/master/landscape.svg?style=flat
+    :target: https://landscape.io/github/isomeric/isomer/master
     :alt: Quality
 
-.. image:: https://coveralls.io/repos/Hackerfleet/hfos/badge.svg
-    :target: https://coveralls.io/r/Hackerfleet/hfos
+.. image:: https://coveralls.io/repos/isomeric/isomer/badge.svg
+    :target: https://coveralls.io/r/isomeric/isomer
     :alt: Coverage
 
-.. image:: https://requires.io/github/Hackerfleet/hfos/requirements.svg?branch=master
-    :target: https://requires.io/github/Hackerfleet/hfos/requirements/?branch=master
+.. image:: https://requires.io/github/isomeric/isomer/requirements.svg?branch=master
+    :target: https://requires.io/github/isomeric/isomer/requirements/?branch=master
     :alt: Requirements Status
 
 .. image:: https://img.shields.io/badge/IRC-%23hackerfleet%20on%20freenode-blue.svg
     :target: http://webchat.freenode.net/?randomnick=1&channels=hackerfleet&uio=d4>
     :alt: IRC Channel
 
-HFOS - The Hackerfleet Operating System
-=======================================
+Isomer - Be Collaborative!
+==========================
 
 **A collaborative and modular infrastructure for your data.**
 
@@ -32,7 +32,7 @@ HFOS - The Hackerfleet Operating System
 Installation
 ============
 
-There is more than one way of installing HFOS, `see the quickstart instructions for those <http://hfos.readthedocs.io/en/latest/start/quick.html>`__.
+There is more than one way of installing Isomer, `see the quickstart instructions for those <http://hfos.readthedocs.io/en/latest/start/quick.html>`__.
 
 The simplest way is to use the supplied installation script:
 
@@ -44,7 +44,7 @@ The installation produces a lot of output which is automatically piped into 'out
 It installs all dependencies then sets up a user account and the system's services.
 This assumes, that you're not running another web server on port 443 and that your firewall is
 configured to allow communications on that port.
-HFOS modules may require additional open ports, to find out about that, read their readme files.
+Isomer modules may require additional open ports, to find out about that, read their readme files.
 
 If you run into trouble or get any unexpected errors, contact us or `try the complex installation procedure <http://hfos.readthedocs.io/en/latest/start/installing.html>`__.
 
@@ -129,7 +129,7 @@ Bugs & Discussion
 =================
 
 Please research any bugs you find via our `Github issue tracker for
-HFOS <https://github.com/hackerfleet/hfos/issues>`__ and report them,
+Isomer <https://github.com/isomeric/isomer/issues>`__ and report them,
 if they're still unknown.
 
 If you want to discuss distributed, opensource (or maritime) technology

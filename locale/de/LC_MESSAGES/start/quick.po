@@ -70,8 +70,8 @@ msgid "The command to get the current testing release is:"
 msgstr "Der Befehl um das aktuelle Testing-Release zu bekommen ist:"
 
 #: ../../source/start/quick.rst:31
-msgid "``$ docker run -i -t hackerfleet/hfos hfos_launcher.py``"
-msgstr "``$ docker run -i -t hackerfleet/hfos hfos_launcher.py``"
+msgid "``$ docker run -i -t isomeric/isomer iso launch``"
+msgstr "``$ docker run -i -t isomeric/isomer iso launch``"
 
 #: ../../source/start/quick.rst:35
 msgid "Planned Installations"

@@ -1,19 +1,19 @@
-# Docker Image for HFOS
+# Docker Image for Isomer
 #
-# This image essentially packages up HFOS along with mongodb
+# This image essentially packages up Isomer along with mongodb
 # into a Docker Image/Container.
 #
 # Usage Examples::
 #
 # To run your instance and see if the backend starts:
-#     $ docker run -i -t hackerfleet/hfos /bin/bash -c "/etc/init.d/mongodb start && hfos_launcher.py"
+#     $ docker run -i -t isomeric/isomer /bin/bash -c "/etc/init.d/mongodb start && iso launch"
 #
 # To investigate problems on the docker container, i.e. get a shell:
-#     $ docker run -i -t --name hfos-test-live -t hackerfleet/hfos
+#     $ docker run -i -t --name isomer-test-live -t isomeric/isomer
 #
 # If you want to run a productive instance with working SSL:
-#     $ docker run -i -p 127.0.0.1:443:443 -t hackerfleet/hfos /bin/bash -c "/etc/init.d/mongodb start && \
-#       python3 hfos_launcher.py --port 443 --cert /etc/ssl/certs/hfos/selfsigned.pem --log 10 --dev"
+#     $ docker run -i -p 127.0.0.1:443:443 -t isomeric/isomer /bin/bash -c "/etc/init.d/mongodb start && \
+#       python3 iso launch --port 443 --cert /etc/ssl/certs/hfos/selfsigned.pem --log 10 --dev"
 #
 # VERSION: 1.1.2
 #
@@ -75,19 +75,19 @@ RUN echo smallfiles = true >> /etc/mongodb.conf
 
 #RUN python3 /usr/lib/python3/dist-packages/virtualenv.py -p /usr/bin/python3.5 --system-site-packages venv
 
-RUN useradd -ms /bin/bash hfos
-WORKDIR /home/hfos
+RUN useradd -ms /bin/bash isomer
+WORKDIR /home/isomer
 
 # Copy repository
 
-COPY . hfos
-WORKDIR hfos
+COPY . isomer
+WORKDIR isomer
 
 # Fetch Frontend
 
 RUN git submodule init && git submodule update
 
-# Install HFOS
+# Install Isomer
 
 RUN pip3 install -r requirements-dev.txt
 RUN python3 setup.py develop
@@ -96,25 +96,25 @@ RUN python3 setup.py develop
 
 RUN npm install -g npm@4.6.1
 
-# Install HFOS
+# Install Isomer
 
-RUN python3 -u hfos_manage.py install cert
-RUN python3 -u hfos_manage.py install var
+RUN python3 -u iso install cert
+RUN python3 -u iso install var
 # Rest might need a running db
-RUN /etc/init.d/mongodb start && python3 -u hfos_manage.py install modules
+RUN /etc/init.d/mongodb start && python3 -u iso install modules
 # Temporary hack, until we have provisioning obey dependencies again:
-RUN /etc/init.d/mongodb start && python3 -u hfos_manage.py install provisions -p system
-RUN /etc/init.d/mongodb start && python3 -u hfos_manage.py install provisions -p user
-RUN /etc/init.d/mongodb start && python3 -u hfos_manage.py install provisions
-RUN /etc/init.d/mongodb start && python3 -u hfos_manage.py install docs
-RUN /etc/init.d/mongodb start && python3 -u hfos_manage.py install frontend --rebuild --dev
+RUN /etc/init.d/mongodb start && python3 -u iso install provisions -p system
+RUN /etc/init.d/mongodb start && python3 -u iso install provisions -p user
+RUN /etc/init.d/mongodb start && python3 -u iso install provisions
+RUN /etc/init.d/mongodb start && python3 -u iso install docs
+RUN /etc/init.d/mongodb start && python3 -u iso install frontend --rebuild --dev
 
 #  Services
 
 EXPOSE 443
 
 # There is a frontend development server with hot reloading which can be started with
-#   $ hfos/frontend/npm run start
+#   $ isomer/frontend/npm run start
 # If you want to run the frontend development live server, uncomment this:
 #
 # EXPOSE 8081

@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-# HFOS - Hackerfleet Operating System
-# ===================================
+# Isomer - The distributed application framework
+# ==============================================
 # Copyright (C) 2011-2018 Heiko 'riot' Weinen <riot@c-base.org> and others.
 #
 # This program is free software: you can redistribute it and/or modify
@@ -17,7 +17,6 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-from isomer.misc import all_languages
 
 __author__ = "Heiko 'riot' Weinen"
 __license__ = "AGPLv3"
@@ -63,7 +62,7 @@ from six.moves import \
 
 from isomer.component import ConfigurableComponent, handler
 from isomer.logger import isolog, debug, warn, error, critical, verbose
-from isomer.misc import i18n as _
+from isomer.misc import i18n as _, all_languages
 
 
 def db_log(*args, **kwargs):
@@ -147,13 +146,17 @@ def _build_schemastore_new():
 
     def form_insert(form, index, path, obj):
         path = path.split('/')
-
+        place = None
         if isinstance(index, str):
             for widget in form:
                 if isinstance(widget, dict) and widget.get('id', None) is not None:
                     place = widget
         else:
             place = form[index]
+
+        if place is None:
+            schemata_log('No place to insert into form found:', path, form, obj)
+            return
 
         for element in path:
             schemata_log(element, place, lvl=verbose)
@@ -351,7 +354,7 @@ def _build_collections(store):
     return result
 
 
-def initialize(address='127.0.0.1:27017', database_name='isomer-default', instance_name="default", reload=False):
+def initialize(address='127.0.0.1:27017', database_name='isomer-default', instance_name="default", reload=False, ignore_fail=False):
     """Initializes the database connectivity, schemata and finally object models"""
 
     global schemastore
@@ -382,7 +385,10 @@ def initialize(address='127.0.0.1:27017', database_name='isomer-default', instan
         db_log("No database available! Check if you have mongodb > 3.0 "
                "installed and running as well as listening on port 27017 "
                "of localhost. (Error: %s) -> EXIT" % e, lvl=critical)
-        sys.exit(5)
+        if not ignore_fail:
+            sys.exit(5000)
+        else:
+            return False
 
     warmongo.connect(database_name)
 
@@ -392,6 +398,8 @@ def initialize(address='127.0.0.1:27017', database_name='isomer-default', instan
     collections = _build_collections(schemastore)
     instance = instance_name
     initialized = True
+
+    return True
 
 
 def test_schemata():
@@ -476,7 +484,7 @@ class Maintenance(ConfigurableComponent):
                             'type': 'string',
                             'description': 'Location of cache data',
                             'title': 'Cache location',
-                            'default': join('/var/cache/hfos', instance)
+                            'default': join('/var/cache/isomer', instance)
                         }
                     },
                     'default': {}
@@ -495,7 +503,7 @@ class Maintenance(ConfigurableComponent):
                             'type': 'string',
                             'description': 'Location of library data',
                             'title': 'Library location',
-                            'default': join('/var/lib/hfos', instance)
+                            'default': join('/var/lib/isomer', instance)
                         }
                     },
                     'default': {}
@@ -514,7 +522,7 @@ class Maintenance(ConfigurableComponent):
                             'type': 'string',
                             'description': 'Location of backup data',
                             'title': 'Backup location',
-                            'default': join('/var/local/hfos/', instance, 'backup')
+                            'default': join('/var/local/isomer/', instance, 'backup')
                         }
                     },
                     'default': {}
@@ -622,7 +630,7 @@ class BackupManager(ConfigurableComponent):
             'type': 'string',
             'description': 'Location of library data',
             'title': 'Library location',
-            'default': join('/var/local/hfos', instance, 'backup')
+            'default': join('/var/local/isomer', instance, 'backup')
         },
         'interval': {
             'type': 'integer',

@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-# HFOS - Hackerfleet Operating System
-# ===================================
+# Isomer - The distributed application framework
+# ==============================================
 # Copyright (C) 2011-2018 Heiko 'riot' Weinen <riot@c-base.org> and others.
 #
 # This program is free software: you can redistribute it and/or modify
@@ -65,7 +65,7 @@ class put(authorized_event):
 
 class Configurator(ConfigurableComponent):
     """
-    Provides a common configuration interface for all HFOS components.
+    Provides a common configuration interface for all ISOMER components.
 
     (You're probably looking at it right now)
     """
@@ -103,7 +103,7 @@ class Configurator(ConfigurableComponent):
             data = sorted(data, key=lambda x: x['name'])
 
             response = {
-                'component': 'hfos.ui.configurator',
+                'component': 'isomer.ui.configurator',
                 'action': 'getlist',
                 'data': data
             }
@@ -128,7 +128,7 @@ class Configurator(ConfigurableComponent):
             component.save()
 
             response = {
-                'component': 'hfos.ui.configurator',
+                'component': 'isomer.ui.configurator',
                 'action': 'put',
                 'data': True
             }
@@ -138,7 +138,7 @@ class Configurator(ConfigurableComponent):
             self.fireEvent(reload_configuration(component.name))
         except (KeyError, ValueError, ValidationError, PermissionError) as e:
             response = {
-                'component': 'hfos.ui.configurator',
+                'component': 'isomer.ui.configurator',
                 'action': 'put',
                 'data': False
             }
@@ -169,7 +169,7 @@ class Configurator(ConfigurableComponent):
             'uuid': comp
         })
         response = {
-            'component': 'hfos.ui.configurator',
+            'component': 'isomer.ui.configurator',
             'action': 'get',
             'data': component.serializablefields()
         }

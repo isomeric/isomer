@@ -379,11 +379,11 @@ msgstr "Fehlerreporte und Diskussion"
 #: ../../../README.rst:106
 msgid ""
 "Please research any bugs you find via our `Github issue tracker for HFOS "
-"<https://github.com/hackerfleet/hfos/issues>`__ and report them, if they're "
+"<https://github.com/isomeric/isomer/issues>`__ and report them, if they're "
 "still unknown."
 msgstr ""
 "Bitte prüfe ob alle Fehler die Du findest in unserem `HFOS Github issue "
-"tracker <https://github.com/hackerfleet/hfos/issues>`__ eingetragen sind und"
+"tracker <https://github.com/isomeric/isomer/issues>`__ eingetragen sind und"
 " berichte sie dort, falls sie noch unbekannt sind."
 
 #: ../../../README.rst:110

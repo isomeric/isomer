@@ -74,10 +74,10 @@ This is the rather dry material for new software developers:
        translating
 
 
-.. Code documentation
-.. ------------------
-..
-.. .. toctree::
-..       :maxdepth: 2
-..
-..       packages/modules
+Module documentation
+--------------------
+
+.. toctree::
+      :glob:
+
+      packages/*

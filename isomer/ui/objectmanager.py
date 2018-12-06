@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-# HFOS - Hackerfleet Operating System
-# ===================================
+# Isomer - The distributed application framework
+# ==============================================
 # Copyright (C) 2011-2018 Heiko 'riot' Weinen <riot@c-base.org> and others.
 #
 # This program is free software: you can redistribute it and/or modify
@@ -112,7 +112,7 @@ class ObjectManager(ConfigurableComponent):
         self.log('No permission:', schema, data, event.user.uuid, lvl=warn)
 
         msg = {
-            'component': 'hfos.events.objectmanager',
+            'component': 'isomer.events.objectmanager',
             'action': 'fail',
             'data': {
                 'reason': 'No permission',
@@ -125,7 +125,7 @@ class ObjectManager(ConfigurableComponent):
         self.log('Bad request:', reason, lvl=warn)
 
         msg = {
-            'component': 'hfos.events.objectmanager',
+            'component': 'isomer.events.objectmanager',
             'action': 'fail',
             'data': {
                 'reason': reason,
@@ -243,7 +243,7 @@ class ObjectManager(ConfigurableComponent):
                 self._add_subscription(uuid, event)
 
             result = {
-                'component': 'hfos.events.objectmanager',
+                'component': 'isomer.events.objectmanager',
                 'action': 'get',
                 'data': {
                     'schema': schema,
@@ -359,7 +359,7 @@ class ObjectManager(ConfigurableComponent):
         # self.log("Generated object search list: ", object_list)
 
         result = {
-            'component': 'hfos.events.objectmanager',
+            'component': 'isomer.events.objectmanager',
             'action': 'search',
             'data': {
                 'schema': schema,
@@ -430,7 +430,7 @@ class ObjectManager(ConfigurableComponent):
         # self.log("Generated object list: ", object_list)
 
         result = {
-            'component': 'hfos.events.objectmanager',
+            'component': 'isomer.events.objectmanager',
             'action': 'getlist',
             'data': {
                 'schema': schema,
@@ -492,7 +492,7 @@ class ObjectManager(ConfigurableComponent):
         self.log("Object stored.")
 
         result = {
-            'component': 'hfos.events.objectmanager',
+            'component': 'isomer.events.objectmanager',
             'action': 'change',
             'data': {
                 'schema': schema,
@@ -576,7 +576,7 @@ class ObjectManager(ConfigurableComponent):
             self._update_subscribers(schema, storage_object)
 
             result = {
-                'component': 'hfos.events.objectmanager',
+                'component': 'isomer.events.objectmanager',
                 'action': 'put',
                 'data': {
                     'schema': schema,
@@ -634,7 +634,7 @@ class ObjectManager(ConfigurableComponent):
 
                 if uuid in self.subscriptions:
                     deletion = {
-                        'component': 'hfos.events.objectmanager',
+                        'component': 'isomer.events.objectmanager',
                         'action': 'deletion',
                         'data': {
                             'schema': schema,
@@ -647,7 +647,7 @@ class ObjectManager(ConfigurableComponent):
                     del (self.subscriptions[uuid])
 
                 result = {
-                    'component': 'hfos.events.objectmanager',
+                    'component': 'isomer.events.objectmanager',
                     'action': 'delete',
                     'data': {
                         'schema': schema,
@@ -678,7 +678,7 @@ class ObjectManager(ConfigurableComponent):
                 continue
 
         result = {
-            'component': 'hfos.events.objectmanager',
+            'component': 'isomer.events.objectmanager',
             'action': 'subscribe',
             'data': {
                 'uuid': subscribed, 'success': True
@@ -715,7 +715,7 @@ class ObjectManager(ConfigurableComponent):
                 result.append(uuid)
 
         result = {
-            'component': 'hfos.events.objectmanager',
+            'component': 'isomer.events.objectmanager',
             'action': 'unsubscribe',
             'data': {
                 'uuid': result, 'success': True
@@ -744,7 +744,7 @@ class ObjectManager(ConfigurableComponent):
         self.log('Notifying subscribers about update.', lvl=verbose)
         if update_object.uuid in self.subscriptions:
             update = {
-                'component': 'hfos.events.objectmanager',
+                'component': 'isomer.events.objectmanager',
                 'action': 'update',
                 'data': {
                     'schema': update_schema,

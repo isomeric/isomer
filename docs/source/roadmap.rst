@@ -1,4 +1,4 @@
-.. _github issuetracker: https://github.com/hackerfleet/hfos/milestones
+.. _github issuetracker: https://github.com/isomeric/isomer/milestones
 
 Road Map
 ========

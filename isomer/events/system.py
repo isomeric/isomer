@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-# HFOS - Hackerfleet Operating System
-# ===================================
+# Isomer - The distributed application framework
+# ==============================================
 # Copyright (C) 2011-2018 Heiko 'riot' Weinen <riot@c-base.org> and others.
 #
 # This program is free software: you can redistribute it and/or modify
@@ -27,7 +27,7 @@ __license__ = "AGPLv3"
 Module: Events
 ==============
 
-Major HFOS event declarations
+Major Isomer event declarations
 
 
 """
@@ -36,7 +36,7 @@ from circuits.core import Event
 
 from isomer.logger import isolog, events
 
-# from hfos.ui.clientobjects import User
+# from isomer.ui.clientobjects import User
 
 AuthorizedEvents = {}
 AnonymousEvents = {}
@@ -72,7 +72,7 @@ def populate_user_events():
                 if child not in subclasses_set:
                     # pprint(child.__dict__)
                     name = child.__module__ + "." + child.__name__
-                    if name.startswith('hfos'):
+                    if name.startswith('iso'):
 
                         subclasses_set.add(child)
                         event = {
@@ -103,7 +103,7 @@ def populate_user_events():
 
 
 class isomer_ui_event(Event):
-    """Basic HFOS event class"""
+    """Basic ISOMER event class"""
 
     pass
 
@@ -155,7 +155,7 @@ class authorized_event(isomer_ui_event):
         """
         Sets up an authorized event.
 
-        :param user: User object from :py:class:hfos.web.clientmanager.User
+        :param user: User object from :py:class:isomer.web.clientmanager.User
         :param action:
         :param data:
         :param client:

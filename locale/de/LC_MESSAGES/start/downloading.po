@@ -32,7 +32,7 @@ msgstr ""
 #: ../../source/start/downloading.rst:10
 msgid ""
 "The latest stable releases (if there should ever be one) could be downloaded"
-" from the `Releases <https://github.com/hackerfleet/hfos/releases>`_ page "
+" from the `Releases <https://github.com/isomeric/isomer/releases>`_ page "
 "(*specifically the Tags tab*)."
 msgstr ""
 

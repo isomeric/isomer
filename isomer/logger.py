@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-# HFOS - Hackerfleet Operating System
-# ===================================
+# Isomer - The distributed application framework
+# ==============================================
 # Copyright (C) 2011-2018 Heiko 'riot' Weinen <riot@c-base.org> and others.
 #
 # This program is free software: you can redistribute it and/or modify
@@ -17,7 +17,6 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-from traceback import format_exception
 
 __author__ = "Heiko 'riot' Weinen"
 __license__ = "AGPLv3"
@@ -26,7 +25,7 @@ __license__ = "AGPLv3"
 Module: Logger
 ==============
 
-HFOS own logger to avoid namespace clashes etc. Comes with some fancy
+Isomer's own logger to avoid namespace clashes etc. Comes with some fancy
 functions.
 
 Log Levels
@@ -45,6 +44,8 @@ off = 100
 
 # from circuits.core import Event
 import pprint
+from traceback import format_exception
+
 # from circuits import Component, handler
 # from uuid import uuid4
 # import json
@@ -91,19 +92,20 @@ terminator = '\033[0m'
 
 count = 0
 
-logfile = "/var/log/hfos/service.log"
+logfile = "/var/log/isomer/service.log"
 
 console = verbose
 live = False
 
-verbosity = {'global': console,
-             'file': off,
-             'system': info,
-             'console': console
-             }
+verbosity = {
+    'global': console,
+    'file': off,
+    'system': info,
+    'console': console
+}
 
 uncut = True
-color = True  # TODO: Make this switchable via args
+color = False
 
 mute = []
 solo = []
@@ -114,11 +116,23 @@ LiveLog = []
 start = time.time()
 
 
+def set_color():
+    """Activate colorful logging"""
+    global color
+    color = True
+
+
 def set_logfile(path, instance):
     """Specify logfile path"""
 
     global logfile
-    logfile = os.path.normpath(path) + '/hfos.' + instance + '.log'
+    logfile = os.path.normpath(path) + '/isomer.' + instance + '.log'
+
+
+def clear():
+    global LiveLog
+
+    LiveLog = []
 
 
 def is_muted(what):
@@ -170,6 +184,7 @@ def setup_root(newroot):
     root = newroot
 
 
+# noinspection PyUnboundLocalVariable
 def isolog(*what, **kwargs):
     """Logs all *what arguments.
 
@@ -226,6 +241,7 @@ def isolog(*what, **kwargs):
             # Dump the message + the name of this function to the log.
 
             if exception:
+                # noinspection PyUnboundLocalVariable
                 line_no = exc_tb.tb_lineno
                 if lvl <= error:
                     lvl = error

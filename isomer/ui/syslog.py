@@ -26,9 +26,9 @@ class Syslog(ConfigurableComponent):
     configprops = {
         'log_file': {
             'type': 'string',
-            'default': '/var/log/hfos.log',
+            'default': '/var/log/isomer.log',
             'title': 'Filename',
-            'description': 'File path of logfile (usually /var/log/hfos.log)'
+            'description': 'File path of logfile (usually /var/log/isomer.log)'
         }
     }
 
@@ -57,7 +57,7 @@ class Syslog(ConfigurableComponent):
 
     def _logupdate(self, new_messages):
         packet = {
-            'component': 'hfos.ui.syslog',
+            'component': 'isomer.ui.syslog',
             'action': 'update',
             'data': new_messages
         }
@@ -89,7 +89,7 @@ class Syslog(ConfigurableComponent):
         messages = []
 
         history_packet = {
-            'component': 'hfos.ui.syslog',
+            'component': 'isomer.ui.syslog',
             'action': 'history',
             'data': {
                 'limit': limit,

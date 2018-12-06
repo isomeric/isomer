@@ -1,9 +1,9 @@
 .. _translating:
 
-Translating HFOS
-================
+Translating Isomer
+==================
 
 Since 2018, we have all parts (Backend, Frontend, Modules) prepared for translations.
 
-To translate HFOS, you can use `Transifex <https://www.transifex.com/hackerfleet-community/hfos/>`__
+To translate Isomer, you can use `Transifex <https://www.transifex.com/isomeric-community/isomer/>`__
 or any PO editor of your choice.

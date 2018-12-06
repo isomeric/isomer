@@ -1,6 +1,8 @@
 Management Tool
 ===============
 
-.. click:: hfos_manage:cli
-   :prog: hfos_manage
+.. toctree::
+
+.. click:: isomer.tool.tool:isotool
+   :prog: iso
    :show-nested:

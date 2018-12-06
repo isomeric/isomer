@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-# HFOS - Hackerfleet Operating System
-# ===================================
+# Isomer - The distributed application framework
+# ==============================================
 # Copyright (C) 2011-2018 Heiko 'riot' Weinen <riot@c-base.org> and others.
 #
 # This program is free software: you can redistribute it and/or modify
@@ -66,7 +66,7 @@ def write_template_file(source, target, content):
 def insert_nginx_service(definition):  # pragma: no cover
     """Insert a new nginx service definition"""
 
-    config_file = '/etc/nginx/sites-available/hfos.conf'
+    config_file = '/etc/nginx/sites-available/isomer.conf'
     splitter = "### SERVICE DEFINITIONS ###"
 
     with open(config_file, 'r') as f:

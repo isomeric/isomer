@@ -9,18 +9,18 @@ Requirements and Dependencies
 Backend
 -------
 
-HFOS' backend has a few dependencies:
+Isomer' backend has a few dependencies:
 
     - `Python`_: >= 3.3 (or possibly pypy >= 2.0)
     - Database: `MongoDb`_
 
 
-.. note:: We're phasing out Python 2.7 support.
+.. note:: We're finishing phasing out Python 2.7 support.
 
 A few more dependencies like nginx, and some python packages provided
 per distribution are recommended, but not strictly necessary.
 
-The HFOS Python package additionally installs a few pure Python libraries:
+The Isomer Python package additionally installs a few pure Python libraries:
 
     - Circuits
     - Click and a few supporting packages
@@ -33,7 +33,7 @@ The HFOS Python package additionally installs a few pure Python libraries:
 
 :Supported Platforms: Linux
 
-:Supported Python Versions: (2.7), 3.3, 3.4, 3.5, 3.6
+:Supported Python Versions: 3.3, 3.4, 3.5, 3.6, 3.7
 
 Frontend
 --------

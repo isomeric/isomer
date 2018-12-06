@@ -1,4 +1,4 @@
-.. _Issue Tracker: https://github.com/hackerfleet/hfos/issues
+.. _Issue Tracker: https://github.com/isomeric/isomer/issues
 .. _FreeNode IRC Network: http://freenode.net
 .. _IRC Channel: http://webchat.freenode.net/?randomnick=1&channels=hackerfleet&uio=d4
 
@@ -7,7 +7,7 @@ Development Introduction
 ========================
 
 
-Here's how we do things in HFOS...
+Here's how we do things in Isomer...
 
 
 Communication
@@ -45,24 +45,24 @@ Alternatively you can use the following command line tool:
 Tools
 -----
 
-We use the following tools to develop HFOS and share code:
+We use the following tools to develop Isomer and share code:
 
 - **Code Sharing:**
   `Git <https://git-scm.com/>`_
 - **Code Hosting and Bug Reporting:**
-  `GitHub <https://github.com/hackerfleet/hfos>`_
+  `GitHub <https://github.com/isomeric/isomer>`_
 - **Issue Tracker:**
-  `Issue Tracker <https://github.com/hackerfleet/hfos/issues>`_
+  `Issue Tracker <https://github.com/isomeric/isomer/issues>`_
 - **Documentation Hosting:**
-  `Read the Docs <http://hfos.readthedocs.org>`_
+  `Read the Docs <http://isomer.readthedocs.org>`_
 - **Package Hosting:**
   `Python Package Index (PyPi) <http://pypi.python.org/pypi/hfos>`_
 - **Docker Hub Automated Builds:**
-  `Dockerhub <https://hub.docker.com/r/hackerfleet/hfos/>`_
+  `Dockerhub <https://hub.docker.com/r/isomeric/isomer/>`_
 - **Continuous Integration:**
-  `Travis CI <https://travis-ci.org/Hackerfleet/hfos>`_
+  `Travis CI <https://travis-ci.org/isomeric/isomer>`_
 - **Code Quality:**
-  `Landscape <https://landscape.io/github/Hackerfleet/hfos/>`_
+  `Landscape <https://landscape.io/github/isomeric/isomer/>`_
 - **Frontend Testing:**
   `Browserstack <https://browserstack.com>`_
 - **Translations:**

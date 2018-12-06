@@ -1,4 +1,4 @@
-HFOS Launcher
+Isomer Launcher
 =============
 
 .. click:: hfos.launcher:launch

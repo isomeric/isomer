@@ -1,7 +1,7 @@
 Command Line Tools
 ==================
 
-HFOS contains a few CLI scripts:
+Isomer contains a few CLI scripts:
 
 .. toctree::
     :maxdepth: 1

@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-# HFOS - Hackerfleet Operating System
-# ===================================
+# Isomer - The distributed application framework
+# ==============================================
 # Copyright (C) 2011-2018 Heiko 'riot' Weinen <riot@c-base.org> and others.
 #
 # This program is free software: you can redistribute it and/or modify
@@ -28,7 +28,7 @@ Module: Migration
 
 """
 
-# from hfos.database import schemastore
+# from isomer.database import schemastore
 from isomer.logger import isolog, warn, debug  # , error, verbose, critical
 from deepdiff.diff import DeepDiff
 from pkg_resources import iter_entry_points, DistributionNotFound
@@ -171,7 +171,7 @@ def make_migrations(schema=None):
         with open(os.path.join(path, filename), 'w') as f:
             f.write(migration)
 
-    for schema_entrypoint in iter_entry_points(group='hfos.schemata',
+    for schema_entrypoint in iter_entry_points(group='isomer.schemata',
                                                name=None):
         try:
             isolog("Schemata found: ", schema_entrypoint.name, lvl=debug,

@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-# HFOS - Hackerfleet Operating System
-# ===================================
+# Isomer - The distributed application framework
+# ==============================================
 # Copyright (C) 2011-2018 Heiko 'riot' Weinen <riot@c-base.org> and others.
 #
 # This program is free software: you can redistribute it and/or modify
@@ -27,6 +27,13 @@ from prompt_toolkit.history import FileHistory
 
 from isomer.tool import run_process
 from isomer.tool.cli import cli
+from isomer.tool import log
+from isomer.version import version_info
+
+
+@cli.command(short_help='Show running isomer tool version')
+def version():
+    log('Tool version info:', version_info)
 
 
 @cli.command(short_help='Start interactive management shell')
@@ -34,9 +41,9 @@ def shell():
     """Open an shell to work with the manage tool interactively."""
 
     prompt_kwargs = {
-        'history': FileHistory('/tmp/.hfos-manage.history'),
+        'history': FileHistory('/tmp/.isomer-manage.history'),
     }
-    print("""HFOS - Management Tool Interactive Prompt
+    print("""Isomer - Management Tool Interactive Prompt
 
 Type -h for help, tab completion is available, hit Ctrl-D to quit.""")
     repl(click.get_current_context(), prompt_kwargs=prompt_kwargs)
@@ -78,11 +85,11 @@ def cmdmap(xdot):
     output = [line.replace("cli", "isomer") for line in output]
 
     if xdot:
-        with open('iso.dot', 'w') as f:
+        with open('iso-tool.dot', 'w') as f:
             f.write('strict digraph {\n')
             f.writelines(sorted(output))
             f.write('}')
 
-        run_process('.', ['xdot', 'iso.dot'])
+        run_process('.', ['xdot', 'iso-tool.dot'])
     else:
         print("".join(output))

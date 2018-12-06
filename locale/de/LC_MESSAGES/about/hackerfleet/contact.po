@@ -27,8 +27,8 @@ msgid "`github.com/Hackerfleet <https://github.com/Hackerfleet>`__"
 msgstr "`github.com/Hackerfleet <https://github.com/Hackerfleet>`__"
 
 #: ../../source/about/hackerfleet/contact.rst:7
-msgid "`Waffle.io/hackerfleet/hfos <https://waffle.io/hackerfleet/hfos>`__"
-msgstr "`Waffle.io/hackerfleet/hfos <https://waffle.io/hackerfleet/hfos>`__"
+msgid "`Waffle.io/isomeric/isomer <https://waffle.io/isomeric/isomer>`__"
+msgstr "`Waffle.io/isomeric/isomer <https://waffle.io/isomeric/isomer>`__"
 
 #: ../../source/about/hackerfleet/contact.rst:8
 msgid "`Twitter.com/hackerfleet <https://twitter.com/hackerfleet>`__"

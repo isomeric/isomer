@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-# HFOS - Hackerfleet Operating System
-# ===================================
+# Isomer - The distributed application framework
+# ==============================================
 # Copyright (C) 2011-2018 Heiko 'riot' Weinen <riot@c-base.org> and others.
 #
 # This program is free software: you can redistribute it and/or modify
@@ -33,7 +33,7 @@ from subprocess import Popen
 
 from click_didyoumean import DYMGroup
 
-from isomer.tool.etc import NonExistentKey
+from isomer.tool.etc import NonExistentKey, instance_template
 from isomer.logger import error, warn, debug
 from isomer.tool import check_root, log, ask
 from isomer.misc.path import get_path, set_instance
@@ -44,22 +44,22 @@ from isomer.version import version
 
 
 @click.group(cls=DYMGroup)
-@click.option('--port', help='Specify local HFOS port', default=8055)
+@click.option('--port', help='Specify local Isomer port', default=8055)
 @click.pass_context
 def install(ctx, port):
-    """[GROUP] Install various aspects of HFOS"""
+    """[GROUP] Install various aspects of Isomer"""
 
-    set_instance(ctx.obj['instance'], "blue")  # Initially start with a blue instance
+    #set_instance(ctx.obj['instance'], "blue")  # Initially start with a blue instance
 
     log('Configuration:', ctx.obj['config'])
     log('Instance:', ctx.obj['instance'])
 
     try:
-        instance = ctx.obj['config']['instances'][ctx.obj['instance']]
+        instance = ctx.obj['instances'][ctx.obj['instance']]
     except NonExistentKey:
         log('Instance unknown, so far.', lvl=warn)
 
-        instance = ctx.obj['config']['defaults']
+        instance = instance_template
         log('New instance configuration:', instance)
 
     environment_name = instance['environment']
@@ -76,12 +76,10 @@ def install(ctx, port):
         log('Repo:', repository)
         environment['version'] = repository.git.describe()
     except exc.InvalidGitRepositoryError:
-        log('Not running from a git repository; Using hfos.version', lvl=warn)
+        log('Not running from a git repository; Using isomer.version', lvl=warn)
         environment['version'] = version
 
     ctx.obj['environment'] = environment
-
-    ctx.obj['instance_config'] = instance
 
 
 @install.command(short_help='build and install docs')
@@ -95,7 +93,7 @@ def docs(ctx, clear_target):
 
 
 def install_docs(instance, clear_target):
-    """Builds and installs the complete HFOS documentation."""
+    """Builds and installs the complete Isomer documentation."""
 
     check_root()
 
@@ -123,7 +121,7 @@ def install_docs(instance, clear_target):
 
     # If these need changes, make sure they are watertight and don't remove
     # wanted stuff!
-    target = os.path.join('/var/lib/hfos', instance, 'frontend/docs')
+    target = os.path.join('/var/lib/isomer', instance, 'frontend/docs')
     source = 'docs/build/html'
 
     log("Updating documentation directory:", target)
@@ -165,12 +163,14 @@ def provisions(ctx, provision, clear_existing, overwrite, list_provisions):
 def install_provisions(ctx, provision, clear_provisions=False, overwrite=False, list_provisions=False):
     """Install default provisioning data"""
 
-    log("Installing HFOS default provisions")
+    log("Installing Isomer default provisions")
 
-    # from hfos.logger import verbosity, events
+    # from isomer.logger import verbosity, events
     # verbosity['console'] = verbosity['global'] = events
 
     from isomer import database
+
+    log('DATABASE SETTINGS:', ctx.obj, pretty=True)
     database.initialize(ctx.obj['dbhost'], ctx.obj['dbname'])
 
     from isomer.provisions import build_provision_store
@@ -247,7 +247,7 @@ def modules(wip):
 def install_modules(wip):
     """Install the plugin modules"""
 
-    def install_module(hfos_module):
+    def install_module(isomer_module):
         """Install a single module via setuptools"""
         try:
             setup = Popen(
@@ -256,12 +256,12 @@ def install_modules(wip):
                     'setup.py',
                     'develop'
                 ],
-                cwd='modules/' + hfos_module + "/"
+                cwd='modules/' + isomer_module + "/"
             )
 
             setup.wait()
         except Exception as e:
-            log("Problem during module installation: ", hfos_module, e,
+            log("Problem during module installation: ", isomer_module, e,
                 type(e), exc=True, lvl=error)
             return False
         return True
@@ -370,9 +370,9 @@ def install_all(ctx, clear_all):
 
     \b
     This includes
-    * System user (hfos.hfos)
+    * System user (isomer.isomer)
     * Self signed certificate
-    * Variable data locations (/var/lib/hfos and /var/cache/hfos)
+    * Variable data locations (/var/lib/isomer and /var/cache/isomer)
     * All the official modules in this repository
     * Default module provisioning data
     * Documentation
@@ -407,10 +407,10 @@ def uninstall():
 
     check_root()
 
-    response = ask("This will delete all data of your HFOS installations! Type"
+    response = ask("This will delete all data of your Isomer installations! Type"
                     "YES to continue:", default="N", show_hint=False)
     if response == 'YES':
-        shutil.rmtree('/var/lib/hfos')
-        shutil.rmtree('/var/cache/hfos')
+        shutil.rmtree('/var/lib/isomer')
+        shutil.rmtree('/var/cache/isomer')
 
 

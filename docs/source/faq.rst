@@ -11,10 +11,10 @@ Frequently Asked Questions
 General
 -------
 
-...  What is HFOS?
-   HFOS is an opensource navigation and communication platform.
+...  What is Isomer?
+   Isomer is an opensource collaborative application platform.
 
-... What platforms does HFOS support?
+... What platforms does Isomer support?
    We currently test on Debian, various flavours of Python (3.3, 3.4, 3.5, 3.6, pypy)
    It'll probably run on various other platforms as well. E.g. we've made good experiences with Arch Linux.
 

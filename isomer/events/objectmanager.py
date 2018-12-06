@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-# HFOS - Hackerfleet Operating System
-# ===================================
+# Isomer - The distributed application framework
+# ==============================================
 # Copyright (C) 2011-2018 Heiko 'riot' Weinen <riot@c-base.org> and others.
 #
 # This program is free software: you can redistribute it and/or modify
@@ -27,7 +27,7 @@ __license__ = "AGPLv3"
 Module: Events
 ==============
 
-Major HFOS event declarations
+Major Isomer event declarations
 
 
 """
@@ -35,7 +35,7 @@ Major HFOS event declarations
 from circuits.core import Event
 
 from isomer.logger import isolog, events
-# from hfos.ui.clientobjects import User
+# from isomer.ui.clientobjects import User
 from isomer.events.system import authorized_event
 
 

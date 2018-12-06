@@ -1,12 +1,12 @@
-# Docker Image for hfos - Arch Linux x64 version
+# Docker Image for Isomer - Arch Linux x64 version
 #
-# This image essentially packages up HFOS
+# This image essentially packages up Isomer
 # into a Docker Image/Container running Arch Linux OS x64.
 #
 # Usage Examples(s)::
 #
-#     $ docker run -i -t hackerfleet/hfos hfos_launcher.py
-#     $ docker run -i -t -p 127.0.0.1:80:80 --name hfos-test-live -t hackerfleet/hfos
+#     $ docker run -i -t isomeric/isomer iso launch
+#     $ docker run -i -t -p 127.0.0.1:80:80 --name hfos-test-live -t isomeric/isomer
 #
 # VERSION: 1.1.0
 #
@@ -46,14 +46,14 @@ RUN mongod -f /etc/mongodb.conf --fork & && python setup.py install_provisions
 
 # Add user account and group
 
-RUN useradd -Ums /bin/sh hfos
+RUN useradd -Ums /bin/sh isomer
 
-# Get HFOS
+# Get Isomer
 
-RUN git clone https://github.com/Hackerfleet/hfos
-WORKDIR hfos
+RUN git clone https://github.com/isomeric/isomer
+WORKDIR isomer
 
-# Install HFOS
+# Install Isomer
 
 RUN pip install -r requirements-dev.txt
 RUN pip install .
@@ -64,7 +64,7 @@ WORKDIR modules
 RUN python install.py --all --dev
 WORKDIR ..
 
-# Make sure /var/[cache,lib]/hfos etc exists
+# Make sure /var/[cache,lib]/isomer etc exists
 
 RUN python setup.py install_var
 

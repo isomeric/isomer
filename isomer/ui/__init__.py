@@ -2,7 +2,7 @@
 
 Web bits
 
-Package HFOS.web
+Package ISOMER.web
 ================
 
 The backend package dealing with the web frontend interface.

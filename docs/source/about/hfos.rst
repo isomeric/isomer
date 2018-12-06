@@ -1,5 +1,5 @@
-HFOS
-====
+Isomer
+======
 
 .. toctree::
        :maxdepth: 2

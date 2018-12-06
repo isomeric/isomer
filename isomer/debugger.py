@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-# HFOS - Hackerfleet Operating System
-# ===================================
+# Isomer - The distributed application framework
+# ==============================================
 # Copyright (C) 2011-2018 Heiko 'riot' Weinen <riot@c-base.org> and others.
 #
 # This program is free software: you can redistribute it and/or modify
@@ -90,6 +90,11 @@ class cli_errors(Event):
     pass
 
 
+class cli_locations(Event):
+    """Display all locations of running instance"""
+    pass
+
+
 class cli_log_level(Event):
     """Adjust log level
 
@@ -141,6 +146,7 @@ class HFDebugger(ConfigurableComponent):
             self.fireEvent(cli_register_event('errors', cli_errors))
             self.fireEvent(cli_register_event('log_level', cli_log_level))
             self.fireEvent(cli_register_event('compgraph', cli_compgraph))
+            self.fireEvent(cli_register_event('locations', cli_locations))
         except AttributeError:
             pass  # We're running in a test environment and root is not yet running
 
@@ -162,6 +168,29 @@ class HFDebugger(ConfigurableComponent):
         verbosity['global'] = new_level
         verbosity['console'] = new_level
         verbosity['file'] = new_level
+
+    @handler('cli_compgraph')
+    def cli_compgraph(self, event):
+        self.log('Drawing component graph')
+        from circuits.tools import graph
+
+        graph(self)
+        self._drawgraph()
+
+    def _drawgraph(self):
+        objgraph.show_backrefs([self.root],
+                               max_depth=5,
+                               filter=lambda x: type(x) not in [list, tuple, set],
+                               highlight=lambda x: type(x) in [ConfigurableComponent],
+                               filename='backref-graph.png')
+        self.log("Backref graph written.", lvl=critical)
+
+    @handler("cli_locations")
+    def cli_locations(self, *args):
+        self.log('All locations for this instance:')
+        from isomer.misc.path import locations, get_path
+        for path in locations:
+            self.log(get_path(path, ''), pretty=True)
 
     @handler("exception", channel="*", priority=100.0)
     def _on_exception(self, error_type, value, traceback,
@@ -187,7 +216,7 @@ class HFDebugger(ConfigurableComponent):
             self.log("\n".join(s), lvl=critical)
 
             alert = {
-                'component': 'hfos.alert.manager',
+                'component': 'isomer.alert.manager',
                 'action': 'notify',
                 'data': {
                     'type': 'danger',
@@ -202,22 +231,6 @@ class HFDebugger(ConfigurableComponent):
         except Exception as e:
             self.log("Exception during exception handling: ", e, type(e),
                      lvl=critical)
-
-    @handler('cli_compgraph')
-    def cli_compgraph(self, event):
-        self.log('Drawing component graph')
-        from circuits.tools import graph
-
-        graph(self)
-        self._drawgraph()
-
-    def _drawgraph(self):
-        objgraph.show_backrefs([self.root],
-                               max_depth=5,
-                               filter=lambda x: type(x) not in [list, tuple, set],
-                               highlight=lambda x: type(x) in [ConfigurableComponent],
-                               filename='backref-graph.png')
-        self.log("Backref graph written.", lvl=critical)
 
     @handler(debugrequest)
     def debugrequest(self, event):

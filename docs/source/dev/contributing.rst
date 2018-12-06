@@ -1,12 +1,12 @@
-.. _Fork hfos: https://github.com/hackerfleet/hfos/#fork-destination-box
+.. _Fork hfos: https://github.com/isomeric/isomer/#fork-destination-box
 .. _Chat with us: http://webchat.freenode.net/?randomnick=1&channels=hackerfleet&uio=d4
-.. _Create an Issue: https://github.com/hackerfleet/hfos/issues/new
-.. _Pull Request: https://github.com/hackerfleet/hfos/compare/
+.. _Create an Issue: https://github.com/isomeric/isomer/issues/new
+.. _Pull Request: https://github.com/isomeric/isomer/compare/
 
-Contributing to HFOS
+Contributing to Isomer
 ====================
 
-Here's how you can contribute to HFOS
+Here's how you can contribute to Isomer
 
 Submitting Bug Reports
 ----------------------
@@ -25,7 +25,7 @@ Writing new tests
 
 
 We're not perfect, and we're still writing more tests to ensure quality code.
-If you'd like to help, please `Fork HFOS`_, write more tests that cover more
+If you'd like to help, please `Fork Isomer`_, write more tests that cover more
 of our code base and submit a `Pull Request`_. Many Thanks!
 
 
@@ -33,7 +33,7 @@ Adding New Features
 -------------------
 
 
-If you'd like to see a new feature added to HFOS, then we'd like to hear
+If you'd like to see a new feature added to Isomer, then we'd like to hear
 about it~ We would like to see some discussion around any new features as well
 as valid use-cases. To start the discussions off, please either:
 
