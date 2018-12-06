@@ -1,0 +1,18 @@
+[Unit]
+Description=Isomer Node - {{instance}} ({{environment}})
+After=network.target
+Wants=mongodb.service
+
+[Service]
+Type=simple
+User={{user_name}}
+Group={{user_group}}
+WorkingDirectory=/
+ExecStart={{executable}}
+StandardOutput=syslog
+StandardError=syslog
+Restart=True
+KillSignal=SIGINT
+
+[Install]
+WantedBy=multi-user.target
