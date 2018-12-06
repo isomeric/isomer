@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: HFOS 1.1.2\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2017-09-02 18:44+0200\n"
-"PO-Revision-Date: 2017-09-02 18:57+0200\n"
+"PO-Revision-Date: 2018-07-08 16:22+0200\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -61,7 +61,7 @@ msgid "The command to get the current testing release is:"
 msgstr ""
 
 #: ../../source/start/quick.rst:31
-msgid "``$ docker run -i -t hackerfleet/hfos hfos_launcher.py``"
+msgid "``docker run -i -t hackerfleet/hfos iso launch``"
 msgstr ""
 
 #: ../../source/start/quick.rst:35

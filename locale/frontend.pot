@@ -4,6 +4,10 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Project-Id-Version: \n"
 
+#: src/about/about-component/about-component.tpl.html:53
+msgid "<a href=\"https://github.com/isomeric/isomer\" target=\"_blank\">Learn more about Isomer</a>"
+msgstr ""
+
 #: src/common/services/user.service.js:131
 msgid "<br />Welcome to this Isomer node! Now is a good time to fill out your profile.<br />Click the user button <a href=\"/#!/editor/profile//edit\">to edit your profile</a>, logout or change your password.<br /> <small>Adding some user data will prevent this notification from reappearing.</small>"
 msgstr ""
@@ -59,7 +63,7 @@ msgstr ""
 msgid "Back to the main menu"
 msgstr ""
 
-#: src/about/about-component/about-component.tpl.html:76
+#: src/about/about-component/about-component.tpl.html:81
 msgid "Browse on Github"
 msgstr ""
 
@@ -100,20 +104,16 @@ msgstr ""
 msgid "Client<span class=\"caret\"></span>"
 msgstr ""
 
-#: src/components/project/todo/todo.tpl.html:77
-msgid "Closed tasks group:"
-msgstr ""
-
 #: src/components/enrol/enrol/enrolment.tpl.html:94
 #: src/components/enrol/enrol/password.tpl.html:42
 msgid "Confirm:"
 msgstr ""
 
-#: src/about/about-component/about-component.tpl.html:60
+#: src/about/about-component/about-component.tpl.html:65
 msgid "Contact the isomer framework maintainers"
 msgstr ""
 
-#: src/about/about-component/about-component.tpl.html:55
+#: src/about/about-component/about-component.tpl.html:60
 msgid "Contact this node's maintainer"
 msgstr ""
 
@@ -214,7 +214,7 @@ msgstr ""
 msgid "Hide menu"
 msgstr ""
 
-#: src/common/services/socket.factory.js:331
+#: src/common/services/socket.factory.js:334
 msgid "High latency"
 msgstr ""
 
@@ -255,7 +255,7 @@ msgstr ""
 msgid "Login failed"
 msgstr ""
 
-#: src/common/services/user.service.js:485
+#: src/common/services/user.service.js:488
 msgid "Login to this node"
 msgstr ""
 
@@ -292,11 +292,11 @@ msgstr ""
 msgid "No connection"
 msgstr ""
 
-#: src/common/services/socket.factory.js:336
+#: src/common/services/socket.factory.js:339
 msgid "No permission"
 msgstr ""
 
-#: src/common/services/user.service.js:418
+#: src/common/services/user.service.js:421
 msgid "No response from node within 30 seconds!"
 msgstr ""
 
@@ -308,7 +308,7 @@ msgstr ""
 msgid "Not found"
 msgstr ""
 
-#: src/common/services/socket.factory.js:144
+#: src/common/services/socket.factory.js:146
 msgid "Offline"
 msgstr ""
 
@@ -316,7 +316,7 @@ msgstr ""
 msgid "Old password:"
 msgstr ""
 
-#: src/common/services/socket.factory.js:184
+#: src/common/services/socket.factory.js:186
 msgid "Online"
 msgstr ""
 
@@ -376,11 +376,11 @@ msgstr ""
 msgid "Registration successful"
 msgstr ""
 
-#: src/about/about-component/about-component.tpl.html:73
+#: src/about/about-component/about-component.tpl.html:78
 msgid "Report Bugs"
 msgstr ""
 
-#: src/about/about-component/about-component.tpl.html:79
+#: src/about/about-component/about-component.tpl.html:84
 msgid "Report on Github"
 msgstr ""
 
@@ -397,7 +397,7 @@ msgstr ""
 msgid "Revoke"
 msgstr ""
 
-#: src/common/services/socket.factory.js:331
+#: src/common/services/socket.factory.js:334
 msgid "Roundtrip took"
 msgstr ""
 
@@ -407,10 +407,6 @@ msgstr ""
 
 #: src/objects/list/list.tpl.html:70
 msgid "Select multiple objects to:"
-msgstr ""
-
-#: src/components/project/todo/todo.tpl.html:71
-msgid "Showing tasks from:"
 msgstr ""
 
 #: src/components/enrol/enrol/enrolment.tpl.html:33
@@ -437,7 +433,7 @@ msgstr ""
 msgid "Thanks for enrolling, {{$ctrl.username}}!"
 msgstr ""
 
-#: src/common/services/socket.factory.js:185
+#: src/common/services/socket.factory.js:187
 msgid "The connection to the node has been established. You're online!"
 msgstr ""
 
@@ -453,11 +449,11 @@ msgstr ""
 msgid "Toggle navigation"
 msgstr ""
 
-#: src/app/app-component/app-component.tpl.html:249
+#: src/app/app-component/app-component.tpl.html:258
 msgid "Toggle notification history"
 msgstr ""
 
-#: src/app/app-component/app-component.tpl.html:253
+#: src/app/app-component/app-component.tpl.html:262
 msgid "Toggle timestamps"
 msgstr ""
 
@@ -470,7 +466,7 @@ msgid "Use SSL"
 msgstr ""
 
 #: src/app/app-component/app-component.tpl.html:49
-#: src/common/services/user.service.js:503
+#: src/common/services/user.service.js:506
 msgid "User actions"
 msgstr ""
 
@@ -495,11 +491,11 @@ msgstr ""
 msgid "You can now"
 msgstr ""
 
-#: src/common/services/socket.factory.js:145
+#: src/common/services/socket.factory.js:147
 msgid "You have been disconnected from the node. Retry interval is at"
 msgstr ""
 
-#: src/common/services/socket.factory.js:337
+#: src/common/services/socket.factory.js:340
 msgid "You have insufficient permissions to do that."
 msgstr ""
 
