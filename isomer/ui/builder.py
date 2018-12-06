@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-# HFOS - Hackerfleet Operating System
-# ===================================
+# Isomer - The distributed application framework
+# ==============================================
 # Copyright (C) 2011-2018 Heiko 'riot' Weinen <riot@c-base.org> and others.
 #
 # This program is free software: you can redistribute it and/or modify
@@ -30,12 +30,18 @@ from glob import glob
 from shutil import copy
 
 from isomer.logger import isolog, debug, verbose, warn, error, critical, hilight
+from isomer.misc.path import get_path
 
 try:
     from subprocess import Popen
 except ImportError:
     # noinspection PyUnresolvedReferences,PyUnresolvedReferences
     from subprocess32 import Popen  # NOQA
+
+
+def log(*args, **kwargs):
+    kwargs.update({'emitter': 'BUILDER', 'frame_ref': 2})
+    isolog(*args, **kwargs)
 
 
 def copytree(root_src_dir, root_dst_dir, hardlink=True):
@@ -51,72 +57,77 @@ def copytree(root_src_dir, root_dst_dir, hardlink=True):
             try:
                 if os.path.exists(dst_file):
                     if hardlink:
-                        isolog('Removing frontend link:', dst_file,
-                               emitter='BUILDER', lvl=verbose)
+                        log('Removing frontend link:', dst_file,
+                            lvl=verbose)
                         os.remove(dst_file)
                     else:
-                        isolog('Overwriting frontend file:', dst_file,
-                               emitter='BUILDER', lvl=verbose)
+                        log('Overwriting frontend file:', dst_file,
+                            lvl=verbose)
                 else:
-                    isolog('Target not existing:', dst_file, emitter='BUILDER', lvl=verbose)
+                    log('Target not existing:', dst_file, lvl=verbose)
             except PermissionError as e:
-                isolog('No permission to remove target:', e, emitter='BUILDER', lvl=error)
+                log('No permission to remove target:', e, lvl=error)
 
             try:
                 if hardlink:
-                    isolog('Hardlinking ', src_file, dst_dir, emitter='BUILDER', lvl=verbose)
+                    log('Hardlinking ', src_file, dst_dir, lvl=verbose)
                     os.link(src_file, dst_file)
                 else:
-                    isolog('Copying ', src_file, dst_dir, emitter='BUILDER', lvl=verbose)
+                    log('Copying ', src_file, dst_dir, lvl=verbose)
                     copy(src_file, dst_dir)
             except PermissionError as e:
-                isolog(
+                log(
                     " No permission to create target %s for frontend:" % ('link' if hardlink else 'copy'),
-                    dst_dir, e, emitter='BUILDER', lvl=error)
+                    dst_dir, e, lvl=error)
             except Exception as e:
-                isolog("Error during", 'link' if hardlink else 'copy',
-                        "creation:", type(e), e, emitter='BUILDER',
-                       lvl=error)
+                log("Error during", 'link' if hardlink else 'copy',
+                    "creation:", type(e), e,
+                    lvl=error)
 
-            isolog('Done linking', root_dst_dir, emitter='BUILDER',
-                   lvl=verbose)
+            log('Done linking', root_dst_dir,
+                lvl=verbose)
 
 
-# TODO: Installation of frontend requirements is currently disabled
 def install_frontend(instance='default', forcereload=False, forcerebuild=False,
                      forcecopy=True, install=True, development=False, build_type='dist'):
     """Builds and installs the frontend"""
 
-    isolog("Updating frontend components", emitter='BUILDER')
+    log("Updating frontend components")
     components = {}
     loadable_components = {}
-    # TODO: Fix this up, it is probably not a sane way to get at the real root
+
     if development:
-        frontendroot = os.path.abspath(os.path.dirname(os.path.realpath(
-            __file__)) + "../../../frontend")
+        frontend_root = os.path.realpath(os.path.dirname(os.path.realpath(__file__)) + "/../../frontend")
+        frontend_target = get_path('lib', 'frontend-dev')
+        if not os.path.exists(frontend_target):
+            try:
+                os.makedirs(frontend_target)
+            except PermissionError:
+                log('Cannot create development frontend target! Check permissions on', frontend_target)
+                return
     else:
-        frontendroot = '/opt/hfos/frontend'
-    frontendtarget = os.path.join('/var/lib/hfos', instance, 'frontend')
+        frontend_root = get_path('lib', 'repository/frontend')
+        frontend_target = get_path('lib', 'frontend')
 
     if install:
         cmdline = ["npm", "install"]
 
-        isolog("Running", cmdline, lvl=verbose,
-               emitter='BUILDER')
-        npminstall = Popen(cmdline, cwd=frontendroot)
+        log("Running", cmdline, lvl=verbose)
+        npminstall = Popen(cmdline, cwd=frontend_root)
+
         out, err = npminstall.communicate()
 
         npminstall.wait()
 
-        isolog("Frontend dependency installing done: ", out,
-               err, lvl=debug, emitter='BUILDER')
+        log("Frontend dependency installing done: ", out,
+            err, lvl=debug)
 
     if True:  # try:
         from pkg_resources import iter_entry_points
 
         entry_point_tuple = (
             iter_entry_points(group='isomer.base', name=None),
-            iter_entry_points(group='isomer.management', name=None),
+            iter_entry_points(group='isomer.sails', name=None),
             iter_entry_points(group='isomer.components', name=None)
         )
 
@@ -127,13 +138,12 @@ def install_frontend(instance='default', forcereload=False, forcerebuild=False,
                     location = entry_point.dist.location
                     loaded = entry_point.load()
 
-                    isolog("Entry point: ", entry_point,
-                           name,
-                           entry_point.resolve().__module__, lvl=debug,
-                           emitter='BUILDER')
+                    log("Entry point: ", entry_point,
+                        name,
+                        entry_point.resolve().__module__, lvl=debug)
                     component_name = entry_point.resolve().__module__.split('.')[1]
 
-                    isolog("Loaded: ", loaded, lvl=verbose, emitter='BUILDER')
+                    log("Loaded: ", loaded, lvl=verbose)
                     comp = {
                         'location': location,
                         'version': str(entry_point.dist.parsed_version),
@@ -141,43 +151,40 @@ def install_frontend(instance='default', forcereload=False, forcerebuild=False,
                     }
 
                     frontend = os.path.join(location, 'frontend')
-                    isolog("Checking component frontend parts: ",
-                           frontend, lvl=verbose, emitter='BUILDER')
-                    if os.path.isdir(
-                        frontend) and frontend != frontendroot:
+                    log("Checking component frontend parts: ",
+                        frontend, lvl=verbose)
+                    if os.path.isdir(frontend) and frontend != frontend_root:
                         comp['frontend'] = frontend
                     else:
-                        isolog("Component without frontend "
-                                "directory:", comp, lvl=debug,
-                               emitter='BUILDER')
+                        log("Component without frontend "
+                            "directory:", comp, lvl=debug)
 
                     components[component_name] = comp
                     loadable_components[component_name] = loaded
 
-                    isolog("Loaded component:", comp, lvl=verbose,
-                           emitter='BUILDER')
+                    log("Loaded component:", comp, lvl=verbose)
 
                 except Exception as e:
-                    isolog("Could not inspect entrypoint: ", e,
-                           type(e), entry_point, iterator, lvl=error,
-                           exc=True, emitter='BUILDER')
+                    log("Could not inspect entrypoint: ", e,
+                        type(e), entry_point, iterator, lvl=error,
+                        exc=True)
 
         frontends = iter_entry_points(group='isomer.frontend', name=None)
         for entrypoint in frontends:
             name = entrypoint.name
             location = entrypoint.dist.location
 
-            isolog('Frontend entrypoint:', name, location, entrypoint, lvl=hilight)
+            log('Frontend entrypoint:', name, location, entrypoint, lvl=hilight)
 
     # except Exception as e:
-    #    hfoslog("Error: ", e, type(e), lvl=error, exc=True, emitter='BUILDER')
+    #    isomerlog("Error: ", e, type(e), lvl=error, exc=True)
     #    return
 
-    isolog('Components after lookup:', sorted(list(components.keys())), emitter='BUILDER')
+    log('Components after lookup:', sorted(list(components.keys())))
 
     def _update_frontends(install=True):
-        isolog("Checking unique frontend locations: ",
-               loadable_components, lvl=debug, emitter='BUILDER')
+        log("Checking unique frontend locations: ",
+            loadable_components, lvl=debug)
 
         importlines = []
         modules = []
@@ -186,7 +193,7 @@ def install_frontend(instance='default', forcereload=False, forcerebuild=False,
             if 'frontend' in component:
                 origin = component['frontend']
 
-                target = os.path.join(frontendroot, 'src', 'components',
+                target = os.path.join(frontend_root, 'src', 'components',
                                       name)
                 target = os.path.normpath(target)
 
@@ -195,59 +202,53 @@ def install_frontend(instance='default', forcereload=False, forcerebuild=False,
 
                     if os.path.exists(reqfile):
                         # TODO: Speed this up by collecting deps first then doing one single install call
-                        isolog("Installing package dependencies for", name, lvl=debug,
-                               emitter='BUILDER')
+                        log("Installing package dependencies for", name, lvl=debug)
                         with open(reqfile, 'r') as f:
                             cmdline = ["npm", "install"]
                             for line in f.readlines():
                                 cmdline.append(line.replace("\n", ""))
 
-                            isolog("Running", cmdline, lvl=verbose,
-                                   emitter='BUILDER')
-                            npminstall = Popen(cmdline, cwd=frontendroot)
+                            log("Running", cmdline, lvl=verbose)
+                            npminstall = Popen(cmdline, cwd=frontend_root)
                             out, err = npminstall.communicate()
 
                             npminstall.wait()
 
-                            isolog("Frontend installing done: ", out,
-                                   err, lvl=debug, emitter='BUILDER')
+                            log("Frontend installing done: ", out,
+                                err, lvl=debug)
 
                 # if target in ('/', '/boot', '/usr', '/home', '/root',
                 # '/var'):
-                #    hfoslog("Unsafe frontend deletion target path, "
-                #            "NOT proceeding! ", target, lvl=critical,
-                #            emitter='BUILDER')
+                #    log("Unsafe frontend deletion target path, "
+                #        "NOT proceeding! ", target, lvl=critical)
 
-                isolog("Copying:", origin, target, lvl=debug,
-                       emitter='BUILDER')
+                log("Copying:", origin, target, lvl=debug)
 
                 copytree(origin, target)
 
-                for modulefilename in glob(target + '/*.module.js'):
-                    modulename = os.path.basename(modulefilename).split(
-                        ".module.js")[0]
-                    line = u"import {s} from './components/{p}/{" \
-                           u"s}.module';\nmodules.push({s});\n".format(
-                        s=modulename, p=name)
-                    if modulename not in modules:
+                for module_filename in glob(target + '/*.module.js'):
+                    module_name = os.path.basename(module_filename).split(".module.js")[0]
+                    line = u"import {s} from './components/{p}/{s}.module';\nmodules.push({s});\n".format(
+                        s=module_name, p=name)
+                    if module_name not in modules:
                         importlines += line
-                        modules.append(modulename)
+                        modules.append(module_name)
             else:
-                isolog("Module without frontend:", name, component,
-                       lvl=debug, emitter='BUILDER')
+                log("Module without frontend:", name, component,
+                    lvl=debug)
 
-        with open(os.path.join(frontendroot, 'src', 'main.tpl.js'),
+        with open(os.path.join(frontend_root, 'src', 'main.tpl.js'),
                   "r") as f:
             main = "".join(f.readlines())
 
         parts = main.split("/* COMPONENT SECTION */")
         if len(parts) != 3:
-            isolog("Frontend loader seems damaged! Please check!",
-                   lvl=critical, emitter='BUILDER')
+            log("Frontend loader seems damaged! Please check!",
+                lvl=critical)
             return
 
         try:
-            with open(os.path.join(frontendroot, 'src', 'main.js'),
+            with open(os.path.join(frontend_root, 'src', 'main.js'),
                       "w") as f:
                 f.write(parts[0])
                 f.write("/* COMPONENT SECTION:BEGIN */\n")
@@ -256,39 +257,42 @@ def install_frontend(instance='default', forcereload=False, forcerebuild=False,
                 f.write("/* COMPONENT SECTION:END */\n")
                 f.write(parts[2])
         except Exception as e:
-            isolog("Error during frontend package info writing. Check "
-                    "permissions! ", e, lvl=error, emitter='BUILDER')
+            log("Error during frontend package info writing. Check "
+                "permissions! ", e, lvl=error)
 
     def _rebuild_frontend():
-        isolog("Starting frontend build.", lvl=warn, emitter='BUILDER')
+        log("Starting frontend build.", lvl=warn)
 
-        npmbuild = Popen(["npm", "run", build_type], cwd=frontendroot)
+        npmbuild = Popen(["npm", "run", build_type], cwd=frontend_root)
         out, err = npmbuild.communicate()
         try:
             npmbuild.wait()
         except Exception as e:
-            isolog("Error during frontend build", e, type(e),
-                   exc=True, lvl=error, emitter='BUILDER')
+            log("Error during frontend build", e, type(e),
+                exc=True, lvl=error)
             return
 
-        isolog("Frontend build done: ", out, err, lvl=debug, emitter='BUILDER')
+        log("Frontend build done: ", out, err, lvl=debug)
 
-        copytree(os.path.join(frontendroot, build_type),
-                 frontendtarget, hardlink=False)
-        copytree(os.path.join(frontendroot, 'assets'),
-                 os.path.join(frontendtarget, 'assets'),
-                 hardlink=False)
+        try:
+            copytree(os.path.join(frontend_root, build_type),
+                     frontend_target, hardlink=False)
+            copytree(os.path.join(frontend_root, 'assets'),
+                     os.path.join(frontend_target, 'assets'),
+                     hardlink=False)
+        except PermissionError:
+            log('No permission to change:', frontend_target, lvl=error)
 
-        isolog("Frontend deployed", emitter='BUILDER')
+        log("Frontend deployed")
 
-    isolog("Checking component frontend bits in ", frontendroot,
-           lvl=verbose, emitter='BUILDER')
+    log("Checking component frontend bits in ", frontend_root,
+        lvl=verbose)
 
     _update_frontends(install=install)
     if forcerebuild:
         _rebuild_frontend()
 
-    isolog("Done: Install Frontend", emitter='BUILDER')
+    log("Done: Install Frontend")
 
     # We have to find a way to detect if we need to rebuild (and
     # possibly wipe) stuff. This maybe the case, when a frontend
