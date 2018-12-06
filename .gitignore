@@ -26,6 +26,7 @@ isomer/scm_version.py
 .tox
 coverage
 .coverage
+.pytest_cache
 
 # IntelliJ IDEA
 workspace.xml
