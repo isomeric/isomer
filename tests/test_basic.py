@@ -21,39 +21,29 @@
 __author__ = "Heiko 'riot' Weinen"
 __license__ = "AGPLv3"
 
-"""Testsuite runner"""
+"""
+Hackerfleet Operating System - Backend
 
-import sys
-# noinspection PyUnresolvedReferences
-from types import ModuleType
-from os.path import abspath, dirname
-from subprocess import Popen, STDOUT
+Test Isomer Auth
+==============
 
 
-def importable(module_name):
-    """Safely try to import a module"""
 
-    try:
-        m = __import__(module_name, globals(), locals())
-        return type(m) is ModuleType
-    except ImportError:
-        return False
+"""
 
-
-def main():
-    """Run all tests with coverage output"""
-
-    cmd = ["py.test", "-r", "fsxX", "--durations=10", "--ignore=tmp"]
-
-    if importable("pytest_cov"):
-        cmd.append("--cov=isomer")
-        cmd.append("--no-cov-on-fail")
-        cmd.append("--cov-report=html")
-
-    cmd.append(dirname(abspath(__file__)))
-
-    raise SystemExit(Popen(cmd, stdout=sys.stdout, stderr=STDOUT).wait())
+from circuits import Manager, Event
+import pytest
+from isomer.ui.auth import Authenticator
+from isomer.events.client import authenticationrequest, authentication
+from isomer.misc import std_uuid, std_now, std_hash
+from isomer.database import objectmodels
+import isomer.logger as logger
 
 
-if __name__ == "__main__":
-    main()
+def test_package():
+    """Tests correct package importing"""
+
+    import isomer
+
+    assert isomer is not None
+

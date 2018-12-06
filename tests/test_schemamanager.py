@@ -24,7 +24,7 @@ __license__ = "AGPLv3"
 """
 Hackerfleet Operating System - Backend
 
-Test HFOS Launcher
+Test Isomer Launcher
 ==================
 
 
@@ -68,9 +68,9 @@ def get_schemata(action, data):
         'configuration': configuration
     }
 
-    waiter = pytest.WaitEvent(m, 'send', "hfosweb")
+    waiter = pytest.WaitEvent(m, 'send', "isomer-web")
 
-    m.fire(events[action](user, action, data, client), "hfosweb")
+    m.fire(events[action](user, action, data, client), "isomer-web")
 
     result = waiter.wait()
     packet = result.packet
@@ -84,7 +84,7 @@ def test_schemarequest_all():
     packet = get_schemata('all', None)
 
     assert packet['action'] == 'all'
-    assert packet['component'] == 'hfos.events.schemamanager'
+    assert packet['component'] == 'isomer.events.schemamanager'
     assert type(packet['data']) == dict
 
 
@@ -106,6 +106,6 @@ def test_schemarequest_get():
     packet = get_schemata("get", "systemconfig")
 
     assert packet['action'] == 'get'
-    assert packet['component'] == 'hfos.events.schemamanager'
+    assert packet['component'] == 'isomer.events.schemamanager'
     assert type(packet['data']) == dict
     assert packet['data'] == schemastore['systemconfig']

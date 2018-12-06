@@ -25,7 +25,7 @@ __license__ = "AGPLv3"
 """
 Hackerfleet Operating System - Backend
 
-Test HFOS Launcher
+Test Isomer Launcher
 ==================
 
 
@@ -100,14 +100,14 @@ def transmit(action, data, account=AccountMock()):
         'unsubscribe': unsubscribe
     }
 
-    waiter = pytest.WaitEvent(m, "send", "hfosweb")
+    waiter = pytest.WaitEvent(m, "send", "isomer-web")
 
-    m.fire(events[action](user, action, data, client), "hfosweb")
+    m.fire(events[action](user, action, data, client), "isomer-web")
 
     result = waiter.wait()
     packet = result.packet
 
-    assert packet['component'] == 'hfos.events.objectmanager'
+    assert packet['component'] == 'isomer.events.objectmanager'
     return packet
 
 

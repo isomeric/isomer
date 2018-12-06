@@ -24,7 +24,7 @@ __license__ = "AGPLv3"
 """
 Hackerfleet Operating System - Backend
 
-Test HFOS Launcher
+Test Isomer Launcher
 ==================
 
 

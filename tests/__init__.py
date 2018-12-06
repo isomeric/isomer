@@ -25,4 +25,4 @@ __license__ = "AGPLv3"
 
 from isomer.database import initialize
 
-initialize(database_name='hfos-test')
+initialize(database_name='isomer-test')

@@ -25,7 +25,7 @@ __license__ = "AGPLv3"
 """
 Hackerfleet Operating System - Backend
 
-Test HFOS Tools
+Test Isomer Tools
 ===============
 
 
@@ -40,12 +40,13 @@ from tempfile import NamedTemporaryFile
 import dateutil.parser
 
 from isomer import misc
+from isomer.misc import path
 from collections import namedtuple
 
 template = """Hello {{placeholder}}!"""
 
 content = {
-    'placeholder': 'HFOS dev'
+    'placeholder': 'Isomer dev'
 }
 
 
@@ -82,22 +83,22 @@ def test_std_table():
 def test_format_template():
     result = isomer.tool.templates.format_template(template, content)
 
-    assert result == 'Hello HFOS dev!'
+    assert result == 'Hello Isomer dev!'
 
 
 def test_format_template_file():
-    with NamedTemporaryFile(prefix='hfos-test',
+    with NamedTemporaryFile(prefix='isomer-test',
                             suffix='tpl',
                             delete=True) as f:
         f.write(template.encode('utf-8'))
         f.flush()
         result = isomer.tool.templates.format_template_file(f.name, content)
 
-    assert result == 'Hello HFOS dev!'
+    assert result == 'Hello Isomer dev!'
 
 
 def test_write_template_file():
-    with NamedTemporaryFile(prefix='hfos-test',
+    with NamedTemporaryFile(prefix='isomer-test',
                             suffix='tpl',
                             delete=True) as f:
         f.write(template.encode('utf-8'))
@@ -109,6 +110,21 @@ def test_write_template_file():
         with open(target, 'r') as tf:
             result = tf.readline()
 
-        assert result == 'Hello HFOS dev!'
+        assert result == 'Hello Isomer dev!'
 
         print(target)
+
+
+def test_path_tools():
+    path.set_instance('TESTING', 'MAUVE')
+
+    assert path.INSTANCE == 'TESTING'
+    assert path.ENVIRONMENT == 'MAUVE'
+
+    assert 'cache' in path.locations
+    assert 'local' in path.locations
+    assert 'lib' in path.locations
+
+    assert path.get_path('cache', '') == '/tmp/isomer-test/var/cache/isomer/TESTING/MAUVE'
+    assert path.get_path('local', 'foo') == '/tmp/isomer-test/var/local/isomer/TESTING/MAUVE/foo'
+    assert path.get_path('lib', 'bar/qux') == '/tmp/isomer-test/var/lib/isomer/TESTING/MAUVE/bar/qux'

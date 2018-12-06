@@ -24,18 +24,19 @@ __license__ = "AGPLv3"
 """
 Hackerfleet Operating System - Backend
 
-Test HFOS Auth
+Test Isomer Auth
 ==============
 
 
 
 """
 
-from circuits import Manager
+from circuits import Manager, Event
 import pytest
 from isomer.ui.auth import Authenticator
 from isomer.events.client import authenticationrequest, authentication
-from isomer.misc import std_uuid
+from isomer.misc import std_uuid, std_now, std_hash
+from isomer.database import objectmodels
 import isomer.logger as logger
 
 # from pprint import pprint
@@ -45,6 +46,25 @@ m = Manager()
 auth = Authenticator()
 auth.register(m)
 
+new_user = objectmodels['user']({
+    'uuid': std_uuid(),
+    'created': std_now()
+})
+
+
+new_user.name = 'TESTER'
+
+new_user.passhash = std_hash('PASSWORD', 'SALT'.encode('ascii'))
+new_user.save()
+
+system_config = objectmodels['systemconfig']({
+    'uuid': std_uuid(),
+    'active': True,
+    'salt': 'SALT'
+})
+
+system_config.save()
+
 
 def test_instantiate():
     """Tests correct instantiation"""
@@ -52,10 +72,10 @@ def test_instantiate():
     assert type(auth) == Authenticator
 
 
-def transmit(event_in, channel_in, event_out, channel_out):
+def transmit(event_in, channel_in, event_out, channel_out, timeout):
     """Fire an event and listen for a reply"""
 
-    waiter = pytest.WaitEvent(m, event_in, channel_in)
+    waiter = pytest.WaitEvent(m, event_in, channel_in, timeout=timeout)
 
     m.fire(event_out, channel_out)
 
@@ -75,9 +95,6 @@ def test_invalid_user_auth():
 
             return "localhost"
 
-    log = logger.LiveLog
-    logger.live = True
-
     m.start()
 
     client_uuid = std_uuid()
@@ -90,7 +107,37 @@ def test_invalid_user_auth():
         auto=False
     )
 
-    result = transmit('authentication', 'auth', event, 'auth')
+    result = transmit('send', 'isomer-web', event, 'auth', 4)
 
-    assert result is None
-    assert "Illegal username or password received, login cancelled" in str(log)
+    assert result is not None
+    assert isinstance(result, Event)
+
+
+def test_user_auth():
+    """Test if login with test credentials succeeds"""
+
+    class sock():
+        """Mock socket"""
+
+        def getpeername(self):
+            """Mock function to return a fake peer name"""
+
+            return "localhost"
+
+    m.start()
+
+    client_uuid = std_uuid()
+    event = authenticationrequest(
+        username='TESTER',
+        password='PASSWORD',
+        clientuuid=client_uuid,
+        requestedclientuuid=client_uuid,
+        sock=sock(),
+        auto=False
+    )
+
+    result = transmit('authentication', 'auth', event, 'auth', 0.5)
+
+    assert isinstance(result, authentication)
+    assert result.username == 'TESTER'
+

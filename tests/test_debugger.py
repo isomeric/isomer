@@ -24,7 +24,7 @@ __license__ = "AGPLv3"
 """
 Hackerfleet Operating System - Backend
 
-Test HFOS Launcher
+Test Isomer Launcher
 ==================
 
 
@@ -62,7 +62,7 @@ def test_exception_monitor():
     hfd.log('FOOBAR')
 
     m.fireEvent(debugrequest(User(None, None, None), 'debugrequest', 'exception', None),
-                "hfosweb")
+                "isomer-web")
 
     sleep(0.2)
 

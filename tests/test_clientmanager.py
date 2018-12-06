@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-# HFOS - Hackerfleet Operating System
-# ===================================
+# Isomer - The distributed application framework
+# ==============================================
 # Copyright (C) 2011-2018 Heiko 'riot' Weinen <riot@c-base.org> and others.
 #
 # This program is free software: you can redistribute it and/or modify
@@ -24,7 +24,7 @@ __license__ = "AGPLv3"
 """
 Hackerfleet Operating System - Backend
 
-Test HFOS Launcher
+Test Isomer Launcher
 ==================
 
 
@@ -40,6 +40,9 @@ from json import dumps  # , loads
 import pytest
 from uuid import uuid4
 from isomer.ui.clientmanager import ClientManager
+from isomer.ui.clientobjects import Client
+from isomer.events.client import clientdisconnect
+from isomer.misc import std_uuid
 # from hfos.events.client import authenticationrequest
 
 from pprint import pprint
@@ -114,10 +117,15 @@ def test_auto_auth_request():
 
 
 def test_auth_logout():
-    return
+
+    client_uuid = std_uuid()
+    user_uuid = std_uuid()
+
+    cm._clients[client_uuid] = Client(None, '127.0.0.1', client_uuid, user_uuid, 'TESTER')
+
     m.start()
 
-    client_uuid = str(uuid4())
+    cm._handleAuthenticationEvents(None, 'logout', client_uuid, None)
 
     data = {
         'component': 'auth',
@@ -127,7 +135,8 @@ def test_auth_logout():
 
     event = read(None, dumps(data))
 
-    result = transmit('clientdisconnect', 'hfosweb', event, 'wsserver')
+    result = transmit('clientdisconnect', 'isomer-web', event, 'wsserver')
 
     assert result.clientuuid == client_uuid
+    assert isinstance(result, clientdisconnect)
 

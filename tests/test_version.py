@@ -24,17 +24,18 @@ __license__ = "AGPLv3"
 """
 Hackerfleet Operating System - Backend
 
-Test HFOS Basic Provisioning
+Test Isomer Basic Provisioning
 ============================
 
 
 
 """
 
-# Disabled, since scm-versioning doesn't correctly work right now
-# def test_version_string():
-#    """Tests if a version exists and if it is a string"""
-#
-#    from hfos.version import version
-#
-#    assert type(version) == str
+
+def test_version_string():
+    """Tests if a version exists and if it is a string"""
+
+    from isomer.version import version
+
+    assert type(version) == str
+    assert version != ""

@@ -24,7 +24,7 @@ __license__ = "AGPLv3"
 """
 Hackerfleet Operating System - Backend
 
-Test HFOS Launcher
+Test Isomer Launcher
 ==================
 
 
@@ -40,7 +40,6 @@ args = {
     'port': 80,
     'host': '127.0.0.1',
     'cert': None,
-    'instance': 'testing',
     'blacklist': []
 }
 
@@ -51,6 +50,11 @@ def test_launcher():
     # Use a non privileged port for testing, until that part can be removed
     # from Core
 
-    core = Core(args)
+    instance_config = {
+        'web_hostname': 'localhost',
+        'web_port': 80000,
+        'web_certificate': ''
+    }
+    core = Core('testing', instance_config, **args)
 
     assert type(core) == Core
