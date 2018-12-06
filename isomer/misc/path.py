@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-# HFOS - Hackerfleet Operating System
-# ===================================
+# Isomer - The distributed application framework
+# ==============================================
 # Copyright (C) 2011-2018 Heiko 'riot' Weinen <riot@c-base.org> and others.
 #
 # This program is free software: you can redistribute it and/or modify
@@ -25,9 +25,17 @@ __license__ = "AGPLv3"
 """
 
 import os.path
+from isomer.logger import isolog
+
+ETC_BASE_PATH = '/etc/isomer'
+
+ETC_INSTANCE_PATH = os.path.join(ETC_BASE_PATH, 'instances')
+ETC_REMOTE_PATH = os.path.join(ETC_BASE_PATH, 'remotes')
+ETC_REMOTE_KEYS_PATH = os.path.join(ETC_BASE_PATH, 'keys')
 
 INSTANCE = ""
 ENVIRONMENT = None
+PREFIX = ""
 
 locations = {
     'cache': '/var/cache/isomer/%s',
@@ -36,21 +44,77 @@ locations = {
 }
 
 
-def set_instance(instance, environment):
+def set_etc_path(path):
+    """Override the base path - dangerous! Only use for testing."""
+    global ETC_BASE_PATH
+    global ETC_INSTANCE_PATH
+    global ETC_REMOTE_PATH
+
+    ETC_BASE_PATH = path
+
+    ETC_INSTANCE_PATH = os.path.join(ETC_BASE_PATH, 'instances')
+    ETC_REMOTE_PATH = os.path.join(ETC_BASE_PATH, 'remotes')
+    ETC_REMOTE_KEYS_PATH = os.path.join(ETC_BASE_PATH, 'keys')
+
+
+def get_etc_path():
+    return ETC_BASE_PATH
+
+
+def get_etc_instance_path():
+    return ETC_INSTANCE_PATH
+
+
+def get_etc_remote_path():
+    return ETC_REMOTE_PATH
+
+
+def get_etc_remote_keys_path():
+    return ETC_REMOTE_KEYS_PATH
+
+
+def get_log_path():
+    if PREFIX not in (None, ''):
+        path = os.path.join(PREFIX, 'var', 'log', 'isomer')
+    else:
+        path = '/var/log/isomer'
+    return path
+
+
+def set_prefix(prefix):
+    global PREFIX
+
+    PREFIX = prefix
+
+
+def set_instance(instance, environment, prefix=None):
+    """Sets the global instance and environment"""
+
     global INSTANCE
     global ENVIRONMENT
+    global PREFIX
 
     INSTANCE = instance
     ENVIRONMENT = environment
+    if prefix is not None:
+        PREFIX = prefix
+
+    isolog('Instance: %s Environment: %s Prefix: %s' % (INSTANCE, ENVIRONMENT, PREFIX))
 
 
 def get_path(location, subfolder, ensure=False):
     """Return a normalized path for the running instance and environment"""
 
-    path = locations[location] % INSTANCE
+    if PREFIX not in (None, ''):
+        path = os.path.join(PREFIX, locations[location].lstrip('/') % INSTANCE)
+    else:
+        path = locations[location] % INSTANCE
+
     if ENVIRONMENT is not None:
         path = os.path.join(path, ENVIRONMENT)
+
     path = os.path.join(path, subfolder)
+    path = path.rstrip("/")
 
     if ensure and not os.path.exists(path):
         os.makedirs(path)
