@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-# HFOS - Hackerfleet Operating System
-# ===================================
+# Isomer - The distributed application framework
+# ==============================================
 # Copyright (C) 2011-2018 Heiko 'riot' Weinen <riot@c-base.org> and others.
 #
 # This program is free software: you can redistribute it and/or modify
@@ -166,28 +166,28 @@ colors = [
 adjectives = [
     'abundant', 'adorable', 'agreeable', 'alive', 'ancient', 'angry', 'beautiful',
     'better', 'bewildered', 'big', 'bitter', 'boiling', 'brave', 'breeze', 'brief',
-    'broad', 'broken', 'bumpy', 'calm', 'careful', 'chilly', 'chubby', 'clean',
-    'clever', 'clumsy', 'cold', 'colossal', 'cooing', 'cool', 'creepy', 'crooked',
-    'crooked', 'cuddly', 'curly', 'curved', 'damaged', 'damp', 'dead', 'deafening',
+    'broad', 'broken', 'bumpy', 'calm', 'careful', 'chilly', 'chubby', 'circular',
+    'clean', 'clever', 'clumsy', 'cold', 'colossal', 'cooing', 'cool', 'creepy',
+    'crooked', 'cuddly', 'curly', 'curved', 'damaged', 'damp', 'deafening',
     'deep', 'defeated', 'delicious', 'delightful', 'dirty', 'drab', 'dry', 'dusty',
     'eager', 'early', 'easy', 'elegant', 'embarrassed', 'empty', 'faint',
-    'faithful', 'famous', 'fancy', 'fast', 'fat', 'few', 'fierce', 'filthy',
+    'faithful', 'famous', 'fancy', 'fast', 'fat', 'few', 'fierce',
     'flaky', 'flat', 'fluffy', 'freezing', 'fresh', 'full', 'gentle', 'gifted',
     'gigantic', 'glamorous', 'greasy', 'great', 'grumpy', 'handsome', 'happy',
-    'heavy', 'helpful', 'helpless', 'high', 'hissing', 'hollow', 'hot', 'hot',
+    'heavy', 'helpful', 'helpless', 'high', 'hissing', 'hollow', 'hot',
     'huge', 'icy', 'immense', 'important', 'inexpensive', 'itchy', 'jealous',
     'jolly', 'juicy', 'kind', 'large', 'late', 'lazy', 'light', 'little', 'lively',
-    'long', 'long', 'loose', 'loud', 'low', 'magnificent', 'mammoth', 'many',
+    'long', 'loose', 'loud', 'low', 'magnificent', 'mammoth', 'many',
     'massive', 'melodic', 'melted', 'miniature', 'modern', 'mushy', 'mysterious',
     'narrow', 'nervous', 'nice', 'noisy', 'numerous', 'nutritious', 'obedient',
-    'obnoxious', 'odd', 'old', 'old-fashioned', 'old-fashioned', 'panicky',
+    'obnoxious', 'odd', 'old', 'old-fashioned', 'panicky',
     'petite', 'plain', 'powerful', 'prickly', 'proud', 'puny', 'purring', 'quaint',
-    'quick', 'quiet', 'rainy', 'rapid', 'raspy', 'relieved', 'repulsive', 'rich',
-    'rotten', 'round', 'salty', 'scary', 'scrawny', 'screeching', 'shallow',
-    'short', 'short', 'shy', 'silly', 'skinny', 'slow', 'small', 'sparkling',
+    'quick', 'quiet', 'rainy', 'rapid', 'raspy', 'relieved', 'rich',
+    'round', 'salty', 'scary', 'scrawny', 'screeching', 'shallow',
+    'short', 'shy', 'silly', 'skinny', 'slow', 'small', 'sparkling',
     'sparse', 'square', 'steep', 'sticky', 'straight', 'strong', 'substantial',
-    'sweet', 'swift', 'tall', 'tart', 'tasteless', 'teeny', 'teeny-tiny', 'tender',
-    'thankful', 'thoughtless', 'thundering', 'tiny', 'ugliest', 'uneven',
+    'sweet', 'swift', 'tall', 'tart', 'tasteless', 'teeny', 'tiny', 'tender',
+    'thankful', 'thoughtless', 'thundering', 'uneven',
     'uninterested', 'unsightly', 'uptight', 'vast', 'victorious', 'voiceless',
     'warm', 'weak', 'wet', 'wet', 'whispering', 'wide', 'wide-eyed', 'witty',
     'wooden', 'worried', 'wrong', 'young', 'yummy', 'zealous'
