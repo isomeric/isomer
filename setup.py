@@ -106,7 +106,7 @@ See https://github.com/isomeric/isomer""",
       ],
       install_requires=['circuits>=3.1',
                         'pymongo>=3.2',
-                        'jsonschema>=2.6.0',
+                        'jsonschema==2.6.0',
                         'pystache>=0.5.4',
                         'click>=6.7.0',
                         'click-didyoumean>=0.0.3',
@@ -114,12 +114,13 @@ See https://github.com/isomeric/isomer""",
                         'click-plugins>=1.0.3',
                         'prompt-toolkit>=1.0.15',
                         'tomlkit>=0.4.6',
+                        'spur>=0.3.20',
                         # TODO: Kick out 2.x compat
                         'six'
                         ],
       data_files=datafiles,
       entry_points="""[console_scripts]
-    iso=iso
+    iso=iso:main
 
     [isomer.base]
     debugger=isomer.debugger:HFDebugger
