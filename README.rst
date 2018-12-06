@@ -18,6 +18,10 @@
     :target: http://webchat.freenode.net/?randomnick=1&channels=hackerfleet&uio=d4>
     :alt: IRC Channel
 
+**HELLO! You are viewing a release candidate of Isomer 1.0!**
+
+Please be wary of bugs and report strange things, thank you.
+
 Isomer - Be Collaborative!
 ==========================
 
