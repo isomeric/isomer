@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="Statistic">
+    <option name="fileTypes" value="class;svn-base;svn-work;Extra;gif;png;jpg;jpeg;bmp;tga;tiff;ear;war;zip;jar;iml;iws;ipr;bz2;gz;pyc;mo;so;*egg*" />
+    <option name="excludeDotArtifactDirectory" value="true" />
+    <option name="excludedDirectories">
+      <list>
+        <option value="$PROJECT_DIR$/frontend/node_modules" />
+        <option value="$PROJECT_DIR$/frontend/dist" />
+        <option value="$PROJECT_DIR$/frontend/src/components" />
+        <option value="$PROJECT_DIR$/docs/build" />
+        <option value="$PROJECT_DIR$/build" />
+        <option value="$PROJECT_DIR$/coverage" />
+      </list>
+    </option>
+  </component>
+</project>
