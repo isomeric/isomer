@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-# HFOS - Hackerfleet Operating System
-# ===================================
+# Isomer - The distributed application framework
+# ==============================================
 # Copyright (C) 2011-2018 Heiko 'riot' Weinen <riot@c-base.org> and others.
 #
 # This program is free software: you can redistribute it and/or modify
@@ -23,14 +23,14 @@ __license__ = "AGPLv3"
 
 import getpass
 import sys
+import spur
 
 import hashlib
 import os
 
-from isomer.logger import isolog, error, verbose, debug
-from isomer.tool.defaults import db_host_default, db_host_help, db_host_metavar, db_default, db_help, db_metavar
-
-from subprocess import Popen, PIPE, STDOUT, check_output, CalledProcessError
+from isomer.logger import isolog, error, verbose, debug, warn
+from isomer.tool.defaults import db_host_default, db_host_help, db_host_metavar, db_default, db_help, db_metavar, \
+    platforms
 
 
 def log(*args, **kwargs):
@@ -47,27 +47,37 @@ def check_root():
         log("Need root access to install. Use sudo!", lvl=error)
         log("If you installed into a virtual environment, don't forget to "
             "specify the interpreter binary for sudo, e.g:\n"
-            "$ sudo /home/user/.virtualenv/hfos/bin/python3 iso")
+            "$ sudo /home/user/.virtualenv/isomer/bin/python3 iso")
 
         sys.exit(1)
 
 
-def run_process(cwd, args):
-    """Executes an external process via subprocess.Popen"""
+def run_process(cwd, args, shell=None):
+    """Executes an external process via subprocess.check_output"""
 
     log("Running:", cwd, args, lvl=verbose)
 
+    if shell is None:
+        log('Running on local shell', lvl=verbose)
+        shell = spur.LocalShell()
+    else:
+        log('Running on remote shell:', shell, lvl=debug)
+
     try:
-        process = check_output(args, cwd=cwd, stderr=STDOUT)
+        process = shell.run(args, cwd=cwd)
 
-        return process
-    except CalledProcessError as e:
+        return True, process
+    except spur.RunProcessError as e:
         log('Uh oh, the teapot broke again! Error:', e, type(e), lvl=verbose, pretty=True)
-        log(e.cmd, e.returncode, e.output, lvl=verbose)
-        return e.output
+        log(e.args, e.return_code, e.output, lvl=verbose)
+        return False, e
+    except spur.NoSuchCommandError as e:
+        log('Command was not found:', e, type(e), lvl=verbose, pretty=True)
+        log(args)
+        return False, e
 
 
-def _ask_password():
+def ask_password():
     """Securely and interactively ask for a password"""
 
     password = "Foo"
@@ -95,7 +105,7 @@ def _get_credentials(username=None, password=None, dbhost=None):
     except (KeyError, AttributeError):
         log('No systemconfig or it is without a salt! '
             'Reinstall the system provisioning with'
-            'hfos_manage.py install provisions -p system')
+            'iso install provisions -p system')
         sys.exit(3)
 
     if username is None:
@@ -104,7 +114,7 @@ def _get_credentials(username=None, password=None, dbhost=None):
         username = username
 
     if password is None:
-        password = _ask_password()
+        password = ask_password()
     else:
         password = password
 
@@ -171,3 +181,127 @@ def ask(question, default=None, data_type='str', show_hint=False):
         print('Programming error! Datatype invalid!')
 
     return data
+
+
+def format_result(result):
+    return str(result.output).replace('\\n', '\n').replace('\\', '')
+
+
+def get_isomer(source, url, destination, shell=None):
+    """Grab a copy of Isomer somehow"""
+
+    success = False
+
+    if source == 'git':
+        log('Cloning repository from', url)
+        success, result = run_process(destination, ['git', 'clone', url, 'repository'], shell)
+        if not success:
+            log(result, lvl=error)
+        log('Pulling frontend')
+        success, result = run_process(os.path.join(destination, 'repository', 'frontend'), ['git', 'pull'], shell)
+        if not success:
+            log(result, lvl=error)
+    elif source == 'link':
+        if shell is not None:
+            log('Remote Linking? Are you sure? Links will be local, they cannot span over any network.', lvl=warn)
+
+        path = os.path.abspath(url)
+
+        if not os.path.exists(os.path.join(destination, 'repository')):
+            log('Linking repository from', path)
+            success, result = run_process(destination, ['ln', '-s', path, 'repository'], shell)
+            if not success:
+                log(result, lvl=error)
+        else:
+            log('Repository already exists!', lvl=warn)
+
+        if not os.path.exists(os.path.join(destination, 'repository', 'frontend', 'src')):
+            log('Linking frontend')
+            success, result = run_process(
+                destination, ['ln', '-s', os.path.join(path, 'frontend'), 'repository/frontend'], shell
+            )
+            if not success:
+                log(result, lvl=error)
+        else:
+            log('Frontend already present')
+    elif source == 'copy':
+        log('Copying local repository to remote.')
+
+        path = os.path.realpath(os.path.expanduser(url))
+
+        if shell is None:
+            shell = spur.LocalShell()
+
+        shell.upload_dir(path, destination, ['.tox*', 'node_modules*'])
+
+    return success
+
+
+def install_isomer(platform_name='debian', use_sudo=False, shell=None, cwd='.'):
+    """Installs all dependencies"""
+
+    if shell is None and use_sudo is False:
+        check_root()
+
+    def build_command(*things):
+        """Construct a command adding sudo if necessary"""
+        if use_sudo:
+            cmd = ['sudo']
+        else:
+            cmd = []
+
+        for thing in things:
+            cmd += [thing]
+
+        return cmd
+
+    def platform():
+        """In a platform specific way, install all dependencies"""
+
+        tool = platforms[platform_name]['tool']
+        packages = platforms[platform_name]['packages']
+        pre_install_commands = platforms[platform_name]['pre_install']
+        post_install_commands = platforms[platform_name]['post_install']
+
+        for command in pre_install_commands:
+            args = build_command(*command)
+            log('Running pre install command' % command)
+            success, output = run_process(cwd, args, shell)
+            if not success:
+                log('Could not run command %s!' % command, lvl=error)
+                log(args, output, pretty=True)
+
+        log('Installing platform dependencies')
+        args = build_command(*tool + packages)
+        success, output = run_process(cwd, args, shell)
+        if not success:
+            log('Could not install %s dependencies!' % platform, lvl=error)
+            log(args, output, pretty=True)
+
+        for command in post_install_commands:
+            args = build_command(*command)
+            log('Running command' % command)
+            success, output = run_process(cwd, args, shell)
+            if not success:
+                log('Could not run command %s!' % command, lvl=error)
+                log(args, output, pretty=True)
+
+    def common():
+        """Perform platform independent setup"""
+
+        log('Installing Isomer')
+        args = build_command('python3', 'setup.py', 'develop')
+        success, output = run_process(cwd, args, shell)
+        if not success:
+            log('Could not install Isomer package!', lvl=error)
+            log(args, output, pretty=True)
+
+        log('Installing Isomer requirements')
+        args = build_command('pip3', 'install', '-r', 'requirements.txt')
+        success, output = run_process(cwd, args, shell)
+        if not success:
+            log('Could not install Python dependencies!', lvl=error)
+            log(args, output, pretty=True)
+
+    platform()
+    common()

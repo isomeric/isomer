@@ -38,11 +38,43 @@ key_file = "/etc/ssl/certs/isomer/selfsigned.key"
 cert_file = "/etc/ssl/certs/isomer/selfsigned.crt"
 combined_file = "/etc/ssl/certs/isomer/selfsigned.pem"
 
-source_url = 'https://github.com/hackerfleet/hfos'
+source_url = 'https://github.com/isomeric/isomer'
+
+platforms = {
+    'debian': {
+        'pre_install': [
+            ['apt-get', '-y', 'install', 'apt-transport-https'],
+            ['sh', '-c', 'wget --quiet -O - https://deb.nodesource.com/gpgkey/nodesource.gpg.key | sudo apt-key add -'],
+            ['sh', '-c', 'VERSION=node_8.x ; '
+                         'DISTRO="$(lsb_release -s -c)" ; '
+                         'echo "deb https://deb.nodesource.com/$VERSION $DISTRO main" | '
+                         'sudo tee /etc/apt/sources.list.d/nodesource.list'
+             ],
+            ['apt-get', 'update'],
+        ],
+        'post_install': [['systemctl', 'start', 'mongodb.service']],
+        'tool': ['apt-get', 'install', '-y'],
+        'packages': [
+            'mongodb', 'python3', 'python3-pip', 'python3-grib',
+            'python3-bson', 'python3-pymongo', 'python3-serial',
+            'python3-pymongo-ext', 'python3-bson-ext', 'python3-dev',
+            'nodejs', 'enchant', 'nginx-full', 'virtualenv', 'git',
+            'gdal-bin', 'python-gdal', 'nodejs'
+        ]  # TODO: Kick out module dependencies (mostly gdal, grib and serial)
+    }
+}
+
+key_defaults = {
+    "type": "rsa",
+    "bits": 4096,
+    "filename": "",
+    "comment": "Isomer Remote Key"
+}
 
 EXIT_INVALID_ENVIRONMENT = 1
 EXIT_INVALID_CONFIGURATION = 2
 EXIT_INVALID_SOURCE = 3
+EXIT_NO_PERMISSION = 5
 
 EXIT_INSTALLATION_FAILED = 11
 EXIT_PROVISIONING_FAILED = 12
@@ -55,3 +87,8 @@ EXIT_SERVICE_INVALID = 31
 EXIT_USER_BAILED_OUT = 41
 
 EXIT_NOTHING_TO_ARCHIVE = 51
+
+EXIT_NO_CONFIGURATION = 61
+
+EXIT_INVALID_PARAMETER = 62
+EXIT_NO_CERTIFICATE = 63
