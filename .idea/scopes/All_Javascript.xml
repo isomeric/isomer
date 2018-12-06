@@ -1,3 +1,3 @@
 <component name="DependencyValidationManager">
-  <scope name="All Javascript" pattern="file[hfos_master]:frontend/src//*||file[hfos_master]:modules//*" />
+  <scope name="All Javascript" pattern="file[isomer]:frontend/src//*||file[isomer]:modules//*" />
 </component>

@@ -1,0 +1,3 @@
+<component name="DependencyValidationManager">
+  <scope name="Isomer-Frontend" pattern="((file:frontend/src//*||file:frontend/test//*||file[isomer-frontend]:*/)&amp;&amp;!file[isomer-frontend]:node_modules/*&amp;&amp;!file[isomer-frontend]:node_modules//*||file[isomer_master]:frontend/src//*||file:frontend/webpack.config.js||file:frontend/.gitignore||file:frontend/LICENSE||file:frontend/webpack.karma.context.js||file:frontend/package.json||file:frontend/.travis.yml||file:frontend/karma.conf.js||file:frontend/README.rst||file:frontend/.jshintrc||file:frontend/.eslintrc||file:frontend/.editorconfig||file:frontend/.babelrc)&amp;&amp;!file[isomer]:modules//*&amp;&amp;!file[isomer]:isomer//*" />
+</component>

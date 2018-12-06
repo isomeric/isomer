@@ -1,0 +1,3 @@
+<component name="DependencyValidationManager">
+  <scope name="Isomer-Docs" pattern="file[isomer-docs]:*/" />
+</component>

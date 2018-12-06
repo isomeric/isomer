@@ -1,0 +1,3 @@
+<component name="DependencyValidationManager">
+  <scope name="Isomer-Backend" pattern="file[isomer]:isomer//*||file[isomer]:tests//*||file:.travis.yml||file:.landscape.yml||file:CHANGES.rst||file:iso||file:LICENSE||file[isomer]:docker/*" />
+</component>

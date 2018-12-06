@@ -8,9 +8,16 @@
       <w>dbhost</w>
       <w>dbname</w>
       <w>debian</w>
+      <w>dsphere</w>
+      <w>ejabberd</w>
       <w>geoobject</w>
       <w>geoobjects</w>
-      <w>hfoslog</w>
+      <w>gettext</w>
+      <w>isomerlog</w>
+      <w>isotool</w>
+      <w>jsonschema</w>
+      <w>keepalive</w>
+      <w>keyfile</w>
       <w>layergroup</w>
       <w>layergroups</w>
       <w>mapview</w>
@@ -18,6 +25,8 @@
       <w>mmsi</w>
       <w>navdata</w>
       <w>nginx</w>
+      <w>nickserv</w>
+      <w>objectproxy</w>
       <w>pypi</w>
       <w>rastercache</w>
       <w>rastertiles</w>
@@ -28,10 +37,15 @@
       <w>systemconfig</w>
       <w>systemctl</w>
       <w>systemd</w>
+      <w>taskgrid</w>
+      <w>taskgroup</w>
       <w>tilecache</w>
       <w>uuids</w>
+      <w>venv</w>
       <w>warmongo</w>
+      <w>websocket</w>
       <w>wget</w>
+      <w>xmpp</w>
     </words>
   </dictionary>
 </component>

@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/hfos_master.iml" filepath="$PROJECT_DIR$/hfos_master.iml" />
+      <module fileurl="file://$PROJECT_DIR$/isomer.iml" filepath="$PROJECT_DIR$/isomer.iml" />
     </modules>
   </component>
 </project>

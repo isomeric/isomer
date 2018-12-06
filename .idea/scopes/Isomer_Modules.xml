@@ -1,0 +1,3 @@
+<component name="DependencyValidationManager">
+  <scope name="Isomer-Modules" pattern="(file:modules/*/setup.py||file:modules/*/isomer//*||file:modules/*/frontend//*)&amp;&amp;!file[isomer_master]:modules/*/build//*&amp;&amp;!file[isomer_master]:modules/*/dist//*&amp;&amp;!file[isomer_master]:modules/*/*.egg-info//*" />
+</component>
