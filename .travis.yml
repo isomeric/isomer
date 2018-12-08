@@ -16,10 +16,9 @@ install:
   - pip install -r requirements-test.txt
   - pip install -r requirements.txt
   - pip install -e .
-  - python iso install provisions
-#  - docker build -t hackerfleet/hfos -f docker/Dockerfile.debian .
+#  - docker build -t isomeric/isomer -f docker/Dockerfile.debian .
 script: python setup.py test
-# -  docker run -i -t hackerfleet/hfos /etc/init.d/mongodb start && py.test tests
+# -  docker run -i -t isomeric/isomer /etc/init.d/mongodb start && py.test tests
 after_success:
   - coveralls
 notifications:
