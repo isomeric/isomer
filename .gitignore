@@ -29,7 +29,7 @@ coverage
 .pytest_cache
 
 # Modules
-modules
+#modules/*
 
 # IntelliJ IDEA
 workspace.xml
