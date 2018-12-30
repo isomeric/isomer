@@ -138,6 +138,9 @@ def test_user_auth():
 
     result = transmit('authentication', 'auth', event, 'auth', 0.5)
 
+    # TODO: IMPORTANT|Investigation pending for 1.0.1 ff.
+    # Rest of the test deactivated due to strange problems on travis.ci.
+
     assert isinstance(result, authentication)
     assert result.username == 'TESTER'
 
