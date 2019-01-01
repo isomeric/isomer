@@ -585,8 +585,12 @@ def _create_folders(ctx):
 
     instance_config = ctx.obj['instance_config']
 
-    uid = pwd.getpwnam(instance_config['user']).pw_uid
-    gid = grp.getgrnam(instance_config['group']).gr_gid
+    try:
+        uid = pwd.getpwnam(instance_config['user']).pw_uid
+        gid = grp.getgrnam(instance_config['group']).gr_gid
+    except KeyError:
+        log('User account for instance not found!', lvl=warn)
+        uid = gid = None
 
     logfile = os.path.join(get_log_path(), "isomer-" + ctx.obj['instance'] + ".log")
 
@@ -597,7 +601,7 @@ def _create_folders(ctx):
             log("Path already exists:", path)
 
         log("Created path: " + path)
-        if os.geteuid() == 0:
+        if os.geteuid() == 0 and uid is not None:
             os.chown(path, uid, gid)
         else:
             log('No root access - could not change ownership', lvl=warn)
@@ -607,7 +611,7 @@ def _create_folders(ctx):
 
     # Touch logfile to make sure it exists
     open(logfile, "a").close()
-    if os.geteuid() == 0:
+    if os.geteuid() == 0 and uid is not None:
         os.chown(logfile, uid, gid)
     else:
         log('No root access - could not change ownership', lvl=warn)
