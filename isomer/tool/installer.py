@@ -17,7 +17,6 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-from isomer.provisions.base import provisionList
 
 __author__ = "Heiko 'riot' Weinen"
 __license__ = "AGPLv3"
@@ -35,12 +34,25 @@ from click_didyoumean import DYMGroup
 
 from isomer.tool.etc import NonExistentKey, instance_template
 from isomer.logger import error, warn, debug
-from isomer.tool import check_root, log, ask
+from isomer.tool import check_root, log, ask, install_isomer
+from isomer.provisions.base import provisionList
 from isomer.misc.path import get_path, set_instance
 from isomer.ui.builder import install_frontend
 
 from git import Repo, exc
 from isomer.version import version
+
+@click.command()
+@click.option('--platform', '-p', default='debian')
+@click.option('--use-sudo', '-u', is_flag=True, default=False)
+def dependencies(platform, use_sudo):
+    """Install Isomer platform dependencies"""
+
+    log('Installing platform dependencies')
+
+    install_isomer(platform.lower(), use_sudo)
+
+    log('Done: Install dependencies')
 
 
 @click.group(cls=DYMGroup)

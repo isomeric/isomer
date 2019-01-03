@@ -3,7 +3,7 @@ from isomer.tool.configuration import config
 from isomer.tool.backup import db_export, db_import
 from isomer.tool.database import db
 from isomer.tool.objects import objects
-from isomer.tool.installer import install, uninstall
+from isomer.tool.installer import install, uninstall, dependencies
 from isomer.tool.instance import instance, environment
 from isomer.tool.rbac import rbac
 from isomer.tool.remote import remote
@@ -16,6 +16,7 @@ cli.add_command(create_module)
 cli.add_command(instance)
 cli.add_command(environment)
 cli.add_command(config)
+cli.add_command(dependencies)
 cli.add_command(install)
 cli.add_command(uninstall)
 cli.add_command(cmdmap)
