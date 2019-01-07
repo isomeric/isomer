@@ -376,7 +376,7 @@ class Core(ConfigurableComponent):
         self.log("Updating components")
         components = {}
 
-        if True:  # try:
+        try:
 
             from pkg_resources import iter_entry_points
 
@@ -435,9 +435,9 @@ class Core(ConfigurableComponent):
                         #
                         # schemastore['component'] = ComponentBaseConfigSchema
 
-        # except Exception as e:
-        #    self.log("Error: ", e, type(e), lvl=error, exc=True)
-        #    return
+        except Exception as e:
+            self.log("Component update error: ", e, type(e), lvl=error, exc=True)
+            return
 
         self.log("Checking component frontend bits in ", self.frontend_root,
                  lvl=verbose)
@@ -588,8 +588,8 @@ def construct_graph(name, instance, args):
 
 
 @click.command()
-#@click.option("--port", "-p", help="Define port for server", type=int,
-#              default=8055)
+@click.option("--port", "-p", help="Define port for server", type=int,
+              default=8055)
 #@click.option("--host", help="Define hostname for server", type=str,
 #              default='127.0.0.1')
 #@click.option("--cert", "--certificate", '-c', help="Certificate file path",
@@ -628,11 +628,11 @@ def launch(ctx, run=True, **args):
     instance_name = ctx.obj['instance']
     instance = load_instance(instance_name)
     environment_name = ctx.obj['environment']
-    environment = instance['environments'][environment_name]
+
     isolog('Launching instance %s - (%s)' % (instance_name, environment_name))
-    isolog(environment, pretty=True)
-    database_host = "%s:%i" % (instance['database_host'], instance['database_port'])
-    database_name = environment['database']
+
+    database_host = ctx.obj['dbhost']
+    database_name = ctx.obj['dbname']
 
     if ctx.params['livelog'] is True:
         from isomer import logger
