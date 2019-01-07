@@ -43,7 +43,6 @@ import time
 import json
 import jsonschema
 from copy import deepcopy
-from jsonschema import ValidationError  # NOQA
 from ast import literal_eval
 from pprint import pprint
 
@@ -96,8 +95,7 @@ dbname = ""
 instance = ""
 initialized = False
 
-# Necessary against import de-optimizations
-ValidationError = ValidationError
+ValidationError = jsonschema.ValidationError
 
 
 def clear_all():
