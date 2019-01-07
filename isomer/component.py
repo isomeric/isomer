@@ -134,7 +134,7 @@ def handler(*names, **kwargs):
         f.channel = kwargs.get("channel", None)
         f.override = kwargs.get("override", False)
 
-        args = inspect.getargspec(f)[0]
+        args = inspect.getfullargspec(f).args
 
         if args and args[0] == "self":
             del args[0]
