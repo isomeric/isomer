@@ -110,13 +110,9 @@ def _get_credentials(username=None, password=None, dbhost=None):
 
     if username is None:
         username = ask("Please enter username: ")
-    else:
-        username = username
 
     if password is None:
         password = ask_password()
-    else:
-        password = password
 
     try:
         password = password.encode('utf-8')
