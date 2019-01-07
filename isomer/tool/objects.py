@@ -29,7 +29,7 @@ import deepdiff
 import click
 from click_didyoumean import DYMGroup
 
-from isomer.logger import error, debug, warn
+from isomer.logger import error, debug, warn, verbose
 from isomer.tool import log, ask
 from isomer.tool.database import db
 
@@ -198,9 +198,7 @@ def find_field(ctx, search, by_type, obj):
     """Find fields in registered data models."""
 
     # TODO: Fix this to work recursively on all possible subschemes
-    if search is not None:
-        search = search
-    else:
+    if search is None:
         search = ask("Enter search term")
 
     database = ctx.obj['db']
@@ -270,7 +268,6 @@ def find_field(ctx, search, by_type, obj):
 @click.pass_context
 def illegalcheck(ctx, schema, delete_duplicates, fix, test):
     database = ctx.obj['db']
-    verbose = ctx.obj['verbose']
 
     if delete_duplicates and fix:
         log('Delete and fix operations are exclusive.')
@@ -285,10 +282,9 @@ def illegalcheck(ctx, schema, delete_duplicates, fix, test):
         log('Schema:', thing)
         for item in database.objectmodels[thing].find():
             if not isinstance(item._fields['_id'], bson.objectid.ObjectId):
-                if not delete_duplicates or verbose:
+                if not delete_duplicates:
                     log(item.uuid)
-                    if verbose:
-                        log(item._fields, pretty=True)
+                    log(item._fields, pretty=True, lvl=verbose)
                 if test:
                     if database.objectmodels[thing].count({'uuid': item.uuid}) == 1:
                         log('Only a faulty object exists.')
@@ -309,7 +305,6 @@ def illegalcheck(ctx, schema, delete_duplicates, fix, test):
 @click.pass_context
 def dupcheck(ctx, delete_duplicates, merge, schema):
     database = ctx.obj['db']
-    verbose = ctx.obj['verbose']
 
     if schema is None:
         schemata = database.objectmodels.keys()
@@ -331,8 +326,7 @@ def dupcheck(ctx, delete_duplicates, merge, schema):
 
         if len(dupes) > 0:
             log(dupe_count, 'duplicates of', count, 'items total of type', thing, 'found:')
-            if verbose:
-                log(dupes.keys(), pretty=True)
+            log(dupes.keys(), pretty=True, lvl=verbose)
 
         if delete_duplicates:
             log('Deleting duplicates')
@@ -366,8 +360,8 @@ def dupcheck(ctx, delete_duplicates, merge, schema):
                         a[key] = b[key]
                 return a
 
-            if verbose:
-                log(dupes, pretty=True)
+            log(dupes, pretty=True, lvl=verbose)
+
             for item in dupes:
                 if len(dupes[item]) == 1:
                     continue

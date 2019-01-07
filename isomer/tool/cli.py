@@ -30,7 +30,7 @@ from click_plugins import with_plugins
 
 from pkg_resources import iter_entry_points
 
-from isomer.logger import set_logfile, set_color, verbosity, warn, error
+from isomer.logger import set_logfile, set_color, verbosity, warn, error, verbose
 from isomer.misc.path import get_log_path, set_etc_path, set_instance, set_prefix
 from isomer.tool import log, db_host_help, db_host_metavar, db_help, db_metavar
 from isomer.tool.etc import load_configuration, load_instances, instance_template, create_configuration
@@ -41,10 +41,9 @@ from isomer.tool.etc import load_configuration, load_instances, instance_templat
 @click.option('--env', '-e', help='Override environment to act on (CAUTION!)', default=None,
               type=click.Choice(['blue', 'green', 'current', 'other']))
 @click.option('--quiet', default=False, help="Suppress all output", is_flag=True)
-@click.option('--verbose', '-v', default=False, help="Give verbose output", is_flag=True)
-@click.option('--no-colors', '-nc', default=False, help='Use colorful output', is_flag=True)
-@click.option('--console-level', '--clog', default=20, help='Log level to use (0-100)', metavar='<number>')
-@click.option('--file-level', '--flog', default=20, help='Log level to use (0-100)', metavar='<number>')
+@click.option('--no-colors', '-nc', default=False, help='Do not use colorful output', is_flag=True)
+@click.option('--console-level', '--clog', default=20, help='Log level to use (0-100)', metavar='<level>')
+@click.option('--file-level', '--flog', default=20, help='Log level to use (0-100)', metavar='<level>')
 @click.option('--do-log', default=False, is_flag=True, help='Log to file')
 @click.option("--log-path", default=None, help="Logfile path")
 @click.option('--dbhost', default=None, help=db_host_help, metavar=db_host_metavar)
@@ -52,7 +51,7 @@ from isomer.tool.etc import load_configuration, load_instances, instance_templat
 @click.option('--prefix', default=None, help='Use different system prefix')
 @click.option('--config-dir', '-c', default='/etc/isomer')
 @click.pass_context
-def cli(ctx, instance, env, quiet, verbose, no_colors, console_level, file_level, do_log, log_path, dbhost, dbname,
+def cli(ctx, instance, env, quiet, no_colors, console_level, file_level, do_log, log_path, dbhost, dbname,
         prefix, config_dir):
     """Isomer Management Tool
 
@@ -73,7 +72,6 @@ def cli(ctx, instance, env, quiet, verbose, no_colors, console_level, file_level
     """
 
     ctx.obj['quiet'] = quiet
-    ctx.obj['verbose'] = verbose
 
     verbosity['console'] = console_level if not quiet else 100
     verbosity['file'] = file_level if do_log else 100
