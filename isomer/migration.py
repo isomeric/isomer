@@ -125,9 +125,10 @@ def make_migrations(schema=None):
             """Check migrations for renamed fields"""
 
             isolog('Checking for rename operations:')
-            pprint(migrations)
-            for entry in migrations:
+            #pprint(migrations)
+            added = removed = None
 
+            for entry in migrations:
                 added = entry.get('dictionary_item_added', None)
                 removed = entry.get('dictionary_item_removed', None)
 
