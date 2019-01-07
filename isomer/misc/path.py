@@ -111,7 +111,7 @@ def get_path(location, subfolder, ensure=False):
         path = locations[location] % INSTANCE
 
     if ENVIRONMENT is not None:
-        path = os.path.join(path, ENVIRONMENT)
+        path = os.path.join(path, str(ENVIRONMENT))
 
     path = os.path.join(path, subfolder)
     path = path.rstrip("/")
