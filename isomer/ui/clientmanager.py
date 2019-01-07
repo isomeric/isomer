@@ -605,18 +605,23 @@ class ClientManager(ConfigurableComponent):
 
         self.log("Beginning new transaction: ", args, lvl=network)
 
+        sock = msg = user = password = client = client_uuid = user_uuid = request_data = \
+            request_action = None
+
         try:
             sock, msg = args[0], args[1]
-            user = password = client = clientuuid = useruuid = requestdata = \
-                requestaction = None
             # self.log("", msg)
 
-            clientuuid = self._sockets[sock].clientuuid
+            client_uuid = self._sockets[sock].clientuuid
         except Exception as e:
             self.log("Receiving error: ", e, type(e), lvl=error)
-            # return
+            return
 
-        if clientuuid in self._flooding:
+        if sock is None or msg is None:
+            self.log('Socket or message are invalid!', lvl=error)
+            return
+
+        if client_uuid in self._flooding:
             return
 
         try:
@@ -627,79 +632,79 @@ class ClientManager(ConfigurableComponent):
             return
 
         try:
-            requestcomponent = msg['component']
-            requestaction = msg['action']
+            request_component = msg['component']
+            request_action = msg['action']
         except (KeyError, AttributeError) as e:
             self.log("Unpacking error: ", msg, e, type(e), lvl=error)
             return
 
-        if self._check_flood_protection(requestcomponent, requestaction,
-                                        clientuuid):
+        if self._check_flood_protection(request_component, request_action,
+                                        client_uuid):
             self.log('Flood protection triggered')
-            self._flooding[clientuuid] = time()
+            self._flooding[client_uuid] = time()
 
         try:
             # TODO: Do not unpickle or decode anything from unsafe events
-            requestdata = msg['data']
-            if isinstance(requestdata, (dict, list)) and 'raw' in requestdata:
-                # self.log(requestdata['raw'], lvl=critical)
-                requestdata['raw'] = b64decode(requestdata['raw'])
-                # self.log(requestdata['raw'])
+            request_data = msg['data']
+            if isinstance(request_data, (dict, list)) and 'raw' in request_data:
+                # self.log(request_data['raw'], lvl=critical)
+                request_data['raw'] = b64decode(request_data['raw'])
+                # self.log(request_data['raw'])
         except (KeyError, AttributeError) as e:
             self.log("No payload.", lvl=network)
-            requestdata = None
+            request_data = None
 
-        if requestcomponent == "auth":
-            self._handleAuthenticationEvents(requestdata, requestaction,
-                                             clientuuid, sock)
+        if request_component == "auth":
+            self._handleAuthenticationEvents(request_data, request_action,
+                                             client_uuid, sock)
             return
 
         try:
-            client = self._clients[clientuuid]
+            client = self._clients[client_uuid]
         except KeyError as e:
             self.log('Could not get client for request!', e, type(e), lvl=warn)
             return
 
-        if requestcomponent in self.anonymous_events and requestaction in \
-            self.anonymous_events[requestcomponent]:
-            self.log('Executing anonymous event:', requestcomponent,
-                     requestaction)
+        if request_component in self.anonymous_events and request_action in \
+            self.anonymous_events[request_component]:
+            self.log('Executing anonymous event:', request_component,
+                     request_action)
             try:
-                self._handleAnonymousEvents(requestcomponent, requestaction,
-                                            requestdata, client)
+                self._handleAnonymousEvents(request_component, request_action,
+                                            request_data, client)
             except Exception as e:
                 self.log("Anonymous request failed:", e, type(e), lvl=warn,
                          exc=True)
             return
 
-        elif requestcomponent in self.authorized_events:
+        elif request_component in self.authorized_events:
             try:
-                useruuid = client.useruuid
+                user_uuid = client.useruuid
                 self.log("Authenticated operation requested by ",
-                         useruuid, client.config, lvl=network)
+                         user_uuid, client.config, lvl=network)
             except Exception as e:
-                self.log("No useruuid!", e, type(e), lvl=critical)
+                self.log("No user_uuid!", e, type(e), lvl=critical)
                 return
 
             self.log('Checking if user is logged in', lvl=verbose)
 
             try:
-                user = self._users[useruuid]
+                user = self._users[user_uuid]
             except KeyError:
-                if not (requestaction == 'ping' and requestcomponent == 'isomer.ui.clientmanager'):
+                if not (request_action == 'ping' and request_component == 'isomer.ui.clientmanager'):
                     self.log("User not logged in.", lvl=warn)
 
                 return
 
-            self.log('Handling event:', requestcomponent, requestaction, lvl=verbose)
+            self.log('Handling event:', request_component, request_action, lvl=verbose)
             try:
-                self._handleAuthorizedEvents(requestcomponent, requestaction,
-                                             requestdata, user, client)
+                self._handleAuthorizedEvents(request_component, request_action,
+                                             request_data, user, client)
             except Exception as e:
                 self.log("User request failed: ", e, type(e), lvl=warn,
                          exc=True)
         else:
-            self.log('Invalid event received:', requestcomponent, requestaction, lvl=warn)
+            self.log('Invalid event received:', request_component, request_action, lvl=warn)
 
     @handler("authentication", channel="auth")
     def authentication(self, event):
@@ -767,8 +772,10 @@ class ClientManager(ConfigurableComponent):
             del (self._clients[originatingclientuuid])
             self._clients[clientuuid] = newclient
 
-            authpacket = {"component": "auth", "action": "login",
-                          "data": account.serializablefields()}
+            authpacket = {
+                "component": "auth", "action": "login",
+                "data": account.serializablefields()
+            }
             self.log("Transmitting Authorization to client", authpacket,
                      lvl=network)
             self.fireEvent(
@@ -776,15 +783,19 @@ class ClientManager(ConfigurableComponent):
                 "wsserver"
             )
 
-            profilepacket = {"component": "profile", "action": "get",
-                             "data": profile.serializablefields()}
+            profilepacket = {
+                "component": "profile", "action": "get",
+                "data": profile.serializablefields()
+            }
             self.log("Transmitting Profile to client", profilepacket,
                      lvl=network)
             self.fireEvent(write(event.sock, json.dumps(profilepacket)),
                            "wsserver")
 
-            clientconfigpacket = {"component": "clientconfig", "action": "get",
-                                  "data": clientconfig.serializablefields()}
+            clientconfigpacket = {
+                "component": "clientconfig", "action": "get",
+                "data": clientconfig.serializablefields()
+            }
             self.log("Transmitting client configuration to client",
                      clientconfigpacket, lvl=network)
             self.fireEvent(write(event.sock, json.dumps(clientconfigpacket)),
