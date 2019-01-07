@@ -48,8 +48,8 @@ def log(*args, **kwargs):
 def provisionList(items, database_name, overwrite=False, clear=False, skip_user_check=False):
     """Provisions a list of items according to their schema
 
+    :param database_name:
     :param items: A list of provisionable items.
-    :param database_object: A warmongo database object
     :param overwrite: Causes existing items to be overwritten
     :param clear: Clears the collection first (Danger!)
     :param skip_user_check: Skips checking if a system user is existing already (for user provisioning)
