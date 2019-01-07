@@ -15,7 +15,7 @@ Isomer' backend has a few dependencies:
     - Database: `MongoDb`_
 
 
-.. note:: We're finishing phasing out Python 2.7 support.
+.. note:: We have phased out Python 2.7 support.
 
 A few more dependencies like nginx, and some python packages provided
 per distribution are recommended, but not strictly necessary.

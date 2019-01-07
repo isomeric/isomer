@@ -37,13 +37,6 @@ from isomer.database import ValidationError
 from isomer.logger import error, warn
 from warmongo import model_factory
 
-try:
-    PermissionError
-except NameError:  # pragma: no cover
-    class PermissionError(Exception):
-        """Not enough Permissions (2to3 substitute)"""
-        pass
-
 
 class getlist(authorized_event):
     """A client requires a schema to validate data or display a form"""

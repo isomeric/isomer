@@ -30,7 +30,7 @@ msgstr ""
 #: ../../source/dev/environment.rst:14
 msgid ""
 "This document *assumes* you already have a working `Python`_ environment "
-"with a minimum `Python`_ version of 2.7 as well as mongodb and `pip`_ "
+"with a minimum `Python`_ version of 3.3 as well as mongodb and `pip`_ "
 "already installed."
 msgstr ""
 

@@ -55,9 +55,6 @@ import time
 import sys
 import inspect
 
-# TODO: Kick out 2.x compat
-import six
-
 import os
 
 root = None
@@ -305,7 +302,7 @@ def isolog(*what, **kwargs):
 
     if lvl >= verbosity['console']:
         output = str(msg)
-        if six.PY3 and color:
+        if color:
             output = lvldata[lvl][1] + output + terminator
         try:
             print(output)

@@ -54,11 +54,6 @@ from os import statvfs, walk
 from os.path import join, getsize
 from pkg_resources import iter_entry_points, DistributionNotFound
 
-# TODO: Kick out 2.x compat
-# noinspection PyUnresolvedReferences
-from six.moves import \
-    input  # noqa - Lazily loaded, may be marked as error, e.g. in IDEs
-
 from isomer.component import ConfigurableComponent, handler
 from isomer.logger import isolog, debug, warn, error, critical, verbose
 from isomer.misc import i18n as _, all_languages
@@ -78,11 +73,6 @@ def schemata_log(*args, **kwargs):
     kwargs.update({'emitter': 'SCHEMATA', 'frame_ref': 2})
     isolog(*args, **kwargs)
 
-
-try:  # PY 2/3
-    PermissionError
-except NameError:
-    PermissionError = IOError  # NOQA
 
 schemastore = None
 l10n_schemastore = {}
@@ -352,7 +342,8 @@ def _build_collections(store):
     return result
 
 
-def initialize(address='127.0.0.1:27017', database_name='isomer-default', instance_name="default", reload=False, ignore_fail=False):
+def initialize(address='127.0.0.1:27017', database_name='isomer-default',
+               instance_name="default", reload=False, ignore_fail=False):
     """Initializes the database connectivity, schemata and finally object models"""
 
     global schemastore

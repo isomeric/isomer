@@ -114,9 +114,7 @@ See https://github.com/isomeric/isomer""",
                         'click-plugins>=1.0.3',
                         'prompt-toolkit>=1.0.15',
                         'tomlkit>=0.4.6',
-                        'spur>=0.3.20',
-                        # TODO: Kick out 2.x compat
-                        'six'
+                        'spur>=0.3.20'
                         ],
       data_files=datafiles,
       entry_points="""[console_scripts]

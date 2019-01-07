@@ -6,13 +6,13 @@
 
 
 Setting up a Isomer Development Environment
-=========================================
+===========================================
 
 This is the recommended way to setup a development enviornment
 for developing the backend and frontend of Isomer .
 
 .. note:: This document *assumes* you already have a working `Python`_
-        environment with a minimum `Python`_ version of 2.7 as well
+        environment with a minimum `Python`_ version of 3.3 as well
         as mongodb and `pip`_ already installed.
 
 
