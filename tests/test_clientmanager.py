@@ -31,19 +31,15 @@ Test Isomer Launcher
 
 """
 
+import pytest
 from circuits import Manager
-# from circuits.web.websockets.client import WebSocketClient
-# from circuits.web.websockets.dispatcher import WebSocketsDispatcher
-# from circuits.web.servers import TCPServer
 from circuits.net.events import read  # , write
 from json import dumps  # , loads
-import pytest
-from uuid import uuid4
+
 from isomer.ui.clientmanager import ClientManager
-from isomer.ui.clientobjects import Client
+from isomer.ui.clientobjects import Client, Socket
 from isomer.events.client import clientdisconnect
 from isomer.misc import std_uuid
-# from hfos.events.client import authenticationrequest
 
 from pprint import pprint
 
@@ -76,6 +72,12 @@ def test_auth_request():
 
     m.start()
 
+    # TODO: Rebuild this, to actually connect a fake socket via cm.connect(socket, IP)
+
+    uuid = std_uuid()
+    socket = Socket('127.0.0.1', uuid)
+    cm._sockets[socket] = socket
+
     data = {
         'component': 'auth',
         'action': 'login',
@@ -85,7 +87,7 @@ def test_auth_request():
         }
     }
 
-    event = read(None, dumps(data))
+    event = read(socket, dumps(data))
 
     result = transmit('authenticationrequest', 'auth', event, 'wsserver')
 
@@ -94,9 +96,16 @@ def test_auth_request():
 
 
 def test_auto_auth_request():
-    m.start()
+    """Tests if automatic authentication requests work"""
 
-    client_config_uuid = str(uuid4())
+    m.start()
+    # TODO: Rebuild this, to actually connect a fake socket via cm.connect(socket, IP)
+
+    uuid = std_uuid()
+    socket = Socket('127.0.0.1', uuid)
+    cm._sockets[socket] = socket
+
+    client_config_uuid = std_uuid()
 
     data = {
         'component': 'auth',
@@ -107,7 +116,7 @@ def test_auto_auth_request():
         }
     }
 
-    event = read(None, dumps(data))
+    event = read(socket, dumps(data))
 
     result = transmit('authenticationrequest', 'auth', event, 'wsserver')
 
