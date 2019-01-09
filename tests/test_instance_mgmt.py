@@ -153,14 +153,14 @@ def test_instance_set():
 
     new_config = load_instance('default')
 
-    assert new_config['quiet'] is False
+    assert new_config['quiet'] is True
 
-    result = run_cli(isotool, ['instance', 'set', 'quiet', 'true'])
+    result = run_cli(isotool, ['instance', 'set', 'quiet', 'false'])
 
     new_config = load_instance('default')
 
     assert result.exit_code == 0
-    assert new_config['quiet'] is True
+    assert new_config['quiet'] is False
 
 
 def test_instance_clear():
