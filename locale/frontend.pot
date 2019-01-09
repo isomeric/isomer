@@ -16,14 +16,6 @@ msgstr ""
 msgid "About"
 msgstr ""
 
-#: src/components/enrol/enrol/enrolment.tpl.html:123
-msgid "Accept <a href=\"{{$ctrl.tos}}\">terms of service</a>"
-msgstr ""
-
-#: src/components/enrol/enrol/enrolment.tpl.html:128
-msgid "Acceptance of Terms is required"
-msgstr ""
-
 #: src/objects/list/list.tpl.html:178
 msgid "Actions"
 msgstr ""
@@ -43,20 +35,8 @@ msgstr ""
 msgid "Add"
 msgstr ""
 
-#: src/components/enrol/enrol/enrolment.tpl.html:44
-msgid ""
-"An email with a confirmation link has been sent to you.\n"
-"                Please open this link in your browser to confirm your account.\n"
-"\n"
-"                If you do not receive this mail, contact an administrator of this system."
-msgstr ""
-
 #: src/about/about-component/about-component.tpl.html:45
 msgid "An isomer node"
-msgstr ""
-
-#: src/components/enrol/enrol/enrolment.tpl.html:134
-msgid "Are you a conscious being?"
 msgstr ""
 
 #: src/about/missing/missing.tpl.html:24
@@ -80,14 +60,6 @@ msgstr ""
 msgid "Change Permissions"
 msgstr ""
 
-#: src/components/enrol/enrol/password.tpl.html:21
-msgid "Change password"
-msgstr ""
-
-#: src/components/enrol/enrol/password.tpl.html:23
-msgid "Change your account password with this form"
-msgstr ""
-
 #: src/objects/list/list.tpl.html:55
 msgid "Checkbox"
 msgstr ""
@@ -104,11 +76,6 @@ msgstr ""
 msgid "Client<span class=\"caret\"></span>"
 msgstr ""
 
-#: src/components/enrol/enrol/enrolment.tpl.html:94
-#: src/components/enrol/enrol/password.tpl.html:42
-msgid "Confirm:"
-msgstr ""
-
 #: src/about/about-component/about-component.tpl.html:65
 msgid "Contact the isomer framework maintainers"
 msgstr ""
@@ -122,7 +89,6 @@ msgid "Controls"
 msgstr ""
 
 #: src/objects/list/list.tpl.html:23
-#: src/objects/search/search.tpl.html:23
 msgid "Create new"
 msgstr ""
 
@@ -143,14 +109,6 @@ msgstr ""
 msgid "Documentation"
 msgstr ""
 
-#: src/components/enrol/enrol/enrolment.tpl.html:117
-msgid "E-Mail address is not valid"
-msgstr ""
-
-#: src/components/enrol/enrol/enrolment.tpl.html:116
-msgid "E-Mail address is required"
-msgstr ""
-
 #: src/objects/list/list.tpl.html:186
 msgid "Edit"
 msgstr ""
@@ -165,29 +123,6 @@ msgstr ""
 
 #: src/common/services/user.service.js:141
 msgid "Either the username or the supplied password is invalid."
-msgstr ""
-
-#: src/components/enrol/enrol/enrolment.tpl.html:160
-#: src/components/enrol/enrol/enrolment.tpl.html:26
-msgid "Enrol Account"
-msgstr ""
-
-#: src/components/enrol/enrol/enrolment.tpl.html:58
-msgid "Enrol a new account with this form"
-msgstr ""
-
-#: src/components/enrol/enrol/enrolment.tpl.html:87
-#: src/components/enrol/enrol/password.tpl.html:39
-msgid "Enter at least 5 characters"
-msgstr ""
-
-#: src/components/enrol/enrol/enrolment.tpl.html:103
-#: src/components/enrol/enrol/password.tpl.html:46
-msgid "Enter the same password for confirmation"
-msgstr ""
-
-#: src/components/enrol/enrol/password.tpl.html:31
-msgid "Enter your old password"
 msgstr ""
 
 #: src/objects/list/list.tpl.html:44
@@ -216,18 +151,6 @@ msgstr ""
 
 #: src/common/services/socket.factory.js:334
 msgid "High latency"
-msgstr ""
-
-#: src/components/enrol/enrol/enrolment.tpl.html:52
-msgid "If you didn't specify a password, there should be a temporary one in your activation confirmation mail."
-msgstr ""
-
-#: src/components/enrol/enrol/enrolment.tpl.html:139
-msgid "Illegible?"
-msgstr ""
-
-#: src/components/enrol/enrol/reset.tpl.html:34
-msgid "In the meantime, please contact a node administrator to reset your password."
 msgstr ""
 
 #: src/objects/editor/editor.tpl.html:34
@@ -261,10 +184,6 @@ msgstr ""
 
 #: src/common/modals/user.tpl.html:21
 msgid "Logout"
-msgstr ""
-
-#: src/components/enrol/enrol/enrolment.tpl.html:111
-msgid "Mail Address"
 msgstr ""
 
 #: src/about/missing/missing.tpl.html:23
@@ -312,43 +231,12 @@ msgstr ""
 msgid "Offline"
 msgstr ""
 
-#: src/components/enrol/enrol/password.tpl.html:27
-msgid "Old password:"
-msgstr ""
-
 #: src/common/services/socket.factory.js:186
 msgid "Online"
 msgstr ""
 
-#: src/components/enrol/enrol/enrolment.tpl.html:78
-#: src/components/enrol/enrol/password.tpl.html:35
-msgid "Password:"
-msgstr ""
-
 #: src/objects/list/list.tpl.html:193
 msgid "Permissions"
-msgstr ""
-
-#: src/components/enrol/enrol/enrolment.tpl.html:84
-msgid ""
-"Please enter a\n"
-"                        password"
-msgstr ""
-
-#: src/components/enrol/enrol/enrolment.tpl.html:71
-msgid "Please enter a username"
-msgstr ""
-
-#: src/components/enrol/enrol/enrolment.tpl.html:148
-msgid "Please type in the characters you see in the image next to the input"
-msgstr ""
-
-#: src/components/enrol/enrol/enrolment.tpl.html:68
-msgid "Please use at least one character"
-msgstr ""
-
-#: src/components/enrol/enrol/enrolment.tpl.html:29
-msgid "Please wait a few seconds."
 msgstr ""
 
 #: src/common/component/login.tpl.html:103
@@ -384,10 +272,6 @@ msgstr ""
 msgid "Report on Github"
 msgstr ""
 
-#: src/components/enrol/enrol/reset.tpl.html:26
-msgid "Reset account"
-msgstr ""
-
 #: src/objects/list/list.tpl.html:115
 #: src/objects/list/list.tpl.html:144
 #: src/objects/list/list.tpl.html:200
@@ -401,16 +285,8 @@ msgstr ""
 msgid "Roundtrip took"
 msgstr ""
 
-#: src/objects/search/search.tpl.html:22
-msgid "Search:"
-msgstr ""
-
 #: src/objects/list/list.tpl.html:70
 msgid "Select multiple objects to:"
-msgstr ""
-
-#: src/components/enrol/enrol/enrolment.tpl.html:33
-msgid "Sorry, but enrolling is currently not possible."
 msgstr ""
 
 #: src/app/app-component/app-component.tpl.html:210
@@ -425,20 +301,8 @@ msgstr ""
 msgid "Stored"
 msgstr ""
 
-#: src/components/enrol/enrol/password.tpl.html:53
-msgid "Submit"
-msgstr ""
-
-#: src/components/enrol/enrol/enrolment.tpl.html:42
-msgid "Thanks for enrolling, {{$ctrl.username}}!"
-msgstr ""
-
 #: src/common/services/socket.factory.js:187
 msgid "The connection to the node has been established. You're online!"
-msgstr ""
-
-#: src/components/enrol/enrol/reset.tpl.html:30
-msgid "This functionality is not yet ready."
 msgstr ""
 
 #: src/app/app-component/app-component.tpl.html:57
@@ -470,10 +334,6 @@ msgstr ""
 msgid "User actions"
 msgstr ""
 
-#: src/components/enrol/enrol/enrolment.tpl.html:62
-msgid "Username:"
-msgstr ""
-
 #: src/objects/list/list.tpl.html:188
 msgid "View"
 msgstr ""
@@ -487,10 +347,6 @@ msgstr ""
 msgid "Write"
 msgstr ""
 
-#: src/components/enrol/enrol/enrolment.tpl.html:51
-msgid "You can now"
-msgstr ""
-
 #: src/common/services/socket.factory.js:147
 msgid "You have been disconnected from the node. Retry interval is at"
 msgstr ""
@@ -499,24 +355,8 @@ msgstr ""
 msgid "You have insufficient permissions to do that."
 msgstr ""
 
-#: src/components/enrol/enrol/enrolment.tpl.html:37
-msgid "You're already logged in. Please"
-msgstr ""
-
 #: src/featuremenu/menu/menu.tpl.html:34
 msgid "Your client is not connected to the node."
-msgstr ""
-
-#: src/components/enrol/enrol/enrolment.tpl.html:37
-msgid "log out"
-msgstr ""
-
-#: src/components/enrol/enrol/enrolment.tpl.html:51
-msgid "login to this node."
-msgstr ""
-
-#: src/components/enrol/enrol/enrolment.tpl.html:37
-msgid "to enrol another account."
 msgstr ""
 
 #: src/app/app-component/app-component.tpl.html:140
