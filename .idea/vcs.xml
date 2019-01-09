@@ -3,11 +3,5 @@
   <component name="VcsDirectoryMappings">
     <mapping directory="" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/frontend" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/frontend/node_modules/schema-form-datetimepicker" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/modules/contacts" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/modules/crm" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/modules/fishfail" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/modules/fleetreporter" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/modules/reporter" vcs="Git" />
   </component>
 </project>
