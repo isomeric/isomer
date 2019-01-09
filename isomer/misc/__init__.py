@@ -193,6 +193,7 @@ adjectives = [
     'wooden', 'worried', 'wrong', 'young', 'yummy', 'zealous'
 ]
 
+# noinspection SpellCheckingInspection
 animals = [
     'Aardvark', 'Abyssinian', 'Affenpinscher', 'Akbash', 'Akita', 'Albatross',
     'Alligator', 'Angelfish', 'Ant', 'Anteater', 'Antelope', 'Armadillo', 'Avocet',
@@ -236,7 +237,7 @@ animals = [
     'Woodpecker', 'Wrasse', 'Yak', 'Zebra', 'Zebu', 'Zonkey', 'Zorse'
 ]
 
-alphabet = [
+radio_alphabet = [
     'Alpha', 'Bravo', 'Charlie', 'Delta', 'Echo', 'Foxtrot', 'Golf', 'Hotel',
     'India', 'Juliet', 'Kilo', 'Lima', 'Mike', 'November', 'Oscar', 'Papa',
     'Quebec', 'Romeo', 'Sierra', 'Tango', 'Uniform', 'Victor', 'Whiskey', 'X-ray',
@@ -269,7 +270,7 @@ attributes = [
 def std_human_uid(kind=None):
     """Return a random generated human-friendly phrase as low-probability unique id"""
 
-    kind_list = alphabet
+    kind_list = radio_alphabet
 
     if kind == 'animal':
         kind_list = animals
@@ -326,12 +327,12 @@ def std_salt(length=16, lowercase=True):
     characters
     """
 
-    alphabet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    alphanumeric = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     if lowercase is True:
-        alphabet += "abcdefghijklmnopqrstuvwxyz"
+        alphanumeric += "abcdefghijklmnopqrstuvwxyz"
 
     chars = []
     for i in range(length):
-        chars.append(choice(alphabet))
+        chars.append(choice(alphanumeric))
 
     return "".join(chars)

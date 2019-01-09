@@ -42,6 +42,7 @@ from isomer.ui.builder import install_frontend
 from git import Repo, exc
 from isomer.version import version
 
+
 @click.command()
 @click.option('--platform', '-p', default='debian')
 @click.option('--use-sudo', '-u', is_flag=True, default=False)
@@ -61,7 +62,7 @@ def dependencies(platform, use_sudo):
 def install(ctx, port):
     """[GROUP] Install various aspects of Isomer"""
 
-    #set_instance(ctx.obj['instance'], "blue")  # Initially start with a blue instance
+    # set_instance(ctx.obj['instance'], "blue")  # Initially start with a blue instance
 
     log('Configuration:', ctx.obj['config'])
     log('Instance:', ctx.obj['instance'])
@@ -420,9 +421,7 @@ def uninstall():
     check_root()
 
     response = ask("This will delete all data of your Isomer installations! Type"
-                    "YES to continue:", default="N", show_hint=False)
+                   "YES to continue:", default="N", show_hint=False)
     if response == 'YES':
         shutil.rmtree('/var/lib/isomer')
         shutil.rmtree('/var/cache/isomer')
-
-

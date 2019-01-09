@@ -195,8 +195,10 @@ class ClientManager(ConfigurableComponent):
         """Display a list of all registered events"""
 
         def merge(a, b, path=None):
-            "merges b into a"
-            if path is None: path = []
+            """Merges b into a"""
+
+            if path is None:
+                path = []
             for key in b:
                 if key in a:
                     if isinstance(a[key], dict) and isinstance(b[key], dict):
@@ -665,8 +667,7 @@ class ClientManager(ConfigurableComponent):
             self.log('Could not get client for request!', e, type(e), lvl=warn)
             return
 
-        if request_component in self.anonymous_events and request_action in \
-            self.anonymous_events[request_component]:
+        if request_component in self.anonymous_events and request_action in self.anonymous_events[request_component]:
             self.log('Executing anonymous event:', request_component,
                      request_action)
             try:

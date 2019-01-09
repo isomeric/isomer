@@ -57,7 +57,6 @@ def provisionList(items, database_name, overwrite=False, clear=False, skip_user_
     """
 
     log('Provisioning', items, database_name, lvl=debug)
-    system_user = None
 
     def get_system_user():
         """Retrieves the node local system user"""
@@ -67,8 +66,8 @@ def provisionList(items, database_name, overwrite=False, clear=False, skip_user_
         try:
             log('System user uuid: ', user.uuid, lvl=verbose)
             return user.uuid
-        except AttributeError as e:
-            log('No system user found:', e, lvl=warn)
+        except AttributeError as system_user_error:
+            log('No system user found:', system_user_error, lvl=warn)
             log('Please install the user provision to setup a system user or check your database configuration',
                 lvl=error)
             return False

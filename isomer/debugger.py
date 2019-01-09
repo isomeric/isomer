@@ -237,7 +237,7 @@ class HFDebugger(ConfigurableComponent):
         """Handler for client-side debug requests"""
         try:
             self.log("Event: ", event.__dict__, lvl=critical)
-
+            # TODO: Clear this up and make it CLI events.
             if event.data == "storejson":
                 self.log("Storing received object to /tmp", lvl=critical)
                 fp = open('/tmp/isomer_debugger_' + str(
@@ -268,6 +268,8 @@ class HFDebugger(ConfigurableComponent):
             if event.data == "logtail":
                 self.fireEvent(logtailrequest(event.user, None, None,
                                               event.client), "logger")
+
+            # TODO: WTF. This needs to move out, asap
             if event.data == "trigger_anchorwatch":
                 from isomer.anchor.anchorwatcher import cli_trigger_anchorwatch
                 self.fireEvent(cli_trigger_anchorwatch())

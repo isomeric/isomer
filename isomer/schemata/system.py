@@ -59,19 +59,27 @@ SystemconfigSchema['properties'].update({
     },
     'language': language_field(),
     # TODO: This should probably be an extension of a future themes pack
-    'defaulttheme': {'type': 'string', 'title': 'Default new client theme',
-                     'description': 'Default theme used for user '
-                                    'interface'},
-    'initial_state': {'type': 'string', 'title': 'State after login',
-                    'description': 'Frontend state, users are directed to after logging in.',
-                    'default': ''},
-    'initial_state_args': {'type': 'string', 'title': 'State arguments',
-                   'description': 'Arguments (JSON) for login state.',
-                   'default': ''},
-    'hostname': {'type': 'string', 'title': 'Public hostname',
-                 'description': 'Public FQDN hostname to use for internet '
-                                'based services (host.domain.tld)',
-                 'default': 'localhost'},
+    'defaulttheme': {
+        'type': 'string', 'title': 'Default new client theme',
+        'description': 'Default theme used for user '
+                       'interface'
+    },
+    'initial_state': {
+        'type': 'string', 'title': 'State after login',
+        'description': 'Frontend state, users are directed to after logging in.',
+        'default': ''
+    },
+    'initial_state_args': {
+        'type': 'string', 'title': 'State arguments',
+        'description': 'Arguments (JSON) for login state.',
+        'default': ''
+    },
+    'hostname': {
+        'type': 'string', 'title': 'Public hostname',
+        'description': 'Public FQDN hostname to use for internet '
+                       'based services (host.domain.tld)',
+        'default': 'localhost'
+    },
     'modules': {
         'type': 'object',
         'default': {}
@@ -125,5 +133,7 @@ SystemconfigOptions = {
     'hidden': ['salt']
 }
 
-Systemconfig = {'schema': SystemconfigSchema, 'form': SystemconfigForm,
-                'options': SystemconfigOptions}
+Systemconfig = {
+    'schema': SystemconfigSchema, 'form': SystemconfigForm,
+    'options': SystemconfigOptions
+}

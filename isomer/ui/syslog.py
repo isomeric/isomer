@@ -2,7 +2,7 @@
 from circuits import Event, Timer
 
 from isomer.component import ConfigurableComponent, handler
-from isomer.events.client import send # , clientdisconnect
+from isomer.events.client import send  # , clientdisconnect
 from isomer.events.system import authorized_event
 from isomer.logger import error, debug
 

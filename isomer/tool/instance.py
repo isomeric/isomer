@@ -710,8 +710,8 @@ def turnover(ctx):
 
     log('Inspecting new environment')
 
-    if not env.get('installed', False) or not env.get('tested', False) or not env.get('provisioned', False) or \
-        not env.get('migrated', False):
+    if not env.get('installed', False) or not env.get('tested', False) or \
+            not env.get('provisioned', False) or not env.get('migrated', False):
         log('Installation failed, cannot activate!')
         sys.exit(EXIT_INSTALLATION_FAILED)
 

@@ -38,8 +38,10 @@ from isomer.database import objectmodels
 from isomer.logger import warn, debug, verbose  # , error, hilight
 from isomer.component import handler
 
+
 class get_tagged(authorized_event):
     pass
+
 
 class TagManager(ConfigurableComponent):
     """
@@ -62,13 +64,13 @@ class TagManager(ConfigurableComponent):
 
         self.log('Tags:', list(self.tags.keys()), pretty=True, lvl=verbose)
 
-        #tagged = self._get_tagged('PR')
+        # tagged = self._get_tagged('PR')
 
-        #for item in tagged:
+        # for item in tagged:
         #    self.log("Found tagged items:", item.serializablefields(), pretty=True)
-        #Timer(3, Event.create('getTagged', 'PR')).register(self)
+        # Timer(3, Event.create('getTagged', 'PR')).register(self)
 
-    #@handler('getTagged')
+    # @handler('getTagged')
     def _get_tagged(self, tag):
         tag = self.tags[tag]
         self.log('TAG UUID', tag.uuid)
@@ -97,4 +99,3 @@ class TagManager(ConfigurableComponent):
             self.fireEvent(send(event.client.uuid, response))
         else:
             self.log("Unavailable schema requested!", lvl=warn)
-

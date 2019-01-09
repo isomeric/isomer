@@ -27,7 +27,7 @@ import bson
 import click
 
 from isomer.database import backup as internal_backup
-from isomer.logger import warn
+from isomer.logger import warn, error
 from isomer.tool import log
 from isomer.tool.database import db
 
@@ -35,10 +35,10 @@ from isomer.tool.database import db
 @db.command('export', short_help='export objects to json')
 @click.option("--schema", "-s", default=None, help="Specify schema to export")
 @click.option("--uuid", "-u", default=None, help="Specify single object to export")
-@click.option("--filter", "--object-filter", default=None, help="Find objects to export by filter")
-@click.option("--format", "--export-format", default='json', help="Currently only JSON is supported")
+@click.option("--object-filter", "--filter", default=None, help="Find objects to export by filter")
+@click.option("--export-format", "--format", default='json', help="Currently only JSON is supported")
 @click.option("--pretty", "-p", default=False, is_flag=True, help="Indent output for human readability")
-@click.option("--all", "--all-schemata", default=False, is_flag=True,
+@click.option("--all-schemata", "--all", default=False, is_flag=True,
               help="Agree to export all documents, if no schema specified")
 @click.option("--omit", "-o", multiple=True, default=[], help="Omit given fields (multiple, e.g. '-o _id -o perms')")
 @click.argument("filename")
@@ -54,11 +54,11 @@ def db_export(schema, uuid, object_filter, export_format, filename, pretty, all_
 @db.command('import', short_help='import objects from json')
 @click.option("--schema", default=None, help="Specify schema to import")
 @click.option("--uuid", default=None, help="Specify single object to import")
-@click.option("--filter", "--object-filter", default=None,
+@click.option("--object-filter", "--filter", default=None,
               help="Specify objects to import by filter (Not implemented yet!)")
-@click.option("--format", "--import-format", default='json', help="Currently only JSON is supported")
+@click.option("--import-format", "--format", default='json', help="Currently only JSON is supported")
 @click.option("--filename", default=None, help="Import from given file")
-@click.option("--all", "--all-schemata", default=False, is_flag=True,
+@click.option("--all-schemata", "--all", default=False, is_flag=True,
               help="Agree to import all documents, if no schema specified")
 @click.option("--dry", default=False, is_flag=True, help="Do not write changes to the database")
 @click.pass_context
@@ -70,9 +70,13 @@ def db_import(ctx, schema, uuid, object_filter, import_format, filename, all_sch
 
     import_format = import_format.upper()
 
-    with open(filename, 'r') as f:
-        json_data = f.read()
-    data = json.loads(json_data)  # , parse_float=True, parse_int=True)
+    if import_format == 'JSON':
+        with open(filename, 'r') as f:
+            json_data = f.read()
+        data = json.loads(json_data)  # , parse_float=True, parse_int=True)
+    else:
+        log('Importing non json data is WiP!', lvl=error)
+        return
 
     if schema is None:
         if all_schemata is False:
@@ -85,6 +89,9 @@ def db_import(ctx, schema, uuid, object_filter, import_format, filename, all_sch
 
     from isomer import database
     database.initialize(ctx.obj['dbhost'], ctx.obj['dbname'])
+
+    if object_filter is not None:
+        log('Object filtering on import is WiP! Ignoring for now.', lvl=warn)
 
     all_items = {}
     total = 0

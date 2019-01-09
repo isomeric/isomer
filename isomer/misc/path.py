@@ -49,6 +49,7 @@ def set_etc_path(path):
     global ETC_BASE_PATH
     global ETC_INSTANCE_PATH
     global ETC_REMOTE_PATH
+    global ETC_REMOTE_KEYS_PATH
 
     ETC_BASE_PATH = path
 
