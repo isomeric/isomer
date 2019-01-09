@@ -560,7 +560,7 @@ class Maintenance(ConfigurableComponent):
 
         self.collection_sizes = {}
         self.collection_total = 0
-        for col in self.db.collection_names(include_system_collections=False):
+        for col in self.db.list_collection_names():
             self.collection_sizes[col] = self.db.command('collstats', col).get(
                 'storageSize', 0)
             self.collection_total += self.collection_sizes[col]
