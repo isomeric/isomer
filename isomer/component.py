@@ -51,7 +51,7 @@ from copy import deepcopy
 from jsonschema import ValidationError
 from pymongo.errors import ServerSelectionTimeoutError
 from random import randint
-from warmongo import model_factory
+from formal import model_factory
 
 from isomer.events.system import isomer_ui_event, authorized_event, anonymous_event
 from isomer.logger import isolog, warn, critical, error, verbose

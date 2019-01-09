@@ -25,7 +25,7 @@ import json
 
 import click
 from click_didyoumean import DYMGroup
-from warmongo import model_factory
+from formal import model_factory
 
 from isomer.tool import log
 

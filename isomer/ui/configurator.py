@@ -35,7 +35,7 @@ from isomer.component import ConfigurableComponent, authorized_event, handler
 from isomer.schemata.component import ComponentConfigSchemaTemplate as Schema
 from isomer.database import ValidationError
 from isomer.logger import error, warn
-from warmongo import model_factory
+from formal import model_factory
 
 
 class getlist(authorized_event):

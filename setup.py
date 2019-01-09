@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-# HFOS - Hackerfleet Operating System
-# ===================================
+# Isomer - The distributed application framework
+# ==============================================
 # Copyright (C) 2011-2018 Heiko 'riot' Weinen <riot@c-base.org> and others.
 #
 # This program is free software: you can redistribute it and/or modify
@@ -100,11 +100,8 @@ A modern, opensource approach to collaborative productivity.
 This software package is supposed to run on your ship/car/plane/ufo's board
 computer.
 See https://github.com/isomeric/isomer""",
-      dependency_links=[
-          'https://github.com/Hackerfleet/warmongo/archive/master.zip#egg'
-          '=warmongo-0.5.5.hf'
-      ],
       install_requires=['circuits>=3.1',
+                        'formal>=0.6.0',
                         'pymongo>=3.2',
                         'jsonschema==2.6.0',
                         'pystache>=0.5.4',

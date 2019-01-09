@@ -34,7 +34,7 @@ from circuits import handler, BaseComponent, Debugger, Manager
 
 from isomer.component import ConfigurableComponent
 from isomer.schemata.component import ComponentConfigSchemaTemplate
-from warmongo import model_factory
+from formal import model_factory
 
 """Basic Test suite bits and pieces"""
 

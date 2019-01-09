@@ -48,7 +48,7 @@ from pprint import pprint
 
 import operator
 import pymongo
-import warmongo
+import formal
 from circuits import Timer, Event
 from os import statvfs, walk
 from os.path import join, getsize
@@ -262,7 +262,7 @@ def _build_model_factories(store):
             schemata_log("No schema found for ", schemaname, lvl=critical, exc=True)
 
         try:
-            result[schemaname] = warmongo.model_factory(schema)
+            result[schemaname] = formal.model_factory(schema)
         except Exception as e:
             schemata_log("Could not create factory for schema ", schemaname, schema, lvl=critical, exc=True)
 
@@ -379,7 +379,7 @@ def initialize(address='127.0.0.1:27017', database_name='isomer-default',
         else:
             return False
 
-    warmongo.connect(database_name)
+    formal.connect(database_name)
 
     schemastore = _build_schemastore_new()
     l10n_schemastore = _build_l10n_schemastore(schemastore)
@@ -397,7 +397,7 @@ def test_schemata():
     objects = {}
 
     for schemaname in schemastore.keys():
-        objects[schemaname] = warmongo.model_factory(
+        objects[schemaname] = formal.model_factory(
             schemastore[schemaname]['schema'])
         try:
             testobject = objects[schemaname]()
@@ -419,9 +419,9 @@ def profile(schemaname='sensordata', profiletype='pjs'):
 
     testclass = None
 
-    if profiletype == 'warmongo':
-        db_log("Running Warmongo benchmark")
-        testclass = warmongo.model_factory(schema)
+    if profiletype == 'formal':
+        db_log("Running formal benchmark")
+        testclass = formal.model_factory(schema)
     elif profiletype == 'pjs':
         db_log("Running PJS benchmark")
         try:
@@ -448,7 +448,7 @@ def profile(schemaname='sensordata', profiletype='pjs'):
     db_log("Profiling done")
 
 
-# profile(schemaname='sensordata', profiletype='warmongo')
+# profile(schemaname='sensordata', profiletype='formal')
 
 class Maintenance(ConfigurableComponent):
     """Regularly checks a few basic system maintenance tests like used
