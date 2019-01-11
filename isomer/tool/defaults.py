@@ -41,9 +41,9 @@ combined_file = "/etc/ssl/certs/isomer/selfsigned.pem"
 source_url = 'https://github.com/isomeric/isomer'
 
 platforms = {
-    'debian': {
+    'Debian GNU/Linux': {
         'pre_install': [
-            ['apt-get', '-y', 'install', 'apt-transport-https'],
+            ['apt-get', '-y', 'install', 'apt-transport-https', 'wget'],
             ['sh', '-c', 'wget --quiet -O - https://deb.nodesource.com/gpgkey/nodesource.gpg.key | sudo apt-key add -'],
             ['sh', '-c', 'VERSION=node_8.x ; '
                          'DISTRO="$(lsb_release -s -c)" ; '
@@ -61,7 +61,8 @@ platforms = {
             'nodejs', 'enchant', 'nginx-full', 'virtualenv', 'git',
             'gdal-bin', 'python-gdal', 'nodejs'
         ]  # TODO: Kick out module dependencies (mostly gdal, grib and serial)
-    }
+    },
+    'Ubuntu': 'Debian GNU/Linux'
 }
 
 key_defaults = {

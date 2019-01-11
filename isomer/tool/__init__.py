@@ -24,6 +24,7 @@ __license__ = "AGPLv3"
 import getpass
 import sys
 import spur
+import distro
 
 import hashlib
 import os
@@ -233,8 +234,22 @@ def get_isomer(source, url, destination, shell=None):
     return success
 
 
-def install_isomer(platform_name='debian', use_sudo=False, shell=None, cwd='.'):
+def install_isomer(platform_name=None, use_sudo=False, shell=None, cwd='.', show=False):
     """Installs all dependencies"""
+
+    if platform_name is None:
+        platform_name = distro.linux_distribution()[0]
+        log('Platform detected as %s' % platform_name)
+
+    if isinstance(platforms[platform_name], str):
+        platform_name = platforms[platform_name]
+        log('This platform is a link to another:', platform_name, lvl=verbose)
+
+    if platform_name not in platforms:
+        log('Your platform is not yet officially supported!\n\n'
+            'Please check the documentation for more information:\n'
+            'https://isomer.readthedocs.io/en/latest/start/platforms/support.html', lvl=error)
+        sys.exit(50000)
 
     if shell is None and use_sudo is False:
         check_root()
@@ -261,7 +276,9 @@ def install_isomer(platform_name='debian', use_sudo=False, shell=None, cwd='.'):
 
         for command in pre_install_commands:
             args = build_command(*command)
-            log('Running pre install command' % command)
+            log('Running pre install command')
+            if show:
+                log(args)
             success, output = run_process(cwd, args, shell)
             if not success:
                 log('Could not run command %s!' % command, lvl=error)
@@ -269,6 +286,8 @@ def install_isomer(platform_name='debian', use_sudo=False, shell=None, cwd='.'):
 
         log('Installing platform dependencies')
         args = build_command(*tool + packages)
+        if show:
+            log(args)
         success, output = run_process(cwd, args, shell)
         if not success:
             log('Could not install %s dependencies!' % platform, lvl=error)
@@ -276,7 +295,9 @@ def install_isomer(platform_name='debian', use_sudo=False, shell=None, cwd='.'):
 
         for command in post_install_commands:
             args = build_command(*command)
-            log('Running command' % command)
+            log('Running command')
+            if show:
+                log(args)
             success, output = run_process(cwd, args, shell)
             if not success:
                 log('Could not run command %s!' % command, lvl=error)
@@ -287,6 +308,8 @@ def install_isomer(platform_name='debian', use_sudo=False, shell=None, cwd='.'):
 
         log('Installing Isomer')
         args = build_command('python3', 'setup.py', 'develop')
+        if show:
+            log(args)
         success, output = run_process(cwd, args, shell)
         if not success:
             log('Could not install Isomer package!', lvl=error)
@@ -294,6 +317,8 @@ def install_isomer(platform_name='debian', use_sudo=False, shell=None, cwd='.'):
 
         log('Installing Isomer requirements')
         args = build_command('pip3', 'install', '-r', 'requirements.txt')
+        if show:
+            log(args)
         success, output = run_process(cwd, args, shell)
         if not success:
             log('Could not install Python dependencies!', lvl=error)

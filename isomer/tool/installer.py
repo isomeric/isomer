@@ -35,6 +35,7 @@ from click_didyoumean import DYMGroup
 from isomer.tool.etc import NonExistentKey, instance_template
 from isomer.logger import error, warn, debug
 from isomer.tool import check_root, log, ask, install_isomer
+from isomer.tool.defaults import platforms
 from isomer.provisions.base import provisionList
 from isomer.misc.path import get_path, set_instance
 from isomer.ui.builder import install_frontend
@@ -44,14 +45,15 @@ from isomer.version import version
 
 
 @click.command()
-@click.option('--platform', '-p', default='debian')
+@click.option('--platform', '-p', default=None, help='Platform name, one of %s' % list(platforms.keys()))
 @click.option('--use-sudo', '-u', is_flag=True, default=False)
-def dependencies(platform, use_sudo):
+@click.option('--print-actions', '-p', help='Show what would be installed', is_flag=True, default=False)
+def dependencies(platform, use_sudo, print_actions):
     """Install Isomer platform dependencies"""
 
     log('Installing platform dependencies')
 
-    install_isomer(platform.lower(), use_sudo)
+    install_isomer(platform, use_sudo, show=print_actions)
 
     log('Done: Install dependencies')
 
