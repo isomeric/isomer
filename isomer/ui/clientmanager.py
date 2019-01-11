@@ -616,7 +616,7 @@ class ClientManager(ConfigurableComponent):
 
             client_uuid = self._sockets[sock].clientuuid
         except Exception as e:
-            self.log("Receiving error: ", e, type(e), lvl=error)
+            self.log("Receiving error: ", e, type(e), lvl=error, exc=True)
             return
 
         if sock is None or msg is None:
