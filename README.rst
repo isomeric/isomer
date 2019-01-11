@@ -18,6 +18,10 @@
     :target: http://webchat.freenode.net/?randomnick=1&channels=hackerfleet&uio=d4>
     :alt: IRC Channel
 
+.. image:: https://www.codetriage.com/isomeric/isomer/badges/users.svg
+    :target: https://www.codetriage.com/isomeric/isomer
+    :alt: Help via codetriage.com
+
 **HELLO! You are viewing a release candidate of Isomer 1.0!**
 
 Please be wary of bugs and report strange things, thank you.
@@ -36,7 +40,7 @@ Isomer - Be Collaborative!
 Installation
 ============
 
-There is more than one way of installing Isomer, `see the quickstart instructions for those <http://hfos.readthedocs.io/en/latest/start/quick.html>`__.
+There is more than one way of installing Isomer, `see the quickstart instructions for those <http://isomer.readthedocs.io/en/latest/start/quick.html>`__.
 
 The simplest way is to use the supplied installation script:
 
@@ -50,7 +54,7 @@ This assumes, that you're not running another web server on port 443 and that yo
 configured to allow communications on that port.
 Isomer modules may require additional open ports, to find out about that, read their readme files.
 
-If you run into trouble or get any unexpected errors, contact us or `try the complex installation procedure <http://hfos.readthedocs.io/en/latest/start/installing.html>`__.
+If you run into trouble or get any unexpected errors, contact us or `try the complex installation procedure <http://isomer.readthedocs.io/en/latest/start/installing.html>`__.
 
 Modules
 =======
