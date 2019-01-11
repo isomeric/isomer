@@ -45,7 +45,6 @@ except ImportError:  # pragma: no cover
 
     from pkgutil import extend_path
 
-    # noinspection PyUnboundLocalVariable
     __path__ = extend_path(__path__, __name__)  # noqa
     import os
 
@@ -54,5 +53,5 @@ except ImportError:  # pragma: no cover
         if _path != __file__ and os.path.exists(_path):
             with open(_path) as fd:
                 exec(fd, globals())
-    # noinspection PyUnboundLocalVariable
-    del os, extend_path, _path, fd, exec_  # noqa
+
+    del os, extend_path, _path
