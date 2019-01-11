@@ -175,13 +175,12 @@ class Core(ConfigurableComponent):
         self.log("Starting system (channel ", self.channel, ")")
 
         self.insecure = kwargs['insecure']
-        self.quiet = kwargs['quiet']
         self.development = kwargs['dev']
 
         self.instance = name
 
-        self.host = instance['web_hostname']
-        self.port = instance['web_port']
+        self.host = instance['web_hostname'] if 'web_hostname' not in kwargs else kwargs['web_hostname']
+        self.port = instance['web_port'] if 'web_port' not in kwargs else kwargs['web_port']
 
         self.certificate = certificate = instance['web_certificate'] if instance['web_certificate'] != '' else None
 
@@ -201,19 +200,21 @@ class Core(ConfigurableComponent):
             self.frontend_target = get_path('lib', 'frontend')
             self.module_root = ""
 
-        self.log('PATHS:', self.frontend_root, self.frontend_target, self.module_root)
+        self.log('Frontend & module paths:', self.frontend_root, self.frontend_target, self.module_root, lvl=verbose)
 
         self.loadable_components = {}
         self.running_components = {}
 
         self.frontend_running = False
         self.frontend_watcher = None
-        self.frontend_watchmanager = None
+        self.frontend_watch_manager = None
 
         self.static = None
         self.websocket = None
 
-        self.component_blacklist = [  # 'camera',
+        # TODO: Cleanup
+        self.component_blacklist = [
+            # 'camera',
             # 'logger',
             # 'debugger',
             'recorder',
@@ -350,9 +351,16 @@ class Core(ConfigurableComponent):
                 certfile=self.certificate  # ,
                 # inherit=True
             ).register(self)
-        except PermissionError:
-            self.log('Could not open (privileged?) port, check '
-                     'permissions!', lvl=critical)
+        except PermissionError as e:
+            if self.port <= 1024:
+                self.log('Could not open privileged port (%i), check permissions!' % self.port, e, lvl=critical)
+            else:
+                self.log('Could not open port (%i):' % self.port, e, lvl=critical)
+        except OSError as e:
+            if e.errno == 98:
+                self.log('Port (%i) is already opened!' % self.port, lvl=critical)
+            else:
+                self.log('Could not open port (%i):' % self.port, e, lvl=critical)
 
     def _drop_privileges(self, *args):
         self.log("Dropping privileges", lvl=debug)
@@ -470,19 +478,19 @@ class Core(ConfigurableComponent):
             self.frontend_running = True
 
             if self.development:
-                self.frontend_watchmanager = pyinotify.WatchManager()
-                self.frontend_watcher = pyinotify.ThreadedNotifier(self.frontend_watchmanager, FrontendHandler(self))
+                self.frontend_watch_manager = pyinotify.WatchManager()
+                self.frontend_watcher = pyinotify.ThreadedNotifier(self.frontend_watch_manager, FrontendHandler(self))
                 self.frontend_watcher.start()
                 mask = pyinotify.IN_DELETE | pyinotify.IN_CREATE | pyinotify.IN_CLOSE_WRITE
-                self.log('ROOT:', self.frontend_root, lvl=error)
-                self.frontend_watchmanager.add_watch(self.module_root, mask, rec=True)
+                self.log('Frontend root:', self.frontend_root, lvl=debug)
+                self.frontend_watch_manager.add_watch(self.module_root, mask, rec=True)
 
     def _instantiate_components(self, clear=True):
         """Inspect all loadable components and run them"""
 
         if clear:
-            #import objgraph
-            #from copy import deepcopy
+            # import objgraph
+            # from copy import deepcopy
             from circuits.tools import kill
             from circuits import Component
             for comp in self.running_components.values():
@@ -572,12 +580,12 @@ def construct_graph(name, instance, args):
 
     isolog("Beginning graph assembly.", emitter='GRAPH')
 
-    if args['drawgraph']:
+    if args['draw_graph']:
         from circuits.tools import graph
 
         graph(app)
 
-    if args['opengui']:
+    if args['open_gui']:
         import webbrowser
         # TODO: Fix up that url:
         webbrowser.open("http://%s:%i/" % (args['host'], args['port']))
@@ -588,43 +596,24 @@ def construct_graph(name, instance, args):
 
 
 @click.command()
-@click.option("--port", "-p", help="Define port for server", type=int,
-              default=8055)
-#@click.option("--host", help="Define hostname for server", type=str,
-#              default='127.0.0.1')
-#@click.option("--cert", "--certificate", '-c', help="Certificate file path",
-#              type=str, default=None)
-#@click.option("--dbhost", help="Define hostname for database server",
-#              type=str, default='127.0.0.1:27017')
-#@click.option('--dbname', default='isomer-default', help='Define name of database (default: isomer-default)',
-#              metavar='<name>')
+@click.option("--web-port", "--port", "-p", help="Define port for server", type=int, default=8055)
+@click.option("--web-host", "--host", help="Define hostname for server", type=str, default='127.0.0.1')
+@click.option("--web-certificate", "--cert", '-c', help="Certificate file path", type=str, default=None)
 @click.option("--profile", help="Enable profiler", is_flag=True)
-@click.option("--opengui", help="Launch webbrowser for GUI inspection after "
-                                "startup", is_flag=True)
-@click.option("--drawgraph", help="Draw a snapshot of the component graph "
-                                  "after construction", is_flag=True)
-@click.option("--quiet", "-q", help="Suppress console output", is_flag=True)
-#@click.option("--log", help="Define console log level (0-100)", type=int,
-#              default=20)
-#@click.option("--logfileverbosity", help="Define file log level (0-100)",
-#              type=int, default=20)
-#@click.option("--logfilepath", default="/var/log/", help="Logfile path")
-#@click.option("--dolog", help="Write to logfile", is_flag=True)
-@click.option("--livelog", help="Log to in-memory structure as well", is_flag=True)
+@click.option("--open-gui", help="Launch web browser for GUI inspection after startup", is_flag=True)
+@click.option("--draw-graph", help="Draw a snapshot of the component graph after construction", is_flag=True)
+@click.option("--live-log", help="Log to in-memory structure as well", is_flag=True)
 @click.option("--debug", help="Run circuits debugger", is_flag=True)
 @click.option("--dev", help="Run development server", is_flag=True, default=True)
-#@click.option('--instance', default='default', help='Define name of instance',
-#              metavar='<name>')
 @click.option("--insecure", help="Keep privileges - INSECURE", is_flag=True)
-@click.option("--norun", help="Only assemble system, do not run", is_flag=True)
+@click.option("--no-run", "-n", help="Only assemble system, do not run", is_flag=True)
 @click.option("--blacklist", "-b", help="Blacklist a component", multiple=True, default=[])
 @click.pass_context
 def launch(ctx, run=True, **args):
     """Bootstrap basics, assemble graph and hand over control to the Core
     component"""
 
-    # isolog(ctx.__dict__, pretty=True)
-
+    print(args['web_port'])
     instance_name = ctx.obj['instance']
     instance = load_instance(instance_name)
     environment_name = ctx.obj['environment']
@@ -634,13 +623,13 @@ def launch(ctx, run=True, **args):
     database_host = ctx.obj['dbhost']
     database_name = ctx.obj['dbname']
 
-    if ctx.params['livelog'] is True:
+    if ctx.params['live_log'] is True:
         from isomer import logger
         logger.live = True
 
-    #if args['cert'] is not None:
-    #    isolog("Warning! Using SSL on the backend is currently not recommended!",
-    #           lvl=critical, emitter='CORE')
+    if args['web_certificate'] is not None:
+        isolog("Warning! Using SSL on the backend is currently not recommended!",
+               lvl=critical, emitter='CORE')
 
     isolog("Initializing database access", emitter='CORE', lvl=debug)
     initialize(database_host, database_name, instance_name)
@@ -648,7 +637,7 @@ def launch(ctx, run=True, **args):
     set_instance(instance_name, environment_name)
 
     server = construct_graph(instance_name, instance, args)
-    if run and not args['norun']:
+    if run and not args['no_run']:
         server.run()
 
     return server
