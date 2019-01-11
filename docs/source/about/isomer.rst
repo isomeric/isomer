@@ -5,4 +5,4 @@ Isomer
        :maxdepth: 2
        :glob:
 
-       hfos/*
+       isomer/*

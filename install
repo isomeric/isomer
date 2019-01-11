@@ -19,15 +19,15 @@ fi
 # Check if root
 if [ "$EUID" -ne 0 ]
 then
-    echo "You need root privileges to install HFOS. Use su or sudo."
+    echo "You need root privileges to install Isomer. Use su or sudo."
     echo
     echo "If you want to install in development mode, please read:"
-    echo "https://hfos.readthedocs.io/en/latest/dev/environment.html"
+    echo "https://isomer.readthedocs.io/en/latest/dev/environment.html"
     exit
 fi
 
 echo "If you run into any trouble, please read the documentation at"
-echo -e "\nhttps://hfos.readthedocs.io/en/latest/start/index.html\n"
+echo -e "\nhttps://isomer.readthedocs.io/en/latest/start/index.html\n"
 
 # Find our package manager
 if VERB="$( which apt-get )" 2> /dev/null; then

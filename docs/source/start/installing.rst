@@ -3,7 +3,8 @@
 Installing
 ==========
 
-First of all: The manual installation procedure is rather complex right now.
+First of all: The manual installation procedure is rather complex right now and
+the documentation is being overhauled for the 1.0.0 release of Isomer.
 
 We've :ref:`simplified the process by supplying an install script <quick_install>`,
 but if you encounter any trouble/problems, checkout these detailed installation steps.
@@ -17,20 +18,25 @@ route.
 
 Warning: **Isomer is not compatible with Python 2 and 3.2!**
 
+.. _manual_installation:
+
+Manual
+======
+
+These instructions are for Debian or Ubuntu based systems. Installation
+on other distributions is possible and being worked on.
+
 Preparation
 -----------
 
-These instructions are for Debian or Ubuntu based systems. Installation
-on other distributions is possible.
-
-Before doing anything with Isomer, be sure you have all the dependencies
+Before doing anything with Isomer, be sure to have all the dependencies
 installed via your distribution's package manager.
 
 For Debian Unstable use this:
 
 .. code-block:: sh
 
-    sudo apt-get install nginx mongodb python3.5 python3-pip python3-grib \
+    sudo apt-get install nginx mongodb python3 python3-pip python3-grib \
                            python3-bson python3-pymongo python3-serial
 
 If you want (and can, depending on your platform/distribution), install the
@@ -42,12 +48,14 @@ mongo and bson extensions for speedups:
 
 The system will need to get a bunch of more dependencies via npm to set up
 the frontend, so install npm and if necessary the nodejs-legacy-symlink
-package:
+package. The simple (but not so good) way is to use Debian's packages:
 
 .. code-block:: sh
 
     sudo apt-get install npm nodejs
     sudo npm install npm@4.2.0 -g
+
+The better way is :ref:`to install nodesource <https://github.com/nodesource/distributions#table-of-contents>`.
 
 If you want to install the full development dependencies to write
 documentation as well, you need to install the enchant package:
@@ -55,6 +63,8 @@ documentation as well, you need to install the enchant package:
 .. code-block:: sh
 
     sudo apt-get install enchant
+
+.. todo:: Remove module content:
 
 In case you want to use raster (or in future: vector) charts in Isomer' map module,
 you'll need to install libgdal and its binaries:
@@ -79,7 +89,7 @@ use git thus:
     mkdir ~/src
     cd ~/src
     git clone https://github.com/isomeric/isomer
-    cd hfos
+    cd isomer
     git submodule init
     git submodule update
     git pull
@@ -90,15 +100,15 @@ use git thus:
 Backend
 -------
 
-The manage tool usually can install everything you need. It starts by adding
+The iso-tool usually can install everything you need. It starts by adding
 a new system user for Isomer and generating a (currently only self signed)
 certificate.
 
 The process also involves installing the supplied modules, getting the frontend
 dependencies, building and installing the documentation, etc.
 
-It also creates two folders in /var (lib/hfos and cache/hfos) for hfos' tile-
-cache and other stuff as well as install basic default provisions into the
+It also creates a few folders in /var (lib/isomer, cache/isomer) for cache data
+and other stuff as well as install basic default provisions into the
 database.
 
 Finally, it installs and activates a systemd and nginx service script to launch
@@ -106,11 +116,11 @@ Isomer on bootup and make it available to users.
 
 .. code-block:: sh
 
-    virtualenv -p /usr/bin/python3.5 --system-site-packages venv
+    virtualenv -p /usr/bin/python3 --system-site-packages venv
     source venv/bin/activate
     pip install -Ur requirements.txt
     python setup.py develop
-    sudo venv/bin/python hfos_manage.py install all
+    sudo venv/bin/python ./iso install all
 
 If you want to develop (documentation) as well, you'll need to use the
 `requirements-dev.txt` instead of the normal one.
@@ -131,13 +141,13 @@ Documentation
 -------------
 
 The documentation is available online on `ReadTheDocs.org
-<https://hfos.readthedocs.org>`__.
+<https://isomer.readthedocs.org>`__.
 If you wish to build and install the included documentation for offline use,
 run these commands:
 
 .. code-block:: sh
 
-    sudo ./venv/bin/python hfos_manage.py install docs
+    sudo ./venv/bin/python ./iso install docs
 
 This installs all necessary documentation tools and copies the files to the
 expected Isomer web data folder.
@@ -159,13 +169,13 @@ Installing from a Source Package
 
 .. code-block:: sh
 
-   python setup.py install
+   python3 setup.py install
 
 For other installation options see:
 
 .. code-block:: sh
 
-   python setup.py --help install
+   python3 setup.py --help install
 
 
 Installing from the Development Repository
@@ -177,10 +187,10 @@ use setuptools and use the following command:
 
 .. code-block:: sh
 
-   python setup.py develop
+   python3 setup.py develop
 
-This will allow you to regularly update your copy of the hfos development
-repository by simply performing the following in the hfos working directory:
+This will allow you to regularly update your copy of the Isomer development
+repository by simply performing the following in the Isomer working directory:
 
 .. code-block:: sh
 
@@ -190,7 +200,7 @@ repository by simply performing the following in the hfos working directory:
 
 .. note::
    You do not need to reinstall if you have installed with setuptools via
-   the hfos repository and used setuptools to install in "develop" mode.
+   the Isomer repository and used setuptools to install in "develop" mode.
 
 Windows & OS X installation notes
 ---------------------------------

@@ -1,4 +1,4 @@
-.. _Fork hfos: https://github.com/isomeric/isomer/#fork-destination-box
+.. _Fork isomer: https://github.com/isomeric/isomer/#fork-destination-box
 .. _Chat with us: http://webchat.freenode.net/?randomnick=1&channels=hackerfleet&uio=d4
 .. _Create an Issue: https://github.com/isomeric/isomer/issues/new
 .. _Pull Request: https://github.com/isomeric/isomer/compare/

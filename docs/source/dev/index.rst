@@ -54,7 +54,7 @@ Translations
 ------------
 
 Most of (if not all) parts of the project can be translated and are waiting for your help.
-You can use `Transifex <https://www.transifex.com/hackerfleet-community/hfos/>`__ to translate all the strings
+You can use `Transifex <https://www.transifex.com/hackerfleet-community/isomer/>`__ to translate all the strings
 we have or work with your favourite PO Editor. Have a look at :ref:`translating` for more details.
 
 

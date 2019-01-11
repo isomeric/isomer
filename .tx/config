@@ -2,262 +2,262 @@
 host = https://www.transifex.com
 type = PO
 
-[hfos.frontend]
+[isomer.frontend]
 file_filter = locale/<lang>/LC_MESSAGES/frontend.po
 source_file = locale/frontend.pot
 source_lang = en
 
-[hfos.backend]
+[isomer.backend]
 file_filter = locale/<lang>/LC_MESSAGES/backend.po
 source_file = locale/backend.pot
 source_lang = en
 
-[hfos.roadmap]
+[isomer.roadmap]
 file_filter = locale/<lang>/LC_MESSAGES/roadmap.po
 source_file = docs/build/locale/roadmap.pot
 source_lang = en
 
-[hfos.faq]
+[isomer.faq]
 file_filter = locale/<lang>/LC_MESSAGES/faq.po
 source_file = docs/build/locale/faq.pot
 source_lang = en
 
-[hfos.todo]
+[isomer.todo]
 file_filter = locale/<lang>/LC_MESSAGES/todo.po
 source_file = docs/build/locale/todo.pot
 source_lang = en
 
-[hfos.glossary_]
+[isomer.glossary_]
 file_filter = locale/<lang>/LC_MESSAGES/glossary.po
 source_file = docs/build/locale/glossary.pot
 source_lang = en
 
-[hfos.changes]
+[isomer.changes]
 file_filter = locale/<lang>/LC_MESSAGES/changes.po
 source_file = docs/build/locale/changes.pot
 source_lang = en
 
-[hfos.contributors]
+[isomer.contributors]
 file_filter = locale/<lang>/LC_MESSAGES/contributors.po
 source_file = docs/build/locale/contributors.pot
 source_lang = en
 
-[hfos.index]
+[isomer.index]
 file_filter = locale/<lang>/LC_MESSAGES/index.po
 source_file = docs/build/locale/index.pot
 source_lang = en
 
-[hfos.readme]
+[isomer.readme]
 file_filter = locale/<lang>/LC_MESSAGES/readme.po
 source_file = docs/build/locale/readme.pot
 source_lang = en
 
-[hfos.manual--index]
+[isomer.manual--index]
 file_filter = locale/<lang>/LC_MESSAGES/manual/index.po
 source_file = docs/build/locale/manual/index.pot
 source_lang = en
 
-[hfos.start--installing]
+[isomer.start--installing]
 file_filter = locale/<lang>/LC_MESSAGES/start/installing.po
 source_file = docs/build/locale/start/installing.pot
 source_lang = en
 
-[hfos.start--quick]
+[isomer.start--quick]
 file_filter = locale/<lang>/LC_MESSAGES/start/quick.po
 source_file = docs/build/locale/start/quick.pot
 source_lang = en
 
-[hfos.start--downloading]
+[isomer.start--downloading]
 file_filter = locale/<lang>/LC_MESSAGES/start/downloading.po
 source_file = docs/build/locale/start/downloading.pot
 source_lang = en
 
-[hfos.start--requirements]
+[isomer.start--requirements]
 file_filter = locale/<lang>/LC_MESSAGES/start/requirements.po
 source_file = docs/build/locale/start/requirements.pot
 source_lang = en
 
-[hfos.start--tools]
+[isomer.start--tools]
 file_filter = locale/<lang>/LC_MESSAGES/start/tools.po
 source_file = docs/build/locale/start/tools.pot
 source_lang = en
 
-[hfos.start--index]
+[isomer.start--index]
 file_filter = locale/<lang>/LC_MESSAGES/start/index.po
 source_file = docs/build/locale/start/index.pot
 source_lang = en
 
-[hfos.start--cli--manage]
+[isomer.start--cli--manage]
 file_filter = locale/<lang>/LC_MESSAGES/start/cli/manage.po
 source_file = docs/build/locale/start/cli/manage.pot
 source_lang = en
 
-[hfos.start--cli--launcher]
+[isomer.start--cli--launcher]
 file_filter = locale/<lang>/LC_MESSAGES/start/cli/launcher.po
 source_file = docs/build/locale/start/cli/launcher.pot
 source_lang = en
 
-[hfos.start--platforms--rpi]
+[isomer.start--platforms--rpi]
 file_filter = locale/<lang>/LC_MESSAGES/start/platforms/rpi.po
 source_file = docs/build/locale/start/platforms/rpi.pot
 source_lang = en
 
-[hfos.dev--introduction]
+[isomer.dev--introduction]
 file_filter = locale/<lang>/LC_MESSAGES/dev/introduction.po
 source_file = docs/build/locale/dev/introduction.pot
 source_lang = en
 
-[hfos.dev--contributing]
+[isomer.dev--contributing]
 file_filter = locale/<lang>/LC_MESSAGES/dev/contributing.po
 source_file = docs/build/locale/dev/contributing.pot
 source_lang = en
 
-[hfos.dev--processes]
+[isomer.dev--processes]
 file_filter = locale/<lang>/LC_MESSAGES/dev/processes.po
 source_file = docs/build/locale/dev/processes.pot
 source_lang = en
 
-[hfos.dev--environment]
+[isomer.dev--environment]
 file_filter = locale/<lang>/LC_MESSAGES/dev/environment.po
 source_file = docs/build/locale/dev/environment.pot
 source_lang = en
 
-[hfos.dev--standards]
+[isomer.dev--standards]
 file_filter = locale/<lang>/LC_MESSAGES/dev/standards.po
 source_file = docs/build/locale/dev/standards.pot
 source_lang = en
 
-[hfos.dev--index]
+[isomer.dev--index]
 file_filter = locale/<lang>/LC_MESSAGES/dev/index.po
 source_file = docs/build/locale/dev/index.pot
 source_lang = en
 
-[hfos.dev--packages--hfos_ldap]
-file_filter = locale/<lang>/LC_MESSAGES/dev/packages/hfos.ldap.po
-source_file = docs/build/locale/dev/packages/hfos.ldap.pot
+[isomer.dev--packages--isomer_ldap]
+file_filter = locale/<lang>/LC_MESSAGES/dev/packages/isomer.ldap.po
+source_file = docs/build/locale/dev/packages/isomer.ldap.pot
 source_lang = en
 
-[hfos.dev--packages--hfos_alert]
-file_filter = locale/<lang>/LC_MESSAGES/dev/packages/hfos.alert.po
-source_file = docs/build/locale/dev/packages/hfos.alert.pot
+[isomer.dev--packages--isomer_alert]
+file_filter = locale/<lang>/LC_MESSAGES/dev/packages/isomer.alert.po
+source_file = docs/build/locale/dev/packages/isomer.alert.pot
 source_lang = en
 
-[hfos.dev--packages--modules]
+[isomer.dev--packages--modules]
 file_filter = locale/<lang>/LC_MESSAGES/dev/packages/modules.po
 source_file = docs/build/locale/dev/packages/modules.pot
 source_lang = en
 
-[hfos.dev--packages--robot]
+[isomer.dev--packages--robot]
 file_filter = locale/<lang>/LC_MESSAGES/dev/packages/robot.po
 source_file = docs/build/locale/dev/packages/robot.pot
 source_lang = en
 
-[hfos.dev--packages--hfos]
-file_filter = locale/<lang>/LC_MESSAGES/dev/packages/hfos.po
-source_file = docs/build/locale/dev/packages/hfos.pot
+[isomer.dev--packages--isomer]
+file_filter = locale/<lang>/LC_MESSAGES/dev/packages/isomer.po
+source_file = docs/build/locale/dev/packages/isomer.pot
 source_lang = en
 
-[hfos.dev--packages--robot_provisions]
+[isomer.dev--packages--robot_provisions]
 file_filter = locale/<lang>/LC_MESSAGES/dev/packages/robot.provisions.po
 source_file = docs/build/locale/dev/packages/robot.provisions.pot
 source_lang = en
 
-[hfos.dev--packages--wiki_provisions]
+[isomer.dev--packages--wiki_provisions]
 file_filter = locale/<lang>/LC_MESSAGES/dev/packages/wiki.provisions.po
 source_file = docs/build/locale/dev/packages/wiki.provisions.pot
 source_lang = en
 
-[hfos.dev--packages--wiki]
+[isomer.dev--packages--wiki]
 file_filter = locale/<lang>/LC_MESSAGES/dev/packages/wiki.po
 source_file = docs/build/locale/dev/packages/wiki.pot
 source_lang = en
 
-[hfos.dev--packages--ldap]
+[isomer.dev--packages--ldap]
 file_filter = locale/<lang>/LC_MESSAGES/dev/packages/ldap.po
 source_file = docs/build/locale/dev/packages/ldap.pot
 source_lang = en
 
-[hfos.dev--api--index]
+[isomer.dev--api--index]
 file_filter = locale/<lang>/LC_MESSAGES/dev/api/index.po
 source_file = docs/build/locale/dev/api/index.pot
 source_lang = en
 
-[hfos.dev--man--schemata]
+[isomer.dev--man--schemata]
 file_filter = locale/<lang>/LC_MESSAGES/dev/man/schemata.po
 source_file = docs/build/locale/dev/man/schemata.pot
 source_lang = en
 
-[hfos.dev--man--provisions]
+[isomer.dev--man--provisions]
 file_filter = locale/<lang>/LC_MESSAGES/dev/man/provisions.po
 source_file = docs/build/locale/dev/man/provisions.pot
 source_lang = en
 
-[hfos.dev--man--authentication]
+[isomer.dev--man--authentication]
 file_filter = locale/<lang>/LC_MESSAGES/dev/man/authentication.po
 source_file = docs/build/locale/dev/man/authentication.pot
 source_lang = en
 
-[hfos.dev--man--index]
+[isomer.dev--man--index]
 file_filter = locale/<lang>/LC_MESSAGES/dev/man/index.po
 source_file = docs/build/locale/dev/man/index.pot
 source_lang = en
 
-[hfos.dev--man--web]
+[isomer.dev--man--web]
 file_filter = locale/<lang>/LC_MESSAGES/dev/man/web.po
 source_file = docs/build/locale/dev/man/web.pot
 source_lang = en
 
-[hfos.dev--man--misc--tools]
+[isomer.dev--man--misc--tools]
 file_filter = locale/<lang>/LC_MESSAGES/dev/man/misc/tools.po
 source_file = docs/build/locale/dev/man/misc/tools.pot
 source_lang = en
 
-[hfos.about--hackerfleet]
+[isomer.about--hackerfleet]
 file_filter = locale/<lang>/LC_MESSAGES/about/hackerfleet.po
 source_file = docs/build/locale/about/hackerfleet.pot
 source_lang = en
 
-[hfos.about--hfos]
-file_filter = locale/<lang>/LC_MESSAGES/about/hfos.po
-source_file = docs/build/locale/about/hfos.pot
+[isomer.about--isomer]
+file_filter = locale/<lang>/LC_MESSAGES/about/isomer.po
+source_file = docs/build/locale/about/isomer.pot
 source_lang = en
 
-[hfos.about--hfos--hfos_differences]
-file_filter = locale/<lang>/LC_MESSAGES/about/hfos/hfos_differences.po
-source_file = docs/build/locale/about/hfos/hfos_differences.pot
+[isomer.about--isomer--isomer_differences]
+file_filter = locale/<lang>/LC_MESSAGES/about/isomer/isomer_differences.po
+source_file = docs/build/locale/about/isomer/isomer_differences.pot
 source_lang = en
 
-[hfos.about--hfos--hfos]
-file_filter = locale/<lang>/LC_MESSAGES/about/hfos/hfos.po
-source_file = docs/build/locale/about/hfos/hfos.pot
+[isomer.about--isomer--isomer]
+file_filter = locale/<lang>/LC_MESSAGES/about/isomer/isomer.po
+source_file = docs/build/locale/about/isomer/isomer.pot
 source_lang = en
 
-[hfos.about--hfos--hfos_details]
-file_filter = locale/<lang>/LC_MESSAGES/about/hfos/hfos_details.po
-source_file = docs/build/locale/about/hfos/hfos_details.pot
+[isomer.about--isomer--isomer_details]
+file_filter = locale/<lang>/LC_MESSAGES/about/isomer/isomer_details.po
+source_file = docs/build/locale/about/isomer/isomer_details.pot
 source_lang = en
 
-[hfos.about--hackerfleet--contact]
+[isomer.about--hackerfleet--contact]
 file_filter = locale/<lang>/LC_MESSAGES/about/hackerfleet/contact.po
 source_file = docs/build/locale/about/hackerfleet/contact.pot
 source_lang = en
 
-[hfos.about--hackerfleet--who]
+[isomer.about--hackerfleet--who]
 file_filter = locale/<lang>/LC_MESSAGES/about/hackerfleet/who.po
 source_file = docs/build/locale/about/hackerfleet/who.pot
 source_lang = en
 
-[hfos.about--hackerfleet--goals]
+[isomer.about--hackerfleet--goals]
 file_filter = locale/<lang>/LC_MESSAGES/about/hackerfleet/goals.po
 source_file = docs/build/locale/about/hackerfleet/goals.pot
 source_lang = en
 
-[hfos.about--hackerfleet--founders]
+[isomer.about--hackerfleet--founders]
 file_filter = locale/<lang>/LC_MESSAGES/about/hackerfleet/founders.po
 source_file = docs/build/locale/about/hackerfleet/founders.pot
 source_lang = en
 
-[hfos.about--hackerfleet--timeline]
+[isomer.about--hackerfleet--timeline]
 file_filter = locale/<lang>/LC_MESSAGES/about/hackerfleet/timeline.po
 source_file = docs/build/locale/about/hackerfleet/timeline.pot
 source_lang = en

@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-# HFOS - Hackerfleet Operating System
-# ===================================
+# Isomer - The distributed application framework
+# ==============================================
 # Copyright (C) {{copyright_begin}}-{{copyright_end}} {{{maintainer_name}}} <{{maintainer_email}}> and others.
 #
 # This program is free software: you can redistribute it and/or modify

@@ -4,8 +4,8 @@
     "author_email": "riot@c-base.org",
     "author_name": "Heiko 'riot' Weinen",
     "license": "AGPLv3",
-    "program_name": "HFOS",
-    "program_description": "",
+    "program_name": "Isomer",
+    "program_description": "The distributed application framework",
     "maintainer_email": "riot@c-base.org",
     "repository": "https://github.com/isomeric/isomer",
     "maintainer_name": "Heiko 'riot' Weinen"

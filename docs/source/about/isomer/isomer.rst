@@ -1,7 +1,7 @@
-About HFOS
-==========
+About Isomer
+============
 
-The Hackerfleet Operating System (Short HFOS) is being developed specifically to
+The Hackerfleet Operating System (Short Isomer) is being developed specifically to
 target a handful of properties and challenges, that are unique to the projected use of the system:
 
 * Locally offline and undisruptable operation (True Internet!)

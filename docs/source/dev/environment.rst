@@ -55,8 +55,8 @@ Example:
 
 .. code-block:: bash
 
-    git clone git@github.com:yourgithubaccount/hfos.git
-    cd hfos
-    mkvirtualenv hfos
+    git clone git@github.com:yourgithubaccount/isomer.git
+    cd isomer
+    mkvirtualenv isomer
     pip install -r requirements-dev.txt
     python setup.py develop

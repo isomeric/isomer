@@ -1,7 +1,7 @@
 {
-  "name": "hfos-{{plugin_name}}",
+  "name": "isomer-{{plugin_name}}",
   "version": "{{version}}",
-  "description": "HFOS - {{description}}",
+  "description": "Isomer - {{description}}",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

@@ -6,7 +6,7 @@
 # Usage Examples(s)::
 #
 #     $ docker run -i -t isomeric/isomer iso launch
-#     $ docker run -i -t -p 127.0.0.1:80:80 --name hfos-test-live -t isomeric/isomer
+#     $ docker run -i -t -p 127.0.0.1:80:80 --name isomer-test-live -t isomeric/isomer
 #
 # VERSION: 1.1.0
 #

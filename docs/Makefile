@@ -57,7 +57,7 @@ clean:
 	rm -rf $(BUILDDIR)/*
 
 modules:
-	for dir in $(SUBDIRS) ; do  ( $(SPHINXAPIDOC) --implicit-namespaces -o $(MODULEDIR)/`basename $$dir` $$dir/hfos ) ; done
+	for dir in $(SUBDIRS) ; do  ( $(SPHINXAPIDOC) --implicit-namespaces -o $(MODULEDIR)/`basename $$dir` $$dir/isomer ) ; done
 	@echo "Done."
 
 html:
@@ -96,9 +96,9 @@ qthelp:
 	@echo
 	@echo "Build finished; now you can run "qcollectiongenerator" with the" \
 	      ".qhcp project file in $(BUILDDIR)/qthelp, like this:"
-	@echo "# qcollectiongenerator $(BUILDDIR)/qthelp/HFOS.qhcp"
+	@echo "# qcollectiongenerator $(BUILDDIR)/qthelp/isomer.qhcp"
 	@echo "To view the help file:"
-	@echo "# assistant -collectionFile $(BUILDDIR)/qthelp/HFOS.qhc"
+	@echo "# assistant -collectionFile $(BUILDDIR)/qthelp/isomer.qhc"
 
 applehelp:
 	$(SPHINXBUILD) -b applehelp $(ALLSPHINXOPTS) $(BUILDDIR)/applehelp
@@ -113,8 +113,8 @@ devhelp:
 	@echo
 	@echo "Build finished."
 	@echo "To view the help file:"
-	@echo "# mkdir -p $$HOME/.local/share/devhelp/HFOS"
-	@echo "# ln -s $(BUILDDIR)/devhelp $$HOME/.local/share/devhelp/HFOS"
+	@echo "# mkdir -p $$HOME/.local/share/devhelp/isomer"
+	@echo "# ln -s $(BUILDDIR)/devhelp $$HOME/.local/share/devhelp/isomer"
 	@echo "# devhelp"
 
 epub:

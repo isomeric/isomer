@@ -9,9 +9,9 @@
 
 from setuptools import setup, find_packages
 
-setup(name="hfos-{{plugin_name}}",
+setup(name="isomer-{{plugin_name}}",
       version="{{version}}",
-      description="HFOS module: {{description}}",
+      description="Isomer module: {{description}}",
       author="{{author_name}}",
       author_email="{{author_email}}",
       url="https://github.com/{{github_url}}/",
@@ -22,11 +22,11 @@ setup(name="hfos-{{plugin_name}}",
           {{keyword_list}}
       ],
       dependency_links=[],
-      install_requires=['hfos==1.1.0'],
+      install_requires=['isomer==1.0.0'],
       entry_points="""[isomer.components]
-          {{component_name}}=hfos.{{plugin_name}}.{{plugin_name}}:{{component_name}}Component
+          {{component_name}}=isomer.{{plugin_name}}.{{plugin_name}}:{{component_name}}Component
 [isomer.schemata]
-    {{component_name}}Schema=hfos.{{plugin_name}}.schemata:{{component_name}}Schema
+    {{component_name}}Schema=isomer.{{plugin_name}}.schemata:{{component_name}}Schema
 """,
       test_suite="tests.main.main",
       )

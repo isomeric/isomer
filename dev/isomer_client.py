@@ -13,9 +13,9 @@ from json import dumps, loads
 from dev.tools import ask
 
 
-class HFOSClient(LoggingComponent):
+class IsomerClient(LoggingComponent):
     def __init__(self, *args, **kwargs):
-        super(HFOSClient, self).__init__(*args, **kwargs)
+        super(IsomerClient, self).__init__(*args, **kwargs)
         self.url = '{protocol}://{host}:{port}/websocket'.format(**kwargs)
         self.client = WebSocketClient(self.url).register(self)
         self.username = kwargs.get('username')
@@ -112,7 +112,7 @@ def main(**kwargs):
     manager = Manager()
     if kwargs.get('debug'):
         debugger = Debugger().register(manager)
-    client = HFOSClient(**kwargs).register(manager)
+    client = IsomerClient(**kwargs).register(manager)
 
     manager.run()
 

@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-# HFOS - Hackerfleet Operating System
-# ===================================
+# Isomer - The distributed application framework
+# ==============================================
 # Copyright (C) 2011-2018 Heiko 'riot' Weinen <riot@c-base.org> and others.
 #
 # This program is free software: you can redistribute it and/or modify
@@ -39,7 +39,7 @@ import isomer.component
 
 
 def test_uniquename():
-    """Tests uniquename functionality of HFOS base components"""
+    """Tests uniquename functionality of Isomer base components"""
 
     a = pytest.TestComponent()
     b = pytest.TestComponent()
@@ -49,7 +49,7 @@ def test_uniquename():
 
 
 def test_named():
-    """Tests named HFOS base components"""
+    """Tests named Isomer base components"""
 
     a = pytest.TestComponent(uniquename="BERTRAM")
     pytest.clean_test_components()

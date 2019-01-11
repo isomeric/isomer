@@ -4,7 +4,6 @@ Communication
 =============
 
 * `github.com/Hackerfleet <https://github.com/Hackerfleet>`__
-* `Waffle.io/hackerfleet/hfos <https://waffle.io/hackerfleet/hfos>`__
 * `Twitter.com/hackerfleet <https://twitter.com/hackerfleet>`__
 * `Facebook/hackerfleet <https://www.facebook.com/Hackerfleet>`__
 * `hackerfleet.soup.io <http://hackerfleet.soup.io/>`__

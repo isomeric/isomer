@@ -1,4 +1,4 @@
-==================
+====================
 Isomer Documentation
 ====================
 
@@ -16,10 +16,10 @@ About
     :maxdepth: 1
 
     about/hackerfleet
-    about/hfos
+    about/isomer
 
-Sailor's Manual
-===============
+User's Manual
+=============
 
 .. toctree::
     :maxdepth: 1

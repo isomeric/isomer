@@ -2,12 +2,12 @@
 
 /**
  * @ngdoc function
- * @name hfosFrontendApp.controller:{{component_name}}Controller
+ * @name isomerFrontendApp.controller:{{component_name}}Controller
  * @description
  * # {{component_name}}Controller
- * Controller of the hfosFrontendApp {{plugin_name}} module
+ * Controller of the isomerFrontendApp {{plugin_name}} module
  */
-angular.module('hfosFrontendApp')
+angular.module('isomerFrontendApp')
     .controller('{{component_name}}Controller', function ($scope, ObjectProxy) {
         $scope.variable = 'Hello World!';
 

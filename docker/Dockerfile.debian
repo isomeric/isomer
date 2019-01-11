@@ -13,7 +13,7 @@
 #
 # If you want to run a productive instance with working SSL:
 #     $ docker run -i -p 127.0.0.1:443:443 -t isomeric/isomer /bin/bash -c "/etc/init.d/mongodb start && \
-#       python3 iso launch --port 443 --cert /etc/ssl/certs/hfos/selfsigned.pem --log 10 --dev"
+#       python3 iso launch --port 443 --cert /etc/ssl/certs/isomer/selfsigned.pem --log 10 --dev"
 #
 # VERSION: 1.1.2
 #

@@ -1,8 +1,8 @@
 [run]
-omit = hfos/__init__.py
-       hfos/web/__init__.py
-       hfos/provisions/__init__.py
-       hfos/schemata/__init__.py
+omit = isomer/__init__.py
+       isomer/ui/__init__.py
+       isomer/provisions/__init__.py
+       isomer/schemata/__init__.py
        tests/*
 
 [html]

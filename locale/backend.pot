@@ -215,3 +215,31 @@ msgstr ""
 msgid "Timespan for repeated escalation"
 msgstr ""
 
+#: modules/enrol/isomer/enrol/enrolmanager.py:410
+msgid "You did not solve the captcha correctly."
+msgstr ""
+
+#: modules/enrol/isomer/enrol/enrolmanager.py:417
+msgid "You have to supply all required fields."
+msgstr ""
+
+#: modules/enrol/isomer/enrol/enrolmanager.py:420
+msgid "The supplied email address seems invalid"
+msgstr ""
+
+#: modules/enrol/isomer/enrol/enrolmanager.py:424
+msgid "Your mail address cannot be used."
+msgstr ""
+
+#: modules/enrol/isomer/enrol/enrolmanager.py:429
+msgid "Your password is not long enough."
+msgstr ""
+
+#: modules/enrol/isomer/enrol/enrolmanager.py:434
+msgid "Your username is not long enough."
+msgstr ""
+
+#: modules/enrol/isomer/enrol/enrolmanager.py:438
+msgid "The username you supplied is not available."
+msgstr ""
+

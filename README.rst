@@ -44,6 +44,8 @@ There is more than one way of installing Isomer, `see the quickstart instruction
 
 The simplest way is to use the supplied installation script:
 
+**Probably broken right now! Will be fixed for the 1.0 release, promised!**
+
 .. code-block:: sh
 
     sudo ./install

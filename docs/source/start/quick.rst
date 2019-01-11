@@ -10,7 +10,7 @@ The script currently only supports Debian based systems.
 
 .. note::
    Feel free to contribute installation steps for other distros - that is mostly adapting the package manager
-   and package names
+   and package names in isomer/tool/defaults.py
 
 To use the install script, get the source code (see :ref:`Getting the source <getting_source>`) if you
 don't have it already, then invoke the script with root permissions:

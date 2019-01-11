@@ -16,8 +16,8 @@ Contains
 
 """
 
-from hfos.component import ConfigurableComponent
-from hfos.logger import warn, critical, error, debug, verbose
+from isomer.component import ConfigurableComponent
+from isomer.logger import warn, critical, error, debug, verbose
 
 __author__ = "{{author_name}} <{{author_email}}>"
 

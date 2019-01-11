@@ -56,7 +56,7 @@ We use the following tools to develop Isomer and share code:
 - **Documentation Hosting:**
   `Read the Docs <http://isomer.readthedocs.org>`_
 - **Package Hosting:**
-  `Python Package Index (PyPi) <http://pypi.python.org/pypi/hfos>`_
+  `Python Package Index (PyPi) <http://pypi.python.org/pypi/isomer>`_
 - **Docker Hub Automated Builds:**
   `Dockerhub <https://hub.docker.com/r/isomeric/isomer/>`_
 - **Continuous Integration:**
@@ -66,7 +66,7 @@ We use the following tools to develop Isomer and share code:
 - **Frontend Testing:**
   `Browserstack <https://browserstack.com>`_
 - **Translations:**
-  `Transifex <https://www.transifex.com/hackerfleet-community/hfos/>`__
+  `Transifex <https://www.transifex.com/hackerfleet-community/isomer/>`__
 
 We strongly suggest familiarizing with all of them, to make sure you understand our CI.
 
