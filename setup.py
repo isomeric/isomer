@@ -100,19 +100,29 @@ A modern, opensource approach to collaborative productivity.
 This software package is supposed to run on your ship/car/plane/ufo's board
 computer.
 See https://github.com/isomeric/isomer""",
-      install_requires=['circuits>=3.1',
-                        'formal>=0.6.0',
-                        'pymongo>=3.2',
-                        'jsonschema==2.6.0',
-                        'pystache>=0.5.4',
-                        'click>=6.7.0',
-                        'click-didyoumean>=0.0.3',
-                        'click-repl>=0.1.2',
-                        'click-plugins>=1.0.3',
-                        'prompt-toolkit>=1.0.15',
-                        'tomlkit>=0.4.6',
-                        'spur>=0.3.20'
-                        ],
+      install_requires=[
+          'circuits>=3.1',
+          'click-didyoumean>=0.0.3',
+          'click-plugins>=1.0.3',
+          'click-repl>=0.1.2',
+          'click>=6.7.0',
+          'deepdiff>=3.2.1',
+          'distro>=1.3',
+          'dpath>=1.4.0',
+          'formal>=0.6.0',
+          'gitpython>=2.1.1',
+          'jsonschema==2.6.0',
+          'networkx',
+          'prompt-toolkit>=1.0.15',
+          'pycountry>=18.2',
+          'pyinotify>=0.9.6',
+          'pymongo>=3.2',
+          'pyOpenSSL>=17.0.0',
+          'pystache>=0.5.4',
+          'python-dateutil>=2.5.3',
+          'spur>=0.3.20',
+          'tomlkit>=0.4.6'
+      ],
       data_files=datafiles,
       entry_points="""[console_scripts]
     iso=iso:main
@@ -145,10 +155,10 @@ See https://github.com/isomeric/isomer""",
     user=isomer.provisions.user:provision
     """,
       use_scm_version={
-            "write_to": "isomer/scm_version.py",
+          "write_to": "isomer/scm_version.py",
       },
       setup_requires=[
-            "setuptools_scm"
+          "setuptools_scm"
       ],
       test_suite="tests.main.main",
       )
