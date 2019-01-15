@@ -23,7 +23,6 @@ __license__ = "AGPLv3"
 
 import getpass
 import sys
-import spur
 import distro
 
 import hashlib
@@ -32,6 +31,21 @@ import os
 from isomer.logger import isolog, error, verbose, debug, warn
 from isomer.tool.defaults import db_host_default, db_host_help, db_host_metavar, db_default, db_help, db_metavar, \
     platforms
+
+try:
+    import spur
+except ImportError:
+    import subprocess
+
+
+    class spur_mock(object):
+        def __init__(self):
+            pass
+
+        def LocalShell(self):
+            return subprocess
+
+    spur = spur_mock()
 
 
 def log(*args, **kwargs):
