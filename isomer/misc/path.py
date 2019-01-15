@@ -25,7 +25,7 @@ __license__ = "AGPLv3"
 """
 
 import os.path
-from isomer.logger import isolog
+from isomer.tool import log, warn
 
 ETC_BASE_PATH = '/etc/isomer'
 
@@ -59,22 +59,27 @@ def set_etc_path(path):
 
 
 def get_etc_path():
+    """Get currently set configuration base path"""
     return ETC_BASE_PATH
 
 
 def get_etc_instance_path():
+    """Get currently set instance configurations base path"""
     return ETC_INSTANCE_PATH
 
 
 def get_etc_remote_path():
+    """Get currently set remote configurations base path"""
     return ETC_REMOTE_PATH
 
 
 def get_etc_remote_keys_path():
+    """Get currently set remote keys base path"""
     return ETC_REMOTE_KEYS_PATH
 
 
 def get_log_path():
+    """Get currently set logging base path"""
     if PREFIX not in (None, ''):
         path = os.path.join(PREFIX, 'var', 'log', 'isomer')
     else:
@@ -83,6 +88,7 @@ def get_log_path():
 
 
 def set_prefix(prefix):
+    """Set a new base prefix (Caution!)"""
     global PREFIX
 
     PREFIX = prefix
@@ -99,8 +105,9 @@ def set_instance(instance, environment, prefix=None):
     ENVIRONMENT = environment
     if prefix is not None:
         PREFIX = prefix
+        log('Warning! Prefix is set:', PREFIX, lvl=warn)
 
-    isolog('Instance: %s Environment: %s Prefix: %s' % (INSTANCE, ENVIRONMENT, PREFIX))
+    log('Instance: %s Environment: %s' % (INSTANCE, ENVIRONMENT))
 
 
 def get_path(location, subfolder, ensure=False):
