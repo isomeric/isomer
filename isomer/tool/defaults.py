@@ -58,6 +58,7 @@ platforms = {
             'mongodb', 'python3', 'python3-pip', 'python3-grib',
             'python3-bson', 'python3-pymongo', 'python3-serial',
             'python3-pymongo-ext', 'python3-bson-ext', 'python3-dev',
+            'python3-cffi', 'libffi-dev', 'libssl-dev',
             'nodejs', 'enchant', 'nginx-full', 'virtualenv', 'git',
             'gdal-bin', 'python-gdal', 'nodejs'
         ]  # TODO: Kick out module dependencies (mostly gdal, grib and serial)
