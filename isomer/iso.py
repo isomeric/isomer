@@ -33,6 +33,11 @@ __license__ = "AGPLv3"
 
 import sys
 
+if sys.version_info.major < 3:
+    print('The iso tool has been evoked with an older Python version. '
+          'Please restart the iso tool to use Python3.')
+    sys.exit()
+
 try:
     from isomer.tool import install_isomer, ask
 except ImportError as e:
@@ -41,7 +46,7 @@ except ImportError as e:
     # python3-dev
     # python3-cffi, libffi-dev, libssl-dev (for spur)
     # python3-pip
-    print('Cannot run iso-tool:', e, typ(e))
+    print('Cannot run iso-tool:', e, type(e))
     print('Please run "python3 setup.py install" first.\n'
           'If you get an error about setuptools, install python3 setuptools for your distribution.\n\n'
           'For more information, please read the manual installation instructions:\n'
@@ -67,15 +72,8 @@ def main():
             sys.exit()
 
         install_isomer()
-
-        try:
-            from isomer.tool.tool import isotool
-        except ImportError as e:
-            print('Cannot import isomer.tool.tool: ', type(e), e)
-            if sys.version_info.major < 3:
-                print('The iso tool has been evoked with an older Python version. '
-                      'Please restart the iso tool to use Python3.')
-            sys.exit()
+        print('Please restart the tool')
+        sys.exit()
 
     isotool(obj={})
 
