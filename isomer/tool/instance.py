@@ -36,7 +36,6 @@ import tomlkit
 import click
 import os
 import shutil
-from OpenSSL import crypto
 from click_didyoumean import DYMGroup
 
 from isomer.logger import error, warn, debug, critical
@@ -278,7 +277,7 @@ def install(ctx, source, url, force):
 
         log('Repo:', repository, lvl=debug)
         env['version'] = repository.git.describe()
-    except exc.InvalidGitRepositoryError:
+    except (exc.InvalidGitRepositoryError, exc.NoSuchPathError):
         log('Not running from a git repository; Using isomer.version', lvl=warn)
         env['version'] = version
 
@@ -290,9 +289,12 @@ def install(ctx, source, url, force):
     if not success:
         log(format_result(result), lvl=error)
 
-    if _install_backend(ctx) and _install_modules(next_environment, modules):
-        log('Backend and modules successfully installed')
+    if _install_backend(ctx):
+        log('Backend successfully installed')
         env['installed'] = True
+    if _install_modules(next_environment, modules):
+        log('Modules successfully installed')
+        #env['installed_modules'] = True
     if _install_provisions(instance_config, next_environment):
         log('Provisions installed')
         env['provisioned'] = True
@@ -474,6 +476,7 @@ def _install_provisions(instance_config, env):
         './iso', '-nc', '--clog', '5', '--config-dir', get_etc_path(), '-i', instance_config['name'], '-e', env,
         'install', 'provisions'])
     if not success:
+        log('Could not provision data:', lvl=error)
         log(format_result(result), lvl=error)
         return False
 
@@ -817,6 +820,94 @@ def validate_services(ctx):
     return True, "VALIDATION_NOT_IMPLEMENTED"
 
 
+@instance.command(short_help='instance ssl certificate')
+@click.option('--selfsigned', help="Use a self-signed certificate", default=True, is_flag=True)
+def cert(selfsigned):
+    """instance a local SSL certificate"""
+
+    instance_cert(selfsigned)
+
+
+def instance_cert(selfsigned):
+    """instance a local SSL certificate"""
+
+    check_root()
+
+    if selfsigned:
+        log('This has been removed.')
+        sys.exit()
+        # log('Generating self signed (insecure) certificate/key combination')
+        #
+        # try:
+        #     os.mkdir('/etc/ssl/certs/isomer')
+        # except FileExistsError:
+        #     pass
+        # except PermissionError:
+        #     log("Need root (e.g. via sudo) to generate ssl certificate")
+        #     sys.exit(1)
+        #
+        # def create_self_signed_cert():
+        #     """Create a simple self signed SSL certificate"""
+        #
+        #     # create a key pair
+        #     k = crypto.PKey()
+        #     k.generate_key(crypto.TYPE_RSA, 1024)
+        #
+        #     if os.path.exists(cert_file):
+        #         try:
+        #             certificate = open(cert_file, "rb").read()
+        #             old_cert = crypto.load_certificate(crypto.FILETYPE_PEM,
+        #                                                certificate)
+        #             serial = old_cert.get_serial_number() + 1
+        #         except (crypto.Error, OSError) as e:
+        #             log('Could not read old certificate to increment '
+        #                 'serial:', type(e), e, exc=True, lvl=warn)
+        #             serial = 1
+        #     else:
+        #         serial = 1
+        #
+        #     # create a self-signed certificate
+        #     certificate = crypto.X509()
+        #     certificate.get_subject().C = "DE"
+        #     certificate.get_subject().ST = "Berlin"
+        #     certificate.get_subject().L = "Berlin"
+        #     # noinspection PyPep8
+        #     certificate.get_subject().O = "Hackerfleet"
+        #     certificate.get_subject().OU = "Hackerfleet"
+        #     certificate.get_subject().CN = gethostname()
+        #     certificate.set_serial_number(serial)
+        #     certificate.gmtime_adj_notBefore(0)
+        #     certificate.gmtime_adj_notAfter(10 * 365 * 24 * 60 * 60)
+        #     certificate.set_issuer(certificate.get_subject())
+        #     certificate.set_pubkey(k)
+        #     certificate.sign(k, b'sha512')
+        #
+        #     open(key_file, "wt").write(str(
+        #         crypto.dump_privatekey(crypto.FILETYPE_PEM, k),
+        #         encoding="ASCII"))
+        #
+        #     open(cert_file, "wt").write(str(
+        #         crypto.dump_certificate(crypto.FILETYPE_PEM, certificate),
+        #         encoding="ASCII"))
+        #
+        #     open(combined_file, "wt").write(str(
+        #         crypto.dump_certificate(crypto.FILETYPE_PEM, certificate),
+        #         encoding="ASCII") + str(
+        #         crypto.dump_privatekey(crypto.FILETYPE_PEM, k),
+        #         encoding="ASCII"))
+        #
+        # create_self_signed_cert()
+        #
+        # log('Done: instance Cert')
+    else:
+        # TODO: Add certbot certificate handling for instances
+
+        log('Not implemented yet. You can build your own certificate and '
+            'store it in /etc/ssl/certs/isomer/server-cert.pem - it should '
+            'be a certificate with key, as this is used server side and '
+            'there is no way to enter a separate key.', lvl=error)
+
+
 @instance.command(short_help='install systemd service')
 @click.pass_context
 def service(ctx):
@@ -913,17 +1004,31 @@ Using 'localhost' for now""", lvl=warn)
     log("Done: instance nginx configuration")
 
 
-# TODO: Add instance user
+@click.group(cls=DYMGroup)
+@click.pass_context
+def system(ctx):
+    """[GROUP] Various aspects of Isomer system handling"""
 
-@instance.command(short_help='create system user')
+
+@system.command(name='all', short_help='Perform all system setup tasks')
+def system_all():
+    """Performs all system setup tasks"""
+
+    _add_system_user()
+    _create_system_folders()
+    log('Done: Setup system - all')
+
+
+# TODO: Add instance user
+@system.command(name='user', short_help='create system user')
 def system_user():
     """instance Isomer system user (isomer.isomer)"""
 
-    add_system_user()
+    _add_system_user()
     log("Done: Add User")
 
 
-def add_system_user():
+def _add_system_user():
     """instance Isomer system user (isomer.isomer)"""
 
     check_root()
@@ -942,7 +1047,7 @@ def add_system_user():
     time.sleep(2)
 
 
-@instance.command(short_help='create system paths')
+@system.command(name='paths', short_help='create system paths')
 def system_paths():
     """instance Isomer system paths (/var/[local,lib,cache]/isomer)"""
 
@@ -967,90 +1072,3 @@ def _create_system_folders():
             log('Location already present:', item)
             pass
 
-
-@instance.command(short_help='instance ssl certificate')
-@click.option('--selfsigned', help="Use a self-signed certificate",
-              default=True, is_flag=True)
-def cert(selfsigned):
-    """instance a local SSL certificate"""
-
-    instance_cert(selfsigned)
-
-
-def instance_cert(selfsigned):
-    """instance a local SSL certificate"""
-
-    check_root()
-
-    if selfsigned:
-        log('Generating self signed (insecure) certificate/key '
-            'combination')
-
-        try:
-            os.mkdir('/etc/ssl/certs/isomer')
-        except FileExistsError:
-            pass
-        except PermissionError:
-            log("Need root (e.g. via sudo) to generate ssl certificate")
-            sys.exit(1)
-
-        def create_self_signed_cert():
-            """Create a simple self signed SSL certificate"""
-
-            # create a key pair
-            k = crypto.PKey()
-            k.generate_key(crypto.TYPE_RSA, 1024)
-
-            if os.path.exists(cert_file):
-                try:
-                    certificate = open(cert_file, "rb").read()
-                    old_cert = crypto.load_certificate(crypto.FILETYPE_PEM,
-                                                       certificate)
-                    serial = old_cert.get_serial_number() + 1
-                except (crypto.Error, OSError) as e:
-                    log('Could not read old certificate to increment '
-                        'serial:', type(e), e, exc=True, lvl=warn)
-                    serial = 1
-            else:
-                serial = 1
-
-            # create a self-signed certificate
-            certificate = crypto.X509()
-            certificate.get_subject().C = "DE"
-            certificate.get_subject().ST = "Berlin"
-            certificate.get_subject().L = "Berlin"
-            # noinspection PyPep8
-            certificate.get_subject().O = "Hackerfleet"
-            certificate.get_subject().OU = "Hackerfleet"
-            certificate.get_subject().CN = gethostname()
-            certificate.set_serial_number(serial)
-            certificate.gmtime_adj_notBefore(0)
-            certificate.gmtime_adj_notAfter(10 * 365 * 24 * 60 * 60)
-            certificate.set_issuer(certificate.get_subject())
-            certificate.set_pubkey(k)
-            certificate.sign(k, b'sha512')
-
-            open(key_file, "wt").write(str(
-                crypto.dump_privatekey(crypto.FILETYPE_PEM, k),
-                encoding="ASCII"))
-
-            open(cert_file, "wt").write(str(
-                crypto.dump_certificate(crypto.FILETYPE_PEM, certificate),
-                encoding="ASCII"))
-
-            open(combined_file, "wt").write(str(
-                crypto.dump_certificate(crypto.FILETYPE_PEM, certificate),
-                encoding="ASCII") + str(
-                crypto.dump_privatekey(crypto.FILETYPE_PEM, k),
-                encoding="ASCII"))
-
-        create_self_signed_cert()
-
-        log('Done: instance Cert')
-    else:
-        # TODO: Add certbot certificate handling for instances
-
-        log('Not implemented yet. You can build your own certificate and '
-            'store it in /etc/ssl/certs/isomer/server-cert.pem - it should '
-            'be a certificate with key, as this is used server side and '
-            'there is no way to enter a separate key.', lvl=error)
