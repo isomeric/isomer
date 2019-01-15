@@ -35,7 +35,7 @@ This is a namespace package.
 
 __author__ = "Heiko 'riot' Weinen"
 __license__ = "AGPLv3"
-__all__ = ['events', 'provisions', 'schemata', 'ui', 'misc', 'tool',
+__all__ = ['events', 'provisions', 'schemata', 'ui', 'misc', 'tool', 'iso',
            'component', 'database', 'debugger', 'launcher', 'logger', 'migration']
 
 # See http://peak.telecommunity.com/DevCenter/setuptools#namespace-packages
