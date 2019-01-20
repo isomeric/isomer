@@ -141,6 +141,8 @@ def test_instance_list():
 
     assert result.exit_code == 0
 
+    pprint(result.output)
+
     assert 'foo' in result.output
     assert 'bar' in result.output
 
@@ -169,7 +171,7 @@ def test_instance_clear():
 
     _ = run_cli(isotool, ['instance', 'create'])
 
-    result = run_cli(isotool, ['instance', 'clear-instance', '--force'])
+    result = run_cli(isotool, ['instance', 'clear', '--force'])
     pprint(result.output)
 
     assert result.exit_code == 0
