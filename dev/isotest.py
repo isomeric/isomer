@@ -40,3 +40,6 @@ if sys.version_info.major < 3:
 
 from isomer.tool import install_isomer, ask
 from isomer.tool.tool import isotool
+from isomer.logger import isolog
+
+isolog("Ok.", emitter="ISOTEST")
