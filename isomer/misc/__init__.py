@@ -336,3 +336,20 @@ def std_salt(length=16, lowercase=True):
         chars.append(choice(alphanumeric))
 
     return "".join(chars)
+
+
+logo = """                                             
+                   .'::'.                    
+                .':cccccc:'.                 
+             .':cccccccccccc:'.              
+          .':ccccccc;..;ccccccc:'.           
+       .':ccccccc;.      .;ccccccc:'.        
+    .':ccccccc;.            .;ccccccc:'.     
+   ;cccccccc:.                .:cccccccc;    
+     .:ccccccc;.            .;ccccccc:'      
+        .:ccccccc;.      .;ccccccc:.         
+           .:ccccccc;..;ccccccc:.            
+              .;cccccccccccc:.               
+                 .;cccccc:.                  
+                    .;;.                     
+                                             """
