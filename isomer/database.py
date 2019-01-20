@@ -40,15 +40,16 @@ Schemastore and Objectstore builder functions.
 
 import sys
 import time
+import bson
 import json
 import jsonschema
-from copy import deepcopy
-from ast import literal_eval
-from pprint import pprint
-
 import operator
 import pymongo
 import formal
+
+from copy import deepcopy
+from ast import literal_eval
+from pprint import pprint
 from circuits import Timer, Event
 from os import statvfs, walk
 from os.path import join, getsize
@@ -57,19 +58,23 @@ from pkg_resources import iter_entry_points, DistributionNotFound
 from isomer.component import ConfigurableComponent, handler
 from isomer.logger import isolog, debug, warn, error, critical, verbose
 from isomer.misc import i18n as _, all_languages
+from isomer.misc.path import get_path
 
 
 def db_log(*args, **kwargs):
+    """Log as emitter 'DB'"""
     kwargs.update({'emitter': 'DB', 'frame_ref': 2})
     isolog(*args, **kwargs)
 
 
 def backup_log(*args, **kwargs):
+    """Log as emitter 'BACKUP'"""
     kwargs.update({'emitter': 'BACKUP', 'frame_ref': 2})
     isolog(*args, **kwargs)
 
 
 def schemata_log(*args, **kwargs):
+    """Log as emitter 'SCHEMATA'"""
     kwargs.update({'emitter': 'SCHEMATA', 'frame_ref': 2})
     isolog(*args, **kwargs)
 
@@ -454,7 +459,6 @@ class Maintenance(ConfigurableComponent):
     """Regularly checks a few basic system maintenance tests like used
     storage space of collections and other data"""
 
-    # TODO: Decouple filesystem checks from configuration, those have been fixed down via isomer.misc.path
     configprops = {
         'locations': {
             'type': 'object',
@@ -464,55 +468,34 @@ class Maintenance(ConfigurableComponent):
                     'properties': {
                         'minimum': {
                             'type': 'integer',
-                            'description': 'Minimum cache free space to '
-                                           'alert on',
-                            'title': 'Minimum cache',
+                            'description': 'Minimum free cache space to alert on',
+                            'title': 'Minimum cache space',
                             'default': 500 * 1024 * 1024
                         },
-                        'location': {
-                            'type': 'string',
-                            'description': 'Location of cache data',
-                            'title': 'Cache location',
-                            'default': join('/var/cache/isomer', instance)
-                        }
                     },
                     'default': {}
                 },
-                'library': {
+                'lib': {
                     'type': 'object',
                     'properties': {
                         'minimum': {
                             'type': 'integer',
-                            'description': 'Minimum library free space to '
-                                           'alert on',
+                            'description': 'Minimum free library space to alert on',
                             'title': 'Minimum library space',
                             'default': 50 * 1024 * 1024
                         },
-                        'location': {
-                            'type': 'string',
-                            'description': 'Location of library data',
-                            'title': 'Library location',
-                            'default': join('/var/lib/isomer', instance)
-                        }
                     },
                     'default': {}
                 },
-                'backup': {
+                'local': {
                     'type': 'object',
                     'properties': {
                         'minimum': {
                             'type': 'integer',
-                            'description': 'Minimum backup free space to '
-                                           'alert on',
-                            'title': 'Minimum backup space',
+                            'description': 'Minimum free local file storage space to alert on',
+                            'title': 'Minimum local storage space',
                             'default': 50 * 1024 * 1024
                         },
-                        'location': {
-                            'type': 'string',
-                            'description': 'Location of backup data',
-                            'title': 'Backup location',
-                            'default': join('/var/local/isomer/', instance, 'backup')
-                        }
                     },
                     'default': {}
                 }
@@ -561,8 +544,7 @@ class Maintenance(ConfigurableComponent):
         self.collection_sizes = {}
         self.collection_total = 0
         for col in self.db.list_collection_names():
-            self.collection_sizes[col] = self.db.command('collstats', col).get(
-                'storageSize', 0)
+            self.collection_sizes[col] = self.db.command('collstats', col).get('storageSize', 0)
             self.collection_total += self.collection_sizes[col]
 
         sorted_x = sorted(self.collection_sizes.items(),
@@ -593,14 +575,14 @@ class Maintenance(ConfigurableComponent):
 
         for name, checkpoint in self.config.locations.items():
             try:
-                stats = statvfs(checkpoint['location'])
+                stats = statvfs(get_path(name, ''))
             except (OSError, PermissionError) as e:
                 self.log('Location unavailable:', name, e, type(e),
                          lvl=error, exc=True)
                 continue
             free_space = stats.f_frsize * stats.f_bavail
             used_space = get_folder_size(
-                checkpoint['location']
+                get_path(name, '')
             ) / 1024.0 / 1024
 
             self.log('Location %s uses %.2f MB' % (name, used_space))
@@ -615,12 +597,6 @@ class BackupManager(ConfigurableComponent):
     """Regularly creates backups of collections"""
 
     configprops = {
-        'location': {
-            'type': 'string',
-            'description': 'Location of library data',
-            'title': 'Library location',
-            'default': join('/var/local/isomer', instance, 'backup')
-        },
         'interval': {
             'type': 'integer',
             'title': 'Backup interval',
@@ -649,7 +625,7 @@ class BackupManager(ConfigurableComponent):
         self.log('Backing up all data')
 
         filename = time.strftime("%Y-%m-%d_%H%M%S.json")
-        filename = join(self.config.location, filename)
+        filename = join(get_path('local', 'backup', ensure=True), filename)
 
         backup(None, None, None, 'json', filename, False, True, [])
 
@@ -731,3 +707,65 @@ def backup(schema, uuid, export_filter, export_format, filename, pretty, export_
     if f is not None:
         f.flush()
         f.close()
+
+
+def internal_restore(schema, uuid, object_filter, import_format, filename, all_schemata, dry):
+    """Foobar"""
+    import_format = import_format.upper()
+
+    if import_format == 'JSON':
+        with open(filename, 'r') as f:
+            json_data = f.read()
+        data = json.loads(json_data)  # , parse_float=True, parse_int=True)
+    else:
+        backup_log('Importing non json data is WiP!', lvl=error)
+        return
+
+    if schema is None:
+        if all_schemata is False:
+            backup_log('No schema given. Read the help', lvl=warn)
+            return
+        else:
+            schemata = data.keys()
+    else:
+        schemata = [schema]
+
+    #from isomer import database
+    #database.initialize(ctx.obj['dbhost'], ctx.obj['dbname'])
+
+    if object_filter is not None:
+        backup_log('Object filtering on import is WiP! Ignoring for now.', lvl=warn)
+
+    all_items = {}
+    total = 0
+
+    for schema_item in schemata:
+        model = objectmodels[schema_item]
+
+        objects = data[schema_item]
+        items = []
+        if uuid:
+            for item in objects:
+                if item['uuid'] == uuid:
+                    items = [model(item)]
+        else:
+            for item in objects:
+                thing = model(item)
+                items.append(thing)
+
+        schema_total = len(items)
+        total += schema_total
+
+        if dry:
+            backup_log('Would import', schema_total, 'items of', schema_item)
+        all_items[schema_item] = items
+
+    if dry:
+        backup_log('Would import', total, 'objects.')
+    else:
+        backup_log('Importing', total, 'objects.')
+        for schema_name, item_list in all_items.items():
+            backup_log('Importing', len(item_list), 'objects of type', schema_name)
+            for item in item_list:
+                item._fields['_id'] = bson.objectid.ObjectId(item._fields['_id'])
+                item.save()
