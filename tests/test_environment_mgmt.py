@@ -33,7 +33,6 @@ Test Isomer Auth
 
 import os
 
-
 import pytest
 from isomer.tool.etc import load_instance
 from isomer.tool.tool import isotool
@@ -46,7 +45,7 @@ def test_instance_clear():
     reset_base()
 
     _ = run_cli(isotool, ['instance', 'create'], full_log=True)
-    #pytest.exit('LOL')
+    # pytest.exit('LOL')
 
     assert os.path.exists('/tmp/isomer-test/etc/isomer/instances/default.conf')
     assert not os.path.exists('/tmp/isomer-test/var/lib/isomer/default/green')
@@ -63,8 +62,15 @@ def test_instance_clear():
 def test_install():
     """Creates a new default instances and clears it without archiving"""
     reset_base()
+    import os
+    import pwd
+
+    def get_username():
+        """Return current username"""
+        return pwd.getpwuid(os.getuid())[0]
 
     _ = run_cli(isotool, ['instance', 'create'])
+    _ = run_cli(isotool, ['instance', 'set', 'user', get_username()])
     _ = run_cli(isotool, ['environment', 'clear', '--no-archive'])
 
     assert os.path.exists('/tmp/isomer-test/etc/isomer/instances/default.conf')
@@ -72,7 +78,11 @@ def test_install():
 
     repo_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../'))
 
-    result = run_cli(isotool, ['environment', 'install', '--source', 'link', '--url', repo_path], full_log=True)
+    result = run_cli(
+        isotool,
+        ['environment', 'install', '--no-sudo', '--source', 'copy', '--url', repo_path],
+        full_log=True
+    )
 
     assert result.exit_code == 0
 
@@ -99,4 +109,3 @@ def test_install():
 
     if result.exit_code != 0:
         print(result.output)
-
