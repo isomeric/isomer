@@ -69,10 +69,11 @@ warn = 30
 error = 40
 critical = 50
 hilight = 60
+version = 99
 off = 100
 
 # https://en.wikipedia.org/wiki/ANSI_escape_code#Colors
-lvldata = {
+level_data = {
     temp: ['TEMP', '\033[1;30m'],
     events: ['EVENT', '\033[1:36m'],
     verbose: ['VERB', '\033[1;30m'],
@@ -82,7 +83,8 @@ lvldata = {
     warn: ['WARN', '\033[1;93m'],
     error: ['ERROR', '\033[1;31;43m'],
     critical: ['CRIT', '\033[1;33;41m'],
-    hilight: ['HILIGHT', '\033[1;4;30;106m']
+    hilight: ['HILIGHT', '\033[1;4;30;106m'],
+    version: ['VER', '\033[1;96;44m']
 }
 
 terminator = '\033[0m'
@@ -126,7 +128,13 @@ def set_logfile(path, instance):
     logfile = os.path.normpath(path) + '/isomer.' + instance + '.log'
 
 
+def get_logfile():
+    """Return the whole filename of the logfile"""
+    return logfile
+
+
 def clear():
+    """Clear the live log"""
     global LiveLog
 
     LiveLog = []
@@ -256,7 +264,7 @@ def isolog(*what, **kwargs):
     now = time.asctime()
 
     msg = "[%s] : %5s : %.5f : %3i : [%5s]" % (now,
-                                               lvldata[lvl][0],
+                                               level_data[lvl][0],
                                                runtime,
                                                count,
                                                emitter)
@@ -303,7 +311,7 @@ def isolog(*what, **kwargs):
     if lvl >= verbosity['console']:
         output = str(msg)
         if color:
-            output = lvldata[lvl][1] + output + terminator
+            output = level_data[lvl][1] + output + terminator
         try:
             print(output)
         except UnicodeEncodeError as e:
