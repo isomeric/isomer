@@ -67,7 +67,7 @@ def check_root():
             "specify the interpreter binary for sudo, e.g:\n"
             "$ sudo /home/user/.virtualenv/isomer/bin/python3 iso")
 
-        sys.exit(1)
+        sys.exit(50001)
 
 
 def run_process(cwd, args, shell=None, sudo=None, show=False):
@@ -75,8 +75,8 @@ def run_process(cwd, args, shell=None, sudo=None, show=False):
 
     log("Running:", cwd, args, lvl=verbose)
 
-    if shell is None and sudo is None:
-        check_root()
+    # if shell is None and sudo is None:
+    #     check_root()
 
     def build_command(*things):
         """Construct a command adding sudo if necessary"""
