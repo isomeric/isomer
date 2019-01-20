@@ -34,6 +34,7 @@ from isomer.logger import set_logfile, set_color, verbosity, warn, error, verbos
 from isomer.misc.path import get_log_path, set_etc_path, set_instance, set_prefix
 from isomer.tool import log, db_host_help, db_host_metavar, db_help, db_metavar
 from isomer.tool.etc import load_configuration, load_instances, instance_template, create_configuration
+from isomer.version import version_info
 
 
 @click.group(context_settings={'help_option_names': ['-h', '--help']}, cls=DYMGroup)
@@ -42,17 +43,18 @@ from isomer.tool.etc import load_configuration, load_instances, instance_templat
               type=click.Choice(['blue', 'green', 'current', 'other']))
 @click.option('--quiet', default=False, help="Suppress all output", is_flag=True)
 @click.option('--no-colors', '-nc', default=False, help='Do not use colorful output', is_flag=True)
-@click.option('--console-level', '--clog', default=20, help='Log level to use (0-100)', metavar='<level>')
-@click.option('--file-level', '--flog', default=20, help='Log level to use (0-100)', metavar='<level>')
+@click.option('--console-level', '--clog', default=None, help='Log level to use (0-100)', metavar='<level>')
+@click.option('--file-level', '--flog', default=None, help='Log level to use (0-100)', metavar='<level>')
 @click.option('--do-log', default=False, is_flag=True, help='Log to file')
 @click.option("--log-path", default=None, help="Logfile path")
 @click.option('--dbhost', default=None, help=db_host_help, metavar=db_host_metavar)
 @click.option('--dbname', default=None, help=db_help, metavar=db_metavar)
 @click.option('--prefix', default=None, help='Use different system prefix')
 @click.option('--config-dir', '-c', default='/etc/isomer')
+@click.option('--fat-logo', '--fat', hidden=True, is_flag=True, default=False)
 @click.pass_context
 def cli(ctx, instance, env, quiet, no_colors, console_level, file_level, do_log, log_path, dbhost, dbname,
-        prefix, config_dir):
+        prefix, config_dir, fat_logo):
     """Isomer Management Tool
 
     This tool supports various operations to manage Isomer instances.
@@ -73,9 +75,17 @@ def cli(ctx, instance, env, quiet, no_colors, console_level, file_level, do_log,
 
     ctx.obj['quiet'] = quiet
 
-    verbosity['console'] = console_level if not quiet else 100
-    verbosity['file'] = file_level if do_log else 100
-    verbosity['global'] = min(console_level, file_level)
+    if quiet:
+        verbosity['console'] = 100
+    else:
+        verbosity['console'] = int(console_level if console_level is not None else 20)
+
+    if do_log:
+        verbosity['file'] = int(file_level if file_level is not None else 20)
+    else:
+        verbosity['file'] = 100
+
+    verbosity['global'] = min(verbosity['console'], verbosity['file'])
 
     if log_path is not None:
         set_logfile(log_path, instance)
@@ -84,6 +94,15 @@ def cli(ctx, instance, env, quiet, no_colors, console_level, file_level, do_log,
         set_color()
 
     ctx.obj['instance'] = instance
+
+    if not fat_logo:
+        log('<> Isomer', version_info, ' ', lvl=99)
+    else:
+        from isomer.misc import logo
+        pad = len(logo.split('\n', maxsplit=1)[0])
+        log(('Isomer %s' % version_info).center(pad), lvl=99)
+        for line in logo.split('\n'):
+            log(line, lvl=99)
 
     log("Running with Python", sys.version.replace("\n", ""), sys.platform, lvl=verbose)
     log("Interpreter executable:", sys.executable, lvl=verbose)
@@ -108,6 +127,12 @@ def cli(ctx, instance, env, quiet, no_colors, console_level, file_level, do_log,
     else:
         instance_config = instances[instance]
 
+    if file_level is None and console_level is None:
+        # TODO: There is a bug here preventing the log-level to be set correctly.
+        verbosity['file_level'] = int(instance_config['loglevel'])
+        verbosity['global'] = int(instance_config['loglevel'])
+        log('Log level set to', verbosity['global'], lvl=verbose)
+
     ctx.obj['instance_config'] = instance_config
 
     instance_environment = instance_config['environment']
@@ -128,6 +153,10 @@ def cli(ctx, instance, env, quiet, no_colors, console_level, file_level, do_log,
 
     if dbname is None:
         dbname = instance_config['environments'][env]['database']
+        if dbname in ('', None):
+            log('Database for this instance environment is unset, '
+                'you probably have to install the environment first.', lvl=warn)
+
     if dbhost is None:
         dbhost = "%s:%i" % (instance_config['database_host'], instance_config['database_port'])
 
