@@ -179,8 +179,17 @@ class Core(ConfigurableComponent):
 
         self.instance = name
 
-        self.host = instance['web_hostname'] if 'web_hostname' not in kwargs else kwargs['web_hostname']
-        self.port = instance['web_port'] if 'web_port' not in kwargs else kwargs['web_port']
+        host = kwargs.get('web_hostname', None)
+        port = kwargs.get('web_port', None)
+
+        self.log(instance, pretty=True)
+
+        self.host = instance['web_hostname'] if host is None else host
+        self.port = instance['web_port'] if port is None else port
+
+        self.log(self.host, self.port, pretty=True, lvl=critical)
+
+        self.log('Web configuration: %s:%i' % (self.host, int(self.port)), lvl=debug)
 
         self.certificate = certificate = instance['web_certificate'] if instance['web_certificate'] != '' else None
 
@@ -596,7 +605,7 @@ def construct_graph(name, instance, args):
 
 
 @click.command()
-@click.option("--web-port", "--port", "-p", help="Define port for server", type=int, default=8055)
+@click.option("--web-port", "--port", "-p", help="Define port for server", type=int, default=None)
 @click.option("--web-host", "--host", help="Define hostname for server", type=str, default='127.0.0.1')
 @click.option("--web-certificate", "--cert", '-c', help="Certificate file path", type=str, default=None)
 @click.option("--profile", help="Enable profiler", is_flag=True)
@@ -613,7 +622,6 @@ def launch(ctx, run=True, **args):
     """Bootstrap basics, assemble graph and hand over control to the Core
     component"""
 
-    print(args['web_port'])
     instance_name = ctx.obj['instance']
     instance = load_instance(instance_name)
     environment_name = ctx.obj['environment']
