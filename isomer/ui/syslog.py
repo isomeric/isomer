@@ -4,7 +4,7 @@ from circuits import Event, Timer
 from isomer.component import ConfigurableComponent, handler
 from isomer.events.client import send  # , clientdisconnect
 from isomer.events.system import authorized_event
-from isomer.logger import error, debug
+from isomer.logger import error, debug, get_logfile
 
 
 class history(authorized_event):
@@ -23,15 +23,6 @@ class Syslog(ConfigurableComponent):
 
     """
 
-    configprops = {
-        'log_file': {
-            'type': 'string',
-            'default': '/var/log/isomer.log',
-            'title': 'Filename',
-            'description': 'File path of logfile (usually /var/log/isomer.log)'
-        }
-    }
-
     def __init__(self, *args):
         super(Syslog, self).__init__('SYSLOG', *args)
 
@@ -39,7 +30,7 @@ class Syslog(ConfigurableComponent):
 
         self.subscribers = []
 
-        self.log_file = open(self.config.log_file)
+        self.log_file = open(get_logfile())
         self.log_position = 0
 
         self.follow_timer = Timer(1, Event.create('syslog_follow'),
