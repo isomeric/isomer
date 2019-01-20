@@ -460,12 +460,13 @@ def _migrate(ctx):
 @click.option('--source', '-s', default='git', type=click.Choice(['link', 'copy', 'git']))
 @click.option('--url', '-u', default=None)
 @click.option('--import-file', '--import', default=None, help='Import the specified backup')
+@click.option('--no-sudo', is_flag=True, default=False, help='Do not use sudo to install (Mostly for tests)')
 @click.option('--skip-modules', is_flag=True, default=False)
 @click.option('--skip-data', is_flag=True, default=False)
 @click.option('--skip-frontend', is_flag=True, default=False)
 @click.option('--skip-test', is_flag=True, default=False)
 @click.pass_context
-def install_environment(ctx, source, url, import_file, force, skip_modules, skip_data, skip_frontend, skip_test):
+def install_environment(ctx, source, url, import_file, no_sudo, force, skip_modules, skip_data, skip_frontend, skip_test):
     """Install the non-active environment"""
 
     if url is None:
@@ -486,6 +487,9 @@ def install_environment(ctx, source, url, import_file, force, skip_modules, skip
 
     user = instance_config['user']
 
+    if no_sudo:
+        user = None
+
     log('Installing new other environment for %s on %s from %s in %s' %
         (instance_name, next_environment, source, env_path))
 
@@ -493,12 +497,12 @@ def install_environment(ctx, source, url, import_file, force, skip_modules, skip
         result = get_isomer(source, url, env_path, sudo=user)
         if result is False:
             log('Getting Isomer failed', lvl=critical)
-            sys.exit(50000)
+            sys.exit(50011)
     except FileExistsError:
         if not force:
             log('Isomer already present, please safely clear or '
                 'inspect the environment before continuing! Use --force to ignore.', lvl=warn)
-            sys.exit(50000)
+            sys.exit(50012)
         else:
             log('Isomer already present, forcing through anyway.')
 
