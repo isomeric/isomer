@@ -28,9 +28,11 @@ import distro
 import hashlib
 import os
 
-from isomer.logger import isolog, error, verbose, debug, warn
+from tomlkit.exceptions import NonExistentKey
+
+from isomer.logger import isolog, verbose, debug, error, warn
 from isomer.tool.defaults import db_host_default, db_host_help, db_host_metavar, db_default, db_help, db_metavar, \
-    platforms
+    platforms, EXIT_INVALID_CONFIGURATION, EXIT_INSTANCE_UNKNOWN
 
 try:
     import spur
@@ -44,6 +46,7 @@ except ImportError:
 
         def LocalShell(self):
             return subprocess
+
 
     spur = spur_mock()
 
@@ -67,10 +70,33 @@ def check_root():
         sys.exit(1)
 
 
-def run_process(cwd, args, shell=None):
+def run_process(cwd, args, shell=None, sudo=None, show=False):
     """Executes an external process via subprocess.check_output"""
 
     log("Running:", cwd, args, lvl=verbose)
+
+    if shell is None and sudo is None:
+        check_root()
+
+    def build_command(*things):
+        """Construct a command adding sudo if necessary"""
+
+        if sudo not in (None, False):
+            if isinstance(sudo, bool) and sudo is True:
+                user = 'root'
+            elif isinstance(sudo, str):
+                user = sudo
+            else:
+                log('Malformed run_process call:', things, lvl=error)
+                return
+
+            cmd = ['sudo', '-u', user] + list(things)
+        else:
+            cmd = []
+            for thing in things:
+                cmd += [thing]
+
+        return cmd
 
     if shell is None:
         log('Running on local shell', lvl=verbose)
@@ -78,13 +104,19 @@ def run_process(cwd, args, shell=None):
     else:
         log('Running on remote shell:', shell, lvl=debug)
 
+    command = build_command(*args)
+
     try:
-        process = shell.run(args, cwd=cwd)
+        if show:
+            log('Executing:', command)
+        process = shell.run(command, cwd=cwd)
 
         return True, process
     except spur.RunProcessError as e:
         log('Uh oh, the teapot broke again! Error:', e, type(e), lvl=verbose, pretty=True)
-        log(e.args, e.return_code, e.output, lvl=verbose)
+        log(command, e.args, e.return_code, e.output, lvl=verbose)
+        if e.stderr_output not in ("", None, False):
+            log('Error output:', e.stderr_output, lvl=error)
         return False, e
     except spur.NoSuchCommandError as e:
         log('Command was not found:', e, type(e), lvl=verbose, pretty=True)
@@ -195,21 +227,32 @@ def ask(question, default=None, data_type='str', show_hint=False):
 
 
 def format_result(result):
+    """Format child instance output"""
     return str(result.output).replace('\\n', '\n').replace('\\', '')
 
 
-def get_isomer(source, url, destination, shell=None):
+def get_isomer(source, url, destination, shell=None, sudo=None):
     """Grab a copy of Isomer somehow"""
 
     success = False
 
     if source == 'git':
         log('Cloning repository from', url)
-        success, result = run_process(destination, ['git', 'clone', url, 'repository'], shell)
+        success, result = run_process(destination, ['git', 'clone', url, 'repository'], shell, sudo)
         if not success:
             log(result, lvl=error)
+
+        log('Initializing submodules')
+        success, result = run_process(destination, ['git', 'submodule', 'init'], shell, sudo)
+        if not success:
+            log(result, lvl=error)
+        success, result = run_process(destination, ['git', 'submodule', 'update'], shell, sudo)
+        if not success:
+            log(result, lvl=error)
+
         log('Pulling frontend')
-        success, result = run_process(os.path.join(destination, 'repository', 'frontend'), ['git', 'pull'], shell)
+        success, result = run_process(os.path.join(destination, 'repository', 'frontend'),
+                                      ['git', 'pull', 'origin', 'master'], shell, sudo)
         if not success:
             log(result, lvl=error)
     elif source == 'link':
@@ -220,7 +263,7 @@ def get_isomer(source, url, destination, shell=None):
 
         if not os.path.exists(os.path.join(destination, 'repository')):
             log('Linking repository from', path)
-            success, result = run_process(destination, ['ln', '-s', path, 'repository'], shell)
+            success, result = run_process(destination, ['ln', '-s', path, 'repository'], shell, sudo)
             if not success:
                 log(result, lvl=error)
         else:
@@ -229,7 +272,7 @@ def get_isomer(source, url, destination, shell=None):
         if not os.path.exists(os.path.join(destination, 'repository', 'frontend', 'src')):
             log('Linking frontend')
             success, result = run_process(
-                destination, ['ln', '-s', os.path.join(path, 'frontend'), 'repository/frontend'], shell
+                destination, ['ln', '-s', os.path.join(path, 'frontend'), 'repository/frontend'], shell, sudo
             )
             if not success:
                 log(result, lvl=error)
@@ -239,16 +282,26 @@ def get_isomer(source, url, destination, shell=None):
         log('Copying local repository to remote.')
 
         path = os.path.realpath(os.path.expanduser(url))
+        target = os.path.join(destination, 'repository')
 
         if shell is None:
             shell = spur.LocalShell()
 
-        shell.upload_dir(path, destination, ['.tox*', 'node_modules*'])
+        log('Copying %s to %s' % (path, target), lvl=verbose)
+
+        shell.upload_dir(path, target, ['.tox*', 'node_modules*'])
+        if sudo is not None:
+            success, result = run_process(
+                '/', ['chown', sudo, '-R', target]
+            )
+            if not success:
+                log('Could not change ownership to', sudo, lvl=warn)
+        return True
 
     return success
 
 
-def install_isomer(platform_name=None, use_sudo=False, shell=None, cwd='.', show=False):
+def install_isomer(platform_name=None, use_sudo=False, shell=None, cwd='.', show=False, omit_common=False):
     """Installs all dependencies"""
 
     if platform_name is None:
@@ -265,21 +318,6 @@ def install_isomer(platform_name=None, use_sudo=False, shell=None, cwd='.', show
             'https://isomer.readthedocs.io/en/latest/start/platforms/support.html', lvl=error)
         sys.exit(50000)
 
-    if shell is None and use_sudo is False:
-        check_root()
-
-    def build_command(*things):
-        """Construct a command adding sudo if necessary"""
-        if use_sudo:
-            cmd = ['sudo']
-        else:
-            cmd = []
-
-        for thing in things:
-            cmd += [thing]
-
-        return cmd
-
     def platform():
         """In a platform specific way, install all dependencies"""
 
@@ -289,54 +327,77 @@ def install_isomer(platform_name=None, use_sudo=False, shell=None, cwd='.', show
         post_install_commands = platforms[platform_name]['post_install']
 
         for command in pre_install_commands:
-            args = build_command(*command)
             log('Running pre install command')
-            if show:
-                log(args)
-            success, output = run_process(cwd, args, shell)
+            success, output = run_process(cwd, command, shell, sudo=use_sudo)
             if not success:
                 log('Could not run command %s!' % command, lvl=error)
-                log(args, output, pretty=True)
+                log(output, pretty=True)
 
         log('Installing platform dependencies')
-        args = build_command(*tool + packages)
-        if show:
-            log(args)
-        success, output = run_process(cwd, args, shell)
+        success, output = run_process(cwd, tool + packages, shell, sudo=use_sudo)
         if not success:
             log('Could not install %s dependencies!' % platform, lvl=error)
-            log(args, output, pretty=True)
+            log(output, pretty=True)
 
         for command in post_install_commands:
-            args = build_command(*command)
-            log('Running command')
-            if show:
-                log(args)
-            success, output = run_process(cwd, args, shell)
+            log('Running post install command')
+            success, output = run_process(cwd, command, shell, sudo=use_sudo)
             if not success:
                 log('Could not run command %s!' % command, lvl=error)
-                log(args, output, pretty=True)
+                log(output, pretty=True)
 
     def common():
         """Perform platform independent setup"""
 
         log('Installing Isomer')
-        args = build_command('python3', 'setup.py', 'develop')
-        if show:
-            log(args)
-        success, output = run_process(cwd, args, shell)
+        success, output = run_process(cwd, ['python3', 'setup.py', 'develop'], shell, sudo=use_sudo)
         if not success:
             log('Could not install Isomer package!', lvl=error)
-            log(args, output, pretty=True)
+            log(output, pretty=True)
 
         log('Installing Isomer requirements')
-        args = build_command('pip3', 'install', '-r', 'requirements.txt')
-        if show:
-            log(args)
-        success, output = run_process(cwd, args, shell)
+
+        success, output = run_process(cwd, ['pip3', 'install', '-r', 'requirements.txt'], shell, sudo=use_sudo)
         if not success:
             log('Could not install Python dependencies!', lvl=error)
-            log(args, output, pretty=True)
+            log(output, pretty=True)
 
     platform()
-    common()
+
+    if not omit_common:
+        common()
+
+
+def _get_configuration(ctx):
+    try:
+        log('Configuration:', ctx.obj['config'], lvl=verbose, pretty=True)
+        log('Instance:', ctx.obj['instance'], lvl=debug)
+    except KeyError:
+        log('Invalid configuration, stopping.', lvl=error)
+        sys.exit(EXIT_INVALID_CONFIGURATION)
+
+    try:
+        instance_config = ctx.obj['instances'][ctx.obj['instance']]
+        log('Instance Configuration:', instance_config, lvl=verbose, pretty=True)
+    except NonExistentKey:
+        log('Instance %s does not exist' % ctx.obj['instance'], lvl=warn)
+        sys.exit(EXIT_INSTANCE_UNKNOWN)
+
+    environment_name = instance_config['environment']
+    environment_config = instance_config['environments'][environment_name]
+
+    ctx.obj['environment'] = environment_config
+
+    ctx.obj['instance_config'] = instance_config
+
+
+def get_next_environment(ctx):
+    """Return the next environment"""
+
+    if ctx.obj['acting_environment'] is not None:
+        next_environment = ctx.obj['acting_environment']
+    else:
+        current_environment = ctx.obj['instance_config']['environment']
+        next_environment = 'blue' if current_environment == 'green' else 'green'
+
+    return next_environment

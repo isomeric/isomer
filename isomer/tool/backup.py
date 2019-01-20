@@ -21,14 +21,9 @@
 __author__ = "Heiko 'riot' Weinen"
 __license__ = "AGPLv3"
 
-import json
-
-import bson
 import click
 
-from isomer.database import backup as internal_backup
-from isomer.logger import warn, error
-from isomer.tool import log
+from isomer.database import backup as internal_backup, internal_restore
 from isomer.tool.database import db
 
 
@@ -68,61 +63,6 @@ def db_import(ctx, schema, uuid, object_filter, import_format, filename, all_sch
     Warning! This functionality is work in progress and you may destroy live data by using it!
     Be very careful when using the export/import functionality!"""
 
-    import_format = import_format.upper()
+    internal_restore(schema, uuid, object_filter, import_format, filename, all_schemata, dry)
 
-    if import_format == 'JSON':
-        with open(filename, 'r') as f:
-            json_data = f.read()
-        data = json.loads(json_data)  # , parse_float=True, parse_int=True)
-    else:
-        log('Importing non json data is WiP!', lvl=error)
-        return
 
-    if schema is None:
-        if all_schemata is False:
-            log('No schema given. Read the help', lvl=warn)
-            return
-        else:
-            schemata = data.keys()
-    else:
-        schemata = [schema]
-
-    from isomer import database
-    database.initialize(ctx.obj['dbhost'], ctx.obj['dbname'])
-
-    if object_filter is not None:
-        log('Object filtering on import is WiP! Ignoring for now.', lvl=warn)
-
-    all_items = {}
-    total = 0
-
-    for schema_item in schemata:
-        model = database.objectmodels[schema_item]
-
-        objects = data[schema_item]
-        items = []
-        if uuid:
-            for item in objects:
-                if item['uuid'] == uuid:
-                    items = [model(item)]
-        else:
-            for item in objects:
-                thing = model(item)
-                items.append(thing)
-
-        schema_total = len(items)
-        total += schema_total
-
-        if dry:
-            log('Would import', schema_total, 'items of', schema_item)
-        all_items[schema_item] = items
-
-    if dry:
-        log('Would import', total, 'objects.')
-    else:
-        log('Importing', total, 'objects.')
-        for schema_name, item_list in all_items.items():
-            log('Importing', len(item_list), 'objects of type', schema_name)
-            for item in item_list:
-                item._fields['_id'] = bson.objectid.ObjectId(item._fields['_id'])
-                item.save()

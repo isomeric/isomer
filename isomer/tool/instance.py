@@ -17,46 +17,28 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-from tempfile import mktemp, mkdtemp
 
 __author__ = "Heiko 'riot' Weinen"
 __license__ = "AGPLv3"
 
-import grp
-import pwd
 import sys
-import time
-import tarfile
-
-from _socket import gethostname
-from distutils.dir_util import copy_tree
-from subprocess import Popen
 
 import tomlkit
 import click
 import os
-import shutil
 from click_didyoumean import DYMGroup
 
-from isomer.logger import error, warn, debug, critical
-from isomer.misc import std_now, std_uuid
-from isomer.misc.path import get_path, get_log_path, get_etc_path, set_instance, locations
-from isomer.tool import check_root, _get_system_configuration, ask, run_process, get_isomer, format_result, \
-    log, error, debug, verbose
-from isomer.tool.etc import write_configuration, write_instance, get_etc_instance_path, valid_configuration, \
-    remove_instance, NonExistentKey, instance_template, environment_template
-from isomer.tool.templates import write_template_file
-from isomer.tool.database import delete_database
-from isomer.database import backup, initialize
-from isomer.tool.defaults import service_template, cert_file, key_file, distribution, \
-    nginx_configuration, combined_file, source_url
-from isomer.tool.defaults import EXIT_INSTALLATION_FAILED, EXIT_INVALID_ENVIRONMENT, \
-    EXIT_PROVISIONING_FAILED, EXIT_USER_BAILED_OUT, EXIT_NOTHING_TO_ARCHIVE, \
-    EXIT_INSTANCE_EXISTS, EXIT_INSTANCE_UNKNOWN, EXIT_SERVICE_INVALID, \
-    EXIT_INVALID_CONFIGURATION, EXIT_INVALID_SOURCE, EXIT_INVALID_PARAMETER
-
-from git import Repo, exc
-from isomer.version import version
+from isomer.logger import warn, critical
+from isomer.tool import check_root, _get_system_configuration, ask, run_process, format_result, \
+    log, error, debug, get_next_environment, _get_configuration
+from isomer.tool.etc import write_instance, valid_configuration, \
+    remove_instance, instance_template
+from isomer.tool.templates import write_template
+from isomer.tool.defaults import service_template, nginx_template, cert_file, key_file, distribution
+from isomer.tool.defaults import EXIT_INSTALLATION_FAILED, EXIT_USER_BAILED_OUT, EXIT_INSTANCE_EXISTS, \
+    EXIT_INSTANCE_UNKNOWN, EXIT_SERVICE_INVALID, \
+    EXIT_INVALID_CONFIGURATION, EXIT_INVALID_PARAMETER
+from isomer.tool.environment import install_environment_module, _clear_environment
 
 
 @click.group(cls=DYMGroup)
@@ -68,29 +50,6 @@ def instance(ctx):
         return
 
     _get_configuration(ctx)
-
-
-def _get_configuration(ctx):
-    try:
-        log('Configuration:', ctx.obj['config'], lvl=verbose, pretty=True)
-        log('Instance:', ctx.obj['instance'], lvl=debug)
-    except KeyError:
-        log('Invalid configuration, stopping.', lvl=error)
-        sys.exit(EXIT_INVALID_CONFIGURATION)
-
-    try:
-        instance_config = ctx.obj['instances'][ctx.obj['instance']]
-        log('Instance Configuration:', instance_config, lvl=verbose, pretty=True)
-    except NonExistentKey:
-        log('Instance %s does not exist' % ctx.obj['instance'], lvl=warn)
-        sys.exit(EXIT_INSTANCE_UNKNOWN)
-
-    environment_name = instance_config['environment']
-    environment_config = instance_config['environments'][environment_name]
-
-    ctx.obj['environment'] = environment_config
-
-    ctx.obj['instance_config'] = instance_config
 
 
 @instance.command(name='info', short_help="show system configuration of instance")
@@ -185,21 +144,22 @@ def install(ctx):
     log('Would now install a blank instance')
 
 
-@instance.command(short_help="Clear the whole instance (CAUTION)")
+@instance.command(name='clear', short_help="Clear the whole instance (CAUTION)")
 @click.option('--force', '-f', is_flag=True, default=False)
+@click.option('--no-archive', '-n', is_flag=True, default=False)
 @click.pass_context
-def clear_instance(ctx, force):
+def clear_instance(ctx, force, no_archive):
     """Clear all environments of an instance"""
 
-    _clear_instance(ctx, force)
+    _clear_instance(ctx, force, no_archive)
 
 
-def _clear_instance(ctx, force):
+def _clear_instance(ctx, force, no_archive):
     log('Clearing instance:', ctx.obj['instance'])
     log('Clearing blue environment.', lvl=debug)
-    _clear_environment(ctx, force, 'blue')
+    _clear_environment(ctx, force, 'blue', no_archive)
     log('Clearing green environment.', lvl=debug)
-    _clear_environment(ctx, force, 'green')
+    _clear_environment(ctx, force, 'green', no_archive)
 
 
 @instance.command(short_help="Remove a whole instance (CAUTION)")
@@ -224,127 +184,6 @@ def remove(ctx, clear):
     remove_instance(ctx.obj['instance'])
 
 
-@click.group(cls=DYMGroup)
-@click.pass_context
-def environment(ctx):
-    """[GROUP] Various aspects of Isomer environment handling"""
-
-    _get_configuration(ctx)
-
-
-@environment.command(short_help="Install the other environment")
-@click.option('--force', '-f', is_flag=True, default=False)
-@click.option('--source', '-s', default='git', type=click.Choice(['link', 'copy', 'git']))
-@click.option('--url', '-u', default=None)
-@click.pass_context
-def install(ctx, source, url, force):
-    """Install the non-active environment"""
-
-    if url is None:
-        url = source_url
-
-    instance_name = ctx.obj['instance']
-    instance_config = ctx.obj['instance_config']
-
-    if ctx.obj['acting_environment'] is not None:
-        next_environment = ctx.obj['acting_environment']
-        log('Picked environment from command line:', next_environment)
-    else:
-        current_environment = instance_config['environment']
-        next_environment = 'blue' if current_environment == 'green' else 'green'
-        log('Picked environment from configuration:', next_environment)
-
-    set_instance(instance_name, next_environment)
-
-    env = instance_config['environments'][next_environment]
-    modules = instance_config['modules']
-    log(modules, pretty=True)
-
-    env['database'] = instance_name + '_' + next_environment
-
-    env_path = get_path('lib', '')
-
-    log('Installing new other environment for %s on %s from %s in %s' %
-        (instance_name, next_environment, source, env_path))
-
-    result = get_isomer(source, url, env_path)
-    if result is False:
-        log('Getting Isomer failed', lvl=critical)
-        sys.exit(5000)
-
-    try:
-        repository = Repo(os.path.join(env_path, 'repository'))
-
-        log('Repo:', repository, lvl=debug)
-        env['version'] = repository.git.describe()
-    except (exc.InvalidGitRepositoryError, exc.NoSuchPathError):
-        log('Not running from a git repository; Using isomer.version', lvl=warn)
-        env['version'] = version
-
-    instance_config['environments'][next_environment] = env
-    write_instance(instance_config)
-
-    log('Creating virtual environment')
-    success, result = run_process(env_path, ['virtualenv', '-p', '/usr/bin/python3', '--system-site-packages', 'venv'])
-    if not success:
-        log(format_result(result), lvl=error)
-
-    if _install_backend(ctx):
-        log('Backend successfully installed')
-        env['installed'] = True
-    if _install_modules(next_environment, modules):
-        log('Modules successfully installed')
-        #env['installed_modules'] = True
-    if _install_provisions(instance_config, next_environment):
-        log('Provisions installed')
-        env['provisioned'] = True
-    if _migrate(instance_config, next_environment):
-        log('Data migrated')
-        env['migrated'] = True
-    if _install_frontend(instance_config, next_environment):
-        log('Frontend installed')
-        env['frontend'] = True
-    if _test_environment(instance_config, next_environment):
-        log('Environment tested')
-        env['tested'] = True
-
-    log('Environment now:', env)
-
-    ctx.obj['instance_config']['environments'][next_environment] = env
-
-    write_instance(ctx.obj['instance_config'])
-
-
-def _install_backend(ctx):
-    """Installs the backend into an environment"""
-
-    instance_name = ctx.obj['instance']
-
-    if ctx.obj['acting_environment'] is not None:
-        next_environment = ctx.obj['acting_environment']
-    else:
-        current_environment = ctx.obj['instance_config']['environment']
-        next_environment = 'blue' if current_environment == 'green' else 'green'
-
-    set_instance(instance_name, next_environment)
-
-    env_path = get_path('lib', '')
-
-    log('Installing backend')
-    success, result = run_process(os.path.join(env_path, 'repository'),
-                                  [os.path.join(env_path, 'venv', 'bin', 'python3'), 'setup.py', 'develop'])
-    if not success:
-        log(format_result(result), lvl=error)
-
-    log('Installing requirements')
-    success, result = run_process(os.path.join(env_path, 'repository'),
-                                  [os.path.join(env_path, 'venv', 'bin', 'pip3'), 'install', '-r', 'requirements.txt'])
-    if not success:
-        log(format_result(result), lvl=error)
-
-    return True
-
-
 @instance.command('install-module', short_help="Add (and install) a module to an instance")
 @click.option('--source', '-s', default='github')
 @click.option('--url', '-u', default=None)
@@ -358,7 +197,8 @@ def install_instance_module(ctx, source, url, install_env):
     instance_configuration = ctx.obj['instances'][instance_name]
 
     descriptor = {'source': source, 'url': url}
-    instance_configuration['modules'].append(descriptor)
+    if descriptor not in instance_configuration['modules']:
+        instance_configuration['modules'].append(descriptor)
 
     write_instance(instance_configuration)
 
@@ -368,355 +208,31 @@ def install_instance_module(ctx, source, url, install_env):
     log('Done: Install instance module')
 
 
-@environment.command('install-module', short_help="Install a module into an environment")
-@click.option('--source', '-s', default='github')
-@click.option('--url', '-u', default=None)
-@click.pass_context
-def install_environment_module(ctx, source, url):
-    """Add and install a module"""
-
-    instance_name = ctx.obj['instance']
-    instance_configuration = ctx.obj['instances'][instance_name]
-
-    if ctx.obj['acting_environment'] is not None:
-        next_environment = ctx.obj['acting_environment']
-    else:
-        current_environment = ctx.obj['instance_config']['environment']
-        next_environment = 'blue' if current_environment == 'green' else 'green'
-
-    set_instance(instance_name, next_environment)
-
-    if _install_module(source, url):
-        descriptor = {'source': source, 'url': url}
-        instance_configuration['environments']['modules'].append(descriptor)
-
-    write_instance(instance_configuration)
-
-    log('Done: Install environment module')
-
-
-def _install_module(source, url):
-    """Actually installs a module into an environment"""
-
-    module_path = get_path('lib', 'modules', ensure=True)
-
-    if source not in ('git', 'link', 'copy'):
-        log('Only installing from github or local is currently supported', lvl=error)
-        sys.exit(EXIT_INVALID_SOURCE)
-
-    uuid = std_uuid()
-    temporary_path = os.path.join(module_path, '%s' % uuid)
-
-    if source == 'git':
-        log('Cloning repository from', url)
-        success, output = run_process(module_path, ['git', 'clone', url, temporary_path])
-        if not success:
-            log('Error:', output, lvl=error)
-    elif source == 'link':
-        log('Linking repository from', url)
-        success, output = run_process(module_path, ['ln', '-s', url, temporary_path])
-        if not success:
-            log('Error:', output, lvl=error)
-
-    log('Getting name')
-    success, result = run_process(temporary_path, ['python', 'setup.py', '--name'])
-    if not success:
-        log(format_result(result), pretty=True, lvl=error)
-        return False
-
-    package_name = str(result.output, encoding='utf8').rstrip('\n')
-    log('Package name:', package_name, type(package_name))
-
-    final_path = os.path.join(module_path, package_name)
-
-    log('Renaming to', final_path)
-    os.rename(temporary_path, final_path)
-
-    log('Installing module')
-    success, output = run_process(final_path,
-                                  [os.path.join(get_path('lib', 'venv'), 'bin', 'python3'), 'setup.py', 'develop'])
-    if not success:
-        log(output, lvl=verbose)
-        return False
-    else:
-        return True
-
-
-def _install_modules(env, modules):
-    """Install all given modules"""
-
-    log('Installing modules into', env, pretty=True)
-
-    for module in modules:
-        log(module, pretty=True)
-        _install_module(module['source'], module['url'])
-
-    # TODO: Confirm in environment configuration which modules are installed
-
-    return True
-
-
-@environment.command(short_help='Install provisions and/or a database dump')
-@click.pass_context
-def install_provisions(ctx):
-    """Foo"""
-    _install_provisions(ctx.obj['instance_config'], ctx.obj['environment'])
-
-
-def _install_provisions(instance_config, env):
-    """Load provisions into database"""
-
-    env_path = get_path('lib', '')
-
-    # TODO: Dependencies of provisions!
-    # First, user has to be provisioned, then system, then the rest
-
-    success, result = run_process(os.path.join(env_path, 'repository'), [
-        os.path.join(env_path, 'venv', 'bin', 'python3'),
-        './iso', '-nc', '--clog', '5', '--config-dir', get_etc_path(), '-i', instance_config['name'], '-e', env,
-        'install', 'provisions'])
-    if not success:
-        log('Could not provision data:', lvl=error)
-        log(format_result(result), lvl=error)
-        return False
-
-    return True
-
-
-def _migrate(instance_config, env):
-    """Migrate all data objects"""
-    # TODO: log('Would now migrate')
-    return True
-
-
-@environment.command(short_help='Install frontend')
-@click.pass_context
-def install_frontend(ctx):
-    """Foo"""
-
-    if ctx.obj['acting_environment'] is not None:
-        next_environment = ctx.obj['acting_environment']
-    else:
-        current_environment = ctx.obj['instance_config']['environment']
-        next_environment = 'blue' if current_environment == 'green' else 'green'
-
-    set_instance(ctx.obj['instance'], next_environment)
-    _install_frontend(ctx.obj['instance_config'], next_environment)
-
-
-def _install_frontend(instance_config, env):
-    """Install and build the frontend"""
-
-    env_path = get_path('lib', '')
-
-    success, result = run_process(os.path.join(env_path, 'repository'), [
-        os.path.join(env_path, 'venv', 'bin', 'python3'),
-        './iso', '-nc', '--config-dir', get_etc_path(), '-i', instance_config['name'], '-e', env,
-        'install', 'frontend', '--rebuild'])
-    if not success:
-        log(format_result(result), lvl=error)
-        return False
-
-    return True
-
-
-def _test_environment(instance_config, env):
-    """General fitness tests of the built environment"""
-    # TODO: log('Would now test the environment')
-    return True
-
-
-@environment.command(name='clear', short_help='Clear an environment')
-@click.option('--force', '-f', is_flag=True, default=False)
-@click.option('--no-archive', '-n', is_flag=True, default=False)
-@click.pass_context
-def clear_environment(ctx, force, no_archive):
-    """Clear the non-active environment"""
-
-    _clear_environment(ctx, force, no_archive=no_archive)
-
-
-def _clear_environment(ctx, force=False, clear_env=None, no_archive=False):
-    """Tests an environment for usage, then clears it"""
-
-    instance_name = ctx.obj['instance']
-
-    if clear_env is None:
-        current_environment = ctx.obj['instance_config']['environment']
-        next_environment = 'blue' if current_environment == 'green' else 'green'
-    else:
-        next_environment = clear_env
-
-    log('Clearing other environment:', next_environment)
-    set_instance(instance_name, next_environment)
-
-    # log('Testing', environment, 'for usage')
-
-    env = ctx.obj['instance_config']['environments'][next_environment]
-
-    if not no_archive:
-        if not (_archive(ctx, force) or force):
-            log('Archival failed, stopping.')
-            sys.exit(5000)
-
-    log('Clearing env:', env)
-
-    for item in locations:
-        path = get_path(item, '')
-        log('Clearing [%s]: %s' % (item, path))
-        try:
-            shutil.rmtree(path)
-        except FileNotFoundError:
-            log('Path not found:', path, lvl=warn)
-        except PermissionError:
-            log('No permission to clear environment', lvl=error)
-            return False
-
-    _create_folders(ctx)
-
-    delete_database(ctx.obj['dbhost'], '%s_%s' % (instance_name, next_environment), force=True)
-
-    ctx.obj['instance_config']['environments'][next_environment] = environment_template
-    write_instance(ctx.obj['instance_config'])
-    return True
-
-
-def _create_folders(ctx):
-    """Generate required folders for an instance"""
-
-    log("Generating instance directories", emitter='MANAGE')
-
-    instance_config = ctx.obj['instance_config']
-
-    try:
-        uid = pwd.getpwnam(instance_config['user']).pw_uid
-        gid = grp.getgrnam(instance_config['group']).gr_gid
-    except KeyError:
-        log('User account for instance not found!', lvl=warn)
-        uid = gid = None
-
-    logfile = os.path.join(get_log_path(), "isomer-" + ctx.obj['instance'] + ".log")
-
-    for item in locations:
-        path = get_path(item, '', ensure=True)
-
-        if os.path.exists(path):
-            log("Path already exists:", path)
-
-        log("Created path: " + path)
-        if os.geteuid() == 0 and uid is not None:
-            os.chown(path, uid, gid)
-        else:
-            log('No root access - could not change ownership', lvl=warn)
-
-    module_path = get_path('lib', 'modules', ensure=True)
-    log('Module storage created:', module_path)
-
-    # Touch logfile to make sure it exists
-    open(logfile, "a").close()
-    if os.geteuid() == 0 and uid is not None:
-        os.chown(logfile, uid, gid)
-    else:
-        log('No root access - could not change ownership', lvl=warn)
-
-    log("Done: Create instance folders")
-
-
-@environment.command(short_help="Archive the other environment")
-@click.option('--force', '-f', is_flag=True, default=False)
-@click.pass_context
-def archive(ctx, force):
-    """Archive the non-active  environment"""
-
-    _archive(ctx, force)
-
-
-def _archive(ctx, force=False):
-    instance_config = ctx.obj['instance_config']
-
-    if ctx.obj['acting_environment'] is not None:
-        next_environment = ctx.obj['acting_environment']
-    else:
-        current_environment = instance_config['environment']
-        next_environment = 'blue' if current_environment == 'green' else 'green'
-
-    env = instance_config['environments'][next_environment]
-
-    log(instance_config, next_environment, pretty=True)
-    log(env['installed'], env['tested'])
-    if (not env['installed'] or not env['tested']) and not force:
-        log('Environment has not been installed - not archiving.', lvl=warn)
-        return False
-
-    log('Archiving environment:', next_environment)
-    set_instance(ctx.obj['instance'], next_environment)
-
-    timestamp = std_now().replace(':', '-').replace('.', '-')
-
-    temp_path = mkdtemp(prefix='isomer_backup')
-
-    log('Archiving database')
-    database_host = '%s:%i' % (instance_config['database_host'], instance_config['database_port'])
-    if initialize(database_host, env['database'], ignore_fail=force):
-        backup(None, None, None, 'json', os.path.join(temp_path, 'db_' + timestamp + '.json'), True, True, [])
-    elif not force:
-        log('Could not archive database.')
-        return False
-
-    try:
-        archive_filename = os.path.join(
-            '/var/backups/isomer/',
-            '%s_%s_%s.tgz' % (ctx.obj['instance'], next_environment, timestamp)
-        )
-
-        shutil.copy(
-            os.path.join(get_etc_instance_path(), ctx.obj['instance'] + '.conf'),
-            temp_path
-        )
-
-        with tarfile.open(archive_filename, 'w:gz') as f:
-            for item in locations:
-                path = get_path(item, '')
-                log('Archiving [%s]: %s' % (item, path))
-                f.add(path)
-            f.add(temp_path, 'db_etc')
-    except (PermissionError, FileNotFoundError) as e:
-        log('Could not archive environment:', e, lvl=error)
-        if not force:
-            return False
-    finally:
-        log('Clearing temporary backup target')
-        shutil.rmtree(temp_path)
-
-    ctx.obj['instance_config']['environments']['archive'][timestamp] = env
-
-    log(ctx.obj['instance_config'])
-
-    return True
-
-    # TODO: confirm archival
-
-
 @instance.command(short_help="Activates the other environment")
+@click.option('--force', '-f', is_flag=True, default=False, help='Force turnover')
 @click.pass_context
-def turnover(ctx):
+def turnover(ctx, force):
     """Activates the other environment """
 
     # if ctx.obj['acting_environment'] is not None:
     #    next_environment = ctx.obj['acting_environment']
     # else:
-    current_environment = ctx.obj['instance_config']['environment']
-    next_environment = 'blue' if current_environment == 'green' else 'green'
+    next_environment = get_next_environment(ctx)
 
     log('Activating environment:', next_environment)
     env = ctx.obj['instance_config']['environments'][next_environment]
 
     log('Inspecting new environment')
 
-    if not env.get('installed', False) or not env.get('tested', False) or \
+    if not force:
+        if env.get('database', '') == '':
+            log('Database has not been set up correctly.', lvl=critical)
+            sys.exit(EXIT_INSTALLATION_FAILED)
+
+        if not env.get('installed', False) or not env.get('tested', False) or \
             not env.get('provisioned', False) or not env.get('migrated', False):
-        log('Installation failed, cannot activate!')
-        sys.exit(EXIT_INSTALLATION_FAILED)
+            log('Installation failed, cannot activate!', lvl=critical)
+            sys.exit(EXIT_INSTALLATION_FAILED)
 
     update_service(ctx, next_environment)
 
@@ -756,19 +272,13 @@ def update_service(ctx, next_environment):
     instance_name = ctx.obj['instance']
     config = ctx.obj['instance_config']
 
-    base_path = os.path.abspath(
-        os.path.join(
-            os.path.dirname(
-                os.path.realpath(__file__)),
-            '..', '..'))
-
     env_path = '/var/lib/isomer/' + instance_name + '/' + next_environment
 
     log("Updating systemd service for %s (%s)" % (instance_name, next_environment))
 
     launcher = os.path.join(env_path, 'repository/iso')
     executable = os.path.join(env_path, 'venv/bin/python3') + " " + launcher
-    executable += " --instance " + instance_name + ' launch'
+    executable += " --do-log --quiet --instance " + instance_name + ' launch'
 
     definitions = {
         'instance': instance_name,
@@ -779,12 +289,7 @@ def update_service(ctx, next_environment):
     }
     service_name = 'isomer-' + instance_name + '.service'
 
-    template_file = os.path.join(base_path, 'dev', 'templates', service_template)
-
-    log('Template:', template_file)
-    write_template_file(template_file,
-                        os.path.join('/etc/systemd/system/', service_name),
-                        definitions)
+    write_template(service_template, os.path.join('/etc/systemd/system/', service_name), definitions)
 
 
 def _launch_service(ctx):
@@ -793,7 +298,7 @@ def _launch_service(ctx):
 
     service_name = 'isomer-' + instance_name + '.service'
 
-    success, result = run_process('/', ['systemctl', 'enable', service_name])
+    success, result = run_process('/', ['systemctl', 'enable', service_name], sudo='root')
 
     if not success:
         log('Error activating service:', format_result(result), pretty=True, lvl=error)
@@ -801,7 +306,7 @@ def _launch_service(ctx):
 
     log('Launching service')
 
-    success, result = run_process('/', ['systemctl', 'start', service_name])
+    success, result = run_process('/', ['systemctl', 'start', service_name], sudo='root')
 
     if not success:
         log('Error activating service:', format_result(result), pretty=True, lvl=error)
@@ -901,11 +406,7 @@ def instance_cert(selfsigned):
         # log('Done: instance Cert')
     else:
         # TODO: Add certbot certificate handling for instances
-
-        log('Not implemented yet. You can build your own certificate and '
-            'store it in /etc/ssl/certs/isomer/server-cert.pem - it should '
-            'be a certificate with key, as this is used server side and '
-            'there is no way to enter a separate key.', lvl=error)
+        pass
 
 
 @instance.command(short_help='install systemd service')
@@ -918,9 +419,8 @@ def service(ctx):
 
 
 @instance.command(short_help='instance nginx configuration')
-@click.option('--hostname', default=None,
-              help='Override public Hostname (FQDN) Default from active system '
-                   'configuration')
+@click.option('--hostname', default=None, help='Override public Hostname (FQDN) Default from active system '
+                                               'configuration')
 @click.pass_context
 def update_nginx(ctx, hostname):
     """instance nginx configuration"""
@@ -985,9 +485,7 @@ Using 'localhost' for now""", lvl=warn)
         return
 
     log('Writing nginx Isomer site definition')
-    write_template_file(os.path.join('dev/templates', nginx_configuration),
-                        configuration_file,
-                        definitions)
+    write_template(nginx_template, configuration_file, definitions)
 
     if configuration_link is not None:
         log('Enabling nginx Isomer site (symlink)')
@@ -995,80 +493,8 @@ Using 'localhost' for now""", lvl=warn)
             os.symlink(configuration_file, configuration_link)
 
     log('Restarting nginx service')
-    Popen([
-        'systemctl',
-        'restart',
-        'nginx.service'
-    ])
+    run_process('/', ['systemctl', 'restart', 'nginx.service'], sudo='root')
 
     log("Done: instance nginx configuration")
 
-
-@click.group(cls=DYMGroup)
-@click.pass_context
-def system(ctx):
-    """[GROUP] Various aspects of Isomer system handling"""
-
-
-@system.command(name='all', short_help='Perform all system setup tasks')
-def system_all():
-    """Performs all system setup tasks"""
-
-    _add_system_user()
-    _create_system_folders()
-    log('Done: Setup system - all')
-
-
 # TODO: Add instance user
-@system.command(name='user', short_help='create system user')
-def system_user():
-    """instance Isomer system user (isomer.isomer)"""
-
-    _add_system_user()
-    log("Done: Add User")
-
-
-def _add_system_user():
-    """instance Isomer system user (isomer.isomer)"""
-
-    check_root()
-
-    Popen([
-        '/usr/sbin/adduser',
-        '--system',
-        '--quiet',
-        '--home',
-        '/var/run/isomer',
-        '--group',
-        '--disabled-password',
-        '--disabled-login',
-        'isomer'
-    ])
-    time.sleep(2)
-
-
-@system.command(name='paths', short_help='create system paths')
-def system_paths():
-    """instance Isomer system paths (/var/[local,lib,cache]/isomer)"""
-
-    _create_system_folders()
-    log("Done: Create system paths")
-
-
-def _create_system_folders():
-    target_paths = [
-        '/var/www/challenges',  # For LetsEncrypt acme certificate challenges
-        '/var/backups/isomer',
-    ]
-    for item in locations:
-        target_paths.append(get_path(item, ''))
-
-    target_paths.append(get_log_path())
-
-    for item in target_paths:
-        try:
-            os.makedirs(item, exist_ok=True)
-        except FileExistsError:
-            log('Location already present:', item)
-            pass
-
