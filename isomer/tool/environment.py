@@ -28,7 +28,6 @@ import click
 from tempfile import mkdtemp
 from click_didyoumean import DYMGroup
 from git import Repo, exc
-from tomlkit.container import Tuple
 
 from isomer.scm_version import version
 from isomer.database import initialize, backup, internal_restore
@@ -38,7 +37,7 @@ from isomer.misc.path import set_instance, get_path, get_etc_path, locations, ge
 from isomer.tool import log, run_process, format_result, get_isomer, _get_configuration, get_next_environment
 from isomer.tool.database import delete_database
 from isomer.tool.defaults import EXIT_INVALID_SOURCE, source_url
-from isomer.tool.etc import write_instance, environment_template, module_template
+from isomer.tool.etc import write_instance, environment_template
 
 __author__ = "Heiko 'riot' Weinen"
 __license__ = "AGPLv3"
