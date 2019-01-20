@@ -25,7 +25,7 @@ __license__ = "AGPLv3"
 """
 
 import os.path
-from isomer.tool import log, warn
+from isomer.tool import log, warn, debug
 
 ETC_BASE_PATH = '/etc/isomer'
 
@@ -107,7 +107,7 @@ def set_instance(instance, environment, prefix=None):
         PREFIX = prefix
         log('Warning! Prefix is set:', PREFIX, lvl=warn)
 
-    log('Instance: %s Environment: %s' % (INSTANCE, ENVIRONMENT))
+    log('Setting Instance: %s and Environment: %s' % (INSTANCE, ENVIRONMENT), lvl=debug)
 
 
 def get_path(location, subfolder, ensure=False):
