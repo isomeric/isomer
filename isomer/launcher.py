@@ -605,8 +605,8 @@ def construct_graph(name, instance, args):
 
 
 @click.command()
-@click.option("--web-port", "--port", "-p", help="Define port for server", type=int, default=None)
-@click.option("--web-host", "--host", help="Define hostname for server", type=str, default='127.0.0.1')
+@click.option("--web-port", "--port", "-p", help="Define port for UI server", type=int, default=None)
+@click.option("--web-address", "--address", help="Define listening address for UI server", type=str, default='127.0.0.1')
 @click.option("--web-certificate", "--cert", '-c', help="Certificate file path", type=str, default=None)
 @click.option("--profile", help="Enable profiler", is_flag=True)
 @click.option("--open-gui", help="Launch web browser for GUI inspection after startup", is_flag=True)
