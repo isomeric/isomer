@@ -51,7 +51,7 @@ def test_launcher():
     # from Core
 
     instance_config = {
-        'web_hostname': 'localhost',
+        'web_hostnames': 'localhost',
         'web_port': 80000,
         'web_certificate': ''
     }
