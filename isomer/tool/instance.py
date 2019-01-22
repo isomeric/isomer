@@ -28,8 +28,9 @@ import click
 import os
 from click_didyoumean import DYMGroup
 
+from isomer.misc.path import set_instance
 from isomer.logger import warn, critical
-from isomer.tool import check_root, _get_system_configuration, ask, run_process, format_result, \
+from isomer.tool import _get_system_configuration, ask, run_process, format_result, \
     log, error, debug, get_next_environment, _get_configuration
 from isomer.tool.etc import write_instance, valid_configuration, \
     remove_instance, instance_template
@@ -326,19 +327,48 @@ def validate_services(ctx):
 
 
 @instance.command(short_help='instance ssl certificate')
-@click.option('--selfsigned', help="Use a self-signed certificate", default=True, is_flag=True)
-def cert(selfsigned):
+@click.option('--selfsigned', help="Use a self-signed certificate", default=False, is_flag=True, hidden=True)
+@click.pass_context
+def cert(ctx, selfsigned):
     """instance a local SSL certificate"""
 
-    instance_cert(selfsigned)
+    instance_cert(ctx, selfsigned)
 
 
-def instance_cert(selfsigned):
+def instance_cert(ctx, selfsigned):
     """instance a local SSL certificate"""
 
-    check_root()
+    instance_configuration = ctx.obj['instance_config']
+    instance_name = ctx.obj['instance']
+    next_environment = get_next_environment(ctx)
+    hostnames = instance_configuration.get('web_hostnames', False)
+    hostnames = hostnames.replace(' ', '')
 
-    if selfsigned:
+    instance_argument = '' if instance_name == 'default' else '-i %s ' % instance_name
+
+    if not hostnames or hostnames == 'localhost':
+        log('Please configure the public fully qualified domain names of this instance.\n'
+            "Use 'iso %sinstance set web_hostname your.hostname.tld' to do that.\n"
+            "You can add multiple names by separating them with commas." % instance_argument, lvl=error)
+        sys.exit(50031)
+
+    set_instance(instance_name, next_environment)
+
+    if not selfsigned:
+        contact = instance_configuration.get('contact', False)
+        if not contact:
+            log('You need to specify a contact mail address for this instance to generate certificates.\n'
+                "Use 'iso %sinstance set contact your@address.com' to do that." % instance_argument, lvl=error)
+            sys.exit(50032)
+
+        success, result = run_process('/', [
+            'certbot', '--nginx', 'certonly',
+            '-m', contact, '-d', hostnames,
+            '--agree-tos', '-n'])
+        if not success:
+            log('Error getting certificate:', format_result(result), pretty=True, lvl=error)
+            sys.exit(50033)
+    else:
         log('This has been removed.')
         sys.exit()
         # log('Generating self signed (insecure) certificate/key combination')
@@ -404,9 +434,6 @@ def instance_cert(selfsigned):
         # create_self_signed_cert()
         #
         # log('Done: instance Cert')
-    else:
-        # TODO: Add certbot certificate handling for instances
-        pass
 
 
 @instance.command(short_help='install systemd service')
@@ -445,13 +472,13 @@ def _create_nginx_config(ctx):
     dbhost = config['database_host']
     dbname = env['database']
 
-    hostname = ctx.obj['hostname']
-    if hostname is None:
-        hostname = config['web_hostname']
-    if hostname is None:
+    hostnames = ctx.obj['web_hostnames']
+    if hostnames is None:
+        hostnames = config['web_hostnames']
+    if hostnames is None:
         try:
             configuration = _get_system_configuration(dbhost, dbname)
-            hostname = configuration.hostname
+            hostnames = configuration.hostname
         except Exception as e:
             log('Exception:', e, type(e), exc=True, lvl=error)
             log("""Could not determine public fully qualified hostname!
@@ -459,16 +486,17 @@ Check systemconfig (see db view and db modify commands) or specify
 manually with --hostname host.domain.tld
 
 Using 'localhost' for now""", lvl=warn)
-            hostname = 'localhost'
+            hostnames = 'localhost'
     port = config['web_port']
+    address = config['web_address']
 
-    log("Creating nginx configuration for %s:%i using %s@%s" % (hostname, port, dbname, dbhost))
+    log("Creating nginx configuration for %s:%i using %s@%s" % (hostnames, port, dbname, dbhost))
 
     definitions = {
-        'server_public_name': hostname,
+        'server_public_name': hostnames.replace(',', ' '),
         'ssl_certificate': cert_file,
         'ssl_key': key_file,
-        'host_url': 'http://127.0.0.1:%i/' % port,
+        'host_url': 'http://%s:%i/' % (address, port),
         'instance': instance_name,
         'environment': current_env
     }
