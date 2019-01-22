@@ -179,12 +179,12 @@ class Core(ConfigurableComponent):
 
         self.instance = name
 
-        host = kwargs.get('web_hostname', None)
+        host = kwargs.get('web_address', None)
         port = kwargs.get('web_port', None)
 
         self.log(instance, pretty=True)
 
-        self.host = instance['web_hostname'] if host is None else host
+        self.host = instance['web_address'] if host is None else host
         self.port = instance['web_port'] if port is None else port
 
         self.log(self.host, self.port, pretty=True, lvl=critical)
