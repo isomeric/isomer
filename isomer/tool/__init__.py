@@ -242,16 +242,17 @@ def get_isomer(source, url, destination, shell=None, sudo=None):
         if not success:
             log(result, lvl=error)
 
+        repository = os.path.join(destination, 'repository')
         log('Initializing submodules')
-        success, result = run_process(destination, ['git', 'submodule', 'init'], shell, sudo)
+        success, result = run_process(repository, ['git', 'submodule', 'init'], shell, sudo)
         if not success:
             log(result, lvl=error)
-        success, result = run_process(destination, ['git', 'submodule', 'update'], shell, sudo)
+        success, result = run_process(repository, ['git', 'submodule', 'update'], shell, sudo)
         if not success:
             log(result, lvl=error)
 
         log('Pulling frontend')
-        success, result = run_process(os.path.join(destination, 'repository', 'frontend'),
+        success, result = run_process(os.path.join(repository, 'frontend'),
                                       ['git', 'pull', 'origin', 'master'], shell, sudo)
         if not success:
             log(result, lvl=error)
