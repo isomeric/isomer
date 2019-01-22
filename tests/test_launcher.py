@@ -37,8 +37,9 @@ args = {
     'insecure': False,
     'quiet': False,
     'dev': False,
-    'port': 80,
-    'host': '127.0.0.1',
+    'web_port': 80,
+    'web_address': '127.0.0.1',
+    'web_hostnames': 'localhost',
     'cert': None,
     'blacklist': []
 }
@@ -51,7 +52,7 @@ def test_launcher():
     # from Core
 
     instance_config = {
-        'web_hostnames': 'localhost',
+        'web_address': '127.0.0.1',
         'web_port': 80000,
         'web_certificate': ''
     }
