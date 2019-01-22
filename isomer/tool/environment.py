@@ -336,7 +336,7 @@ def _install_module(source, url, force=False, user=None):
 
     log('Getting name')
     success, result = run_process(
-        temporary_path, ['python', 'setup.py', '--name'], sudo=user
+        temporary_path, ['python3', 'setup.py', '--name'], sudo=user
     )
     if not success:
         log(format_result(result), pretty=True, lvl=error)
@@ -346,7 +346,7 @@ def _install_module(source, url, force=False, user=None):
 
     log('Getting version')
     success, result = run_process(
-        temporary_path, ['python', 'setup.py', '--version'], sudo=user
+        temporary_path, ['python3', 'setup.py', '--version'], sudo=user
     )
     if not success:
         log(format_result(result), pretty=True, lvl=error)
