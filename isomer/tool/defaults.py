@@ -56,7 +56,7 @@ platforms = {
             'python3', 'python3-pip', 'python3-dev', 'virtualenv', 'git',
             'mongodb', 'python3-bson', 'python3-pymongo', 'python3-pymongo-ext', 'python3-bson-ext',
             'python3-cffi', 'libffi-dev',
-            'nginx-full', 'libssl-dev', 'certbot', 'python-certbot',
+            'nginx-full', 'libssl-dev', 'certbot', 'python3-certbot', 'python3-certbot-nginx',  
             'nodejs', 'enchant',
             # TODO: Kick out module dependencies (mostly gdal, grib and serial)
             'python3-grib', 'python3-serial', 'gdal-bin', 'python-gdal',
