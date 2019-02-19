@@ -172,6 +172,19 @@ def base_object(name,
     return base_schema
 
 
+def sql_object(*args, **kwargs):
+    """Generates a basic SQL object with RBAC properties"""
+    
+    base_schema = base_object(*args, **kwargs)
+
+    base_schema['class-properties'] = base_schema['properties']['perms']
+    del base_schema['properties']['perms']
+    
+    base_schema['sql'] = True
+    
+    return base_schema
+
+
 def language_field():
     schema = {
         'type': 'string',
