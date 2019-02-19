@@ -18,26 +18,33 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+
+"""
+
+Module: Dev
+===========
+
+A collection of developer support tools.
+
+"""
+
 __author__ = "Heiko 'riot' Weinen"
 __license__ = "AGPLv3"
 
 import sys
 import time
-from pprint import pprint
-
+import pkg_resources
 import click
 import os
 import shutil
-from collections import OrderedDict
 
-from isomer.tool import log, ask
+from pprint import pprint
+from click_didyoumean import DYMGroup
+from collections import OrderedDict, namedtuple
+
+from isomer.tool import log, ask, debug, verbose
+from isomer.misc import std_table
 from isomer.tool.templates import write_template_file
-
-try:
-    # noinspection PyUnresolvedReferences,PyUnboundLocalVariable
-    unicode  # NOQA
-except NameError:
-    unicode = str
 
 paths = [
     'isomer',
@@ -133,18 +140,22 @@ def _ask_questionnaire():
 
     for question, default in questions.items():
         response = ask(question, default, str(type(default)), show_hint=True)
-        if type(default) == unicode and type(response) != str:
+        if type(default) == bytes and type(response) != str:
             response = response.decode('utf-8')
         answers[question] = response
 
     return answers
 
 
-@click.command(short_help='create starterkit module')
-@click.option('--clear-target', '--clear', help='Clears already existing target',
-              default=False, is_flag=True)
-@click.option("--target", help="Create module in the given folder (uses ./ "
-                               "if omitted)", default=".", metavar='<folder>')
+@click.group(cls=DYMGroup)
+def dev():
+    """[GROUP] Developer support operations"""
+
+
+@dev.command(short_help='create starterkit module')
+@click.option('--clear-target', '--clear', help='Clears already existing target', default=False, is_flag=True)
+@click.option("--target", help="Create module in the given folder (uses ./ if omitted)",
+              default=".", metavar='<folder>')
 def create_module(clear_target, target):
     """Creates a new template Isomer plugin module"""
 
@@ -168,3 +179,79 @@ def create_module(clear_target, target):
 
     log("Constructing module %(plugin_name)s" % info)
     _construct_module(augmented_info, target)
+
+
+@dev.command(short_help='List setuptools installed component information')
+@click.option('--base', '-b', is_flag=True, default=False, help='Also list isomer-base (integrated) modules')
+@click.option('--sails', '-s', is_flag=True, default=False, help='Also list isomer-sails (integrated) modules')
+@click.option('--frontend-only', '-f', is_flag=True, default=False, help='Only list modules with a frontend')
+@click.option('--frontend-list', '-l', is_flag=True, default=False, help='List files in frontend per module')
+@click.option('--directory', '-d', is_flag=True, default=False, help='Show directory of module')
+def entrypoints(base, sails, frontend_only, frontend_list, directory):
+    """Display list of entrypoints and diagnose module loading problems."""
+
+    log('Showing entrypoints:')
+
+    component = namedtuple('Component', ['name', 'package', 'classname', 'location', 'frontend'])
+    results = []
+
+    from pkg_resources import iter_entry_points
+
+    entry_points = [
+        iter_entry_points(group='isomer.components', name=None)
+    ]
+
+    if sails:
+        entry_points.insert(0, iter_entry_points(group='isomer.sails', name=None))
+    if base:
+        entry_points.insert(0, iter_entry_points(group='isomer.base', name=None))
+
+    log('Entrypoints:', entry_points, pretty=True, lvl=verbose)
+    try:
+        for iterator in entry_points:
+            for entry_point in iterator:
+                log('Entrypoint:', entry_point, pretty=True, lvl=debug)
+
+                try:
+                    name = entry_point.name
+                    package = entry_point.dist.project_name
+                    log('Package:', package, pretty=True, lvl=debug)
+                    location = entry_point.dist.location
+                    loaded = entry_point.load()
+
+                    log("Entry point: ", entry_point, name, entry_point.resolve(), location, lvl=debug)
+
+                    log("Loaded: ", loaded, lvl=debug)
+
+                    try:
+                        pkg = pkg_resources.Requirement.parse(package)
+                        frontend = pkg_resources.resource_listdir(pkg, 'frontend')
+                        log('Frontend resources found:', frontend, lvl=debug)
+                    except:
+                        log('Exception during frontend resource lookup:', exc=True)
+                        frontend = None
+
+                    if frontend not in (None, []):
+                        log('Contains frontend parts', lvl=debug)
+                        if not frontend_list:
+                            frontend = "[X]"
+                    else:
+                        frontend = "[ ]"
+
+                    result = component(
+                        frontend=frontend,
+                        name=name,
+                        package=package,
+                        classname=repr(loaded).lstrip('<class \'').rstrip('\'>'),
+                        location=location if directory else 'use -d'
+                    )
+
+                    if not frontend_only or frontend:
+                        results.append(result)
+                except ImportError as e:
+                    log('Exception while iterating entrypoints:', e, type(e), exc=True)
+    except ModuleNotFoundError as e:
+        log('Module could not be loaded:', e, exc=True)
+
+    table = std_table(results)
+    log('Found components:\n%s' % table)
