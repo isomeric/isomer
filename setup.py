@@ -77,7 +77,6 @@ add_datafiles('frontend', 'docs', 'locale')
 setup(
     name="isomer",
     description="isomer",
-    version="1.0.0",
     author="Isomer Community",
     author_email="riot@c-base.org",
     maintainer="Isomer Community",

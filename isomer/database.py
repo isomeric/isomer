@@ -386,6 +386,7 @@ def initialize(address='127.0.0.1:27017', database_name='isomer-default',
             return False
 
     formal.connect(database_name)
+    formal.connect_sql(database_name, database_type='sql_memory')
 
     schemastore = _build_schemastore_new()
     l10n_schemastore = _build_l10n_schemastore(schemastore)
