@@ -18,9 +18,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-__author__ = "Heiko 'riot' Weinen"
-__license__ = "AGPLv3"
-
 """
 
 
@@ -37,6 +34,10 @@ Schemastore and Objectstore builder functions.
 
 
 """
+
+__author__ = "Heiko 'riot' Weinen"
+__license__ = "AGPLv3"
+
 
 import sys
 import time
@@ -630,6 +631,66 @@ class BackupManager(ConfigurableComponent):
         backup(None, None, None, 'json', filename, False, True, [])
 
 
+def dump(db_host, db_port, db_name, filename):
+    """Dump a full database to JSON"""
+
+    backup_log('Connecting database', db_host, db_port, db_name, lvl=debug)
+
+    client = pymongo.MongoClient(host=str(db_host), port=int(db_port))
+    db = client[str(db_name)]
+
+    backup_log('Dumping data from database', db_name)
+
+    with open(filename, "w") as file:
+        for collection_name in db.collection_names():
+            backup_log('Archiving collection:', collection_name, lvl=debug)
+            collection = db[collection_name]
+            cursor = collection.find({})
+
+            file.write("{'collection': '%s', 'data': [" % collection_name)
+            for document in cursor:
+                backup_log('Archiving:', document[:50] if len(document) >= 50 else document, lvl=verbose)
+                document['_id'] = str(document['_id'])
+                file.write(json.dumps(document))
+                file.write(',')
+            file.write(']}')
+
+    backup_log('Done')
+
+    return True
+
+
+def load(db_host, db_port, db_name, filename):
+    """Load a full database dump from JSON"""
+
+    backup_log('Connecting database')
+
+    client = pymongo.MongoClient(db_host, db_port)
+    db = client[db_name]
+
+    backup_log('Loading data')
+
+    with open(filename, "r") as file:
+        data = json.load(file)
+
+    backup_log('Storing data')
+
+    for collection_name, items in data:
+        collection = db[collection_name]
+
+        requests = []
+
+        for document in data:
+            document['_id'] = bson.ObjectId(document['_id'])
+            requests.append(pymongo.ReplaceOne(document, upsert=True))
+
+        collection.bulk_write(requests)
+
+    backup_log('Done')
+
+    return True
+
+
 def backup(schema, uuid, export_filter, export_format, filename, pretty, export_all, omit):
     """Exports all collections to (JSON-) files."""
 
@@ -729,9 +790,6 @@ def internal_restore(schema, uuid, object_filter, import_format, filename, all_s
             schemata = data.keys()
     else:
         schemata = [schema]
-
-    #from isomer import database
-    #database.initialize(ctx.obj['dbhost'], ctx.obj['dbname'])
 
     if object_filter is not None:
         backup_log('Object filtering on import is WiP! Ignoring for now.', lvl=warn)
