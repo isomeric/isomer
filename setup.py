@@ -22,12 +22,57 @@ __author__ = "Heiko 'riot' Weinen"
 __license__ = "AGPLv3"
 
 from setuptools import setup
+import os
 
 # TODO:
 # Classifiers
 # Keywords
 # download_url
 # platform
+
+ignore = [
+    '/frontend/node_modules',
+    '/frontend/build',
+    '/frontend/src/components',
+    '/docs/build',
+    '__pycache__'
+]
+datafiles = []
+manifestfiles = []
+
+
+def prune(thing):
+    for part in ignore:
+        part = part[1:] if part.startswith('/') else part
+        if part in thing:
+            return True
+    return False
+
+
+def add_datafiles(*paths):
+    with open('MANIFEST.in', 'w') as manifest:
+        for path in paths:
+            files = []
+            manifest.write('recursive-include ' + path + ' *\n')
+
+            for root, dirnames, filenames in os.walk(path):
+                for filename in filenames:
+                    datafile = os.path.join(root, filename)
+
+                    if not prune(datafile):
+                        files.append(datafile)
+                        manifestfiles.append(datafile)
+
+            datafiles.append((path, files))
+
+        for part in ignore:
+            if part.startswith('/'):
+                manifest.write('prune ' + part[1:] + '\n')
+            else:
+                manifest.write('global-exclude ' + part + '/*\n')
+
+
+add_datafiles('frontend', 'docs', 'locale')
 
 setup(
     name="isomer",
@@ -76,6 +121,7 @@ See https://github.com/isomeric/isomer""",
         'pystache>=0.5.4',
         'tomlkit>=0.4.6'
     ],
+    data_files=datafiles,
     entry_points="""[console_scripts]
     isomer=isomer.iso:main
     iso=isomer.iso:main
