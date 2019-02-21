@@ -182,12 +182,10 @@ class Core(ConfigurableComponent):
         host = kwargs.get('web_address', None)
         port = kwargs.get('web_port', None)
 
-        self.log(instance, pretty=True)
+        # self.log(instance, pretty=True, lvl=verbose)
 
         self.host = instance['web_address'] if host is None else host
         self.port = instance['web_port'] if port is None else port
-
-        self.log(self.host, self.port, pretty=True, lvl=critical)
 
         self.log('Web configuration: %s:%i' % (self.host, int(self.port)), lvl=debug)
 
@@ -356,6 +354,7 @@ class Core(ConfigurableComponent):
         try:
             self.server = Server(
                 (self.host, self.port),
+                display_banner=False,
                 secure=secure,
                 certfile=self.certificate  # ,
                 # inherit=True
@@ -605,9 +604,10 @@ def construct_graph(name, instance, args):
 
 
 @click.command()
-@click.option("--web-port", "--port", "-p", help="Define port for UI server", type=int, default=None)
-@click.option("--web-address", "--address", help="Define listening address for UI server", type=str, default='127.0.0.1')
-@click.option("--web-certificate", "--cert", '-c', help="Certificate file path", type=str, default=None)
+@click.option("--web-port", "-p", help="Define port for UI server", type=int, default=None)
+@click.option("--web-address", "-a", help="Define listening address for UI server",
+              type=str, default='127.0.0.1')
+@click.option("--web-certificate", '-c', help="Certificate file path", type=str, default=None)
 @click.option("--profile", help="Enable profiler", is_flag=True)
 @click.option("--open-gui", help="Launch web browser for GUI inspection after startup", is_flag=True)
 @click.option("--draw-graph", help="Draw a snapshot of the component graph after construction", is_flag=True)
@@ -616,11 +616,10 @@ def construct_graph(name, instance, args):
 @click.option("--dev", help="Run development server", is_flag=True, default=True)
 @click.option("--insecure", help="Keep privileges - INSECURE", is_flag=True)
 @click.option("--no-run", "-n", help="Only assemble system, do not run", is_flag=True)
-@click.option("--blacklist", "-b", help="Blacklist a component", multiple=True, default=[])
+@click.option("--blacklist", "-b", help="Blacklist a component (can be repeated)", multiple=True, default=[])
 @click.pass_context
 def launch(ctx, run=True, **args):
-    """Bootstrap basics, assemble graph and hand over control to the Core
-    component"""
+    """Assemble and run an Isomer instance"""
 
     instance_name = ctx.obj['instance']
     instance = load_instance(instance_name)
