@@ -51,11 +51,11 @@ def test_launcher():
     # Use a non privileged port for testing, until that part can be removed
     # from Core
 
-    instance_config = {
+    instance_configuration = {
         'web_address': '127.0.0.1',
         'web_port': 80000,
         'web_certificate': ''
     }
-    core = Core('testing', instance_config, **args)
+    core = Core('testing', instance_configuration, **args)
 
     assert type(core) == Core

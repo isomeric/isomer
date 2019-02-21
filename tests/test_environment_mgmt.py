@@ -94,8 +94,8 @@ def test_install():
     assert os.path.exists('/tmp/isomer-test/var/lib/isomer/default/green/repository')
     assert os.path.exists('/tmp/isomer-test/var/lib/isomer/default/green/repository/frontend')
 
-    instance_config = load_instance('default')
-    environment = instance_config['environments']['green']
+    instance_configuration = load_instance('default')
+    environment = instance_configuration['environments']['green']
 
     assert environment['installed'] is True
     # TODO: IMPORTANT|Investigation pending for 1.0.1 ff.
