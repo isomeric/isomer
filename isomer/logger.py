@@ -83,7 +83,7 @@ level_data = {
     warn: ['WARN', '\033[1;93m'],
     error: ['ERROR', '\033[1;31;43m'],
     critical: ['CRIT', '\033[1;33;41m'],
-    hilight: ['HILIGHT', '\033[1;4;30;106m'],
+    hilight: ['HILIGHT', '\033[1;4;34;106m'],
     version: ['VER', '\033[1;96;44m']
 }
 
@@ -216,6 +216,7 @@ def isolog(*what, **kwargs):
     emitter = kwargs.get('emitter', 'UNKNOWN')
     traceback = kwargs.get('tb', False)
     frame_ref = kwargs.get('frame_ref', 0)
+    nc = kwargs.get('nc', False)
 
     output = None
 
@@ -310,7 +311,7 @@ def isolog(*what, **kwargs):
 
     if lvl >= verbosity['console']:
         output = str(msg)
-        if color:
+        if color and not nc:
             output = level_data[lvl][1] + output + terminator
         try:
             print(output)
