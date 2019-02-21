@@ -166,12 +166,12 @@ def test_instance_set():
 
 
 def test_instance_clear():
-    """Creates a new default instances and checks if setting a parameter works"""
+    """Creates a new default instances and checks if clearing it works"""
     reset_base()
 
     _ = run_cli(isotool, ['instance', 'create'])
 
-    result = run_cli(isotool, ['instance', 'clear', '--force'])
+    result = run_cli(isotool, ['instance', 'clear', '--force', '--no-archive'])
     pprint(result.output)
 
     assert result.exit_code == 0
