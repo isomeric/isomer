@@ -147,10 +147,15 @@ def std_hash(word, salt):
     return hex_hash
 
 
-def std_now():
+def std_now(delta=None):
     """Return current (UTC) timestamp in ISO format"""
 
-    return datetime.now().isoformat()
+    now = datetime.now()
+
+    if delta is not None:
+        now = now + delta
+
+    return now.isoformat()
 
 
 def std_uuid():
