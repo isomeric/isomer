@@ -26,6 +26,7 @@ Frontend building process
 """
 
 import os
+import pkg_resources
 from glob import glob
 from shutil import copy
 
@@ -40,11 +41,12 @@ except ImportError:
 
 
 def log(*args, **kwargs):
+    """Log as builder emitter"""
     kwargs.update({'emitter': 'BUILDER', 'frame_ref': 2})
     isolog(*args, **kwargs)
 
 
-def copytree(root_src_dir, root_dst_dir, hardlink=True):
+def copy_directory_tree(root_src_dir, root_dst_dir, hardlink=True):
     """Copies a whole directory tree"""
 
     for src_dir, dirs, files in os.walk(root_src_dir):
@@ -88,13 +90,46 @@ def copytree(root_src_dir, root_dst_dir, hardlink=True):
                 lvl=verbose)
 
 
+def copy_resource_tree(package, source, target):
+    """Copies a whole resource tree"""
+
+    pkg = pkg_resources.Requirement.parse(package)
+
+    log('Copying component frontend tree for %s to %s (%s)' % (package, target, source), lvl=debug)
+
+    if not os.path.exists(target):
+        os.mkdir(target)
+
+    for item in pkg_resources.resource_listdir(pkg, source):
+        log('Handling resource item:', item, lvl=verbose)
+
+        if item in ('__pycache__', '__init__.py'):
+            continue
+
+        target_name = os.path.join(target, source.split('frontend')[1].lstrip('/'), item)
+        log('Would copy to:', target_name, lvl=verbose)
+
+        if pkg_resources.resource_isdir(pkg, source + '/' + item):
+            log('Creating subdirectory:', target_name, lvl=debug)
+            try:
+                os.mkdir(target_name)
+            except FileExistsError:
+                log('Subdirectory already exists, ignoring', lvl=debug)
+
+            log('Recursing resource subdirectory:', source + '/' + item, lvl=debug)
+            copy_resource_tree(package, source + '/' + item, target)
+        else:
+            log('Copying resource file:', source + '/' + item, lvl=debug)
+            with open(target_name, 'w') as f:
+                f.write(pkg_resources.resource_string(pkg, source + '/' + item).decode('utf-8'))
+
+
 def install_frontend(instance='default', forcereload=False, forcerebuild=False,
                      forcecopy=True, install=True, development=False, build_type='dist'):
     """Builds and installs the frontend"""
 
     log("Updating frontend components")
     components = {}
-    loadable_components = {}
 
     if development:
         frontend_root = os.path.realpath(os.path.dirname(os.path.realpath(__file__)) + "/../../frontend")
@@ -122,7 +157,7 @@ def install_frontend(instance='default', forcereload=False, forcerebuild=False,
         log("Frontend dependency installing done: ", out,
             err, lvl=debug)
 
-    if True:  # try:
+    try:
         from pkg_resources import iter_entry_points
 
         entry_point_tuple = (
@@ -135,110 +170,127 @@ def install_frontend(instance='default', forcereload=False, forcerebuild=False,
             for entry_point in iterator:
                 try:
                     name = entry_point.name
+                    package = entry_point.dist.project_name
                     location = entry_point.dist.location
                     loaded = entry_point.load()
 
-                    log("Entry point: ", entry_point,
-                        name,
-                        entry_point.resolve().__module__, lvl=debug)
+                    if package == 'isomer':
+                        continue
+
+                    log('Package:', package, lvl=debug)
+
+                    log("Entry point: ", entry_point, name, entry_point.resolve().__module__, lvl=debug)
                     component_name = entry_point.resolve().__module__.split('.')[1]
 
                     log("Loaded: ", loaded, lvl=verbose)
-                    comp = {
+                    component = {
                         'location': location,
                         'version': str(entry_point.dist.parsed_version),
-                        'description': loaded.__doc__
+                        'description': loaded.__doc__,
+                        'package': package
                     }
 
-                    frontend = os.path.join(location, 'frontend')
-                    log("Checking component frontend parts: ",
-                        frontend, lvl=verbose)
-                    if os.path.isdir(frontend) and frontend != frontend_root:
-                        comp['frontend'] = frontend
+                    try:
+                        pkg = pkg_resources.Requirement.parse(package)
+                        log('Checking component data resources', lvl=debug)
+                        resources = pkg_resources.resource_listdir(pkg, 'frontend')
+                        if len(resources) > 0:
+                            component['frontend'] = resources
+                            component['method'] = 'resources'
+                    except ModuleNotFoundError:
+                        frontend = os.path.join(location, 'frontend')
+                        log("Checking component data folders ", frontend, lvl=verbose)
+                        if os.path.isdir(frontend) and frontend != frontend_root:
+                            component['frontend'] = frontend
+                            component['method'] = 'folder'
+
+                    if 'frontend' not in component:
+                        log("Component without frontend directory:", component, lvl=debug)
                     else:
-                        log("Component without frontend "
-                            "directory:", comp, lvl=debug)
-
-                    components[component_name] = comp
-                    loadable_components[component_name] = loaded
-
-                    log("Loaded component:", comp, lvl=verbose)
+                        components[component_name] = component
 
                 except Exception as e:
                     log("Could not inspect entrypoint: ", e,
                         type(e), entry_point, iterator, lvl=error,
                         exc=True)
 
-        frontends = iter_entry_points(group='isomer.frontend', name=None)
-        for entrypoint in frontends:
-            name = entrypoint.name
-            location = entrypoint.dist.location
+        # frontends = iter_entry_points(group='isomer.frontend', name=None)
+        # for entrypoint in frontends:
+        #     name = entrypoint.name
+        #     location = entrypoint.dist.location
+        #
+        #     log('Frontend entrypoint:', name, location, entrypoint, lvl=hilight)
 
-            log('Frontend entrypoint:', name, location, entrypoint, lvl=hilight)
-
-    # except Exception as e:
-    #    isomerlog("Error: ", e, type(e), lvl=error, exc=True)
-    #    return
+    except Exception as e:
+        log("Error during frontend install: ", e, type(e), lvl=error, exc=True)
 
     log('Components after lookup:', sorted(list(components.keys())))
 
     def _update_frontends(install=True):
-        log("Checking unique frontend locations: ",
-            loadable_components, lvl=debug)
+        log("Checking unique frontend locations: ", components, lvl=debug)
 
-        importlines = []
+        imports = []
         modules = []
 
-        for name, component in components.items():
+        installation_packages = []
+
+        log(components, pretty=True)
+
+        for package_name, component in components.items():
             if 'frontend' in component:
                 origin = component['frontend']
+                method = component['method']
+                package = component.get('package', None)
 
-                target = os.path.join(frontend_root, 'src', 'components',
-                                      name)
+                target = os.path.join(frontend_root, 'src', 'components', package_name)
                 target = os.path.normpath(target)
 
                 if install:
-                    reqfile = os.path.join(origin, 'requirements.txt')
+                    if method == 'folder':
+                        requirements_file = os.path.join(origin, 'requirements.txt')
 
-                    if os.path.exists(reqfile):
-                        # TODO: Speed this up by collecting deps first then doing one single install call
-                        log("Installing package dependencies for", name, lvl=debug)
-                        with open(reqfile, 'r') as f:
-                            cmdline = ["npm", "install"]
-                            for line in f.readlines():
-                                cmdline.append(line.replace("\n", ""))
-
-                            log("Running", cmdline, lvl=verbose)
-                            npminstall = Popen(cmdline, cwd=frontend_root)
-                            out, err = npminstall.communicate()
-
-                            npminstall.wait()
-
-                            log("Frontend installing done: ", out,
-                                err, lvl=debug)
-
-                # if target in ('/', '/boot', '/usr', '/home', '/root',
-                # '/var'):
-                #    log("Unsafe frontend deletion target path, "
-                #        "NOT proceeding! ", target, lvl=critical)
+                        if os.path.exists(requirements_file):
+                            log("Adding package dependencies for", package_name, lvl=debug)
+                            with open(requirements_file, 'r') as f:
+                                for line in f.readlines():
+                                    installation_packages.append(line.replace("\n", ""))
+                    elif method == 'resources':
+                        pkg = pkg_resources.Requirement.parse(package)
+                        if pkg_resources.resource_exists(pkg, 'frontend/requirements.txt'):
+                            for line in pkg_resources.resource_string(pkg, 'frontend/requirements.txt'):
+                                installation_packages.append(line.replace("\n", ""))
 
                 log("Copying:", origin, target, lvl=debug)
-
-                copytree(origin, target)
+                if method == 'folder':
+                    copy_directory_tree(origin, target)
+                elif method == 'resources':
+                    copy_resource_tree(package, 'frontend', target)
 
                 for module_filename in glob(target + '/*.module.js'):
                     module_name = os.path.basename(module_filename).split(".module.js")[0]
                     line = u"import {s} from './components/{p}/{s}.module';\nmodules.push({s});\n".format(
-                        s=module_name, p=name)
+                        s=module_name, p=package_name)
+
                     if module_name not in modules:
-                        importlines += line
+                        imports += line
                         modules.append(module_name)
             else:
-                log("Module without frontend:", name, component,
+                log("Module without frontend:", package_name, component,
                     lvl=debug)
 
-        with open(os.path.join(frontend_root, 'src', 'main.tpl.js'),
-                  "r") as f:
+        if install:
+            command_line = ['npm', 'install'] + installation_packages
+            log("Running", command_line, lvl=verbose)
+
+            # TODO: Switch to i.t.run_process
+            installer = Popen(command_line, cwd=frontend_root)
+            installer_output, installer_error = installer.communicate()
+
+            installer.wait()
+
+            log("Frontend installing done: ", installer_output, installer_error, lvl=debug)
+
+        with open(os.path.join(frontend_root, 'src', 'main.tpl.js'), "r") as f:
             main = "".join(f.readlines())
 
         parts = main.split("/* COMPONENT SECTION */")
@@ -252,7 +304,7 @@ def install_frontend(instance='default', forcereload=False, forcerebuild=False,
                       "w") as f:
                 f.write(parts[0])
                 f.write("/* COMPONENT SECTION:BEGIN */\n")
-                for line in importlines:
+                for line in imports:
                     f.write(line)
                 f.write("/* COMPONENT SECTION:END */\n")
                 f.write(parts[2])
@@ -263,23 +315,24 @@ def install_frontend(instance='default', forcereload=False, forcerebuild=False,
     def _rebuild_frontend():
         log("Starting frontend build.", lvl=warn)
 
-        npmbuild = Popen(["npm", "run", build_type], cwd=frontend_root)
-        out, err = npmbuild.communicate()
+        # TODO: Switch to i.t.run_process
+        builder = Popen(["npm", "run", build_type], cwd=frontend_root)
+        builder_output, builder_error = builder.communicate()
         try:
-            npmbuild.wait()
+            builder.wait()
         except Exception as e:
             log("Error during frontend build", e, type(e),
                 exc=True, lvl=error)
             return
 
-        log("Frontend build done: ", out, err, lvl=debug)
+        log("Frontend build done: ", builder_output, builder_error, lvl=debug)
 
         try:
-            copytree(os.path.join(frontend_root, build_type),
-                     frontend_target, hardlink=False)
-            copytree(os.path.join(frontend_root, 'assets'),
-                     os.path.join(frontend_target, 'assets'),
-                     hardlink=False)
+            copy_directory_tree(os.path.join(frontend_root, build_type),
+                                frontend_target, hardlink=False)
+            copy_directory_tree(os.path.join(frontend_root, 'assets'),
+                                os.path.join(frontend_target, 'assets'),
+                                hardlink=False)
         except PermissionError:
             log('No permission to change:', frontend_target, lvl=error)
 
