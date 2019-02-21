@@ -90,7 +90,7 @@ setup(
               'isomer.ui',
               'isomer.schemata',
               'isomer.provisions'
-             ],
+              ],
     namespace_packages=['isomer'],
     long_description="""
 Isomer - A distributed application framework
@@ -102,8 +102,7 @@ This software package is supposed to run on your ship/car/plane/ufo's board
 computer.
 See https://github.com/isomeric/isomer""",
     dependency_links=[
-        'https://github.com/ri0t/click-repl/archive/master.zip#egg'
-        '=click-repl-0.1.3-ri0t'
+        'https://github.com/ri0t/click-repl/archive/master.zip#egg=click-repl-0.1.3-ri0t'
     ],
     install_requires=[
         'click-didyoumean>=0.0.3',
