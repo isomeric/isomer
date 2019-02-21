@@ -18,6 +18,20 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+
+"""
+
+Module: Backup
+==============
+
+Contains functionality for exporting and importing objects.
+
+These do not fully backup or restore databases, as only validated and well-known (by schemata) objects will be handled.
+
+See isomer.database.dump and isomer.database.load for functionality without any schema awareness.
+
+"""
+
 __author__ = "Heiko 'riot' Weinen"
 __license__ = "AGPLv3"
 
@@ -56,13 +70,10 @@ def db_export(schema, uuid, object_filter, export_format, filename, pretty, all_
 @click.option("--all-schemata", "--all", default=False, is_flag=True,
               help="Agree to import all documents, if no schema specified")
 @click.option("--dry", default=False, is_flag=True, help="Do not write changes to the database")
-@click.pass_context
-def db_import(ctx, schema, uuid, object_filter, import_format, filename, all_schemata, dry):
+def db_import(schema, uuid, object_filter, import_format, filename, all_schemata, dry):
     """Import objects from file
 
     Warning! This functionality is work in progress and you may destroy live data by using it!
     Be very careful when using the export/import functionality!"""
 
     internal_restore(schema, uuid, object_filter, import_format, filename, all_schemata, dry)
-
-

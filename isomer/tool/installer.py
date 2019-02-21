@@ -18,6 +18,17 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+"""
+
+Module: Configuration
+=====================
+
+Classic installer tidbits that should probably be moved to places elsewhere,
+i.e. isomer.tool.instance and isomer.tool.environment
+
+
+"""
+
 __author__ = "Heiko 'riot' Weinen"
 __license__ = "AGPLv3"
 
@@ -34,9 +45,8 @@ from click_didyoumean import DYMGroup
 
 from isomer.tool.etc import NonExistentKey, instance_template
 from isomer.logger import error, warn, debug
-from isomer.tool import check_root, log, ask
+from isomer.tool import check_root, log
 from isomer.provisions.base import provisionList
-from isomer.misc.path import get_path, set_instance
 from isomer.ui.builder import install_frontend
 
 from git import Repo, exc
@@ -144,8 +154,7 @@ def install_docs(instance, clear_target):
 
 
 @install.command(short_help='install provisions')
-@click.option('--provision', '-p', help="Specify a provision (default=install "
-                                        "all)",
+@click.option('--provision', '-p', help="Specify a provision (default=install all)",
               default=None, metavar='<name>')
 @click.option('--clear-existing', '--clear', help='Clears already existing collections (DANGER!)',
               is_flag=True, default=False)
@@ -399,16 +408,3 @@ def install_all(ctx, clear_all):
     # install_nginx(instance, dbhost, dbname, port)
 
     log('Done')
-
-
-@click.command(short_help='remove stuff in /var')
-def uninstall():
-    """Uninstall data and resource locations"""
-
-    check_root()
-
-    response = ask("This will delete all data of your Isomer installations! Type"
-                   "YES to continue:", default="N", show_hint=False)
-    if response == 'YES':
-        shutil.rmtree('/var/lib/isomer')
-        shutil.rmtree('/var/cache/isomer')

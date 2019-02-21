@@ -18,6 +18,45 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+
+"""
+
+Package: Tool
+=============
+
+Contains basic functionality for the isomer management tool.
+
+
+Command groups
+--------------
+
+backup
+configuration
+create_module
+database
+defaults
+dev
+environment
+etc
+installer
+instance
+misc
+objects
+rbac
+remote
+system
+user
+
+General binding glue
+--------------------
+
+cli
+templates
+tool
+
+
+"""
+
 __author__ = "Heiko 'riot' Weinen"
 __license__ = "AGPLv3"
 
@@ -41,10 +80,11 @@ except ImportError:
 
 
     class spur_mock(object):
-        def __init__(self):
-            pass
+        """Mock object for cases where spur was not installed."""
 
-        def LocalShell(self):
+        @staticmethod
+        def LocalShell():
+            """Only defines a local shell which behaves like a standard library subprocess"""
             return subprocess
 
 
@@ -81,8 +121,8 @@ def run_process(cwd, args, shell=None, sudo=None, show=False):
     def build_command(*things):
         """Construct a command adding sudo if necessary"""
 
-        if sudo not in (None, False):
-            if isinstance(sudo, bool) and sudo is True:
+        if sudo not in (None, False, 'False'):
+            if isinstance(sudo, bool) and sudo is True or sudo == 'True':
                 user = 'root'
             elif isinstance(sudo, str):
                 user = sudo
@@ -105,11 +145,14 @@ def run_process(cwd, args, shell=None, sudo=None, show=False):
         log('Running on remote shell:', shell, lvl=debug)
 
     command = build_command(*args)
+    log(command, lvl=verbose)
 
     try:
         if show:
             log('Executing:', command)
         process = shell.run(command, cwd=cwd)
+
+        log(process.output, lvl=verbose)
 
         return True, process
     except spur.RunProcessError as e:
@@ -228,34 +271,45 @@ def ask(question, default=None, data_type='str', show_hint=False):
 
 def format_result(result):
     """Format child instance output"""
-    return str(result.output).replace('\\n', '\n').replace('\\', '')
+    return str(result.output, encoding='ascii').replace('\\n', '\n')
 
 
-def get_isomer(source, url, destination, shell=None, sudo=None):
+def get_isomer(source, url, destination, upgrade=False, shell=None, sudo=None):
     """Grab a copy of Isomer somehow"""
-
     success = False
 
     if source == 'git':
-        log('Cloning repository from', url)
-        success, result = run_process(destination, ['git', 'clone', url, 'repository'], shell, sudo)
-        if not success:
-            log(result, lvl=error)
+        if not upgrade:
+            log('Cloning repository from', url)
+            success, result = run_process(destination, ['git', 'clone', url, 'repository'], shell, sudo)
+            if not success:
+                log(result, lvl=error)
+                sys.exit(50000)
+        else:
+            log('Updating repository from', url)
+            success, result = run_process(os.path.join(destination, 'repository'),
+                                          ['git', 'pull', 'origin', 'master'], shell, sudo)
+            if not success:
+                log(result, lvl=error)
+                sys.exit(50000)
 
         repository = os.path.join(destination, 'repository')
         log('Initializing submodules')
         success, result = run_process(repository, ['git', 'submodule', 'init'], shell, sudo)
         if not success:
             log(result, lvl=error)
+            sys.exit(50000)
         success, result = run_process(repository, ['git', 'submodule', 'update'], shell, sudo)
         if not success:
             log(result, lvl=error)
+            sys.exit(50000)
 
         log('Pulling frontend')
         success, result = run_process(os.path.join(repository, 'frontend'),
                                       ['git', 'pull', 'origin', 'master'], shell, sudo)
         if not success:
             log(result, lvl=error)
+            sys.exit(50000)
     elif source == 'link':
         if shell is not None:
             log('Remote Linking? Are you sure? Links will be local, they cannot span over any network.', lvl=warn)
@@ -267,6 +321,7 @@ def get_isomer(source, url, destination, shell=None, sudo=None):
             success, result = run_process(destination, ['ln', '-s', path, 'repository'], shell, sudo)
             if not success:
                 log(result, lvl=error)
+                sys.exit(50000)
         else:
             log('Repository already exists!', lvl=warn)
 
@@ -277,32 +332,38 @@ def get_isomer(source, url, destination, shell=None, sudo=None):
             )
             if not success:
                 log(result, lvl=error)
+                sys.exit(50000)
         else:
             log('Frontend already present')
     elif source == 'copy':
-        log('Copying local repository to remote.')
+        log('Copying local repository')
 
         path = os.path.realpath(os.path.expanduser(url))
         target = os.path.join(destination, 'repository')
 
         if shell is None:
             shell = spur.LocalShell()
+        else:
+            log('Copying to remote')
 
         log('Copying %s to %s' % (path, target), lvl=verbose)
 
         shell.upload_dir(path, target, ['.tox*', 'node_modules*'])
+
         if sudo is not None:
             success, result = run_process(
                 '/', ['chown', sudo, '-R', target]
             )
             if not success:
                 log('Could not change ownership to', sudo, lvl=warn)
+                sys.exit(50000)
         return True
 
     return success
 
 
-def install_isomer(platform_name=None, use_sudo=False, shell=None, cwd='.', show=False, omit_common=False):
+def install_isomer(platform_name=None, use_sudo=False, shell=None, cwd='.',
+                   show=False, omit_common=False, omit_platform=False):
     """Installs all dependencies"""
 
     if platform_name is None:
@@ -363,7 +424,8 @@ def install_isomer(platform_name=None, use_sudo=False, shell=None, cwd='.', show
             log('Could not install Python dependencies!', lvl=error)
             log(output, pretty=True)
 
-    platform()
+    if not omit_platform:
+        platform()
 
     if not omit_common:
         common()
@@ -378,18 +440,18 @@ def _get_configuration(ctx):
         sys.exit(EXIT_INVALID_CONFIGURATION)
 
     try:
-        instance_config = ctx.obj['instances'][ctx.obj['instance']]
-        log('Instance Configuration:', instance_config, lvl=verbose, pretty=True)
+        instance_configuration = ctx.obj['instances'][ctx.obj['instance']]
+        log('Instance Configuration:', instance_configuration, lvl=verbose, pretty=True)
     except NonExistentKey:
         log('Instance %s does not exist' % ctx.obj['instance'], lvl=warn)
         sys.exit(EXIT_INSTANCE_UNKNOWN)
 
-    environment_name = instance_config['environment']
-    environment_config = instance_config['environments'][environment_name]
+    environment_name = instance_configuration['environment']
+    environment_config = instance_configuration['environments'][environment_name]
 
     ctx.obj['environment'] = environment_config
 
-    ctx.obj['instance_config'] = instance_config
+    ctx.obj['instance_configuration'] = instance_configuration
 
 
 def get_next_environment(ctx):
@@ -398,7 +460,7 @@ def get_next_environment(ctx):
     if ctx.obj['acting_environment'] is not None:
         next_environment = ctx.obj['acting_environment']
     else:
-        current_environment = ctx.obj['instance_config']['environment']
+        current_environment = ctx.obj['instance_configuration']['environment']
         next_environment = 'blue' if current_environment == 'green' else 'green'
 
     return next_environment

@@ -18,6 +18,16 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+
+"""
+
+Module: Database
+================
+
+Database management functionality.
+
+"""
+
 __author__ = "Heiko 'riot' Weinen"
 __license__ = "AGPLv3"
 
@@ -46,6 +56,7 @@ def db(ctx):
 @db.command(short_help='List all mongodb databases')
 @click.pass_context
 def list_all(ctx):
+    """List all available Mongo Databases on the configured database host."""
     from pymongo import MongoClient
 
     client = MongoClient(ctx.obj['dbhost'])
@@ -60,6 +71,8 @@ def list_all(ctx):
 @click.option('--clear-target', is_flag=True, help='Erase target if it exists', default=False)
 @click.pass_context
 def rename(ctx, source, destination, keep, clear_target):
+    """Rename Mongodb databases"""
+
     from pymongo import MongoClient
 
     client = MongoClient(ctx.obj['dbhost'])

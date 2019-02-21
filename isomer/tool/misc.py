@@ -18,9 +18,19 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+"""
+
+Module: Misc
+============
+
+Miscellaneous functionality for the management tool.
+
+"""
+
 __author__ = "Heiko 'riot' Weinen"
 __license__ = "AGPLv3"
 
+import os
 import click
 from click_repl import repl
 from prompt_toolkit.history import FileHistory
@@ -34,7 +44,9 @@ from isomer.version import version_info
 
 @cli.command(short_help='Show running isomer tool version')
 def version():
-    log('Tool version info:', version_info)
+    """Log the version information"""
+
+    log('Tool version info:', version_info, os.path.dirname(__file__))
 
 
 @cli.command(short_help='Start interactive management shell')
@@ -64,6 +76,7 @@ def shell():
     ]
 
     def bottom_toolbar():
+        """Returns a nice isomeric toolbar with the current version displayed"""
         return [
             ('class:bottom-toolbar-name', ' Isomer '),
             ('class:bottom-toolbar', 'maintenance tool (%s)' % version_info)

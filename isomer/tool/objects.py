@@ -18,6 +18,16 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+
+"""
+
+Module: Objects
+===============
+
+Object management functionality and utilities.
+
+"""
+
 __author__ = "Heiko 'riot' Weinen"
 __license__ = "AGPLv3"
 
@@ -267,6 +277,8 @@ def find_field(ctx, search, by_type, obj):
 @click.option('--schema', default=None, help='Work on specified schema only')
 @click.pass_context
 def illegalcheck(ctx, schema, delete_duplicates, fix, test):
+    """Tool to find erroneous objects created with old legacy bugs. Should be obsolete!"""
+
     database = ctx.obj['db']
 
     if delete_duplicates and fix:
@@ -304,6 +316,8 @@ def illegalcheck(ctx, schema, delete_duplicates, fix, test):
 @click.option('--schema', default=None, help='Work on specified schema only')
 @click.pass_context
 def dupcheck(ctx, delete_duplicates, merge, schema):
+    """Tool to check for duplicate objects. Which should never happen."""
+
     database = ctx.obj['db']
 
     if schema is None:

@@ -18,20 +18,30 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+
+"""
+
+Module: CLI
+===========
+
+Basic management tool functionality and plugin support.
+
+
+"""
+
 __author__ = "Heiko 'riot' Weinen"
 __license__ = "AGPLv3"
 
 import sys
 import click
-import os.path
 
 from click_didyoumean import DYMGroup
 from click_plugins import with_plugins
 
 from pkg_resources import iter_entry_points
 
-from isomer.logger import set_logfile, set_color, verbosity, warn, error, verbose
-from isomer.misc.path import get_log_path, set_etc_path, set_instance, set_prefix
+from isomer.logger import set_logfile, set_color, verbosity, warn, verbose
+from isomer.misc.path import get_log_path, set_etc_path, set_instance
 from isomer.tool import log, db_host_help, db_host_metavar, db_help, db_metavar
 from isomer.tool.etc import load_configuration, load_instances, instance_template, create_configuration
 from isomer.version import version_info
@@ -95,15 +105,6 @@ def cli(ctx, instance, env, quiet, no_colors, console_level, file_level, do_log,
 
     ctx.obj['instance'] = instance
 
-    if not fat_logo:
-        log('<> Isomer', version_info, ' ', lvl=99)
-    else:
-        from isomer.misc import logo
-        pad = len(logo.split('\n', maxsplit=1)[0])
-        log(('Isomer %s' % version_info).center(pad), lvl=99)
-        for line in logo.split('\n'):
-            log(line, lvl=99)
-
     log("Running with Python", sys.version.replace("\n", ""), sys.platform, lvl=verbose)
     log("Interpreter executable:", sys.executable, lvl=verbose)
 
@@ -123,19 +124,19 @@ def cli(ctx, instance, env, quiet, no_colors, console_level, file_level, do_log,
 
     if instance not in instances:
         log('No instance configuration called %s found! Using fresh defaults.' % instance, lvl=warn)
-        instance_config = instance_template
+        instance_configuration = instance_template
     else:
-        instance_config = instances[instance]
+        instance_configuration = instances[instance]
 
     if file_level is None and console_level is None:
         # TODO: There is a bug here preventing the log-level to be set correctly.
-        verbosity['file_level'] = int(instance_config['loglevel'])
-        verbosity['global'] = int(instance_config['loglevel'])
+        verbosity['file_level'] = int(instance_configuration['loglevel'])
+        verbosity['global'] = int(instance_configuration['loglevel'])
         log('Log level set to', verbosity['global'], lvl=verbose)
 
-    ctx.obj['instance_config'] = instance_config
+    ctx.obj['instance_configuration'] = instance_configuration
 
-    instance_environment = instance_config['environment']
+    instance_environment = instance_configuration['environment']
 
     if env is not None:
         if env == 'current':
@@ -146,19 +147,28 @@ def cli(ctx, instance, env, quiet, no_colors, console_level, file_level, do_log,
             ctx.obj['acting_environment'] = env
         env = ctx.obj['acting_environment']
     else:
-        env = instance_config['environment']
+        env = instance_configuration['environment']
         ctx.obj['acting_environment'] = None
 
     ctx.obj['environment'] = env
 
+    if not fat_logo:
+        log('<> Isomer', version_info, ' [%s|%s]' % (instance, env), lvl=99)
+    else:
+        from isomer.misc import logo
+        pad = len(logo.split('\n', maxsplit=1)[0])
+        log(('Isomer %s' % version_info).center(pad), lvl=99)
+        for line in logo.split('\n'):
+            log(line, lvl=99)
+
     if dbname is None:
-        dbname = instance_config['environments'][env]['database']
-        if dbname in ('', None):
+        dbname = instance_configuration['environments'][env]['database']
+        if dbname in ('', None) and ctx.invoked_subcommand in ('config', 'db', 'environment', 'plugin'):
             log('Database for this instance environment is unset, '
                 'you probably have to install the environment first.', lvl=warn)
 
     if dbhost is None:
-        dbhost = "%s:%i" % (instance_config['database_host'], instance_config['database_port'])
+        dbhost = "%s:%i" % (instance_configuration['database_host'], instance_configuration['database_port'])
 
     ctx.obj['dbhost'] = dbhost
     ctx.obj['dbname'] = dbname

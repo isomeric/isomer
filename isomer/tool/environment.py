@@ -17,6 +17,26 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+"""
+
+Module: Environment
+===================
+
+Environment management functionality.
+
+    environment clear
+    environment archive
+    environment install-frontend
+    environment install-module
+    environment install-provisions
+    environment install
+
+"""
+
+__author__ = "Heiko 'riot' Weinen"
+__license__ = "AGPLv3"
+
 import grp
 import os
 import pwd
@@ -30,17 +50,14 @@ from click_didyoumean import DYMGroup
 from git import Repo, exc
 
 from isomer.scm_version import version
-from isomer.database import initialize, backup, internal_restore
-from isomer.logger import error, verbose, warn, critical, debug
+from isomer.database import dump, load
+from isomer.logger import error, verbose, warn, critical, debug, hilight
 from isomer.misc import std_uuid, std_now
 from isomer.misc.path import set_instance, get_path, get_etc_path, locations, get_log_path, get_etc_instance_path
 from isomer.tool import log, run_process, format_result, get_isomer, _get_configuration, get_next_environment
 from isomer.tool.database import delete_database
 from isomer.tool.defaults import EXIT_INVALID_SOURCE, source_url
 from isomer.tool.etc import write_instance, environment_template
-
-__author__ = "Heiko 'riot' Weinen"
-__license__ = "AGPLv3"
 
 
 @click.group(cls=DYMGroup)
@@ -68,7 +85,7 @@ def clear_environment(ctx, force, no_archive):
     _clear_environment(ctx, force, no_archive=no_archive)
 
 
-def _clear_environment(ctx, force=False, clear_env=None, no_archive=False):
+def _clear_environment(ctx, force=False, clear_env=None, clear=False, no_archive=False):
     """Tests an environment for usage, then clears it"""
 
     instance_name = ctx.obj['instance']
@@ -83,18 +100,18 @@ def _clear_environment(ctx, force=False, clear_env=None, no_archive=False):
 
     # log('Testing', environment, 'for usage')
 
-    env = ctx.obj['instance_config']['environments'][next_environment]
+    env = ctx.obj['instance_configuration']['environments'][next_environment]
 
     if not no_archive:
         if not (_archive(ctx, force) or force):
             log('Archival failed, stopping.')
             sys.exit(5000)
 
-    log('Clearing env:', env)
+    log('Clearing env:', env, lvl=debug)
 
     for item in locations:
         path = get_path(item, '')
-        log('Clearing [%s]: %s' % (item, path))
+        log('Clearing [%s]: %s' % (item, path), lvl=debug)
         try:
             shutil.rmtree(path)
         except FileNotFoundError:
@@ -103,12 +120,13 @@ def _clear_environment(ctx, force=False, clear_env=None, no_archive=False):
             log('No permission to clear environment', lvl=error)
             return False
 
-    _create_folders(ctx)
+    if not clear:
+        _create_folders(ctx)
 
     delete_database(ctx.obj['dbhost'], '%s_%s' % (instance_name, next_environment), force=True)
 
-    ctx.obj['instance_config']['environments'][next_environment] = environment_template
-    write_instance(ctx.obj['instance_config'])
+    ctx.obj['instance_configuration']['environments'][next_environment] = environment_template
+    write_instance(ctx.obj['instance_configuration'])
     return True
 
 
@@ -117,11 +135,11 @@ def _create_folders(ctx):
 
     log("Generating instance directories", emitter='MANAGE')
 
-    instance_config = ctx.obj['instance_config']
+    instance_configuration = ctx.obj['instance_configuration']
 
     try:
-        uid = pwd.getpwnam(instance_config['user']).pw_uid
-        gid = grp.getgrnam(instance_config['group']).gr_gid
+        uid = pwd.getpwnam(instance_configuration['user']).pw_uid
+        gid = grp.getgrnam(instance_configuration['group']).gr_gid
     except KeyError:
         log('User account for instance not found!', lvl=warn)
         uid = gid = None
@@ -131,7 +149,7 @@ def _create_folders(ctx):
     for item in locations:
         path = get_path(item, '', ensure=True)
 
-        log("Created path: " + path)
+        log("Created path: " + path, lvl=debug)
         if os.geteuid() == 0 and uid is not None:
             os.chown(path, uid, gid)
         else:
@@ -143,7 +161,7 @@ def _create_folders(ctx):
     else:
         log('No root access - could not change ownership:', module_path, lvl=warn)
 
-    log('Module storage created:', module_path)
+    log('Module storage created:', module_path, lvl=debug)
 
     if not os.path.exists(logfile):
         open(logfile, "w").close()
@@ -156,23 +174,29 @@ def _create_folders(ctx):
     log("Done: Create instance folders")
 
 
-@environment.command(short_help="Archive the other environment")
+@environment.command(short_help="Archive an environment")
 @click.option('--force', '-f', is_flag=True, default=False)
 @click.pass_context
 def archive(ctx, force):
-    """Archive the non-active  environment"""
+    """Archive the specified or non-active environment"""
 
-    _archive(ctx, force)
+    result = _archive(ctx, force)
+    if result:
+        log("Archived to '%s'" % result)
+        sys.exit(0)
+    else:
+        log('Could not archive.', lvl=error)
+        sys.exit(50060)
 
 
 def _archive(ctx, force=False):
-    instance_config = ctx.obj['instance_config']
+    instance_configuration = ctx.obj['instance_configuration']
 
     next_environment = get_next_environment(ctx)
 
-    env = instance_config['environments'][next_environment]
+    env = instance_configuration['environments'][next_environment]
 
-    log(instance_config, next_environment, pretty=True)
+    log(instance_configuration, next_environment, pretty=True)
     log(env['installed'], env['tested'])
     if (not env['installed'] or not env['tested']) and not force:
         log('Environment has not been installed - not archiving.', lvl=warn)
@@ -186,19 +210,18 @@ def _archive(ctx, force=False):
     temp_path = mkdtemp(prefix='isomer_backup')
 
     log('Archiving database')
-    database_host = '%s:%i' % (instance_config['database_host'], instance_config['database_port'])
-    if initialize(database_host, env['database'], ignore_fail=force):
-        backup(None, None, None, 'json', os.path.join(temp_path, 'db_' + timestamp + '.json'), True, True, [])
-    elif not force:
-        log('Could not archive database.')
-        return False
+    if not dump(instance_configuration['database_host'], instance_configuration['database_port'], env['database'],
+                os.path.join(temp_path, 'db_' + timestamp + '.json')):
+        if not force:
+            log('Could not archive database.')
+            return False
+
+    archive_filename = os.path.join(
+        '/var/backups/isomer/',
+        '%s_%s_%s.tgz' % (ctx.obj['instance'], next_environment, timestamp)
+    )
 
     try:
-        archive_filename = os.path.join(
-            '/var/backups/isomer/',
-            '%s_%s_%s.tgz' % (ctx.obj['instance'], next_environment, timestamp)
-        )
-
         shutil.copy(
             os.path.join(get_etc_instance_path(), ctx.obj['instance'] + '.conf'),
             temp_path
@@ -218,19 +241,17 @@ def _archive(ctx, force=False):
         log('Clearing temporary backup target')
         shutil.rmtree(temp_path)
 
-    ctx.obj['instance_config']['environments']['archive'][timestamp] = env
+    ctx.obj['instance_configuration']['environments']['archive'][timestamp] = env
 
-    log(ctx.obj['instance_config'])
+    log(ctx.obj['instance_configuration'])
 
-    return True
-
-    # TODO: confirm archival
+    return archive_filename
 
 
 @environment.command(short_help='Install frontend')
 @click.pass_context
 def install_frontend(ctx):
-    """Foo"""
+    """Install frontend into an environment"""
 
     next_environment = get_next_environment(ctx)
 
@@ -244,9 +265,9 @@ def _install_frontend(ctx):
     env = get_next_environment(ctx)
     env_path = get_path('lib', '')
 
-    instance_config = ctx.obj['instance_config']
+    instance_configuration = ctx.obj['instance_configuration']
 
-    user = instance_config['user']
+    user = instance_configuration['user']
 
     log('Building frontend')
 
@@ -254,7 +275,7 @@ def _install_frontend(ctx):
         os.path.join(env_path, 'repository'),
         [
             os.path.join(env_path, 'venv', 'bin', 'python3'),
-            './iso', '-nc', '--config-dir', get_etc_path(), '-i', instance_config['name'], '-e', env,
+            './iso', '-nc', '--config-dir', get_etc_path(), '-i', instance_configuration['name'], '-e', env,
             'install', 'frontend', '--rebuild'
         ],
         sudo=user
@@ -279,6 +300,11 @@ def install_environment_module(ctx, source, force, url):
 
     next_environment = get_next_environment(ctx)
     user = instance_configuration['user']
+    installed = instance_configuration['environments'][next_environment]['installed']
+
+    if not installed:
+        log('Please install the \'%s\' environment first.' % next_environment, lvl=error)
+        sys.exit(50000)
 
     set_instance(instance_name, next_environment)
 
@@ -290,8 +316,8 @@ def install_environment_module(ctx, source, force, url):
 
     package_name, package_version = result
 
-    descriptor = [package_name, package_version, source, url]
-    instance_configuration['environments'][next_environment]['modules'].append(descriptor)
+    descriptor = {'version': package_version, 'source': source, 'url': url}
+    instance_configuration['environments'][next_environment]['modules'][package_name] = descriptor
 
     write_instance(instance_configuration)
 
@@ -327,7 +353,7 @@ def _install_module(source, url, force=False, user=None):
         if not success:
             log('Error:', output, lvl=error)
     elif source == 'copy':
-        log('Linking repository from', url)
+        log('Copying repository from', url)
         success, output = run_process(
             module_path, ['cp', '-a', url, temporary_path], sudo=user
         )
@@ -386,23 +412,40 @@ def _install_module(source, url, force=False, user=None):
         return package_name, package_version
 
 
+@environment.command()
+@click.pass_context
+def install_modules(ctx):
+    """Installs all instance configured modules"""
+
+    _install_modules(ctx)
+
+
 def _install_modules(ctx):
-    """Install all given modules"""
+    """Internal function to install modules"""
 
     env = get_next_environment(ctx)
     log('Installing modules into', env, pretty=True)
 
-    modules = ctx.obj['instance_config']['modules']
-    user = ctx.obj['instance_config']['user']
+    instance_configuration = ctx.obj['instance_configuration']
 
-    log(modules, pretty=True)
+    modules = instance_configuration['modules']
+    user = instance_configuration['user']
+
+    if len(modules) == 0:
+        log('No modules defined for instance')
+        return True
 
     for module in modules:
-        log(module, pretty=True)
-        _install_module(module['source'], module['url'], user)
+        log('Installing:', module, pretty=True)
+        result = _install_module(module[0], module[1], user)
+        if result is False:
+            log('Installation of module failed!', lvl=warn)
+        else:
+            module_name, module_version = result
+            descriptor = {'name': module_name, 'source': module[0], 'url': module[1]}
+            instance_configuration['environments'][env]['modules'][module_name] = descriptor
 
-    # TODO: Confirm in environment configuration which modules are installed
-
+    write_instance(instance_configuration)
     return True
 
 
@@ -418,21 +461,19 @@ def install_provisions(ctx, import_file, skip_provisions):
 def _install_provisions(ctx, import_file=None, skip_provisions=False):
     """Load provisions into database"""
 
-    instance_config = ctx.obj['instance_config']
+    instance_configuration = ctx.obj['instance_configuration']
     env = get_next_environment(ctx)
     env_path = get_path('lib', '')
 
     log('Installing provisioning data')
-
-    # TODO: Dependencies of provisions!
-    # First, user has to be provisioned, then system, then the rest
 
     if not skip_provisions:
         success, result = run_process(
             os.path.join(env_path, 'repository'),
             [
                 os.path.join(env_path, 'venv', 'bin', 'python3'),
-                './iso', '-nc', '--clog', '5', '--config-dir', get_etc_path(), '-i', instance_config['name'], '-e', env,
+                './iso', '-nc', '--clog', '5', '--config-dir', get_etc_path(), '-i', instance_configuration['name'],
+                '-e', env,
                 'install', 'provisions'
             ]  # Note: no sudo necessary as long as we do not enforce authentication on databases
         )
@@ -443,7 +484,7 @@ def _install_provisions(ctx, import_file=None, skip_provisions=False):
 
     if import_file is not None:
         log('Importing backup')
-        internal_restore(None, None, {}, 'json', import_file, True, False)
+        load(ctx.obj['dbhost'], ctx.obj['dbport'], ctx.obj['dbname'], import_file)
 
     return True
 
@@ -466,26 +507,33 @@ def _migrate(ctx):
 @click.option('--skip-frontend', is_flag=True, default=False)
 @click.option('--skip-test', is_flag=True, default=False)
 @click.pass_context
-def install_environment(ctx, source, url, import_file, no_sudo, force, skip_modules, skip_data, skip_frontend, skip_test):
-    """Install the non-active environment"""
+def install_environment(ctx, **kwargs):
+    """Install an environment"""
+
+    _install_environment(ctx, **kwargs)
+
+
+def _install_environment(ctx, source, url, import_file, no_sudo, force,
+                         skip_modules, skip_data, skip_frontend, skip_test):
+    """Internal function to perform environment installation"""
 
     if url is None:
         url = source_url
 
     instance_name = ctx.obj['instance']
-    instance_config = ctx.obj['instance_config']
+    instance_configuration = ctx.obj['instance_configuration']
 
     next_environment = get_next_environment(ctx)
 
     set_instance(instance_name, next_environment)
 
-    env = instance_config['environments'][next_environment]
+    env = instance_configuration['environments'][next_environment]
 
     env['database'] = instance_name + '_' + next_environment
 
     env_path = get_path('lib', '')
 
-    user = instance_config['user']
+    user = instance_configuration['user']
 
     if no_sudo:
         user = None
@@ -515,8 +563,8 @@ def install_environment(ctx, source, url, import_file, no_sudo, force, skip_modu
         env['version'] = version
         log('Not running from a git repository; Using isomer.version:', version, lvl=warn)
 
-    instance_config['environments'][next_environment] = env
-    write_instance(instance_config)
+    instance_configuration['environments'][next_environment] = env
+    write_instance(instance_configuration)
 
     log('Creating virtual environment')
     success, result = run_process(
@@ -551,9 +599,9 @@ def install_environment(ctx, source, url, import_file, no_sudo, force, skip_modu
 
     log('Environment status now:', env)
 
-    ctx.obj['instance_config']['environments'][next_environment] = env
+    ctx.obj['instance_configuration']['environments'][next_environment] = env
 
-    write_instance(ctx.obj['instance_config'])
+    write_instance(ctx.obj['instance_configuration'])
 
 
 def _install_backend(ctx):
@@ -564,7 +612,7 @@ def _install_backend(ctx):
     set_instance(instance_name, get_next_environment(ctx))
 
     env_path = get_path('lib', '')
-    user = ctx.obj['instance_config']['user']
+    user = ctx.obj['instance_configuration']['user']
 
     log('Installing backend')
     success, result = run_process(
@@ -573,7 +621,15 @@ def _install_backend(ctx):
         sudo=user
     )
     if not success:
-        log(format_result(result), lvl=error)
+        output = str(result)
+
+        if 'was unable to detect version' in output:
+            log('Installing from dirty repository. This might result in dependency version problems!', lvl=hilight)
+        else:
+            log('Something unexpected happened during backend installation:\n', result, lvl=hilight)
+
+        # TODO: Another fault might be an unclean package path. But i forgot the log message to check for.
+        # log('This might be a problem due to unclean installations of Python libraries. Please check your path.')
 
     log('Installing requirements')
     success, result = run_process(

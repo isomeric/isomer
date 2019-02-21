@@ -18,10 +18,20 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+
+"""
+
+Module: Templates
+=================
+
+Internal template handling utilities.
+
+"""
+
 __author__ = "Heiko 'riot' Weinen"
 __license__ = "AGPLv3"
 
-from pprint import pprint
+from isomer.tool import log, error, debug
 
 
 def format_template(template, content):
@@ -30,10 +40,10 @@ def format_template(template, content):
 
     import pystache
     result = u""
-    if True:  # try:
+    try:
         result = pystache.render(template, content, string_encoding='utf-8')
-    # except (ValueError, KeyError) as e:
-    #    print("Templating error: %s %s" % (e, type(e)))
+    except (ValueError, KeyError) as e:
+        log("Templating error:", e, type(e), exc=True, lvl=error)
 
     # pprint(result)
     return result
@@ -85,18 +95,18 @@ def insert_nginx_service(definition):  # pragma: no cover
     with open(config_file, 'r') as f:
         old_config = "".join(f.readlines())
 
-    pprint(old_config)
+    log(old_config, pretty=True, lvl=debug)
 
     if definition in old_config:
         print("Service definition already inserted")
         return
 
     parts = old_config.split(splitter)
-    print(len(parts))
+    log("Parts count:", len(parts), lvl=debug)
     if len(parts) != 3:
         print("Nginx configuration seems to be changed and cannot be "
               "extended automatically anymore!")
-        pprint(parts)
+        log(parts, pretty=True, lvl=debug)
         return
 
     try:
@@ -109,4 +119,4 @@ def insert_nginx_service(definition):  # pragma: no cover
             f.write("\n    " + splitter)
             f.write(parts[2])
     except Exception as e:
-        print("Error during Nginx configuration extension:", type(e), e)
+        log("Error during Nginx configuration extension:", type(e), e, lvl=error, exc=True)
