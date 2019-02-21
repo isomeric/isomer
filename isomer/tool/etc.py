@@ -18,6 +18,15 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+"""
+
+Module: etc
+===========
+
+Instance, environment and remote configuration bits.
+
+"""
+
 __author__ = "Heiko 'riot' Weinen"
 __license__ = "AGPLv3"
 
@@ -32,6 +41,8 @@ from isomer.misc import std_now
 from isomer.tool import log, error, debug, verbose, warn
 from isomer.tool.defaults import EXIT_NO_PERMISSION
 from isomer.misc.path import get_etc_path, get_etc_instance_path, get_etc_remote_path, get_etc_remote_keys_path
+
+NonExistentKey = NonExistentKey
 
 
 def create_configuration(ctx):
@@ -195,6 +206,7 @@ configuration_template.add('meta', meta)
 instance_template = table()
 instance_template.add('name', '')
 instance_template.add('contact', '')
+instance_template.add('active', False)
 instance_template.add('environment', 'blue')
 instance_template.add('loglevel', '20')
 instance_template.add('quiet', True)
@@ -209,6 +221,9 @@ instance_template.add('web_hostnames', 'localhost')
 instance_template['web_hostnames'].comment('Comma separated list of FQDN hostnames')
 instance_template.add('web_port', 8055)
 instance_template.add('web_certificate', '')
+instance_template.add('source', '')
+instance_template['source'].comment('git, link or copy')
+instance_template.add('url', '')
 instance_template.add('modules', [])
 
 instance_template['database_type'].comment('Currently only mongodb supported')
@@ -221,13 +236,12 @@ environment_template = table()
 environment_template.add('version', '')
 environment_template.add('old_version', '')
 environment_template.add('database', '')
-environment_template.add('modules', [])
+environment_template.add('modules', {})
 environment_template.add('installed', False)
 environment_template.add('provisioned', False)
 environment_template.add('migrated', False)
 environment_template.add('frontend', False)
 environment_template.add('tested', False)
-environment_template.add('running', False)
 
 environments = table()
 blue = environment_template
@@ -247,14 +261,18 @@ remote_template.add(comment('Isomer Remote Instance Configuration'))
 remote_template.add(comment('Created on %s' % std_now()))
 remote_template.add(nl())
 
-remote_table = table()
+remote_template.add('platform', '')
+remote_template.add('name', '')
+remote_template.add('use_sudo', False)
+remote_template.add('source', '')
+remote_template.add('url', '')
 
-remote_table.add('platform', '')
-remote_table.add('hostname', '')
-remote_table.add('password', '')
-remote_table.add('username', '')
-remote_table.add('use_sudo', False)
-remote_table.add('private_key_file', '')
-remote_table.add('port', 22)
+login_table = table()
 
-remote_template.add('settings', remote_table)
+login_table.add('hostname', '')
+login_table.add('password', '')
+login_table.add('username', '')
+login_table.add('private_key_file', '')
+login_table.add('port', 22)
+
+remote_template.add('login', login_table)
