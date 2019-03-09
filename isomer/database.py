@@ -377,9 +377,10 @@ def initialize(address='127.0.0.1:27017', database_name='isomer-default',
         db = client[dbname]
         db_log("Database: ", db.command('buildinfo'), lvl=debug)
     except Exception as e:
-        db_log("No database available! Check if you have mongodb > 3.0 "
+        db_log("No database available! Check if you have mongodb > 2.2 "
                "installed and running as well as listening on port 27017 "
-               "of localhost. (Error: %s) -> EXIT" % e, lvl=critical)
+               "of localhost and check if you specified the correct "
+               "instance and environment. (Error: %s) -> EXIT" % e, lvl=critical)
         if not ignore_fail:
             sys.exit(5000)
         else:
