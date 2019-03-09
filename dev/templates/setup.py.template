@@ -9,24 +9,40 @@
 
 from setuptools import setup, find_packages
 
-setup(name="isomer-{{plugin_name}}",
-      version="{{version}}",
-      description="Isomer module: {{description}}",
-      author="{{author_name}}",
-      author_email="{{author_email}}",
-      url="https://github.com/{{github_url}}/",
-      license="{{license}}",
-      packages=find_packages(),
-      long_description="""{{long_description}}""",
-      keywords=[
-          {{keyword_list}}
-      ],
-      dependency_links=[],
-      install_requires=['isomer==1.0.0'],
-      entry_points="""[isomer.components]
-          {{component_name}}=isomer.{{plugin_name}}.{{plugin_name}}:{{component_name}}Component
+setup(
+    name="isomer-{{plugin_name}}",
+    version="{{version}}",
+    description="Isomer module: {{description}}",
+    author="{{author_name}}",
+    author_email="{{author_email}}",
+    url="https://github.com/{{github_url}}/",
+    classifiers=[
+        'Development Status :: 2 - Pre-Alpha',
+        'Environment :: Web Environment',
+        'Framework :: Isomer :: 1',
+        'License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)',
+        'Operating System :: Linux',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3 :: Only',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: Implementation :: PyPy',
+        'Programming Language :: Python :: Implementation :: CPython'
+    ],
+    packages=find_packages(),
+    license="{{license}}",
+    long_description="""{{long_description}}""",
+    keywords=[
+        {{keyword_list}}
+    ],
+    dependency_links=[],
+    install_requires=['isomer>=1.0'],
+    entry_points="""[isomer.components]
+        {{component_name}}=isomer.{{plugin_name}}.{{plugin_name}}:{{component_name}}Component
 [isomer.schemata]
     {{component_name}}Schema=isomer.{{plugin_name}}.schemata:{{component_name}}Schema
 """,
-      test_suite="tests.main.main",
-      )
+    test_suite="tests.main.main",
+)

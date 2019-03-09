@@ -83,14 +83,39 @@ setup(
     maintainer_email="riot@c-base.org",
     url="https://isomeric.github.io",
     license="GNU Affero General Public License v3",
-    packages=['isomer',
-              'isomer.events',
-              'isomer.tool',
-              'isomer.misc',
-              'isomer.ui',
-              'isomer.schemata',
-              'isomer.provisions'
-              ],
+    classifiers=[
+        'Development Status :: 4 - Beta',  # Hmm.
+        'Environment :: Web Environment',
+        'Environment :: Other Environment',
+        'Environment :: No Input/Output (Daemon)',
+        'Framework :: Isomer :: 1',
+        'Intended Audience :: Developers',
+        'License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)',
+        'Operating System :: Linux',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3 :: Only',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: Implementation :: PyPy',
+        'Programming Language :: Python :: Implementation :: CPython',
+        'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
+        'Topic :: Office/Business :: Groupware',
+        'Topic :: Software Development :: Libraries :: Application Frameworks',
+        'Topic :: Software Development :: Embedded Systems',
+        'Topic :: Software Development :: User Interfaces',
+        'Topic :: System :: Distributed Computing'
+    ],
+    packages=[
+        'isomer',
+        'isomer.events',
+        'isomer.tool',
+        'isomer.misc',
+        'isomer.ui',
+        'isomer.schemata',
+        'isomer.provisions'
+    ],
     namespace_packages=['isomer'],
     long_description="""
 Isomer - A distributed application framework
@@ -102,22 +127,24 @@ This software package is supposed to run on your ship/car/plane/ufo's board
 computer.
 See https://github.com/isomeric/isomer""",
     dependency_links=[
-        'https://github.com/ri0t/click-repl/archive/master.zip#egg=click-repl-0.1.3-ri0t'
+        'https://github.com/ri0t/click-repl/archive/master.zip#egg=click-repl-0.1.3-ri0t',
     ],
     install_requires=[
         'click-didyoumean>=0.0.3',
         'click-plugins>=1.0.3',
         'click-repl>=0.1.3-ri0t',
         'click>=6.7.0',
+        'circuits',
         'distro>=1.3',
         'dpath>=1.4.0',
-        'formal>=0.6.1',
+        'formal>=0.6.2',
         'gitpython>=2.1.1',
         'networkx',
         'prompt-toolkit>=2.0',
         'pyinotify>=0.9.6',
         'pystache>=0.5.4',
-        'tomlkit>=0.4.6'
+        'tomlkit>=0.4.6',
+        'spur>=0.3.20'
     ],
     data_files=datafiles,
     entry_points="""[console_scripts]
