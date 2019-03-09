@@ -519,8 +519,8 @@ msgid "License"
 msgstr "Lizenz"
 
 #: ../../../README.rst:169
-msgid "Copyright (C) 2011-2018 riot <riot@c-base.org> and others."
-msgstr "Copyright (C) 2011-2018 riot <riot@c-base.org> und Andere."
+msgid "Copyright (C) 2011-2019 Heiko 'riot' Weinen <riot@c-base.org> and others."
+msgstr "Copyright (C) 2011-2019 Heiko 'riot' Weinen <riot@c-base.org> und Andere."
 
 #: ../../../README.rst:171
 msgid ""

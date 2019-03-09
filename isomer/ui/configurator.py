@@ -3,7 +3,7 @@
 
 # Isomer - The distributed application framework
 # ==============================================
-# Copyright (C) 2011-2018 Heiko 'riot' Weinen <riot@c-base.org> and others.
+# Copyright (C) 2011-2019 Heiko 'riot' Weinen <riot@c-base.org> and others.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
@@ -58,7 +58,7 @@ class put(authorized_event):
 
 class Configurator(ConfigurableComponent):
     """
-    Provides a common configuration interface for all ISOMER components.
+    Provides a common configuration interface for all Isomer components.
 
     (You're probably looking at it right now)
     """

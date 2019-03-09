@@ -4,7 +4,7 @@
 Module Schemata
 ===============
 
-All JSONSchema compliant data schemata for ISOMER
+All JSONSchema compliant data schemata for Isomer
 
 Contains
 ========

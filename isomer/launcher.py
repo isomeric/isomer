@@ -3,7 +3,7 @@
 
 # Isomer - The distributed application framework
 # ==============================================
-# Copyright (C) 2011-2018 Heiko 'riot' Weinen <riot@c-base.org> and others.
+# Copyright (C) 2011-2019 Heiko 'riot' Weinen <riot@c-base.org> and others.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
@@ -145,7 +145,7 @@ def drop_privileges(uid_name='isomer', gid_name='isomer'):
 
 
 class Core(ConfigurableComponent):
-    """ISOMER Core Backend Application"""
+    """Isomer Core Backend Application"""
     # TODO: Move most of this stuff over to a new FrontendBuilder
 
     configprops = {
@@ -562,7 +562,7 @@ class Core(ConfigurableComponent):
 
 
 def construct_graph(name, instance, args):
-    """Preliminary ISOMER application Launcher"""
+    """Preliminary Isomer application Launcher"""
 
     app = Core(name, instance, **args)
 

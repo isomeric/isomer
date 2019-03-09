@@ -3,7 +3,7 @@
 
 # Isomer - The distributed application framework
 # ==============================================
-# Copyright (C) 2011-2018 Heiko 'riot' Weinen <riot@c-base.org> and others.
+# Copyright (C) 2011-2019 Heiko 'riot' Weinen <riot@c-base.org> and others.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
@@ -347,7 +347,7 @@ class ConfigurableMeta(LoggingMeta):
 
 
 class LoggingComponent(LoggingMeta, Component):
-    """Logging capable component for simple ISOMER components"""
+    """Logging capable component for simple Isomer components"""
 
     def __init__(self, uniquename=None, *args, **kwargs):
         LoggingMeta.__init__(self, uniquename)
@@ -363,7 +363,7 @@ class ConfigurableController(ConfigurableMeta, Controller):
 
 
 class ConfigurableComponent(ConfigurableMeta, Component):
-    """Configurable component for default ISOMER modules"""
+    """Configurable component for default Isomer modules"""
 
     def __init__(self, uniquename=None, *args, **kwargs):
         ConfigurableMeta.__init__(self, uniquename)

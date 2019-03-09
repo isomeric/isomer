@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-# ISOMER - Hackerfleet Operating System
-# ===================================
-# Copyright (C) 2011-2018 Heiko 'riot' Weinen <riot@c-base.org> and others.
+# Isomer - The distributed application framework
+# ==============================================
+# Copyright (C) 2011-2019 Heiko 'riot' Weinen <riot@c-base.org> and others.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
@@ -23,7 +23,7 @@ __license__ = "AGPLv3"
 
 """Version Module
 
-Unified ISOMER wide version number.
+Unified Isomer wide version number.
 """
 
 from isomer.logger import isolog, error

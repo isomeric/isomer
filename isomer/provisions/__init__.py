@@ -7,7 +7,7 @@ Package: Provisions
 Initial client configuration data.
 This contains tilelayer urls, api stuff etc.
 
-:copyright: (C) 2011-2018 riot@c-base.org
+:copyright: (C) 2011-2019 Heiko 'riot' Weinen@c-base.org
 :license: AGPLv3 (See LICENSE)
 
 """
