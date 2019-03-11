@@ -120,8 +120,8 @@ def copy_resource_tree(package, source, target):
             copy_resource_tree(package, source + '/' + item, target)
         else:
             log('Copying resource file:', source + '/' + item, lvl=debug)
-            with open(target_name, 'w') as f:
-                f.write(pkg_resources.resource_string(pkg, source + '/' + item).decode('utf-8'))
+            with open(target_name, 'wb') as f:
+                f.write(pkg_resources.resource_string(pkg, source + '/' + item))
 
 
 def install_frontend(instance='default', forcereload=False, forcerebuild=False,
@@ -193,7 +193,12 @@ def install_frontend(instance='default', forcereload=False, forcerebuild=False,
                     try:
                         pkg = pkg_resources.Requirement.parse(package)
                         log('Checking component data resources', lvl=debug)
-                        resources = pkg_resources.resource_listdir(pkg, 'frontend')
+                        try:
+                            resources = pkg_resources.resource_listdir(pkg, 'frontend')
+                        except FileNotFoundError:
+                            log('Component does not have a frontend',lvl=debug)
+                            resources = []
+
                         if len(resources) > 0:
                             component['frontend'] = resources
                             component['method'] = 'resources'
@@ -255,9 +260,14 @@ def install_frontend(instance='default', forcereload=False, forcerebuild=False,
                                 for line in f.readlines():
                                     installation_packages.append(line.replace("\n", ""))
                     elif method == 'resources':
-                        pkg = pkg_resources.Requirement.parse(package)
-                        if pkg_resources.resource_exists(pkg, 'frontend/requirements.txt'):
-                            for line in pkg_resources.resource_string(pkg, 'frontend/requirements.txt'):
+                        log('Getting resources:', package)
+                        resource = pkg_resources.Requirement.parse(package)
+                        if pkg_resources.resource_exists(resource, 'frontend/requirements.txt'):
+                            resource_string = pkg_resources.resource_string(resource, 'frontend/requirements.txt')
+
+                            # TODO: Not sure if decoding to ascii is a smart idea for npm package names.
+                            for line in resource_string.decode('ascii').rstrip('\n').split('\n'):
+                                log('Resource string:', line)
                                 installation_packages.append(line.replace("\n", ""))
 
                 log("Copying:", origin, target, lvl=debug)
