@@ -24,7 +24,8 @@ webcolors
 
 Sphinx
 sphinx-intl
-sphinx_bootstrap_theme
+sphinx_rtd_theme
+#sphinx_bootstrap_theme
 releases
 #Sphinx-PyPI-upload
 sphinx-issues
