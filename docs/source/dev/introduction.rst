@@ -9,6 +9,8 @@ Development Introduction
 
 Here's how we do things in Isomer...
 
+If you're looking for instructions on how to set up a development environment, please check out :ref:`the workflow
+documentation <environment>`.
 
 Communication
 -------------
