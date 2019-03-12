@@ -55,7 +55,7 @@ package. The simple (but not so good) way is to use Debian's packages:
     sudo apt-get install npm nodejs
     sudo npm install npm@4.2.0 -g
 
-The better way is :ref:`to install nodesource <https://github.com/nodesource/distributions#table-of-contents>`.
+The better way is `to install nodesource <https://github.com/nodesource/distributions#table-of-contents>`__.
 
 If you want to install the full development dependencies to write
 documentation as well, you need to install the enchant package:
@@ -100,7 +100,10 @@ use git thus:
 Backend
 -------
 
-The iso-tool usually can install everything you need. It starts by adding
+.. caution::
+    This is currently outdated!
+
+The management tool usually can install everything you need. It starts by adding
 a new system user for Isomer and generating a (currently only self signed)
 certificate.
 
@@ -120,7 +123,7 @@ Isomer on bootup and make it available to users.
     source venv/bin/activate
     pip install -Ur requirements.txt
     python setup.py develop
-    sudo venv/bin/python ./iso install all
+    sudo venv/bin/python ./iso system all
 
 If you want to develop (documentation) as well, you'll need to use the
 `requirements-dev.txt` instead of the normal one.
@@ -139,6 +142,9 @@ site definition
 
 Documentation
 -------------
+
+.. caution::
+    This is currently outdated!
 
 The documentation is available online on `ReadTheDocs.org
 <https://isomer.readthedocs.org>`__.
