@@ -130,8 +130,10 @@ def run_process(cwd, args, shell=None, sudo=None, show=False):
                 log('Malformed run_process call:', things, lvl=error)
                 return
 
+            log('Using sudo with user:', user, lvl=verbose)
             cmd = ['sudo', '-u', user] + list(things)
         else:
+            log('Not using sudo', lvl=verbose)
             cmd = []
             for thing in things:
                 cmd += [thing]
