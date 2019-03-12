@@ -22,9 +22,7 @@
     :target: https://www.codetriage.com/isomeric/isomer
     :alt: Help via codetriage.com
 
-**HELLO! You are viewing a release candidate of Isomer 1.0!**
-
-Please be wary of bugs and report strange things, thank you.
+Please be wary of bugs and report strange things, thank you!
 
 Isomer - Be Collaborative!
 ==========================
@@ -40,28 +38,46 @@ Isomer - Be Collaborative!
 Installation
 ============
 
-There is more than one way of installing Isomer, `see the quickstart instructions for those <http://isomer.readthedocs.io/en/latest/start/quick.html>`__.
+There is more than one way of installing Isomer, `see the detailed instructions for those
+<http://isomer.readthedocs.io/en/latest/start/quick.html>`__.
 
-The simplest way is to use the supplied installation script:
+If you intend to set up a development environment, `please follow the development workflow instructions
+<http://isomer.readthedocs.io/en/latest/dev/workflow.html>`__.
 
-**Probably broken right now! Will be fixed for the 1.0 release, promised!**
+The simplest way is to use the management tool. It will try to detect your platform (Currently only
+Debian/Ubuntu are supported, others might work with a little bit of manual dependency installation) and
+try to install everything required:
 
 .. code-block:: sh
 
-    sudo ./install
+    git clone https://github.com/isomeric/isomer ~/src/isomer
+    cd ~/src/isomer
+    sudo ./iso
 
-The installation produces a lot of output which is automatically piped into 'output.log'.
-It installs all dependencies then sets up a user account and the system's services.
+Now set up user accounts and directories for your local system:
+
+.. code-block:: sh
+
+    sudo iso system all
+
+This should install the local management tool, which you can use to install your default instance:
+
+.. code-block:: sh
+
+    sudo iso instance create
+    sudo iso instance install
+
 This assumes, that you're not running another web server on port 443 and that your firewall is
 configured to allow communications on that port.
 Isomer modules may require additional open ports, to find out about that, read their readme files.
 
-If you run into trouble or get any unexpected errors, contact us or `try the complex installation procedure <http://isomer.readthedocs.io/en/latest/start/installing.html>`__.
+If you run into trouble or get any unexpected errors, contact us or `try the complex installation procedure
+<http://isomer.readthedocs.io/en/latest/start/installing.html>`__.
 
 Modules
 =======
 
-The system is modular, so you can install what you need and leave other things.
+The system is modular, so you can install what you need and leave out other things.
 
 A lot of the included modules are still Work in Progress, so help out, if you're interested
 in a powerful - **cloud independent** - collaboration tool suite.
@@ -69,39 +85,36 @@ in a powerful - **cloud independent** - collaboration tool suite.
 General modules
 ---------------
 
-These are 'official' Hackerfleet developed modules. If you'd like to contribute your own,
+These are 'official' isomer modules. If you'd like to contribute your own,
 ping riot@c-base.org, to get it added to the list.
+
+Some (marked with *) are work in progress and probably not really usable, yet.
+
+Again, help is very welcome!
 
 ============== ==============================================================
   Name           Description
 ============== ==============================================================
-sails          Web UI, compatible with all modern browsers
-automat        Automation for non programmers
-alert          User alerting and notification system
-calc           Integrated EtherCalc
+automat*       Automation for non programmers
+calc*          Integrated EtherCalc
+calendar*      Calendar support
 camera         Camera support
-chat           Integrated chat
-comms          Communication package
 countables     Count arbitrary things
-dash           Dashboard information system
-enrol          Enrollment (new user) management
-equipment      Equipment management
-filemanager    File management
-garden         Garden automation tools
-ldap           LDAP user authorization
-library        Library management
-mesh           Mesh networking
-nodestate      Node wide status system
-polls          Tool for lightweight internet voting
+enrol          Enrollment/User account management
+filemanager*   File management
+heroic*        User achievements and badges
+ldap*          LDAP user authorization
+mail           E-Mail support
+notifications* Channel independent user notification system
 project        Project management tools
 protocols      Miscellaneous communication protocols
-robot          RC remote control unit
+sails          Web UI, compatible with all modern browsers (integrated)
+sessions       Session chair module for planning conferences and similar
 shareables     Shared resource blocking tool
-switchboard    Virtual switchboard
+simplechat     Very rudimentary integrated chat
+transcript*    Meeting notes module
 wiki           Etherpad + Wiki = awesomeness
 ============== ==============================================================
-
-Many of these are not yet fully usable, so please help out and perhaps take ownership of one (or more) of them!
 
 Navigation (Hackerfleet) modules
 --------------------------------
@@ -115,12 +128,20 @@ They are far from complete, see the WiP list below.
 ============== ==============================================================
   Name           Description
 ============== ==============================================================
+alert          User alerting and notification system
 anchor         Automatic anchor safety watcher
 busrepeater    Tool to repeat navigation data bus frames to other media
+comms          Communication package
+dashboard      Dashboard information system
+equipment      Equipment management
 logbook        Displaying and manual logging of important (nautical) events
 maps           (Offline) moving maps with shareable views/layers
+mesh           Mesh networking
 navdata        Navigational data module
 nmea           NMEA-0183 Navigation data and AIS bus parser
+nodestate      Node wide status system
+robot          RC remote control unit
+switchboard    Virtual switchboard
 webguides      Importer for skipperguide.de wiki content into the map
 ============== ==============================================================
 
@@ -134,6 +155,18 @@ Work in progress
 -  Datalog, automated navigational data exchange
 -  Crew management, more safety tools
 -  wireless crew network and general communications
+
+Other 3rd party modules
+-----------------------
+
+============== ==============================================================
+  Name           Description
+============== ==============================================================
+library        Library management
+polls          Tool for lightweight internet voting
+garden         Garden automation tools
+============== ==============================================================
+
 
 Bugs & Discussion
 =================
