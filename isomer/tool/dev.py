@@ -217,7 +217,11 @@ def entrypoints(base, sails, frontend_only, frontend_list, directory):
                     package = entry_point.dist.project_name
                     log('Package:', package, pretty=True, lvl=debug)
                     location = entry_point.dist.location
-                    loaded = entry_point.load()
+                    try:
+                        loaded = entry_point.load()
+                    except pkg_resources.DistributionNotFound as e:
+                        log('Required distribution not found:', e, pretty=True, exc=True, lvl=warn)
+                        continue
 
                     log("Entry point: ", entry_point, name, entry_point.resolve(), location, lvl=debug)
 
