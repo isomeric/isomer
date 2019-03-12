@@ -4,7 +4,7 @@
 .. _Pull Request: https://github.com/isomeric/isomer/compare/
 
 Contributing to Isomer
-====================
+======================
 
 Here's how you can contribute to Isomer
 
