@@ -91,6 +91,21 @@ def install(ctx, port):
 
     ctx.obj['environment'] = environment
 
+@install.command(short_help='build and install frontend')
+@click.option('--dev', help="Use frontend development location", default=True, is_flag=True)
+@click.option('--rebuild', help="Rebuild frontend before installation", default=False, is_flag=True)
+@click.option('--no-install', help="Do not install requirements", default=False, is_flag=True)
+@click.option('--build-type', help="Specify frontend build type. Either dist(default) or build", default='dist')
+@click.pass_context
+def frontend(ctx, dev, rebuild, no_install, build_type):
+    """Build and install frontend"""
+
+    install_frontend(instance=ctx.obj['instance'],
+                     forcerebuild=rebuild,
+                     development=dev,
+                     install=not no_install,
+                     build_type=build_type)
+
 
 @install.command(short_help='build and install docs')
 @click.option('--clear-target', '--clear', help='Clears target documentation '
