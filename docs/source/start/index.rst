@@ -8,6 +8,7 @@ Getting Started
     requirements
     downloading
     installing
+    instances
     tools
 
 .. todo:: Simplify the installation documents by stringing them together, so the other setup documents are more visible
