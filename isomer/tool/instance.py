@@ -226,11 +226,11 @@ def remove(ctx, clear, no_archive):
 
 
 @instance.command('install-module', short_help="Add (and install) a module to an instance")
-@click.option('--source', '-s', default='git', type=click.Choice(['link', 'copy', 'git']))
-@click.option('--url', '-u', default=None)
+@click.option('--source', '-s', default='git', type=click.Choice(['link', 'copy', 'git', 'develop']))
 @click.option('--install-env', '--install', '-i', is_flag=True, default=False,
               help='Install module on active environment')
 @click.option('--force', '-f', default=False, is_flag=True, help='Force installation (overwrites old modules)')
+@click.argument('url')
 @click.pass_context
 def install_instance_module(ctx, source, url, install_env, force):
     """Add and install a module"""
