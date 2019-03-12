@@ -327,6 +327,42 @@ def install_environment_module(ctx, source, force, url):
 def _install_module(source, url, force=False, user=None):
     """Actually installs a module into an environment"""
 
+    def get_module_info(directory):
+        log('Getting name')
+        success, result = run_process(
+            directory, ['python3', 'setup.py', '--name'], sudo=user
+        )
+        if not success:
+            log(format_result(result), pretty=True, lvl=error)
+            return False
+
+        package_name = str(result.output, encoding='utf8').rstrip('\n')
+
+        log('Getting version')
+        success, result = run_process(
+            directory, ['python3', 'setup.py', '--version'], sudo=user
+        )
+        if not success:
+            log(format_result(result), pretty=True, lvl=error)
+            return False
+
+        package_version = str(result.output, encoding='utf8').rstrip('\n')
+
+        log('Package name:', package_name, 'version:', package_version)
+        return package_name, package_version
+
+    if source == 'develop':
+        log('Installing module for development')
+        success, output = run_process(url,
+            [os.path.join(get_path('lib', 'venv'), 'bin', 'python3'), 'setup.py', 'develop'],
+            sudo=user
+        )
+        if not success:
+            log(output, lvl=verbose)
+            return False
+        else:
+            return get_module_info(url)
+
     module_path = get_path('lib', 'modules', ensure=True)
 
     if source not in ('git', 'link', 'copy'):
@@ -360,27 +396,12 @@ def _install_module(source, url, force=False, user=None):
         if not success:
             log('Error:', output, lvl=error)
 
-    log('Getting name')
-    success, result = run_process(
-        temporary_path, ['python3', 'setup.py', '--name'], sudo=user
-    )
-    if not success:
-        log(format_result(result), pretty=True, lvl=error)
+    module_info = get_module_info(temporary_path)
+    if module_info is False:
+        log('Could not get name and version information from module.', lvl=error)
         return False
 
-    package_name = str(result.output, encoding='utf8').rstrip('\n')
-
-    log('Getting version')
-    success, result = run_process(
-        temporary_path, ['python3', 'setup.py', '--version'], sudo=user
-    )
-    if not success:
-        log(format_result(result), pretty=True, lvl=error)
-        return False
-
-    package_version = str(result.output, encoding='utf8').rstrip('\n')
-
-    log('Package name:', package_name, 'version:', package_version)
+    package_name, package_version = module_info
 
     final_path = os.path.join(module_path, package_name)
 
@@ -437,7 +458,7 @@ def _install_modules(ctx):
 
     for module in modules:
         log('Installing:', module, pretty=True)
-        result = _install_module(module[0], module[1], user)
+        result = _install_module(module[0], module[1], user=user)
         if result is False:
             log('Installation of module failed!', lvl=warn)
         else:
