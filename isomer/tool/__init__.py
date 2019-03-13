@@ -391,7 +391,7 @@ def install_isomer(platform_name=None, use_sudo=False, shell=None, cwd='.',
         post_install_commands = platforms[platform_name]['post_install']
 
         for command in pre_install_commands:
-            log('Running pre install command')
+            log('Running pre install command', " ".join(command))
             success, output = run_process(cwd, command, shell, sudo=use_sudo)
             if not success:
                 log('Could not run command %s!' % command, lvl=error)
