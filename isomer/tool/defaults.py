@@ -64,8 +64,7 @@ platforms = {
                             'sudo tee /etc/apt/sources.list.d/nodesource.list'
             ],
             [
-                'sh', '-c', 'DISTRO="$(lsb_release -s -c)" ; '
-                            'echo "deb http://repo.mongodb.org/apt/debian $DISTRO/mongodb-org/4.0  main" | '
+                'sh', '-c', 'echo "deb http://repo.mongodb.org/apt/debian stretch/mongodb-org/4.0  main" | '
                             'sudo tee /etc/apt/sources.list.d/mongodb.list'
             ],
             ['apt-get', 'update'],
