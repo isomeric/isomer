@@ -400,7 +400,7 @@ def install_isomer(platform_name=None, use_sudo=False, shell=None, cwd='.',
         log('Installing platform dependencies')
         success, output = run_process(cwd, tool + packages, shell, sudo=use_sudo)
         if not success:
-            log('Could not install %s dependencies!' % platform, lvl=error)
+            log('Could not install %s dependencies!' % platform_name, lvl=error)
             log(output, pretty=True)
 
         for command in post_install_commands:
