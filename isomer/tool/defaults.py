@@ -58,7 +58,7 @@ distribution_name = distro.codename()
 platforms = {
     'Debian GNU/Linux': {
         'pre_install':[
-            ['apt-get', '-y', 'install', 'apt-transport-https', 'wget', 'sudo', 'gnupg', 'gdebi'],
+            ['apt-get', '-y', 'install', 'apt-transport-https', 'wget', 'sudo', 'gnupg', 'gdebi-core'],
             ['apt-get', 'update'],
             ['wget', 'https://deb.nodesource.com/node_8.x/pool/main/n/nodejs/nodejs_8.15.1-1nodesource1_amd64.deb'],
             ['gdebi', '-n', 'nodejs_8.15.1-1nodesource1_amd64.deb'],
