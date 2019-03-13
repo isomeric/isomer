@@ -184,7 +184,7 @@ def install(ctx, **kwargs):
             'Please use \'iso instance upgrade\' to upgrade an instance.', lvl=warn)
         sys.exit(50081)
 
-    _clear_instance(ctx)
+    _clear_instance(ctx, force=kwargs['force'], clear=True, no_archive=True)
     _install_environment(ctx, **kwargs)
     _turnover(ctx, force=kwargs['force'])
 
