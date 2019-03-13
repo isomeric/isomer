@@ -53,20 +53,29 @@ source_url = 'https://github.com/isomeric/isomer'
 platforms = {
     'Debian GNU/Linux': {
         'pre_install': [
-            ['apt-get', '-y', 'install', 'apt-transport-https', 'wget', 'sudo', 'lsb-release'],
+            ['apt-get', '-y', 'install', 'apt-transport-https', 'wget', 'sudo', 'lsb-release', 'gnupg'],
             ['sh', '-c', 'wget --quiet -O - https://deb.nodesource.com/gpgkey/nodesource.gpg.key | sudo apt-key add -'],
-            ['sh', '-c', 'VERSION=node_8.x ; '
-                         'DISTRO="$(lsb_release -s -c)" ; '
-                         'echo "deb https://deb.nodesource.com/$VERSION $DISTRO main" | '
-                         'sudo tee /etc/apt/sources.list.d/nodesource.list'
-             ],
+            ['apt-key', 'adv', '--keyserver', 'hkp://keyserver.ubuntu.com:80',
+             '--recv', '9DA31620334BD75D9DCB49F368818C72E52529D4'],
+            [
+                'sh', '-c', 'VERSION=node_8.x ; '
+                            'DISTRO="$(lsb_release -s -c)" ; '
+                            'echo "deb https://deb.nodesource.com/$VERSION $DISTRO main" | '
+                            'sudo tee /etc/apt/sources.list.d/nodesource.list'
+            ],
+            [
+                'sh', '-c', 'DISTRO="$(lsb_release -s -c)" ; '
+                            'echo "deb http://repo.mongodb.org/apt/debian $DISTRO/mongodb-org/4.0  main" | '
+                            'sudo tee /etc/apt/sources.list.d/mongodb.list'
+            ],
             ['apt-get', 'update'],
         ],
         'post_install': [['systemctl', 'start', 'mongodb.service']],
         'tool': ['apt-get', 'install', '-y'],
         'packages': [
             'python3', 'python3-pip', 'python3-dev', 'virtualenv', 'git',
-            'mongodb', 'python3-bson', 'python3-pymongo', 'python3-pymongo-ext', 'python3-bson-ext',
+            'mongodb-org-server', 'mongodb-org-tools',
+            'python3-bson', 'python3-pymongo', 'python3-pymongo-ext', 'python3-bson-ext',
             'python3-cffi', 'libffi-dev',
             'nginx-full', 'libssl-dev', 'certbot', 'python3-certbot', 'python3-certbot-nginx',
             'nodejs', 'enchant',
