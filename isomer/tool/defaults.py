@@ -57,7 +57,7 @@ distribution_name = distro.codename()
 
 platforms = {
     'Debian GNU/Linux': {
-        'pre_install': {
+        'pre_install':[
             ['apt-get', '-y', 'install', 'apt-transport-https', 'wget', 'sudo', 'gnupg'],
             ['sh', '-c', 'wget --quiet -O - https://deb.nodesource.com/gpgkey/nodesource.gpg.key | sudo apt-key add -'],
             ['sh', '-c', 'echo deb http://httpredir.debian.org/debian unstable main > '
@@ -69,7 +69,7 @@ platforms = {
             ['sh', '-c', 'echo "deb https://deb.nodesource.com/node_8.x %s main" > '
                          '/etc/apt/sources.list.d/nodesource.list' % distribution_name],
             ['apt-get', 'update']
-        },
+        ],
         'post_install': [['systemctl', 'start', 'mongodb.service']],
         'tool': ['apt-get', 'install', '-y'],
         'packages': [
