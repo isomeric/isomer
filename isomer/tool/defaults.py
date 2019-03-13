@@ -58,26 +58,21 @@ distribution_name = distro.codename()
 platforms = {
     'Debian GNU/Linux': {
         'pre_install':[
-            ['apt-get', '-y', 'install', 'apt-transport-https', 'wget', 'sudo', 'gnupg'],
-            ['sh', '-c', 'wget --quiet -O - https://deb.nodesource.com/gpgkey/nodesource.gpg.key | sudo apt-key add -'],
-            ['sh', '-c', 'echo deb http://httpredir.debian.org/debian unstable main > '
-                         '/etc/apt/sources.list.d/debian-unstable.list'],
-            ['sh', '-c', 'echo "Package: *\n Pin: release a=unstable\n Pin-Priority: 50" > '
-                         '/etc/apt/preferences.d/unstable.pref'],
-            ['sh', '-c', 'echo "Package: *\n Pin: release a={0}\n Pin-Priority: 1000" > '
-                         '/etc/apt/preferences.d/{0}.pref'.format(distribution_name)],
-            ['sh', '-c', 'echo "deb https://deb.nodesource.com/node_8.x %s main" > '
-                         '/etc/apt/sources.list.d/nodesource.list' % distribution_name],
-            ['apt-get', 'update']
+            ['apt-get', '-y', 'install', 'apt-transport-https', 'wget', 'sudo', 'gnupg', 'gdebi'],
+            ['apt-get', 'update'],
+            ['wget', 'https://deb.nodesource.com/node_8.x/pool/main/n/nodejs/nodejs_8.15.1-1nodesource1_amd64.deb'],
+            ['gdebi', '-n', 'nodejs_8.15.1-1nodesource1_amd64.deb'],
+            ['wget', 'http://httpredir.debian.org/debian/pool/main/m/mongodb/mongodb-server-core_3.4.18-2+b1_amd64.deb'],
+            ['gdebi', '-n', 'mongodb-server-core_3.4.18-2+b1_amd64.deb'],
         ],
         'post_install': [['systemctl', 'start', 'mongodb.service']],
         'tool': ['apt-get', 'install', '-y'],
         'packages': [
-            'python3', 'python3-pip', 'python3-dev', 'virtualenv', 'git', 'mongodb-server',
+            'python3', 'python3-pip', 'python3-dev', 'virtualenv', 'git',
             'python3-bson', 'python3-pymongo', 'python3-pymongo-ext', 'python3-bson-ext',
             'python3-cffi', 'libffi-dev',
             'nginx-full', 'libssl-dev', 'certbot', 'python3-certbot', 'python3-certbot-nginx',
-            'nodejs', 'enchant',
+            'enchant',
             # TODO: Kick out module dependencies (mostly gdal, grib and serial)
             'python3-grib', 'python3-serial', 'gdal-bin', 'python-gdal',
         ]
