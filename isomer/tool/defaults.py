@@ -59,11 +59,12 @@ platforms = {
     'Debian GNU/Linux': {
         'pre_install':[
             ['apt-get', '-y', 'install', 'apt-transport-https', 'wget', 'sudo', 'gnupg', 'gdebi-core'],
+            ['sh', '-c', 'wget --quiet -O - https://deb.nodesource.com/gpgkey/nodesource.gpg.key | sudo apt-key add -'],
             ['apt-get', 'update'],
             ['wget', 'https://deb.nodesource.com/node_8.x/pool/main/n/nodejs/nodejs_8.15.1-1nodesource1_amd64.deb'],
             ['gdebi', '-n', 'nodejs_8.15.1-1nodesource1_amd64.deb'],
-            ['wget', 'http://httpredir.debian.org/debian/pool/main/m/mongodb/mongodb-server-core_3.4.18-2+b1_amd64.deb'],
-            ['gdebi', '-n', 'mongodb-server-core_3.4.18-2+b1_amd64.deb'],
+            ['wget', 'http://httpredir.debian.org/debian/pool/main/m/mongodb/mongodb-server_3.4.18-2_all.deb'],
+            ['gdebi', '-n', 'mongodb-server_3.4.18-2_all.deb'],
         ],
         'post_install': [['systemctl', 'start', 'mongodb.service']],
         'tool': ['apt-get', 'install', '-y'],
