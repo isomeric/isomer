@@ -186,7 +186,14 @@ def install(ctx, **kwargs):
 
     _clear_instance(ctx, force=kwargs['force'], clear=False, no_archive=True)
     _install_environment(ctx, **kwargs)
+
+    ctx.obj['instance_configuration']['source'] = kwargs['source']
+    ctx.obj['instance_configuration']['url'] = kwargs['url']
+
+    write_instance(ctx.obj['instance_configuration'])
+
     _turnover(ctx, force=kwargs['force'])
+
 
 
 @instance.command(name='clear', short_help="Clear the whole instance (CAUTION)")
