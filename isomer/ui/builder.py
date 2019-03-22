@@ -26,6 +26,7 @@ Frontend building process
 """
 
 import os
+import shutil
 import pkg_resources
 from glob import glob
 from shutil import copy
@@ -143,6 +144,16 @@ def install_frontend(instance='default', forcereload=False, forcerebuild=False,
     else:
         frontend_root = get_path('lib', 'repository/frontend')
         frontend_target = get_path('lib', 'frontend')
+
+    component_folder = os.path.join(frontend_root, 'src', 'components')
+
+    if not os.path.isdir(component_folder):
+        log('Creating new components folder')
+        os.mkdir(component_folder)
+    else:
+        log('Clearing components folder')
+        for thing in os.listdir(component_folder):
+            shutil.rmtree(os.path.join(component_folder, thing))
 
     if install:
         cmdline = ["npm", "install"]
