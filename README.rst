@@ -22,6 +22,9 @@
     :target: https://www.codetriage.com/isomeric/isomer
     :alt: Help via codetriage.com
 
+.. image:: https://img.shields.io/badge/dynamic/json.svg?url=https://pypistats.org/api/packages/isomer/recent?mirrors=false&label=downloads&query=$.data.last_month&suffix=/month
+    :target: https://pypistats.org/packages/isomer
+
 Please be wary of bugs and report strange things, thank you!
 
 Isomer - Be Collaborative!
@@ -52,15 +55,16 @@ try to install everything required:
 
     git clone https://github.com/isomeric/isomer ~/src/isomer
     cd ~/src/isomer
+    git submodule update --init
     sudo ./iso
 
-Now set up user accounts and directories for your local system:
+Now set up user accounts and directories for your local system and install required software:
 
 .. code-block:: sh
 
     sudo iso system all
 
-This should install the local management tool, which you can use to install your default instance:
+This should install the local management tool, which you can use to create your default instance:
 
 .. code-block:: sh
 
