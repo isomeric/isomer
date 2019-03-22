@@ -21,7 +21,9 @@ The latest development branch can be cloned using the following command:
 
 .. code-block:: sh
    
-   git clone https://github.com/isomeric/isomer.git
+    git clone https://github.com/isomeric/isomer.git
+    cd isomer
+    git submodule update --init
    
 For further instructions on how to use Git, please refer to the
 `Git Website <https://git-scm.com/>`_.

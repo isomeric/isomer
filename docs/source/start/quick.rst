@@ -23,6 +23,23 @@ Remote Management      Using a local management tool to configure and
                        maintain remote hosted Isomer systems and instances
 =====================  ====================================================
 
+Install minimum dependency set
+------------------------------
+
+Please make sure, you have python3 as well as python3-setuptools installed.
+
+Get Isomer
+----------
+
+Currently, getting Isomer via git is recommended. We are working on Python packages, packages for multiple
+distributions as well as ready made images for various embedded systems.
+
+.. code-block:: sh
+
+    git clone https://github.com/isomeric/isomer
+    cd isomer
+    git submodule update --init
+
 Install Management Tool
 -----------------------
 
@@ -32,12 +49,12 @@ The management tool's automatic installation currently only supports Debian base
    Feel free to contribute installation steps for other distros - that is mostly adapting the package manager
    and package names in isomer/tool/defaults.py
 
-To use the automatic installation, get the source code (see :ref:`Getting the source <getting_source>`) if you
-don't have it already, then invoke the tool with root permissions:
+First, install the local management system:
 
 .. code-block:: sh
 
-    sudo ./iso
+    cd ~/src/isomer
+    python3 setup.py install
 
 If you run into trouble or get any unexpected errors, :ref:`try the complex installation procedure <complex_install>`.
 

@@ -90,8 +90,7 @@ use git thus:
     cd ~/src
     git clone https://github.com/isomeric/isomer
     cd isomer
-    git submodule init
-    git submodule update
+    git submodule update --init
     git pull
     cd frontend
     git pull
