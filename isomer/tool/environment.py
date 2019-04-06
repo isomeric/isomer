@@ -176,11 +176,12 @@ def _create_folders(ctx):
 
 @environment.command(short_help="Archive an environment")
 @click.option('--force', '-f', is_flag=True, default=False)
+@click.option('--dynamic', '-d', is_flag=True, default=False, help='Archive only dynamic data: database, configuration')
 @click.pass_context
-def archive(ctx, force):
+def archive(ctx, force, dynamic):
     """Archive the specified or non-active environment"""
 
-    result = _archive(ctx, force)
+    result = _archive(ctx, force, dynamic)
     if result:
         log("Archived to '%s'" % result)
         sys.exit(0)
@@ -189,7 +190,7 @@ def archive(ctx, force):
         sys.exit(50060)
 
 
-def _archive(ctx, force=False):
+def _archive(ctx, force=False, dynamic=False):
     instance_configuration = ctx.obj['instance_configuration']
 
     next_environment = get_next_environment(ctx)
@@ -228,10 +229,11 @@ def _archive(ctx, force=False):
         )
 
         with tarfile.open(archive_filename, 'w:gz') as f:
-            for item in locations:
-                path = get_path(item, '')
-                log('Archiving [%s]: %s' % (item, path))
-                f.add(path)
+            if not dynamic:
+                for item in locations:
+                    path = get_path(item, '')
+                    log('Archiving [%s]: %s' % (item, path))
+                    f.add(path)
             f.add(temp_path, 'db_etc')
     except (PermissionError, FileNotFoundError) as e:
         log('Could not archive environment:', e, lvl=error)
@@ -505,7 +507,9 @@ def _install_provisions(ctx, import_file=None, skip_provisions=False):
 
     if import_file is not None:
         log('Importing backup')
-        load(ctx.obj['dbhost'], ctx.obj['dbport'], ctx.obj['dbname'], import_file)
+        log(ctx.obj, pretty=True)
+        host, port = ctx.obj['dbhost'].split(':')
+        load(host, int(port), ctx.obj['dbname'], import_file)
 
     return True
 
