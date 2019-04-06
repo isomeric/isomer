@@ -141,7 +141,7 @@ def delete_database(db_host, db_name, force):
     if force:
         response = True
     else:
-        response = ask('Are you sure you want to delete the collection "%s"' % (
+        response = ask('Are you sure you want to delete database "%s"' % (
             db_name), default='N', data_type='bool')
     if response is True:
         host, port = db_host.split(':')
