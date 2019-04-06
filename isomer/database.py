@@ -684,14 +684,12 @@ def load(db_host, db_port, db_name, filename):
     backup_log('Storing data to database')
 
     for import_item in data:
-        backup_log(import_item)
         collection_name = import_item['collection']
 
         collection = db[collection_name]
         requests = []
 
         for document in import_item['data']:
-
             document['_id'] = bson.ObjectId(document['_id'])
             requests.append(pymongo.ReplaceOne({'uuid': document['uuid']}, document, upsert=True))
 
