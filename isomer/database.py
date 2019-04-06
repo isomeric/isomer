@@ -643,19 +643,25 @@ def dump(db_host, db_port, db_name, filename):
 
     backup_log('Dumping data from database', db_name)
 
-    with open(filename, "w") as file:
-        for collection_name in db.collection_names():
-            backup_log('Archiving collection:', collection_name, lvl=debug)
-            collection = db[collection_name]
-            cursor = collection.find({})
+    content = []
 
-            file.write("{'collection': '%s', 'data': [" % collection_name)
-            for document in cursor:
-                backup_log('Archiving:', document[:50] if len(document) >= 50 else document, lvl=verbose)
-                document['_id'] = str(document['_id'])
-                file.write(json.dumps(document))
-                file.write(',')
-            file.write(']}')
+    for collection_name in db.collection_names():
+        backup_log('Archiving collection:', collection_name, lvl=debug)
+        collection = db[collection_name]
+        cursor = collection.find({})
+
+        objects = []
+
+        for document in cursor:
+            backup_log('Archiving:', document[:50] if len(document) >= 50 else document, lvl=verbose)
+            document['_id'] = str(document['_id'])
+            objects.append(document)
+
+        collection = {'collection': collection_name, 'data': objects}
+        content.append(collection)
+
+    with open(filename, "w") as file:
+        json.dump(content, file)
 
     backup_log('Done')
 
@@ -675,18 +681,25 @@ def load(db_host, db_port, db_name, filename):
     with open(filename, "r") as file:
         data = json.load(file)
 
-    backup_log('Storing data')
+    backup_log('Storing data to database')
 
-    for collection_name, items in data:
+    for import_item in data:
+        backup_log(import_item)
+        collection_name = import_item['collection']
+
         collection = db[collection_name]
-
         requests = []
 
-        for document in data:
-            document['_id'] = bson.ObjectId(document['_id'])
-            requests.append(pymongo.ReplaceOne(document, upsert=True))
+        for document in import_item['data']:
 
-        collection.bulk_write(requests)
+            document['_id'] = bson.ObjectId(document['_id'])
+            requests.append(pymongo.ReplaceOne({'uuid': document['uuid']}, document, upsert=True))
+
+        size = len(requests)
+
+        if size > 0:
+            collection.bulk_write(requests)
+        backup_log('Imported %i object%s into collection \'%s\'' % (size, 's' if size != 1 else '', collection_name))
 
     backup_log('Done')
 
