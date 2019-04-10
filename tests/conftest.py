@@ -211,16 +211,14 @@ def pytest_unconfigure(config):
     clean_test_components()
 
 
-def pytest_namespace():
+def pytest_configure():
     """Setup the testing namespace"""
 
-    return dict((
-        ("TestComponent", TestComponent),
-        ("clean_test_components", clean_test_components),
-        ("WaitEvent", WaitEvent),
-        ("wait_for", wait_for),
-        ("call_event", call_event),
-        ("PLATFORM", sys.platform),
-        ("PYVER", sys.version_info[:3]),
-        ("call_event_from_name", call_event_from_name),
-    ))
+    pytest.TestComponent = TestComponent
+    pytest.clean_test_components = clean_test_components
+    pytest.WaitEvent = WaitEvent
+    pytest.wait_for = wait_for
+    pytest.call_event = call_event
+    pytest.PLATFORM = sys.platform
+    pytest.PYVER = sys.version_info[:3]
+    pytest.call_event_from_name = call_event_from_name
