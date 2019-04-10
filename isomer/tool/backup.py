@@ -37,7 +37,7 @@ __license__ = "AGPLv3"
 
 import click
 
-from isomer.database import backup as internal_backup, internal_restore
+from isomer.database.backup import backup as internal_backup, internal_restore
 from isomer.tool.database import db
 
 

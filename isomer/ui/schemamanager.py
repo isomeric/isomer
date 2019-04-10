@@ -35,7 +35,7 @@ from isomer.events.client import send
 from isomer.events.schemamanager import get, all, configuration
 from isomer.debugger import cli_register_event
 from isomer.component import ConfigurableComponent
-from isomer.database import schemastore, l10n_schemastore, configschemastore
+from isomer.schemastore import schemastore, l10n_schemastore, configschemastore
 from isomer.logger import warn, debug, error  # , hilight
 from isomer.component import handler
 

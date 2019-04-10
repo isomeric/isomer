@@ -50,7 +50,7 @@ from click_didyoumean import DYMGroup
 from git import Repo, exc
 
 from isomer.scm_version import version
-from isomer.database import dump, load
+from isomer.database.backup import dump, load
 from isomer.logger import error, verbose, warn, critical, debug, hilight
 from isomer.misc import std_uuid, std_now
 from isomer.misc.path import set_instance, get_path, get_etc_path, locations, get_log_path, get_etc_instance_path

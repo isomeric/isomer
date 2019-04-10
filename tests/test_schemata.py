@@ -32,7 +32,7 @@ Test Isomer Basic Provisioning
 """
 
 import pytest
-from isomer.database import schemastore
+from isomer.schemastore import schemastore
 
 schemata = schemastore.keys()
 

@@ -242,7 +242,7 @@ class ConfigurableMeta(LoggingMeta):
         store"""
 
         super(ConfigurableMeta, self).register(*args)
-        from isomer.database import configschemastore
+        from isomer.schemastore import configschemastore
         # self.log('ADDING SCHEMA:')
         # pprint(self.configschema)
         configschemastore[self.name] = self.configschema

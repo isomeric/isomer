@@ -31,7 +31,7 @@ Test Isomer Launcher
 
 """
 
-from isomer.database import schemastore
+from isomer.schemastore import schemastore
 from isomer.ui.clientobjects import User, Client
 from circuits import Manager
 import pytest

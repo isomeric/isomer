@@ -262,7 +262,7 @@ class Core(ConfigurableComponent):
         """All components have initialized, set up the component
         configuration schema-store, run the local server and drop privileges"""
 
-        from isomer.database import configschemastore
+        from isomer.schemastore import configschemastore
         configschemastore[self.name] = self.configschema
 
         self._start_server()

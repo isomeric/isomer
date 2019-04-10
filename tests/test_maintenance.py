@@ -33,7 +33,7 @@ Test Isomer Maintenance
 
 from circuits import Manager
 import pytest
-from isomer.database import Maintenance
+from isomer.database.components import Maintenance
 import isomer.logger as logger
 
 m = Manager()

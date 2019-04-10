@@ -31,7 +31,8 @@ Test Isomer Basic Provisioning
 
 """
 
-from isomer.database import _build_schemastore_new
+from isomer.schemastore import build_schemastore_new
+
 
 # from pprint import pprint
 
@@ -43,6 +44,6 @@ def test_invalid_schema_store_generation():
         'foobar': 'qux'
     }
 
-    schemastore = _build_schemastore_new()
+    schemastore = build_schemastore_new()
 
     # pprint(schemastore.keys())

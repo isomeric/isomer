@@ -41,7 +41,8 @@ from isomer.events.objectmanager import objectcreation, objectchange, \
 from isomer.events.client import send
 from isomer.debugger import cli_register_event
 from isomer.component import handler, ConfigurableComponent
-from isomer.database import objectmodels, ValidationError, schemastore
+from isomer.database import objectmodels, ValidationError
+from isomer.schemastore import schemastore
 from isomer.logger import verbose, debug, error, warn, critical  # , hilight
 
 # from pprint import pprint
