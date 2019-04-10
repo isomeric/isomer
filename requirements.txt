@@ -8,10 +8,10 @@ click>=6.7.0
 deepdiff>=3.2.1
 distro>=1.3
 dpath>=1.4.0
-formal>=0.6.1
+formal>=0.6.3
 git+https://github.com/circuits/circuits.git
 gitpython>=2.1.1
-jsonschema==2.6.0
+jsonschema>=3.0.1
 networkx
 prompt-toolkit>=2.0
 pycountry>=18.2
