@@ -49,7 +49,7 @@ from isomer.version import version_info
 
 @click.group(context_settings={'help_option_names': ['-h', '--help']}, cls=DYMGroup)
 @click.option('--instance', '-i', default='default', help='Name of instance to act on', metavar='<name>')
-@click.option('--env', '-e', help='Override environment to act on (CAUTION!)', default=None,
+@click.option('--env', '--environment', '-e', help='Override environment to act on (CAUTION!)', default=None,
               type=click.Choice(['blue', 'green', 'current', 'other']))
 @click.option('--quiet', default=False, help="Suppress all output", is_flag=True)
 @click.option('--no-colors', '-nc', default=False, help='Do not use colorful output', is_flag=True)
