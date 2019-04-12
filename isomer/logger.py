@@ -233,33 +233,7 @@ def isolog(*what, **kwargs):
         except BlockingIOError:
             isolog("Too long log line encountered:", message[:20], lvl=warn)
 
-    # Count all messages (missing numbers give a hint at too high log level)
-    global count
-    global verbosity
-
-    count += 1
-
-    lvl = kwargs.get('lvl', info)
-
-    if lvl < verbosity['global']:
-        return
-
-    emitter = kwargs.get('emitter', 'UNKNOWN')
-    traceback = kwargs.get('tb', False)
-    frame_ref = kwargs.get('frame_ref', 0)
-    nc = kwargs.get('nc', False)
-    exception = kwargs.get('exc', False)
-
-    timestamp = time.time()
-    runtime = timestamp - start
-    callee = None
-
-    if exception:
-        exc_type, exc_obj, exc_tb = sys.exc_info()  # NOQA
-
-    if verbosity['global'] <= debug or traceback:
-        # Automatically log the current function details.
-
+    def get_callee():
         if 'sourceloc' not in kwargs:
             frame = kwargs.get('frame', frame_ref)
 
@@ -288,6 +262,36 @@ def isolog(*what, **kwargs):
             )
         else:
             callee = kwargs['sourceloc']
+
+        return callee
+
+    # Count all messages (missing numbers give a hint at too high log level)
+    global count
+    global verbosity
+
+    count += 1
+
+    lvl = kwargs.get('lvl', info)
+
+    if lvl < verbosity['global']:
+        return
+
+    emitter = kwargs.get('emitter', 'UNKNOWN')
+    traceback = kwargs.get('tb', False)
+    frame_ref = kwargs.get('frame_ref', 0)
+    no_color = kwargs.get('nc', False)
+    exception = kwargs.get('exc', False)
+
+    timestamp = time.time()
+    runtime = timestamp - start
+    callee = None
+
+    if exception:
+        exc_type, exc_obj, exc_tb = sys.exc_info()  # NOQA
+
+    if verbosity['global'] <= debug or traceback:
+        # Automatically log the current function details.
+        callee = get_callee()
 
     now = time.asctime()
     msg = "[%s] : %5s : %.5f : %3i : [%5s]" % (
@@ -324,7 +328,7 @@ def isolog(*what, **kwargs):
 
     if lvl >= verbosity['console']:
         output = str(msg)
-        if color and not nc:
+        if color and not no_color:
             output = level_data[lvl][1] + output + terminator
         write_to_console(output)
 

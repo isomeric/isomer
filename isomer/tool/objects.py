@@ -312,25 +312,18 @@ def illegalcheck(ctx, schema, delete_duplicates, fix, test):
 
 @objects.command(short_help='Find duplicates by UUID')
 @click.option('--delete-duplicates', '--delete', default=False, is_flag=True, help='Delete found duplicates')
-@click.option('--merge', default=False, is_flag=True, help='Merge found duplicates')
+@click.option('--do-merge', '--merge', default=False, is_flag=True, help='Merge found duplicates')
 @click.option('--schema', default=None, help='Work on specified schema only')
 @click.pass_context
-def dupcheck(ctx, delete_duplicates, merge, schema):
+def dupcheck(ctx, delete_duplicates, do_merge, schema):
     """Tool to check for duplicate objects. Which should never happen."""
 
-    database = ctx.obj['db']
-
-    if schema is None:
-        schemata = database.objectmodels.keys()
-    else:
-        schemata = [schema]
-
-    for thing in schemata:
+    def handle_schema(check_schema):
         dupes = {}
         dupe_count = 0
         count = 0
 
-        for item in database.objectmodels[thing].find():
+        for item in database.objectmodels[check_schema].find():
             if item.uuid in dupes:
                 dupes[item.uuid].append(item)
                 dupe_count += 1
@@ -339,17 +332,16 @@ def dupcheck(ctx, delete_duplicates, merge, schema):
             count += 1
 
         if len(dupes) > 0:
-            log(dupe_count, 'duplicates of', count, 'items total of type', thing, 'found:')
+            log(dupe_count, 'duplicates of', count, 'items total of type', check_schema, 'found:')
             log(dupes.keys(), pretty=True, lvl=verbose)
 
         if delete_duplicates:
             log('Deleting duplicates')
             for item in dupes:
-                database.objectmodels[thing].find_one({'uuid': item}).delete()
+                database.objectmodels[check_schema].find_one({'uuid': item}).delete()
 
-            log('Done for schema', thing)
-        elif merge:
-
+            log('Done for schema', check_schema)
+        elif do_merge:
             def merge(a, b, path=None):
                 """merges b into a"""
 
@@ -431,7 +423,9 @@ def dupcheck(ctx, delete_duplicates, merge, schema):
 
                             dupes[item][merge_request_a]._fields['_id'] = _id
                             merge(dupes[item][merge_request_b]._fields, dupes[item][merge_request_a]._fields)
+
                             log('Candidate after merge:', dupes[item][merge_request_b]._fields, pretty=True)
+
                             store = ''
                             while store not in ('n', 'y'):
                                 store = ask('Store?')
@@ -440,4 +434,14 @@ def dupcheck(ctx, delete_duplicates, merge, schema):
                                 dupes[item][merge_request_a].delete()
                                 break
 
-        log('Done')
+    database = ctx.obj['db']
+
+    if schema is None:
+        schemata = database.objectmodels.keys()
+    else:
+        schemata = [schema]
+
+    for thing in schemata:
+        handle_schema(thing)
+
+    log('Done')

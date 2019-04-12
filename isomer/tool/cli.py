@@ -85,23 +85,28 @@ def cli(ctx, instance, env, quiet, no_colors, console_level, file_level, do_log,
 
     ctx.obj['quiet'] = quiet
 
-    if quiet:
-        verbosity['console'] = 100
-    else:
-        verbosity['console'] = int(console_level if console_level is not None else 20)
+    def set_verbosity():
+        if quiet:
+            verbosity['console'] = 100
+        else:
+            verbosity['console'] = int(console_level if console_level is not None else 20)
 
-    if do_log:
-        verbosity['file'] = int(file_level if file_level is not None else 20)
-    else:
-        verbosity['file'] = 100
+        if do_log:
+            verbosity['file'] = int(file_level if file_level is not None else 20)
+        else:
+            verbosity['file'] = 100
 
-    verbosity['global'] = min(verbosity['console'], verbosity['file'])
+        verbosity['global'] = min(verbosity['console'], verbosity['file'])
 
-    if log_path is not None:
-        set_logfile(log_path, instance)
+    def set_logger():
+        if log_path is not None:
+            set_logfile(log_path, instance)
 
-    if no_colors is False:
-        set_color()
+        if no_colors is False:
+            set_color()
+
+    set_verbosity()
+    set_logger()
 
     ctx.obj['instance'] = instance
 
