@@ -130,7 +130,7 @@ class ClientManager(ConfigurableComponent):
         self._sockets = {}
         self._users = {}
         self._count = 0
-        self._usermapping = {}
+        self._user_mapping = {}
         self._flooding = {}
         self._flood_counter = {}
 
@@ -262,9 +262,9 @@ class ClientManager(ConfigurableComponent):
         try:
             if sock in self._sockets:
                 self.log("Getting socket", lvl=debug)
-                sockobj = self._sockets[sock]
+                socket_object = self._sockets[sock]
                 self.log("Getting clientuuid", lvl=debug)
-                clientuuid = sockobj.clientuuid
+                clientuuid = socket_object.clientuuid
                 self.log("getting useruuid", lvl=debug)
                 useruuid = self._clients[clientuuid].useruuid
 
@@ -276,7 +276,7 @@ class ClientManager(ConfigurableComponent):
                 if useruuid is not None:
                     self.log("Client was logged in", lvl=debug)
                     try:
-                        self._logoutclient(useruuid, clientuuid)
+                        self._logout_client(useruuid, clientuuid)
                         self.log("Client logged out", useruuid, clientuuid)
                     except Exception as e:
                         self.log("Couldn't clean up logged in user! ",
@@ -291,7 +291,7 @@ class ClientManager(ConfigurableComponent):
             self.log("Error during disconnect handling: ", e, type(e),
                      lvl=critical)
 
-    def _logoutclient(self, useruuid, clientuuid):
+    def _logout_client(self, useruuid, clientuuid):
         """Log out a client and possibly associated user"""
 
         self.log("Cleaning up client of logged in user.", lvl=debug)
@@ -444,7 +444,7 @@ class ClientManager(ConfigurableComponent):
         except Exception as e:
             self.log("Error during broadcast: ", e, type(e), lvl=critical)
 
-    def _checkPermissions(self, user, event):
+    def _check_permissions(self, user, event):
         """Checks if the user has in any role that allows to fire the event."""
 
         for role in user.account.roles:
@@ -455,7 +455,7 @@ class ClientManager(ConfigurableComponent):
         self.log('Access denied', lvl=verbose)
         return False
 
-    def _handleAuthorizedEvents(self, component, action, data, user, client):
+    def _handle_authorized_events(self, component, action, data, user, client):
         """Isolated communication link for authorized events."""
 
         try:
@@ -471,7 +471,7 @@ class ClientManager(ConfigurableComponent):
             event = self.authorized_events[component][action]['event'](user, action, data, client)
 
             self.log('Authorized event roles:', event.roles, lvl=verbose)
-            if not self._checkPermissions(user, event):
+            if not self._check_permissions(user, event):
                 result = {
                     'component': 'isomer.ui.clientmanager',
                     'action': 'Permission',
@@ -489,7 +489,7 @@ class ClientManager(ConfigurableComponent):
                      component, action, e,
                      type(e), lvl=critical, exc=True)
 
-    def _handleAnonymousEvents(self, component, action, data, client):
+    def _handle_anonymous_events(self, component, action, data, client):
         """Handler for anonymous (public) events"""
         try:
             event = self.anonymous_events[component][action]['event']
@@ -503,29 +503,28 @@ class ClientManager(ConfigurableComponent):
                      component, action, e,
                      type(e), lvl=critical, exc=True)
 
-    def _handleAuthenticationEvents(self, requestdata, requestaction,
-                                    clientuuid, sock):
+    def _handle_authentication_events(self, data, action, clientuuid, sock):
         """Handler for authentication events"""
 
         # TODO: Move this stuff over to ./auth.py
-        if requestaction in ("login", "autologin"):
+        if action in ("login", "autologin"):
             try:
                 self.log("Login request", lvl=verbose)
 
-                if requestaction == "autologin":
+                if action == "autologin":
                     username = password = None
-                    requestedclientuuid = requestdata
+                    requested_clientuuid = data
                     auto = True
 
-                    self.log("Autologin for", requestedclientuuid, lvl=debug)
+                    self.log("Autologin for", requested_clientuuid, lvl=debug)
                 else:
-                    username = requestdata['username']
-                    password = requestdata['password']
+                    username = data['username']
+                    password = data['password']
 
-                    if 'clientuuid' in requestdata:
-                        requestedclientuuid = requestdata['clientuuid']
+                    if 'clientuuid' in data:
+                        requested_clientuuid = data['clientuuid']
                     else:
-                        requestedclientuuid = None
+                        requested_clientuuid = None
                     auto = False
 
                     self.log("Auth request by", username, lvl=verbose)
@@ -534,14 +533,14 @@ class ClientManager(ConfigurableComponent):
                     username,
                     password,
                     clientuuid,
-                    requestedclientuuid,
+                    requested_clientuuid,
                     sock,
                     auto,
                 ), "auth")
                 return
             except Exception as e:
                 self.log("Login failed: ", e, type(e), lvl=warn, exc=True)
-        elif requestaction == "logout":
+        elif action == "logout":
             self.log("User logged out, refreshing client.", lvl=network)
             try:
                 if clientuuid in self._clients:
@@ -549,7 +548,7 @@ class ClientManager(ConfigurableComponent):
                     user_id = client.useruuid
                     if client.useruuid:
                         self.log("Logout client uuid: ", clientuuid)
-                        self._logoutclient(client.useruuid, clientuuid)
+                        self._logout_client(client.useruuid, clientuuid)
                     self.fireEvent(clientdisconnect(clientuuid))
                 else:
                     self.log("Client is not connected!", lvl=warn)
@@ -558,7 +557,7 @@ class ClientManager(ConfigurableComponent):
                          lvl=error, exc=True)
         else:
             self.log("Unsupported auth action requested:",
-                     requestaction, lvl=warn)
+                     action, lvl=warn)
 
     @handler('reset_flood_counters')
     def _reset_flood_counters(self, *args):
@@ -657,10 +656,14 @@ class ClientManager(ConfigurableComponent):
             request_data = None
 
         if request_component == "auth":
-            self._handleAuthenticationEvents(request_data, request_action,
-                                             client_uuid, sock)
+            self._handle_authentication_events(request_data, request_action,
+                                               client_uuid, sock)
             return
+        else:
+            self._forward_event(client_uuid, request_component, request_action, request_data)
 
+    def _forward_event(self, client_uuid, request_component, request_action, request_data):
+        """Determine what exactly to do with the event and forward it to its destination"""
         try:
             client = self._clients[client_uuid]
         except KeyError as e:
@@ -671,8 +674,8 @@ class ClientManager(ConfigurableComponent):
             self.log('Executing anonymous event:', request_component,
                      request_action)
             try:
-                self._handleAnonymousEvents(request_component, request_action,
-                                            request_data, client)
+                self._handle_anonymous_events(request_component, request_action,
+                                              request_data, client)
             except Exception as e:
                 self.log("Anonymous request failed:", e, type(e), lvl=warn,
                          exc=True)
@@ -699,8 +702,8 @@ class ClientManager(ConfigurableComponent):
 
             self.log('Handling event:', request_component, request_action, lvl=verbose)
             try:
-                self._handleAuthorizedEvents(request_component, request_action,
-                                             request_data, user, client)
+                self._handle_authorized_events(request_component, request_action,
+                                               request_data, user, client)
             except Exception as e:
                 self.log("User request failed: ", e, type(e), lvl=warn,
                          exc=True)
