@@ -202,6 +202,37 @@ def isolog(*what, **kwargs):
     :param sourceloc: Give specific source code location hints, used internally
     """
 
+    def assemble_things(things):
+        content = ""
+
+        for thing in things:
+            content += " "
+            if kwargs.get('pretty', False) and not isinstance(thing, str):
+                content += "\n" + pprint.pformat(thing)
+            else:
+                content += str(thing)
+
+        return content
+
+    def write_to_log(message):
+        try:
+            f = open(logfile, "a")
+            f.write(message + '\n')
+            f.flush()
+            f.close()
+        except IOError:
+            print("Can't open logfile %s for writing!" % logfile)
+            # sys.exit(23)
+
+    def write_to_console(message):
+        try:
+            print(message)
+        except UnicodeEncodeError as e:
+            print(message.encode("utf-8"))
+            isolog("Bad encoding encountered on previous message:", e, lvl=error)
+        except BlockingIOError:
+            isolog("Too long log line encountered:", message[:20], lvl=warn)
+
     # Count all messages (missing numbers give a hint at too high log level)
     global count
     global verbosity
@@ -217,15 +248,11 @@ def isolog(*what, **kwargs):
     traceback = kwargs.get('tb', False)
     frame_ref = kwargs.get('frame_ref', 0)
     nc = kwargs.get('nc', False)
-
-    output = None
+    exception = kwargs.get('exc', False)
 
     timestamp = time.time()
     runtime = timestamp - start
-
     callee = None
-
-    exception = kwargs.get('exc', False)
 
     if exception:
         exc_type, exc_obj, exc_tb = sys.exc_info()  # NOQA
@@ -263,14 +290,13 @@ def isolog(*what, **kwargs):
             callee = kwargs['sourceloc']
 
     now = time.asctime()
-
-    msg = "[%s] : %5s : %.5f : %3i : [%5s]" % (now,
-                                               level_data[lvl][0],
-                                               runtime,
-                                               count,
-                                               emitter)
-
-    content = ""
+    msg = "[%s] : %5s : %.5f : %3i : [%5s]" % (
+        now,
+        level_data[lvl][0],
+        runtime,
+        count,
+        emitter
+    )
 
     if callee:
         if not uncut and lvl > 10:
@@ -278,13 +304,7 @@ def isolog(*what, **kwargs):
         else:
             msg += "%s" % callee
 
-    for thing in what:
-        content += " "
-        if kwargs.get('pretty', False) and not isinstance(thing, str):
-            content += "\n" + pprint.pformat(thing)
-        else:
-            content += str(thing)
-
+    content = assemble_things(what)
     msg += content
 
     if exception:
@@ -297,14 +317,7 @@ def isolog(*what, **kwargs):
         msg = msg[:1000]
 
     if lvl >= verbosity['file']:
-        try:
-            f = open(logfile, "a")
-            f.write(msg + '\n')
-            f.flush()
-            f.close()
-        except IOError:
-            print("Can't open logfile %s for writing!" % logfile)
-            # sys.exit(23)
+        write_to_log(msg)
 
     if is_marked(msg):
         lvl = hilight
@@ -313,14 +326,7 @@ def isolog(*what, **kwargs):
         output = str(msg)
         if color and not nc:
             output = level_data[lvl][1] + output + terminator
-        try:
-            print(output)
-        except UnicodeEncodeError as e:
-            print(output.encode("utf-8"))
-            isolog("Bad encoding encountered on previous message:", e,
-                   lvl=error)
-        except BlockingIOError:
-            isolog("Too long log line encountered:", output[:20], lvl=warn)
+        write_to_console(output)
 
     if live:
         item = [now, lvl, runtime, count, emitter, str(content)]
