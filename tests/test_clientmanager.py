@@ -134,7 +134,7 @@ def test_auth_logout():
 
     m.start()
 
-    cm._handleAuthenticationEvents(None, 'logout', client_uuid, None)
+    cm._handle_authentication_events(None, 'logout', client_uuid, None)
 
     data = {
         'component': 'auth',
