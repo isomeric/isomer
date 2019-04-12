@@ -42,7 +42,6 @@ ProfileSchema['properties'].update({
     'name': {'type': 'string', 'title': 'Name',
              'description': 'Profile name'},
     "userdata": {
-        "default": {},
         "id": "#profile.userdata",
         "type": "object",
         "properties": {
@@ -81,12 +80,10 @@ ProfileSchema['properties'].update({
     },
     'modules': {
         'type': 'object',
-        'default': {}
     },
     "components": {
         "id": "#profile.components",
         "type": "object",
-        "default": {},
         "properties": {
             "enabled": {
                 "type": "array",
