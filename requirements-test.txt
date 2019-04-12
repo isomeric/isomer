@@ -1,4 +1,5 @@
 # Running Tests
+pluggy>= 0.9
 tox
 pytest==4.4.0
 coveralls
