@@ -54,8 +54,174 @@ class cli_subscriptions(Event):
     """Display a list of all registered subscriptions"""
     pass
 
+class RoleOperations():
 
-class ObjectManager(ConfigurableComponent):
+    @handler(remove_role)
+    def remove_role(self, event):
+        schema = event.data.get('schema', None)
+        uuid = event.data.get('uuid', None)
+        action = event.data.get('action', None)
+        role = event.data.get('role', None)
+
+        if schema is None or uuid is None or action is None or role is None:
+            self.log('Invalid request, arguments missing:', event.data, lvl=error)
+            return
+
+        user = event.user
+
+        if not isinstance(uuid, list):
+            uuid = [uuid]
+
+        for item in uuid:
+            obj = objectmodels[schema].find_one({'uuid': item})
+
+            if not self._check_permissions(user, 'write', obj):
+                self.log('Revoking role not possible due to insufficient permissions.')
+                return
+
+            self.log('Removing role', role, 'of', action, 'on', schema, ':', item)
+            try:
+                obj.perms[action].remove(role)
+                obj.save()
+            except ValueError:
+                self.log('Could not remove role, it is not existing:', role, action, schema, ':', item)
+
+    @handler(add_role)
+    def add_role(self, event):
+        schema = event.data.get('schema', None)
+        uuid = event.data.get('uuid', None)
+        action = event.data.get('action', None)
+        role = event.data.get('role', None)
+
+        if schema is None or uuid is None or action is None or role is None:
+            self.log('Invalid request, arguments missing:', event.data, lvl=error)
+            return
+
+        user = event.user
+
+        if not isinstance(uuid, list):
+            uuid = [uuid]
+
+        for item in uuid:
+            obj = objectmodels[schema].find_one({'uuid': item})
+
+            if not self._check_permissions(user, 'write', obj):
+                self.log('Adding role not possible due to insufficient permissions.')
+                return
+
+            self.log('Appending role', role, 'of', action, 'on', schema, ':', item)
+            if role not in obj.perms[action]:
+                obj.perms[action].append(role)
+                obj.save()
+            else:
+                self.log('Role already present, not adding')
+
+
+class SubscriptionOperations():
+
+    @handler(subscribe)
+    def subscribe(self, event):
+        """Subscribe to an object's future changes"""
+        uuids = event.data
+
+        if not isinstance(uuids, list):
+            uuids = [uuids]
+
+        subscribed = []
+        for uuid in uuids:
+            try:
+                self._add_subscription(uuid, event)
+                subscribed.append(uuid)
+            except KeyError:
+                continue
+
+        result = {
+            'component': 'isomer.events.objectmanager',
+            'action': 'subscribe',
+            'data': {
+                'uuid': subscribed, 'success': True
+            }
+        }
+        self._respond(None, result, event)
+
+    def _add_subscription(self, uuid, event):
+        self.log('Adding subscription for', uuid, event.user, lvl=verbose)
+        if uuid in self.subscriptions:
+            if event.client.uuid not in self.subscriptions[uuid]:
+                self.subscriptions[uuid][event.client.uuid] = event.user
+        else:
+            self.subscriptions[uuid] = {event.client.uuid: event.user}
+
+    @handler(unsubscribe)
+    def unsubscribe(self, event):
+        """Unsubscribe from an object's future changes"""
+        # TODO: Automatic Unsubscription
+        uuids = event.data
+
+        if not isinstance(uuids, list):
+            uuids = [uuids]
+
+        result = []
+
+        for uuid in uuids:
+            if uuid in self.subscriptions:
+                self.subscriptions[uuid].pop(event.client.uuid)
+
+                if len(self.subscriptions[uuid]) == 0:
+                    del (self.subscriptions[uuid])
+
+                result.append(uuid)
+
+        result = {
+            'component': 'isomer.events.objectmanager',
+            'action': 'unsubscribe',
+            'data': {
+                'uuid': result, 'success': True
+            }
+        }
+
+        self._respond(None, result, event)
+
+    @handler('updatesubscriptions')
+    def update_subscriptions(self, event):
+        """OM event handler for to be stored and client shared objectmodels
+        :param event: OMRequest with uuid, schema and object data
+        """
+
+        # self.log("Event: '%s'" % event.__dict__)
+        try:
+            self._update_subscribers(event.schema, event.data)
+
+        except Exception as e:
+            self.log("Error during subscription update: ", type(e), e,
+                     exc=True)
+
+    def _update_subscribers(self, update_schema, update_object):
+        # Notify frontend subscribers
+
+        self.log('Notifying subscribers about update.', lvl=verbose)
+        if update_object.uuid in self.subscriptions:
+            update = {
+                'component': 'isomer.events.objectmanager',
+                'action': 'update',
+                'data': {
+                    'schema': update_schema,
+                    'uuid': update_object.uuid,
+                    'object': update_object.serializablefields()
+                }
+            }
+
+            # pprint(self.subscriptions)
+
+            for client, recipient in self.subscriptions[update_object.uuid].items():
+                if not self._check_permissions(recipient, 'read', update_object):
+                    continue
+
+                self.log('Notifying subscriber: ', client, recipient,
+                         lvl=verbose)
+                self.fireEvent(send(client, update))
+
+class BaseObjectManager(ConfigurableComponent):
     """
     Handles object requests and updates.
     """
@@ -65,129 +231,15 @@ class ObjectManager(ConfigurableComponent):
     configprops = {}
 
     def __init__(self, *args):
-        super(ObjectManager, self).__init__('OM', *args)
+        super(BaseObjectManager, self).__init__('OM', *args)
 
         self.subscriptions = {}
 
         self.fireEvent(cli_register_event('om_subscriptions', cli_subscriptions))
         self.log("Started")
 
-    @handler("cli_subscriptions")
-    def cli_subscriptions(self, event):
-        self.log('Subscriptions', self.subscriptions, pretty=True)
 
-    def _check_permissions(self, subject, action, obj):
-        # self.log('Roles of user:', subject.account.roles, lvl=verbose)
-
-        if 'perms' not in obj._fields:
-            if 'admin' in subject.account.roles:
-                # self.log('Access to administrative object granted', lvl=verbose)
-                return True
-            else:
-                # self.log('Access to administrative object failed', lvl=verbose)
-                return False
-
-        if 'owner' in obj.perms[action]:
-            try:
-                if subject.uuid == obj.owner:
-                    # self.log('Access granted via ownership', lvl=verbose)
-                    return True
-            except AttributeError as e:
-                self.log('Schema has ownership permission but no owner:', obj._schema['name'], lvl=verbose)
-        for role in subject.account.roles:
-            if role in obj.perms[action]:
-                # self.log('Access granted', lvl=verbose)
-                return True
-
-        self.log('Access denied', lvl=verbose)
-        return False
-
-    @staticmethod
-    def _check_create_permission(subject, schema):
-        for role in subject.account.roles:
-            if role in schemastore[schema]['schema']['roles_create']:
-                return True
-        return False
-
-    def _cancel_by_permission(self, schema, data, event):
-        self.log('No permission:', schema, data, event.user.uuid, lvl=warn)
-
-        msg = {
-            'component': 'isomer.events.objectmanager',
-            'action': 'fail',
-            'data': {
-                'reason': 'No permission',
-                'req': data.get('req')
-            }
-        }
-        self.fire(send(event.client.uuid, msg))
-
-    def _cancel_by_error(self, event, reason="malformed"):
-        self.log('Bad request:', reason, lvl=warn)
-
-        msg = {
-            'component': 'isomer.events.objectmanager',
-            'action': 'fail',
-            'data': {
-                'reason': reason,
-                'req': event.data.get('req', None)
-            }
-        }
-        self.fire(send(event.client.uuid, msg))
-
-    def _get_schema(self, event):
-        data = event.data
-
-        if 'schema' not in data:
-            self._cancel_by_error(event, 'no_schema')
-            raise AttributeError
-        if data['schema'] not in objectmodels.keys():
-            self._cancel_by_error(event, 'invalid_schema:' + data['schema'])
-            raise AttributeError
-
-        return data['schema']
-
-    @staticmethod
-    def _get_filter(event):
-        data = event.data
-        if 'filter' in data:
-            object_filter = data['filter']
-        else:
-            object_filter = {}
-
-        return object_filter
-
-    def _get_args(self, event):
-        schema = self._get_schema(event)
-        try:
-            data = event.data
-            user = event.user
-            client = event.client
-        except (KeyError, AttributeError) as e:
-            self.log('Error during argument extraction:', e, type(e), exc=True, lvl=error)
-            self._cancel_by_error(event, 'Invalid arguments')
-            raise AttributeError
-
-        return data, schema, user, client
-
-    def _respond(self, notification, result, event):
-        if notification:
-            try:
-                self.log('Firing notification', lvl=verbose)
-                self.fireEvent(notification)
-            except Exception as e:
-                self.log("Transmission error during notification: %s" % e,
-                         lvl=error)
-
-        if result:
-            try:
-                self.log('Transmitting result', lvl=verbose)
-                if isinstance(event.data, dict):
-                    result['data']['req'] = event.data.get('req', None)
-                self.fireEvent(send(event.client.uuid, result))
-            except Exception as e:
-                self.log("Transmission error during response: %s" % e,
-                         lvl=error, exc=True)
+class CrudOperations():
 
     @handler(get)
     def get(self, event):
@@ -662,164 +714,139 @@ class ObjectManager(ConfigurableComponent):
             self.log("Error during delete request: ", e, type(e),
                      lvl=error)
 
-    @handler(subscribe)
-    def subscribe(self, event):
-        """Subscribe to an object's future changes"""
-        uuids = event.data
 
-        if not isinstance(uuids, list):
-            uuids = [uuids]
+class ObjectManager(ConfigurableComponent, CrudOperations, SubscriptionOperations, RoleOperations):
+    """
+    Handles object requests and updates.
+    """
 
-        subscribed = []
-        for uuid in uuids:
-            try:
-                self._add_subscription(uuid, event)
-                subscribed.append(uuid)
-            except KeyError:
-                continue
+    channel = 'isomer-web'
 
-        result = {
-            'component': 'isomer.events.objectmanager',
-            'action': 'subscribe',
-            'data': {
-                'uuid': subscribed, 'success': True
-            }
-        }
-        self._respond(None, result, event)
+    configprops = {}
 
-    def _add_subscription(self, uuid, event):
-        self.log('Adding subscription for', uuid, event.user, lvl=verbose)
-        if uuid in self.subscriptions:
-            if event.client.uuid not in self.subscriptions[uuid]:
-                self.subscriptions[uuid][event.client.uuid] = event.user
-        else:
-            self.subscriptions[uuid] = {event.client.uuid: event.user}
+    def __init__(self, *args):
+        super(ObjectManager, self).__init__('OM', *args)
 
-    @handler(unsubscribe)
-    def unsubscribe(self, event):
-        """Unsubscribe from an object's future changes"""
-        # TODO: Automatic Unsubscription
-        uuids = event.data
+        self.subscriptions = {}
 
-        if not isinstance(uuids, list):
-            uuids = [uuids]
+        self.fireEvent(cli_register_event('om_subscriptions', cli_subscriptions))
+        self.log("Started")
 
-        result = []
+    @handler("cli_subscriptions")
+    def cli_subscriptions(self, event):
+        self.log('Subscriptions', self.subscriptions, pretty=True)
 
-        for uuid in uuids:
-            if uuid in self.subscriptions:
-                self.subscriptions[uuid].pop(event.client.uuid)
+    def _check_permissions(self, subject, action, obj):
+        # self.log('Roles of user:', subject.account.roles, lvl=verbose)
 
-                if len(self.subscriptions[uuid]) == 0:
-                    del (self.subscriptions[uuid])
-
-                result.append(uuid)
-
-        result = {
-            'component': 'isomer.events.objectmanager',
-            'action': 'unsubscribe',
-            'data': {
-                'uuid': result, 'success': True
-            }
-        }
-
-        self._respond(None, result, event)
-
-    @handler('updatesubscriptions')
-    def update_subscriptions(self, event):
-        """OM event handler for to be stored and client shared objectmodels
-        :param event: OMRequest with uuid, schema and object data
-        """
-
-        # self.log("Event: '%s'" % event.__dict__)
-        try:
-            self._update_subscribers(event.schema, event.data)
-
-        except Exception as e:
-            self.log("Error during subscription update: ", type(e), e,
-                     exc=True)
-
-    def _update_subscribers(self, update_schema, update_object):
-        # Notify frontend subscribers
-
-        self.log('Notifying subscribers about update.', lvl=verbose)
-        if update_object.uuid in self.subscriptions:
-            update = {
-                'component': 'isomer.events.objectmanager',
-                'action': 'update',
-                'data': {
-                    'schema': update_schema,
-                    'uuid': update_object.uuid,
-                    'object': update_object.serializablefields()
-                }
-            }
-
-            # pprint(self.subscriptions)
-
-            for client, recipient in self.subscriptions[update_object.uuid].items():
-                if not self._check_permissions(recipient, 'read', update_object):
-                    continue
-
-                self.log('Notifying subscriber: ', client, recipient,
-                         lvl=verbose)
-                self.fireEvent(send(client, update))
-
-    @handler(remove_role)
-    def remove_role(self, event):
-        schema = event.data.get('schema', None)
-        uuid = event.data.get('uuid', None)
-        action = event.data.get('action', None)
-        role = event.data.get('role', None)
-
-        if schema is None or uuid is None or action is None or role is None:
-            self.log('Invalid request, arguments missing:', event.data, lvl=error)
-            return
-
-        user = event.user
-
-        if not isinstance(uuid, list):
-            uuid = [uuid]
-
-        for item in uuid:
-            obj = objectmodels[schema].find_one({'uuid': item})
-
-            if not self._check_permissions(user, 'write', obj):
-                self.log('Revoking role not possible due to insufficient permissions.')
-                return
-
-            self.log('Removing role', role, 'of', action, 'on', schema, ':', item)
-            try:
-                obj.perms[action].remove(role)
-                obj.save()
-            except ValueError:
-                self.log('Could not remove role, it is not existing:', role, action, schema, ':', item)
-
-    @handler(add_role)
-    def add_role(self, event):
-        schema = event.data.get('schema', None)
-        uuid = event.data.get('uuid', None)
-        action = event.data.get('action', None)
-        role = event.data.get('role', None)
-
-        if schema is None or uuid is None or action is None or role is None:
-            self.log('Invalid request, arguments missing:', event.data, lvl=error)
-            return
-
-        user = event.user
-
-        if not isinstance(uuid, list):
-            uuid = [uuid]
-
-        for item in uuid:
-            obj = objectmodels[schema].find_one({'uuid': item})
-
-            if not self._check_permissions(user, 'write', obj):
-                self.log('Adding role not possible due to insufficient permissions.')
-                return
-
-            self.log('Appending role', role, 'of', action, 'on', schema, ':', item)
-            if role not in obj.perms[action]:
-                obj.perms[action].append(role)
-                obj.save()
+        if 'perms' not in obj._fields:
+            if 'admin' in subject.account.roles:
+                # self.log('Access to administrative object granted', lvl=verbose)
+                return True
             else:
-                self.log('Role already present, not adding')
+                # self.log('Access to administrative object failed', lvl=verbose)
+                return False
+
+        if 'owner' in obj.perms[action]:
+            try:
+                if subject.uuid == obj.owner:
+                    # self.log('Access granted via ownership', lvl=verbose)
+                    return True
+            except AttributeError as e:
+                self.log('Schema has ownership permission but no owner:', obj._schema['name'], lvl=verbose)
+        for role in subject.account.roles:
+            if role in obj.perms[action]:
+                # self.log('Access granted', lvl=verbose)
+                return True
+
+        self.log('Access denied', lvl=verbose)
+        return False
+
+    @staticmethod
+    def _check_create_permission(subject, schema):
+        for role in subject.account.roles:
+            if role in schemastore[schema]['schema']['roles_create']:
+                return True
+        return False
+
+    def _cancel_by_permission(self, schema, data, event):
+        self.log('No permission:', schema, data, event.user.uuid, lvl=warn)
+
+        msg = {
+            'component': 'isomer.events.objectmanager',
+            'action': 'fail',
+            'data': {
+                'reason': 'No permission',
+                'req': data.get('req')
+            }
+        }
+        self.fire(send(event.client.uuid, msg))
+
+    def _cancel_by_error(self, event, reason="malformed"):
+        self.log('Bad request:', reason, lvl=warn)
+
+        msg = {
+            'component': 'isomer.events.objectmanager',
+            'action': 'fail',
+            'data': {
+                'reason': reason,
+                'req': event.data.get('req', None)
+            }
+        }
+        self.fire(send(event.client.uuid, msg))
+
+    def _get_schema(self, event):
+        data = event.data
+
+        if 'schema' not in data:
+            self._cancel_by_error(event, 'no_schema')
+            raise AttributeError
+        if data['schema'] not in objectmodels.keys():
+            self._cancel_by_error(event, 'invalid_schema:' + data['schema'])
+            raise AttributeError
+
+        return data['schema']
+
+    @staticmethod
+    def _get_filter(event):
+        data = event.data
+        if 'filter' in data:
+            object_filter = data['filter']
+        else:
+            object_filter = {}
+
+        return object_filter
+
+    def _get_args(self, event):
+        schema = self._get_schema(event)
+        try:
+            data = event.data
+            user = event.user
+            client = event.client
+        except (KeyError, AttributeError) as e:
+            self.log('Error during argument extraction:', e, type(e), exc=True, lvl=error)
+            self._cancel_by_error(event, 'Invalid arguments')
+            raise AttributeError
+
+        return data, schema, user, client
+
+    def _respond(self, notification, result, event):
+        if notification:
+            try:
+                self.log('Firing notification', lvl=verbose)
+                self.fireEvent(notification)
+            except Exception as e:
+                self.log("Transmission error during notification: %s" % e,
+                         lvl=error)
+
+        if result:
+            try:
+                self.log('Transmitting result', lvl=verbose)
+                if isinstance(event.data, dict):
+                    result['data']['req'] = event.data.get('req', None)
+                self.fireEvent(send(event.client.uuid, result))
+            except Exception as e:
+                self.log("Transmission error during response: %s" % e,
+                         lvl=error, exc=True)
+
+
