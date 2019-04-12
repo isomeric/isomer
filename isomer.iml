@@ -24,6 +24,7 @@
     <content url="file://$MODULE_DIR$/frontend/node_modules" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="inheritedJdk" />
+    <orderEntry type="library" name="Python 3.6 (isomer) interpreter library" level="application" />
   </component>
   <component name="PyDocumentationSettings">
     <option name="renderExternalDocumentation" value="true" />
