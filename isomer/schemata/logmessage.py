@@ -36,30 +36,44 @@ LogMessage: LogMessage to store messages in rooms and private logs
 from isomer.schemata.defaultform import readonlyform
 from isomer.schemata.base import base_object
 
-LogMessageSchema = base_object('logmessage', no_perms=True)
+LogMessageSchema = base_object("logmessage", no_perms=True)
 
-LogMessageSchema.update({'roles_create': 'SYSTEM'})
+LogMessageSchema.update({"roles_create": "SYSTEM"})
 
-LogMessageSchema['properties'].update({
-    'timestamp': {'type': 'number', 'title': 'Timestamp',
-                  'description': 'Log Message timestamp (\xc2Sec)'},
-    'emitter': {'type': 'string', 'minLength': 1, 'title': 'Emitter',
-                'description': 'Log Message emitter name'},
-    'sourceloc': {'type': 'string', 'minLength': 1, 'title': 'Source '
-                                                             'location',
-                  'description': 'Log Message source code location'},
-    'level': {'type': 'string', 'minLength': 1, 'title': 'Level',
-              'description': 'Log Message elevation level'},
-    'content': {'type': 'string', 'minLength': 1, 'title': 'Content',
-                'description': 'Log Message content'}
-})
+LogMessageSchema["properties"].update(
+    {
+        "timestamp": {
+            "type": "number",
+            "title": "Timestamp",
+            "description": "Log Message timestamp (\xc2Sec)",
+        },
+        "emitter": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Emitter",
+            "description": "Log Message emitter name",
+        },
+        "sourceloc": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Source " "location",
+            "description": "Log Message source code location",
+        },
+        "level": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Level",
+            "description": "Log Message elevation level",
+        },
+        "content": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Content",
+            "description": "Log Message content",
+        },
+    }
+)
 
-LogOptions = {
-    'disabled': True
-}
+LogOptions = {"disabled": True}
 
-LogMessage = {
-    'schema': LogMessageSchema,
-    'form': readonlyform,
-    'options': LogOptions
-}
+LogMessage = {"schema": LogMessageSchema, "form": readonlyform, "options": LogOptions}

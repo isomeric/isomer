@@ -38,14 +38,12 @@ from isomer.logger import isolog, warn
 
 from uuid import uuid4
 
-Users = [{
-    'name': 'System',
-    'uuid': str(uuid4()),
-    'roles': ['admin', 'system', 'crew']
-}]
+Users = [{"name": "System", "uuid": str(uuid4()), "roles": ["admin", "system", "crew"]}]
 
 
-def provision_system_user(items, database_name, overwrite=False, clear=False, skip_user_check=False):
+def provision_system_user(
+    items, database_name, overwrite=False, clear=False, skip_user_check=False
+):
     """Provision a system user"""
 
     from isomer.provisions.base import provisionList
@@ -56,16 +54,15 @@ def provision_system_user(items, database_name, overwrite=False, clear=False, sk
     # since this process is usually run automated.
 
     if overwrite is True:
-        isolog('Refusing to overwrite system user!', lvl=warn,
-               emitter='PROVISIONS')
+        isolog("Refusing to overwrite system user!", lvl=warn, emitter="PROVISIONS")
         overwrite = False
 
-    system_user_count = objectmodels['user'].count({'name': 'System'})
+    system_user_count = objectmodels["user"].count({"name": "System"})
     if system_user_count == 0 or clear is False:
-        provisionList(Users, 'user', overwrite, clear,  skip_user_check=True)
-        isolog('Provisioning: Users: Done.', emitter="PROVISIONS")
+        provisionList(Users, "user", overwrite, clear, skip_user_check=True)
+        isolog("Provisioning: Users: Done.", emitter="PROVISIONS")
     else:
-        isolog('System user already present.', lvl=warn, emitter='PROVISIONS')
+        isolog("System user already present.", lvl=warn, emitter="PROVISIONS")
 
 
-provision = {'data': Users, 'method': provision_system_user}
+provision = {"data": Users, "method": provision_system_user}

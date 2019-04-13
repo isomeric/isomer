@@ -72,23 +72,20 @@ def populate_user_events():
                 if child not in subclasses_set:
                     # pprint(child.__dict__)
                     name = child.__module__ + "." + child.__name__
-                    if name.startswith('iso'):
+                    if name.startswith("iso"):
 
                         subclasses_set.add(child)
                         event = {
-                            'event': child,
-                            'name': name,
-                            'doc': child.__doc__,
-                            'args': []
+                            "event": child,
+                            "name": name,
+                            "doc": child.__doc__,
+                            "args": [],
                         }
 
                         if child.__module__ in subclasses:
-                            subclasses[child.__module__][
-                                child.__name__] = event
+                            subclasses[child.__module__][child.__name__] = event
                         else:
-                            subclasses[child.__module__] = {
-                                child.__name__: event
-                            }
+                            subclasses[child.__module__] = {child.__name__: event}
                     work.append(child)
         return subclasses
 
@@ -114,7 +111,7 @@ class reload_configuration(isomer_ui_event):
     def __init__(self, target, *args, **kwargs):
         super(reload_configuration, self).__init__(*args, **kwargs)
         self.target = target
-        isolog('Reload of configuration triggered', lvl=events)
+        isolog("Reload of configuration triggered", lvl=events)
 
 
 class anonymous_event(isomer_ui_event):
@@ -131,25 +128,25 @@ class anonymous_event(isomer_ui_event):
         :return:
         """
 
-        self.name = self.__module__ + '.' + self.__class__.__name__
+        self.name = self.__module__ + "." + self.__class__.__name__
         super(anonymous_event, self).__init__(*args)
         self.action = action
         self.data = data
         self.client = client
-        isolog('AnonymousEvent created:', self.name, lvl=events)
+        isolog("AnonymousEvent created:", self.name, lvl=events)
 
     @classmethod
     def realname(cls):
         """Return real name of an object class"""
 
         # For circuits manager to enable module/event namespaces
-        return cls.__module__ + '.' + cls.__name__
+        return cls.__module__ + "." + cls.__name__
 
 
 class authorized_event(isomer_ui_event):
     """Base class for events for logged in users."""
 
-    roles = ['admin', 'crew']
+    roles = ["admin", "crew"]
 
     def __init__(self, user, action, data, client, *args):
         """
@@ -165,23 +162,24 @@ class authorized_event(isomer_ui_event):
 
         # assert isinstance(user, User)
 
-        self.name = self.__module__ + '.' + self.__class__.__name__
+        self.name = self.__module__ + "." + self.__class__.__name__
         super(authorized_event, self).__init__(*args)
         self.user = user
         self.action = action
         self.data = data
         self.client = client
-        isolog('AuthorizedEvent created:', self.name, lvl=events)
+        isolog("AuthorizedEvent created:", self.name, lvl=events)
 
     @classmethod
     def realname(cls):
         """Return real name of an object class"""
 
         # For circuits manager to enable module/event namespaces
-        return cls.__module__ + '.' + cls.__name__
+        return cls.__module__ + "." + cls.__name__
 
 
 # Authenticator Events
+
 
 class profilerequest(authorized_event):
     """A user has changed his profile"""
@@ -194,11 +192,16 @@ class profilerequest(authorized_event):
         """
         super(profilerequest, self).__init__(*args)
 
-        isolog("Profile update request: ", self.__dict__,
-               lvl=events, emitter="PROFILE-EVENT")
+        isolog(
+            "Profile update request: ",
+            self.__dict__,
+            lvl=events,
+            emitter="PROFILE-EVENT",
+        )
 
 
 # Frontend assembly events
+
 
 class frontendbuildrequest(Event):
     """Rebuild and/or install the frontend"""
@@ -217,8 +220,10 @@ class componentupdaterequest(frontendbuildrequest):
 
 # Debugger
 
+
 class logtailrequest(authorized_event):
     """Request the logger's latest output"""
+
     pass
 
 
@@ -228,4 +233,4 @@ class debugrequest(authorized_event):
     def __init__(self, *args):
         super(debugrequest, self).__init__(*args)
 
-        isolog('Created debugrequest', lvl=events, emitter="DEBUG-EVENT")
+        isolog("Created debugrequest", lvl=events, emitter="DEBUG-EVENT")

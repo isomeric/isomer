@@ -38,43 +38,21 @@ User: Useraccount object
 from isomer.schemata.defaultform import noform
 from isomer.schemata.base import base_object
 
-UserSchema = base_object('user', roles_list=['crew'])
+UserSchema = base_object("user", roles_list=["crew"])
 
-UserSchema['properties'].update({
-    'passhash': {
-        'type': 'string'
-    },
-    'roles': {
-        'type': 'array',
-        'items': {
-            'type': 'string'
-        },
-        'default': ['crew']
-    },
-    'needs_password_change': {
-        'type': 'boolean',
-        'default': False,
-    },
-    # TODO: Decide if this should be an extension of the enrol module
-    'mail': {
-        'type': 'string'
-    },
-    'active':  {
-        'type': 'boolean',
-        'default': True
-    },
-    'created': {
-        'type': 'string',
-        'format': 'datetimepicker'
-    },
-    'lastlogin': {
-        'type': 'string',
-        'format': 'datetimepicker'
+UserSchema["properties"].update(
+    {
+        "passhash": {"type": "string"},
+        "roles": {"type": "array", "items": {"type": "string"}, "default": ["crew"]},
+        "needs_password_change": {"type": "boolean", "default": False},
+        # TODO: Decide if this should be an extension of the enrol module
+        "mail": {"type": "string"},
+        "active": {"type": "boolean", "default": True},
+        "created": {"type": "string", "format": "datetimepicker"},
+        "lastlogin": {"type": "string", "format": "datetimepicker"},
     }
-})
+)
 
-UserOptions = {
-    'hidden': ['passhash', 'needs_password_change']
-}
+UserOptions = {"hidden": ["passhash", "needs_password_change"]}
 
-User = {'schema': UserSchema, 'form': noform, 'options': UserOptions}
+User = {"schema": UserSchema, "form": noform, "options": UserOptions}

@@ -34,6 +34,7 @@ from deepdiff.diff import DeepDiff
 from pkg_resources import iter_entry_points, DistributionNotFound
 import dpath
 import os
+
 # import json
 
 from pprint import pprint
@@ -62,14 +63,14 @@ def make_migrations(schema=None):
             for item in raw_path.split("["):
                 print(item)
                 item = item.rstrip("]")
-                item = item.replace('"', '')
-                item = item.replace("'", '')
+                item = item.replace('"', "")
+                item = item.replace("'", "")
                 try:
                     item = int(item)
                 except ValueError:
                     pass
                 path.append(item)
-            path.remove('root')
+            path.remove("root")
             print("PATH:", path)
             return path
 
@@ -91,32 +92,35 @@ def make_migrations(schema=None):
                 for addition in additions:
                     path = get_path(addition)
                     entry = additions[addition]
-                    isolog('Adding:', entry, 'at', path)
+                    isolog("Adding:", entry, "at", path)
                     dpath.util.new(result, path, entry)
                 return result
 
-            if changetype == 'type_changes':
-                isolog('Creating new object')
-                result = change['root']['new_value']
+            if changetype == "type_changes":
+                isolog("Creating new object")
+                result = change["root"]["new_value"]
                 return result
 
-            if changetype == 'dictionary_item_added':
-                isolog('Adding items')
+            if changetype == "dictionary_item_added":
+                isolog("Adding items")
                 result = apply_additions(change, result)
-            elif changetype == 'dictionary_item_removed':
-                isolog('Removing items')
+            elif changetype == "dictionary_item_removed":
+                isolog("Removing items")
                 result = apply_removes(change, result)
-            elif changetype == 'values_changed':
+            elif changetype == "values_changed":
                 isolog("Changing items' types")
                 for item in change:
                     path = get_path(item)
-                    isolog('Changing', path, 'from',
-                           change[item]['old_value'], ' to',
-                           change[item]['new_value'])
-                    assert dpath.util.get(result, path) == change[item][
-                        'old_value']
-                    amount = dpath.util.set(result, path, change[item][
-                        'new_value'])
+                    isolog(
+                        "Changing",
+                        path,
+                        "from",
+                        change[item]["old_value"],
+                        " to",
+                        change[item]["new_value"],
+                    )
+                    assert dpath.util.get(result, path) == change[item]["old_value"]
+                    amount = dpath.util.set(result, path, change[item]["new_value"])
                     assert amount == 1
 
             return result
@@ -124,13 +128,13 @@ def make_migrations(schema=None):
         def get_renames(migrations):
             """Check migrations for renamed fields"""
 
-            isolog('Checking for rename operations:')
-            #pprint(migrations)
+            isolog("Checking for rename operations:")
+            # pprint(migrations)
             added = removed = None
 
             for entry in migrations:
-                added = entry.get('dictionary_item_added', None)
-                removed = entry.get('dictionary_item_removed', None)
+                added = entry.get("dictionary_item_added", None)
+                removed = entry.get("dictionary_item_removed", None)
 
             renames = []
 
@@ -140,15 +144,14 @@ def make_migrations(schema=None):
                     for removal in removed:
                         removed_path = get_path(removal)
                         if path[:-1] == removed_path[:-1]:
-                            isolog('Possible rename detected:', removal, '->',
-                                   addition)
+                            isolog("Possible rename detected:", removal, "->", addition)
                             renames.append((removed_path, path))
             return renames
 
         result = {}
         for no, migration in enumerate(migrations):
-            isolog('Migrating', no)
-            isolog('Migration:', migration, lvl=debug)
+            isolog("Migrating", no)
+            isolog("Migration:", migration, lvl=debug)
             renamed = get_renames(migrations)
 
             for entry in migration:
@@ -163,20 +166,18 @@ def make_migrations(schema=None):
         filename = "%s_%04i.json" % (schema, counter)
         migration = DeepDiff(previous, current, verbose_level=2).json
         if migration == "{}":
-            isolog('Nothing changed - no new migration data.', lvl=warn)
+            isolog("Nothing changed - no new migration data.", lvl=warn)
             return
 
-        print('Writing migration: ', os.path.join(path, filename))
+        print("Writing migration: ", os.path.join(path, filename))
         pprint(migration)
 
-        with open(os.path.join(path, filename), 'w') as f:
+        with open(os.path.join(path, filename), "w") as f:
             f.write(migration)
 
-    for schema_entrypoint in iter_entry_points(group='isomer.schemata',
-                                               name=None):
+    for schema_entrypoint in iter_entry_points(group="isomer.schemata", name=None):
         try:
-            isolog("Schemata found: ", schema_entrypoint.name, lvl=debug,
-                   emitter='DB')
+            isolog("Schemata found: ", schema_entrypoint.name, lvl=debug, emitter="DB")
             if schema is not None and schema_entrypoint.name != schema:
                 continue
 
@@ -184,43 +185,49 @@ def make_migrations(schema=None):
             pprint(schema_entrypoint.dist.location)
             schema_top = schema_entrypoint.dist.location
             schema_migrations = schema_entrypoint.module_name.replace(
-                'schemata', 'migrations').replace('.', '/')
+                "schemata", "migrations"
+            ).replace(".", "/")
             path = os.path.join(schema_top, schema_migrations)
-            new_model = schema_entrypoint.load()['schema']
+            new_model = schema_entrypoint.load()["schema"]
 
             migrations = []
 
             try:
                 for file in sorted(os.listdir(path)):
-                    if not file.endswith('.json'):
+                    if not file.endswith(".json"):
                         continue
                     fullpath = os.path.join(path, file)
-                    isolog('Importing migration', fullpath)
-                    with open(fullpath, 'r') as f:
+                    isolog("Importing migration", fullpath)
+                    with open(fullpath, "r") as f:
                         migration = DeepDiff.from_json(f.read())
                     migrations.append(migration)
-                    isolog('Successfully imported')
+                    isolog("Successfully imported")
 
                 if len(migrations) == 0:
                     raise ImportError
                 pprint(migrations)
                 model = apply_migrations(migrations, new_model)
-                write_migration(schema, len(migrations) + 1, path, model,
-                                new_model)
+                write_migration(schema, len(migrations) + 1, path, model, new_model)
             except ImportError as e:
-                isolog('No previous migrations for', schema, e,
-                       type(e), exc=True)
+                isolog("No previous migrations for", schema, e, type(e), exc=True)
 
             if len(migrations) == 0:
                 write_migration(schema, 1, path, None, new_model)
 
         except (ImportError, DistributionNotFound) as e:
-            isolog("Problematic schema: ", e, type(e),
-                   schema_entrypoint.name, exc=True, lvl=warn,
-                   emitter='SCHEMATA')
+            isolog(
+                "Problematic schema: ",
+                e,
+                type(e),
+                schema_entrypoint.name,
+                exc=True,
+                lvl=warn,
+                emitter="SCHEMATA",
+            )
 
-    isolog("Found schemata: ", sorted(entrypoints.keys()), lvl=debug,
-           emitter='SCHEMATA')
+    isolog(
+        "Found schemata: ", sorted(entrypoints.keys()), lvl=debug, emitter="SCHEMATA"
+    )
 
     pprint(entrypoints)
 

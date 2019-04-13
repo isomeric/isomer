@@ -27,20 +27,20 @@ __license__ = "AGPLv3"
 import os.path
 from isomer.tool import log, warn, debug
 
-ETC_BASE_PATH = '/etc/isomer'
+ETC_BASE_PATH = "/etc/isomer"
 
-ETC_INSTANCE_PATH = os.path.join(ETC_BASE_PATH, 'instances')
-ETC_REMOTE_PATH = os.path.join(ETC_BASE_PATH, 'remotes')
-ETC_REMOTE_KEYS_PATH = os.path.join(ETC_BASE_PATH, 'keys')
+ETC_INSTANCE_PATH = os.path.join(ETC_BASE_PATH, "instances")
+ETC_REMOTE_PATH = os.path.join(ETC_BASE_PATH, "remotes")
+ETC_REMOTE_KEYS_PATH = os.path.join(ETC_BASE_PATH, "keys")
 
 INSTANCE = ""
 ENVIRONMENT = None
 PREFIX = ""
 
 locations = {
-    'cache': '/var/cache/isomer/%s',
-    'local': '/var/local/isomer/%s',
-    'lib': '/var/lib/isomer/%s'
+    "cache": "/var/cache/isomer/%s",
+    "local": "/var/local/isomer/%s",
+    "lib": "/var/lib/isomer/%s",
 }
 
 
@@ -53,9 +53,9 @@ def set_etc_path(path):
 
     ETC_BASE_PATH = path
 
-    ETC_INSTANCE_PATH = os.path.join(ETC_BASE_PATH, 'instances')
-    ETC_REMOTE_PATH = os.path.join(ETC_BASE_PATH, 'remotes')
-    ETC_REMOTE_KEYS_PATH = os.path.join(ETC_BASE_PATH, 'keys')
+    ETC_INSTANCE_PATH = os.path.join(ETC_BASE_PATH, "instances")
+    ETC_REMOTE_PATH = os.path.join(ETC_BASE_PATH, "remotes")
+    ETC_REMOTE_KEYS_PATH = os.path.join(ETC_BASE_PATH, "keys")
 
 
 def get_etc_path():
@@ -80,10 +80,10 @@ def get_etc_remote_keys_path():
 
 def get_log_path():
     """Get currently set logging base path"""
-    if PREFIX not in (None, ''):
-        path = os.path.join(PREFIX, 'var', 'log', 'isomer')
+    if PREFIX not in (None, ""):
+        path = os.path.join(PREFIX, "var", "log", "isomer")
     else:
-        path = '/var/log/isomer'
+        path = "/var/log/isomer"
     return path
 
 
@@ -105,16 +105,16 @@ def set_instance(instance, environment, prefix=None):
     ENVIRONMENT = environment
     if prefix is not None:
         PREFIX = prefix
-        log('Warning! Prefix is set:', PREFIX, lvl=warn)
+        log("Warning! Prefix is set:", PREFIX, lvl=warn)
 
-    log('Setting Instance: %s and Environment: %s' % (INSTANCE, ENVIRONMENT), lvl=debug)
+    log("Setting Instance: %s and Environment: %s" % (INSTANCE, ENVIRONMENT), lvl=debug)
 
 
 def get_path(location, subfolder, ensure=False):
     """Return a normalized path for the running instance and environment"""
 
-    if PREFIX not in (None, ''):
-        path = os.path.join(PREFIX, locations[location].lstrip('/') % INSTANCE)
+    if PREFIX not in (None, ""):
+        path = os.path.join(PREFIX, locations[location].lstrip("/") % INSTANCE)
     else:
         path = locations[location] % INSTANCE
 

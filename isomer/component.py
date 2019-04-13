@@ -122,8 +122,11 @@ def handler(*names, **kwargs):
             f.handler = False
             return f
 
-        if len(names) > 0 and inspect.isclass(names[0]) and \
-                issubclass(names[0], isomer_ui_event):
+        if (
+            len(names) > 0
+            and inspect.isclass(names[0])
+            and issubclass(names[0], isomer_ui_event)
+        ):
             f.names = (str(names[0].realname()),)
         else:
             f.names = names
@@ -160,12 +163,15 @@ class LoggingMeta(object):
                 self.uniquename = uniquename
                 self.names.append(uniquename)
             else:
-                isolog("Unique component added twice: ", uniquename,
-                       lvl=critical, emitter="CORE")
+                isolog(
+                    "Unique component added twice: ",
+                    uniquename,
+                    lvl=critical,
+                    emitter="CORE",
+                )
         else:
             while True:
-                uniquename = "%s%s" % (self.__class__.__name__,
-                                       randint(0, 32768))
+                uniquename = "%s%s" % (self.__class__.__name__, randint(0, 32768))
                 if uniquename not in self.names:
                     self.uniquename = uniquename
                     self.names.append(uniquename)
@@ -178,19 +184,15 @@ class LoggingMeta(object):
         func = inspect.currentframe().f_back.f_code
         # Dump the message + the name of this function to the log.
 
-        if 'exc' in kwargs and kwargs['exc'] is True:
+        if "exc" in kwargs and kwargs["exc"] is True:
             exc_type, exc_obj, exc_tb = exc_info()
             line_no = exc_tb.tb_lineno
             # print('EXCEPTION DATA:', line_no, exc_type, exc_obj, exc_tb)
-            args += traceback.extract_tb(exc_tb),
+            args += (traceback.extract_tb(exc_tb),)
         else:
             line_no = func.co_firstlineno
 
-        sourceloc = "[%.10s@%s:%i]" % (
-            func.co_name,
-            func.co_filename,
-            line_no
-        )
+        sourceloc = "[%.10s@%s:%i]" % (func.co_name, func.co_filename, line_no)
         isolog(sourceloc=sourceloc, emitter=self.uniquename, *args, **kwargs)
 
 
@@ -207,11 +209,11 @@ class ConfigurableMeta(LoggingMeta):
 
         self.configschema = deepcopy(ComponentBaseConfigSchema)
 
-        self.configschema['schema']['properties'].update(self.configprops)
+        self.configschema["schema"]["properties"].update(self.configprops)
         if len(self.configform) > 0:
-            self.configschema['form'] += self.configform
+            self.configschema["form"] += self.configform
         else:
-            self.configschema['form'] = ['*']
+            self.configschema["form"] = ["*"]
 
         # self.log("[UNIQUECOMPONENT] Config Schema: ", self.configschema,
         #         lvl=critical)
@@ -223,7 +225,7 @@ class ConfigurableMeta(LoggingMeta):
         # schemastore[self.uniquename] = {'schema': self.configschema,
         # 'form': self.configform}
 
-        self.componentmodel = model_factory(self.configschema['schema'])
+        self.componentmodel = model_factory(self.configschema["schema"])
         # self.log("Component model: ", lvl=critical)
         # pprint(self.componentmodel._schema)
 
@@ -234,8 +236,7 @@ class ConfigurableMeta(LoggingMeta):
                 self._set_config()
                 self._write_config()
             except ValidationError as e:
-                self.log("Error during configuration reading: ", e, type(e),
-                         exc=True)
+                self.log("Error during configuration reading: ", e, type(e), exc=True)
 
     def register(self, *args):
         """Register a configurable component in the configuration schema
@@ -243,6 +244,7 @@ class ConfigurableMeta(LoggingMeta):
 
         super(ConfigurableMeta, self).register(*args)
         from isomer.schemastore import configschemastore
+
         # self.log('ADDING SCHEMA:')
         # pprint(self.configschema)
         configschemastore[self.name] = self.configschema
@@ -256,11 +258,12 @@ class ConfigurableMeta(LoggingMeta):
         """Read this component's configuration from the database"""
 
         try:
-            self.config = self.componentmodel.find_one(
-                {'name': self.uniquename})
+            self.config = self.componentmodel.find_one({"name": self.uniquename})
         except ServerSelectionTimeoutError:  # pragma: no cover
-            self.log("No database access! Check if mongodb is running "
-                     "correctly.", lvl=critical)
+            self.log(
+                "No database access! Check if mongodb is running " "correctly.",
+                lvl=critical,
+            )
         if self.config:
             self.log("Configuration read.", lvl=verbose)
         else:
@@ -299,8 +302,14 @@ class ConfigurableMeta(LoggingMeta):
             try:
                 self.config.name = self.uniquename
             except (AttributeError, KeyError) as e:  # pragma: no cover
-                self.log("Cannot set component name for configuration: ", e,
-                         type(e), self.name, exc=True, lvl=critical)
+                self.log(
+                    "Cannot set component name for configuration: ",
+                    e,
+                    type(e),
+                    self.name,
+                    exc=True,
+                    lvl=critical,
+                )
 
             try:
                 uuid = self.config.uuid
@@ -325,24 +334,28 @@ class ConfigurableMeta(LoggingMeta):
 
             try:
                 componentclass = self.config.componentclass
-                self.log("Componentclass set to: ", componentclass,
-                         lvl=verbose)
+                self.log("Componentclass set to: ", componentclass, lvl=verbose)
             except (AttributeError, KeyError):
                 self.log("Has no component class", lvl=verbose)
                 self.config.componentclass = self.name
 
         except ValidationError as e:
-            self.log("Not setting invalid component configuration: ", e,
-                     type(e), exc=True, lvl=error)
+            self.log(
+                "Not setting invalid component configuration: ",
+                e,
+                type(e),
+                exc=True,
+                lvl=error,
+            )
 
             # self.log("Fields:", self.config._fields, lvl=verbose)
 
-    @handler('reload_configuration')
+    @handler("reload_configuration")
     def reload_configuration(self, event):
         """Event triggered configuration reload"""
 
         if event.target == self.uniquename:
-            self.log('Reloading configuration')
+            self.log("Reloading configuration")
             self._read_config()
 
 
@@ -374,8 +387,12 @@ class ExampleComponent(ConfigurableComponent):
     """Exemplary component to demonstrate basic component usage"""
 
     configprops = {
-        'setting': {'type': 'string', 'title': 'Some Setting',
-                    'description': 'Some string setting.', 'default': 'Yay'},
+        "setting": {
+            "type": "string",
+            "title": "Some Setting",
+            "description": "Some string setting.",
+            "default": "Yay",
+        }
     }
 
     def __init__(self, *args, **kwargs):

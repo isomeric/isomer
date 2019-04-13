@@ -54,67 +54,88 @@ from isomer.version import version
 
 
 @click.group(cls=DYMGroup)
-@click.option('--port', help='Specify local Isomer port', default=8055)
+@click.option("--port", help="Specify local Isomer port", default=8055)
 @click.pass_context
 def install(ctx, port):
     """[GROUP] Install various aspects of Isomer"""
 
     # set_instance(ctx.obj['instance'], "blue")  # Initially start with a blue instance
 
-    log('Configuration:', ctx.obj['config'])
-    log('Instance:', ctx.obj['instance'])
+    log("Configuration:", ctx.obj["config"])
+    log("Instance:", ctx.obj["instance"])
 
     try:
-        instance = ctx.obj['instances'][ctx.obj['instance']]
+        instance = ctx.obj["instances"][ctx.obj["instance"]]
     except NonExistentKey:
-        log('Instance unknown, so far.', lvl=warn)
+        log("Instance unknown, so far.", lvl=warn)
 
         instance = instance_template
-        log('New instance configuration:', instance)
+        log("New instance configuration:", instance)
 
-    environment_name = instance['environment']
-    environment = instance['environments'][environment_name]
+    environment_name = instance["environment"]
+    environment = instance["environments"][environment_name]
 
-    environment['port'] = port
+    environment["port"] = port
 
     # TODO: Remove sparse&superfluous environment info from context
-    ctx.obj['port'] = port
+    ctx.obj["port"] = port
 
     try:
-        repository = Repo('./')
-        ctx.obj['repository'] = repository
-        log('Repo:', repository)
-        environment['version'] = repository.git.describe()
+        repository = Repo("./")
+        ctx.obj["repository"] = repository
+        log("Repo:", repository)
+        environment["version"] = repository.git.describe()
     except exc.InvalidGitRepositoryError:
-        log('Not running from a git repository; Using isomer.version', lvl=warn)
-        environment['version'] = version
+        log("Not running from a git repository; Using isomer.version", lvl=warn)
+        environment["version"] = version
 
-    ctx.obj['environment'] = environment
+    ctx.obj["environment"] = environment
 
-@install.command(short_help='build and install frontend')
-@click.option('--dev', help="Use frontend development location", default=True, is_flag=True)
-@click.option('--rebuild', help="Rebuild frontend before installation", default=False, is_flag=True)
-@click.option('--no-install', help="Do not install requirements", default=False, is_flag=True)
-@click.option('--build-type', help="Specify frontend build type. Either dist(default) or build", default='dist')
+
+@install.command(short_help="build and install frontend")
+@click.option(
+    "--dev", help="Use frontend development location", default=True, is_flag=True
+)
+@click.option(
+    "--rebuild",
+    help="Rebuild frontend before installation",
+    default=False,
+    is_flag=True,
+)
+@click.option(
+    "--no-install", help="Do not install requirements", default=False, is_flag=True
+)
+@click.option(
+    "--build-type",
+    help="Specify frontend build type. Either dist(default) or build",
+    default="dist",
+)
 @click.pass_context
 def frontend(ctx, dev, rebuild, no_install, build_type):
     """Build and install frontend"""
 
-    install_frontend(instance=ctx.obj['instance'],
-                     forcerebuild=rebuild,
-                     development=dev,
-                     install=not no_install,
-                     build_type=build_type)
+    install_frontend(
+        instance=ctx.obj["instance"],
+        forcerebuild=rebuild,
+        development=dev,
+        install=not no_install,
+        build_type=build_type,
+    )
 
 
-@install.command(short_help='build and install docs')
-@click.option('--clear-target', '--clear', help='Clears target documentation '
-                                                'folders', default=False, is_flag=True)
+@install.command(short_help="build and install docs")
+@click.option(
+    "--clear-target",
+    "--clear",
+    help="Clears target documentation " "folders",
+    default=False,
+    is_flag=True,
+)
 @click.pass_context
 def docs(ctx, clear_target):
     """Build and install documentation"""
 
-    install_docs(str(ctx.obj['instance']), clear_target)
+    install_docs(str(ctx.obj["instance"]), clear_target)
 
 
 def install_docs(instance, clear_target):
@@ -127,18 +148,17 @@ def install_docs(instance, clear_target):
         log("Generating HTML documentation")
 
         try:
-            build = Popen(
-                [
-                    'make',
-                    'html'
-                ],
-                cwd='docs/'
-            )
+            build = Popen(["make", "html"], cwd="docs/")
 
             build.wait()
         except Exception as e:
-            log("Problem during documentation building: ", e, type(e),
-                exc=True, lvl=error)
+            log(
+                "Problem during documentation building: ",
+                e,
+                type(e),
+                exc=True,
+                lvl=error,
+            )
             return False
         return True
 
@@ -146,15 +166,17 @@ def install_docs(instance, clear_target):
 
     # If these need changes, make sure they are watertight and don't remove
     # wanted stuff!
-    target = os.path.join('/var/lib/isomer', instance, 'frontend/docs')
-    source = 'docs/build/html'
+    target = os.path.join("/var/lib/isomer", instance, "frontend/docs")
+    source = "docs/build/html"
 
     log("Updating documentation directory:", target)
 
     if not os.path.exists(os.path.join(os.path.curdir, source)):
         log(
             "Documentation not existing yet. Run python setup.py "
-            "build_sphinx first.", lvl=error)
+            "build_sphinx first.",
+            lvl=error,
+        )
         return
 
     if os.path.exists(target):
@@ -168,15 +190,35 @@ def install_docs(instance, clear_target):
     log("Done: Install Docs")
 
 
-@install.command(short_help='install provisions')
-@click.option('--provision', '-p', help="Specify a provision (default=install all)",
-              default=None, metavar='<name>')
-@click.option('--clear-existing', '--clear', help='Clears already existing collections (DANGER!)',
-              is_flag=True, default=False)
-@click.option('--overwrite', '-o', help='Overwrites existing provisions',
-              is_flag=True, default=False)
-@click.option('--list-provisions', '-l', help='Only list available provisions',
-              is_flag=True, default=False)
+@install.command(short_help="install provisions")
+@click.option(
+    "--provision",
+    "-p",
+    help="Specify a provision (default=install all)",
+    default=None,
+    metavar="<name>",
+)
+@click.option(
+    "--clear-existing",
+    "--clear",
+    help="Clears already existing collections (DANGER!)",
+    is_flag=True,
+    default=False,
+)
+@click.option(
+    "--overwrite",
+    "-o",
+    help="Overwrites existing provisions",
+    is_flag=True,
+    default=False,
+)
+@click.option(
+    "--list-provisions",
+    "-l",
+    help="Only list available provisions",
+    is_flag=True,
+    default=False,
+)
 @click.pass_context
 def provisions(ctx, provision, clear_existing, overwrite, list_provisions):
     """Install default provisioning data"""
@@ -184,7 +226,9 @@ def provisions(ctx, provision, clear_existing, overwrite, list_provisions):
     install_provisions(ctx, provision, clear_existing, overwrite, list_provisions)
 
 
-def install_provisions(ctx, provision, clear_provisions=False, overwrite=False, list_provisions=False):
+def install_provisions(
+    ctx, provision, clear_provisions=False, overwrite=False, list_provisions=False
+):
     """Install default provisioning data"""
 
     log("Installing Isomer default provisions")
@@ -194,8 +238,8 @@ def install_provisions(ctx, provision, clear_provisions=False, overwrite=False, 
 
     from isomer import database
 
-    log('DATABASE SETTINGS:', ctx.obj, pretty=True)
-    database.initialize(ctx.obj['dbhost'], ctx.obj['dbname'])
+    log("DATABASE SETTINGS:", ctx.obj, pretty=True)
+    database.initialize(ctx.obj["dbhost"], ctx.obj["dbname"])
 
     from isomer.provisions import build_provision_store
 
@@ -205,11 +249,11 @@ def install_provisions(ctx, provision, clear_provisions=False, overwrite=False, 
         """Topologically sort the dependency tree"""
 
         g = networkx.DiGraph()
-        log('Sorting dependencies')
+        log("Sorting dependencies")
 
         for key, item in items:
-            log('key: ', key, 'item:', item, pretty=True, lvl=debug)
-            dependencies = item.get('dependencies', [])
+            log("key: ", key, "item:", item, pretty=True, lvl=debug)
+            dependencies = item.get("dependencies", [])
             if isinstance(dependencies, str):
                 dependencies = [dependencies]
 
@@ -220,8 +264,8 @@ def install_provisions(ctx, provision, clear_provisions=False, overwrite=False, 
                 g.add_edge(key, link)
 
         if not networkx.is_directed_acyclic_graph(g):
-            log('Cycles in provosioning dependency graph detected!', lvl=error)
-            log('Involved provisions:', list(networkx.simple_cycles(g)), lvl=error)
+            log("Cycles in provosioning dependency graph detected!", lvl=error)
+            log("Involved provisions:", list(networkx.simple_cycles(g)), lvl=error)
 
         topology = list(networkx.algorithms.topological_sort(g))
         topology.reverse()
@@ -237,9 +281,9 @@ def install_provisions(ctx, provision, clear_provisions=False, overwrite=False, 
     def provision_item(item):
         """Provision a single provisioning element"""
 
-        method = item.get('method', provisionList)
-        model = item.get('model')
-        data = item.get('data')
+        method = item.get("method", provisionList)
+        model = item.get("model")
+        data = item.get("data")
 
         method(data, model, overwrite=overwrite, clear=clear_provisions)
 
@@ -248,10 +292,14 @@ def install_provisions(ctx, provision, clear_provisions=False, overwrite=False, 
             log("Provisioning ", provision, pretty=True)
             provision_item(provision_store[provision])
         else:
-            log("Unknown provision: ", provision, "\nValid provisions are",
+            log(
+                "Unknown provision: ",
+                provision,
+                "\nValid provisions are",
                 list(provision_store.keys()),
                 lvl=error,
-                emitter='MANAGE')
+                emitter="MANAGE",
+            )
     else:
         for name in sort_dependencies(provision_store.items()):
             log("Provisioning", name, pretty=True)
@@ -260,8 +308,12 @@ def install_provisions(ctx, provision, clear_provisions=False, overwrite=False, 
     log("Done: Install Provisions")
 
 
-@install.command(short_help='install modules')
-@click.option('--wip', help="Install Work-In-Progress (alpha/beta-state) modules as well", is_flag=True)
+@install.command(short_help="install modules")
+@click.option(
+    "--wip",
+    help="Install Work-In-Progress (alpha/beta-state) modules as well",
+    is_flag=True,
+)
 def modules(wip):
     """Install the plugin modules"""
 
@@ -275,18 +327,20 @@ def install_modules(wip):
         """Install a single module via setuptools"""
         try:
             setup = Popen(
-                [
-                    sys.executable,
-                    'setup.py',
-                    'develop'
-                ],
-                cwd='modules/' + isomer_module + "/"
+                [sys.executable, "setup.py", "develop"],
+                cwd="modules/" + isomer_module + "/",
             )
 
             setup.wait()
         except Exception as e:
-            log("Problem during module installation: ", isomer_module, e,
-                type(e), exc=True, lvl=error)
+            log(
+                "Problem during module installation: ",
+                isomer_module,
+                e,
+                type(e),
+                exc=True,
+                lvl=error,
+            )
             return False
         return True
 
@@ -306,46 +360,45 @@ def install_modules(wip):
         # TODO: Poor man's dependency management, as long as the modules are
         # installed from local sources and they're not available on pypi,
         # which would handle real dependency management for us:
-        'navdata',
-
+        "navdata",
         # Now all the rest:
-        'alert',
-        'automat',
-        'busrepeater',
-        'calendar',
-        'countables',
-        'dash',
+        "alert",
+        "automat",
+        "busrepeater",
+        "calendar",
+        "countables",
+        "dash",
         # 'dev',
-        'enrol',
-        'mail',
-        'maps',
-        'nmea',
-        'nodestate',
-        'project',
-        'webguides',
-        'wiki'
+        "enrol",
+        "mail",
+        "maps",
+        "nmea",
+        "nodestate",
+        "project",
+        "webguides",
+        "wiki",
     ]
 
     modules_wip = [
-        'calc',
-        'camera',
-        'chat',
-        'comms',
-        'contacts',
-        'crew',
-        'equipment',
-        'filemanager',
-        'garden',
-        'heroic',
-        'ldap',
-        'library',
-        'logbook',
-        'protocols',
-        'polls',
-        'mesh',
-        'robot',
-        'switchboard',
-        'shareables',
+        "calc",
+        "camera",
+        "chat",
+        "comms",
+        "contacts",
+        "crew",
+        "equipment",
+        "filemanager",
+        "garden",
+        "heroic",
+        "ldap",
+        "library",
+        "logbook",
+        "protocols",
+        "polls",
+        "mesh",
+        "robot",
+        "switchboard",
+        "shareables",
     ]
 
     installables = modules_production
@@ -357,14 +410,13 @@ def install_modules(wip):
     failed = []
 
     for installable in installables:
-        log('Installing module ', installable)
+        log("Installing module ", installable)
         if install_module(installable):
             success.append(installable)
         else:
             failed.append(installable)
 
-    log('Installed modules: ', success)
+    log("Installed modules: ", success)
     if len(failed) > 0:
-        log('Failed modules: ', failed)
-    log('Done: Install Modules')
-
+        log("Failed modules: ", failed)
+    log("Done: Install Modules")

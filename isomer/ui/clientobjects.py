@@ -59,8 +59,9 @@ class Client(object):
     Client metadata object
     """
 
-    def __init__(self, sock, ip, clientuuid, useruuid=None, name='',
-                 config=None, language='en'):
+    def __init__(
+        self, sock, ip, clientuuid, useruuid=None, name="", config=None, language="en"
+    ):
         """
 
         :param sock: Associated connection
@@ -73,8 +74,8 @@ class Client(object):
         self.ip = ip
         self.uuid = clientuuid
         self.useruuid = useruuid
-        if name == '':
-            self.name = std_human_uid(kind='place')
+        if name == "":
+            self.name = std_human_uid(kind="place")
         else:
             self.name = name
         self.config = config

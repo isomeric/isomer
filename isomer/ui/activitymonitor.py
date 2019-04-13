@@ -55,17 +55,17 @@ class ActivityMonitor(ConfigurableComponent):
     * ActivityMonitor broadcasts
     """
 
-    channel = 'isomer-web'
+    channel = "isomer-web"
 
     def __init__(self, *args):
-        super(ActivityMonitor, self).__init__('ACTIVITY', *args)
+        super(ActivityMonitor, self).__init__("ACTIVITY", *args)
 
         self.log("Started")
 
         self.referenceframe = None
         self.alertlist = []
 
-    @handler('referenceframe', channel='navdata')
+    @handler("referenceframe", channel="navdata")
     def referenceframe(self, event):
         """Handles navigational reference frame updates.
         These are necessary to assign geo coordinates to alerts and other

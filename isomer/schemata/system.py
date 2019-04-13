@@ -35,105 +35,104 @@ System: Global systemwide settings
 from isomer.schemata.defaultform import savebutton, lookup_field
 from isomer.schemata.base import base_object, uuid_object, language_field
 
-SystemconfigSchema = base_object('systemconfig', roles_read=['admin', 'crew'], roles_write=['admin'])
+SystemconfigSchema = base_object(
+    "systemconfig", roles_read=["admin", "crew"], roles_write=["admin"]
+)
 
-SystemconfigSchema['properties'].update({
-    'active': {
-        'type': 'boolean', 'title': 'Active configuration',
-        'description': 'Determines which configuration will be used. '
-                       'Only one can be active.',
-        'default': False
-    },
-    'salt': {
-        'type': 'string', 'minLength': 1, 'title': 'Salt',
-        'description': 'System hashing salt'
-    },
-    'description': {
-        'type': 'string', 'format': 'html',
-        'title': 'Description',
-        'description': 'System description'
-    },
-    'contact': {
-        'type': 'string', 'title': 'Contact',
-        'description': 'Contact e-mail address'
-    },
-    'language': language_field(),
-    # TODO: This should probably be an extension of a future themes pack
-    'defaulttheme': {
-        'type': 'string', 'title': 'Default new client theme',
-        'description': 'Default theme used for user '
-                       'interface'
-    },
-    'initial_state': {
-        'type': 'string', 'title': 'State after login',
-        'description': 'Frontend state, users are directed to after logging in.',
-        'default': ''
-    },
-    'initial_state_args': {
-        'type': 'string', 'title': 'State arguments',
-        'description': 'Arguments (JSON) for login state.',
-        'default': ''
-    },
-    'hostname': {
-        'type': 'string', 'title': 'Public hostname',
-        'description': 'Public FQDN hostname to use for internet '
-                       'based services (host.domain.tld)',
-        'default': 'localhost'
-    },
-    'modules': {
-        'type': 'object',
-        'default': {}
+SystemconfigSchema["properties"].update(
+    {
+        "active": {
+            "type": "boolean",
+            "title": "Active configuration",
+            "description": "Determines which configuration will be used. "
+            "Only one can be active.",
+            "default": False,
+        },
+        "salt": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Salt",
+            "description": "System hashing salt",
+        },
+        "description": {
+            "type": "string",
+            "format": "html",
+            "title": "Description",
+            "description": "System description",
+        },
+        "contact": {
+            "type": "string",
+            "title": "Contact",
+            "description": "Contact e-mail address",
+        },
+        "language": language_field(),
+        # TODO: This should probably be an extension of a future themes pack
+        "defaulttheme": {
+            "type": "string",
+            "title": "Default new client theme",
+            "description": "Default theme used for user " "interface",
+        },
+        "initial_state": {
+            "type": "string",
+            "title": "State after login",
+            "description": "Frontend state, users are directed to after logging in.",
+            "default": "",
+        },
+        "initial_state_args": {
+            "type": "string",
+            "title": "State arguments",
+            "description": "Arguments (JSON) for login state.",
+            "default": "",
+        },
+        "hostname": {
+            "type": "string",
+            "title": "Public hostname",
+            "description": "Public FQDN hostname to use for internet "
+            "based services (host.domain.tld)",
+            "default": "localhost",
+        },
+        "modules": {"type": "object", "default": {}},
     }
-})
+)
 
 SystemconfigForm = [
     {
-        'type': 'section',
-        'htmlClass': 'row',
-        'items': [
+        "type": "section",
+        "htmlClass": "row",
+        "items": [
             {
-                'type': 'section',
-                'htmlClass': 'col-xs-4',
-                'items': [
-                    'name', 'hostname', 'language'
-                ]
+                "type": "section",
+                "htmlClass": "col-xs-4",
+                "items": ["name", "hostname", "language"],
             },
             {
-                'type': 'section',
-                'htmlClass': 'col-xs-4',
-                'items': [
-                    {'key': 'active', 'readonly': True}, 'contact'
-                ]
+                "type": "section",
+                "htmlClass": "col-xs-4",
+                "items": [{"key": "active", "readonly": True}, "contact"],
             },
             {
-                'type': 'section',
-                'htmlClass': 'col-xs-4',
-                'items': [
-                    'initial_state', 'initial_state_args'
-                ]
-            }
-        ]
+                "type": "section",
+                "htmlClass": "col-xs-4",
+                "items": ["initial_state", "initial_state_args"],
+            },
+        ],
     },
     {
-        'id': 'modules',
-        'type': 'section',
-        'htmlClass': 'row',
-        'items': [
-            {
-                'type': 'help',
-                'helpvalue': '<h2>Default module configurations</h2>'
-            }
-        ]
+        "id": "modules",
+        "type": "section",
+        "htmlClass": "row",
+        "items": [
+            {"type": "help", "helpvalue": "<h2>Default module configurations</h2>"}
+        ],
     },
-    'description',
-    savebutton
+    "description",
+    savebutton,
 ]
 
-SystemconfigOptions = {
-    'hidden': ['salt']
-}
+SystemconfigOptions = {"hidden": ["salt"]}
 
 Systemconfig = {
-    'schema': SystemconfigSchema, 'form': SystemconfigForm,
-    'options': SystemconfigOptions
+    "schema": SystemconfigSchema,
+    "form": SystemconfigForm,
+    "options": SystemconfigOptions,
 }

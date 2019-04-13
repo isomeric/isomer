@@ -36,7 +36,6 @@ from isomer.ui.objectmanager.roles import RoleOperations
 
 
 class SubscriptionOperations(RoleOperations):
-
     @handler(subscribe)
     def subscribe(self, event):
         """Subscribe to an object's future changes"""
@@ -54,16 +53,14 @@ class SubscriptionOperations(RoleOperations):
                 continue
 
         result = {
-            'component': 'isomer.events.objectmanager',
-            'action': 'subscribe',
-            'data': {
-                'uuid': subscribed, 'success': True
-            }
+            "component": "isomer.events.objectmanager",
+            "action": "subscribe",
+            "data": {"uuid": subscribed, "success": True},
         }
         self._respond(None, result, event)
 
     def _add_subscription(self, uuid, event):
-        self.log('Adding subscription for', uuid, event.user, lvl=verbose)
+        self.log("Adding subscription for", uuid, event.user, lvl=verbose)
         if uuid in self.subscriptions:
             if event.client.uuid not in self.subscriptions[uuid]:
                 self.subscriptions[uuid][event.client.uuid] = event.user
@@ -86,21 +83,19 @@ class SubscriptionOperations(RoleOperations):
                 self.subscriptions[uuid].pop(event.client.uuid)
 
                 if len(self.subscriptions[uuid]) == 0:
-                    del (self.subscriptions[uuid])
+                    del self.subscriptions[uuid]
 
                 result.append(uuid)
 
         result = {
-            'component': 'isomer.events.objectmanager',
-            'action': 'unsubscribe',
-            'data': {
-                'uuid': result, 'success': True
-            }
+            "component": "isomer.events.objectmanager",
+            "action": "unsubscribe",
+            "data": {"uuid": result, "success": True},
         }
 
         self._respond(None, result, event)
 
-    @handler('updatesubscriptions')
+    @handler("updatesubscriptions")
     def update_subscriptions(self, event):
         """OM event handler for to be stored and client shared objectmodels
         :param event: OMRequest with uuid, schema and object data
@@ -111,30 +106,28 @@ class SubscriptionOperations(RoleOperations):
             self._update_subscribers(event.schema, event.data)
 
         except Exception as e:
-            self.log("Error during subscription update: ", type(e), e,
-                     exc=True)
+            self.log("Error during subscription update: ", type(e), e, exc=True)
 
     def _update_subscribers(self, update_schema, update_object):
         # Notify frontend subscribers
 
-        self.log('Notifying subscribers about update.', lvl=verbose)
+        self.log("Notifying subscribers about update.", lvl=verbose)
         if update_object.uuid in self.subscriptions:
             update = {
-                'component': 'isomer.events.objectmanager',
-                'action': 'update',
-                'data': {
-                    'schema': update_schema,
-                    'uuid': update_object.uuid,
-                    'object': update_object.serializablefields()
-                }
+                "component": "isomer.events.objectmanager",
+                "action": "update",
+                "data": {
+                    "schema": update_schema,
+                    "uuid": update_object.uuid,
+                    "object": update_object.serializablefields(),
+                },
             }
 
             # pprint(self.subscriptions)
 
             for client, recipient in self.subscriptions[update_object.uuid].items():
-                if not self._check_permissions(recipient, 'read', update_object):
+                if not self._check_permissions(recipient, "read", update_object):
                     continue
 
-                self.log('Notifying subscriber: ', client, recipient,
-                         lvl=verbose)
+                self.log("Notifying subscriber: ", client, recipient, lvl=verbose)
                 self.fireEvent(send(client, update))

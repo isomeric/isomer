@@ -10,7 +10,7 @@ from isomer.misc import all_languages, i18n as _
 
 def schemata_log(*args, **kwargs):
     """Log as emitter 'SCHEMATA'"""
-    kwargs.update({'emitter': 'SCHEMATA', 'frame_ref': 2})
+    kwargs.update({"emitter": "SCHEMATA", "frame_ref": 2})
     isolog(*args, **kwargs)
 
 
@@ -22,22 +22,23 @@ configschemastore = {}
 def build_schemastore_new():
     available = {}
 
-    for schema_entrypoint in iter_entry_points(group='isomer.schemata',
-                                               name=None):
+    for schema_entrypoint in iter_entry_points(group="isomer.schemata", name=None):
         try:
             schemata_log("Schemata found: ", schema_entrypoint.name, lvl=verbose)
             schema = schema_entrypoint.load()
             available[schema_entrypoint.name] = schema
         except (ImportError, DistributionNotFound) as e:
-            schemata_log("Problematic schema: ", schema_entrypoint.name, exc=True, lvl=warn)
+            schemata_log(
+                "Problematic schema: ", schema_entrypoint.name, exc=True, lvl=warn
+            )
 
     def schema_insert(dictionary, path, obj):
-        path = path.split('/')
+        path = path.split("/")
 
         place = dictionary
 
         for element in path:
-            if element != '':
+            if element != "":
                 place = place[element]
 
         place.update(obj)
@@ -45,17 +46,17 @@ def build_schemastore_new():
         return dictionary
 
     def form_insert(form, index, path, obj):
-        path = path.split('/')
+        path = path.split("/")
         place = None
         if isinstance(index, str):
             for widget in form:
-                if isinstance(widget, dict) and widget.get('id', None) is not None:
+                if isinstance(widget, dict) and widget.get("id", None) is not None:
                     place = widget
         else:
             place = form[index]
 
         if place is None:
-            schemata_log('No place to insert into form found:', path, form, obj)
+            schemata_log("No place to insert into form found:", path, form, obj)
             return
 
         for element in path:
@@ -64,7 +65,7 @@ def build_schemastore_new():
                 element = int(element)
             except ValueError:
                 pass
-            if element != '':
+            if element != "":
                 place = place[element]
 
         if isinstance(place, dict):
@@ -75,45 +76,57 @@ def build_schemastore_new():
         return form
 
     for key, item in available.items():
-        extends = item.get('extends', None)
+        extends = item.get("extends", None)
         if extends is not None:
-            schemata_log(key, 'extends:', extends, pretty=True, lvl=verbose)
+            schemata_log(key, "extends:", extends, pretty=True, lvl=verbose)
 
             for model, extension_group in extends.items():
-                schema_extensions = extension_group.get('schema', None)
-                form_extensions = extension_group.get('form', None)
-                schema = available[model].get('schema', None)
-                form = available[model].get('form', None)
+                schema_extensions = extension_group.get("schema", None)
+                form_extensions = extension_group.get("form", None)
+                schema = available[model].get("schema", None)
+                form = available[model].get("form", None)
 
                 original_schema = deepcopy(schema)
 
                 if schema_extensions is not None:
-                    schemata_log('Extending schema', model, 'from', key, lvl=debug)
+                    schemata_log("Extending schema", model, "from", key, lvl=debug)
                     for path, extensions in schema_extensions.items():
-                        schemata_log('Item:', path, 'Extensions:', extensions, lvl=verbose)
+                        schemata_log(
+                            "Item:", path, "Extensions:", extensions, lvl=verbose
+                        )
                         for obj in extensions:
-                            available[model]['schema'] = schema_insert(schema, path, obj)
-                            schemata_log('Path:', path, 'obj:', obj, lvl=verbose)
+                            available[model]["schema"] = schema_insert(
+                                schema, path, obj
+                            )
+                            schemata_log("Path:", path, "obj:", obj, lvl=verbose)
 
                 if form_extensions is not None:
-                    schemata_log('Extending form of', model, 'with', key, lvl=verbose)
+                    schemata_log("Extending form of", model, "with", key, lvl=verbose)
                     for index, extensions in form_extensions.items():
-                        schemata_log('Item:', index, 'Extensions:', extensions, lvl=verbose)
+                        schemata_log(
+                            "Item:", index, "Extensions:", extensions, lvl=verbose
+                        )
                         for path, obj in extensions.items():
                             if not isinstance(obj, list):
                                 obj = [obj]
                             for thing in obj:
-                                available[model]['form'] = form_insert(form, index, path, thing)
-                                schemata_log('Path:', path, 'obj:', thing, lvl=verbose)
+                                available[model]["form"] = form_insert(
+                                    form, index, path, thing
+                                )
+                                schemata_log("Path:", path, "obj:", thing, lvl=verbose)
 
                 # schemata_log(available[model]['form'], pretty=True, lvl=warn)
                 try:
                     jsonschema.Draft4Validator.check_schema(schema)
                 except jsonschema.SchemaError as e:
-                    schemata_log('Schema extension failed:', model, extension_group, exc=True)
-                    available[model]['schema'] = original_schema
+                    schemata_log(
+                        "Schema extension failed:", model, extension_group, exc=True
+                    )
+                    available[model]["schema"] = original_schema
 
-    schemata_log("Found", len(available), "schemata: ", sorted(available.keys()), lvl=debug)
+    schemata_log(
+        "Found", len(available), "schemata: ", sorted(available.keys()), lvl=debug
+    )
 
     return available
 
@@ -135,12 +148,14 @@ def build_l10n_schemastore(available):
 
                 if isinstance(branch, dict):
 
-                    if 'title' in branch and isinstance(branch['title'], str):
+                    if "title" in branch and isinstance(branch["title"], str):
                         # schemata_log(branch['title'])
-                        branch['title'] = _(branch['title'], lang=lang)
-                    if 'description' in branch and isinstance(branch['description'], str):
+                        branch["title"] = _(branch["title"], lang=lang)
+                    if "description" in branch and isinstance(
+                        branch["description"], str
+                    ):
                         # schemata_log(branch['description'])
-                        branch['description'] = _(branch['description'], lang=lang)
+                        branch["description"] = _(branch["description"], lang=lang)
 
                     for key, item in branch.items():
                         walk(item)
@@ -165,12 +180,11 @@ def test_schemata():
     objects = {}
 
     for schemaname in schemastore.keys():
-        objects[schemaname] = formal.model_factory(
-            schemastore[schemaname]['schema'])
+        objects[schemaname] = formal.model_factory(schemastore[schemaname]["schema"])
         try:
             testobject = objects[schemaname]()
             testobject.validate()
         except Exception as e:
-            schemata_log('Blank schema did not validate:', schemaname, exc=True)
+            schemata_log("Blank schema did not validate:", schemaname, exc=True)
 
             # pprint(objects)

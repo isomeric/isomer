@@ -52,16 +52,45 @@ from click_didyoumean import DYMGroup
 
 from isomer.misc.path import set_instance
 from isomer.logger import warn, critical
-from isomer.tool import _get_system_configuration, ask, run_process, format_result, \
-    log, error, debug, get_next_environment, _get_configuration
-from isomer.tool.etc import write_instance, valid_configuration, \
-    remove_instance, instance_template
+from isomer.tool import (
+    _get_system_configuration,
+    ask,
+    run_process,
+    format_result,
+    log,
+    error,
+    debug,
+    get_next_environment,
+    _get_configuration,
+)
+from isomer.tool.etc import (
+    write_instance,
+    valid_configuration,
+    remove_instance,
+    instance_template,
+)
 from isomer.tool.templates import write_template
-from isomer.tool.defaults import service_template, nginx_template, cert_file, key_file, distribution
-from isomer.tool.defaults import EXIT_INSTALLATION_FAILED, EXIT_USER_BAILED_OUT, EXIT_INSTANCE_EXISTS, \
-    EXIT_INSTANCE_UNKNOWN, EXIT_SERVICE_INVALID, \
-    EXIT_INVALID_CONFIGURATION, EXIT_INVALID_PARAMETER
-from isomer.tool.environment import _install_environment, install_environment_module, _clear_environment
+from isomer.tool.defaults import (
+    service_template,
+    nginx_template,
+    cert_file,
+    key_file,
+    distribution,
+)
+from isomer.tool.defaults import (
+    EXIT_INSTALLATION_FAILED,
+    EXIT_USER_BAILED_OUT,
+    EXIT_INSTANCE_EXISTS,
+    EXIT_INSTANCE_UNKNOWN,
+    EXIT_SERVICE_INVALID,
+    EXIT_INVALID_CONFIGURATION,
+    EXIT_INVALID_PARAMETER,
+)
+from isomer.tool.environment import (
+    _install_environment,
+    install_environment_module,
+    _clear_environment,
+)
 
 
 @click.group(cls=DYMGroup)
@@ -69,50 +98,50 @@ from isomer.tool.environment import _install_environment, install_environment_mo
 def instance(ctx):
     """[GROUP] instance various aspects of Isomer"""
 
-    if ctx.invoked_subcommand in ('info', 'list', 'create'):
+    if ctx.invoked_subcommand in ("info", "list", "create"):
         return
 
     _get_configuration(ctx)
 
 
-@instance.command(name='info', short_help="show system configuration of instance")
+@instance.command(name="info", short_help="show system configuration of instance")
 @click.pass_context
 def info_instance(ctx):
     """Print information about the selected instance"""
 
-    instance_name = ctx.obj['instance']
-    instances = ctx.obj['instances']
+    instance_name = ctx.obj["instance"]
+    instances = ctx.obj["instances"]
     instance_configuration = instances[instance_name]
 
-    environment_name = instance_configuration['environment']
-    environment_config = instance_configuration['environments'][environment_name]
+    environment_name = instance_configuration["environment"]
+    environment_config = instance_configuration["environments"][environment_name]
 
     if instance_name not in instances:
-        log('Instance %s unknown!' % instance_name, lvl=warn)
+        log("Instance %s unknown!" % instance_name, lvl=warn)
         sys.exit(EXIT_INSTANCE_UNKNOWN)
 
-    log('Instance configuration:', instance_configuration, pretty=True)
-    log('Active environment (%s):' % environment_name, environment_config, pretty=True)
+    log("Instance configuration:", instance_configuration, pretty=True)
+    log("Active environment (%s):" % environment_name, environment_config, pretty=True)
 
 
-@instance.command(name='list', short_help='List all instances')
+@instance.command(name="list", short_help="List all instances")
 @click.pass_context
 def list_instances(ctx):
     """List all known instances"""
 
-    for instance_name in ctx.obj['instances']:
+    for instance_name in ctx.obj["instances"]:
         log(instance_name, pretty=True)
 
 
-@instance.command(name='set', short_help='Set a parameter of an instance')
-@click.argument('parameter')
-@click.argument('value')
+@instance.command(name="set", short_help="Set a parameter of an instance")
+@click.argument("parameter")
+@click.argument("value")
 @click.pass_context
 def set_parameter(ctx, parameter, value):
     """Set a configuration parameter of an instance"""
 
-    log('Setting %s to %s' % (parameter, value))
-    instance_configuration = ctx.obj['instance_configuration']
+    log("Setting %s to %s" % (parameter, value))
+    instance_configuration = ctx.obj["instance_configuration"]
     defaults = instance_template
 
     try:
@@ -122,22 +151,26 @@ def set_parameter(ctx, parameter, value):
         if parameter_type == tomlkit.items.Integer:
             converted_value = int(value)
         elif parameter_type == bool:
-            converted_value = value.upper() == 'TRUE'
+            converted_value = value.upper() == "TRUE"
         else:
             converted_value = value
     except KeyError:
-        log('Invalid parameter specified. Available parameters:', sorted(list(defaults.keys())), lvl=warn)
+        log(
+            "Invalid parameter specified. Available parameters:",
+            sorted(list(defaults.keys())),
+            lvl=warn,
+        )
         sys.exit(EXIT_INVALID_PARAMETER)
 
     instance_configuration[parameter] = converted_value
-    log('New config:', instance_configuration, pretty=True, lvl=debug)
+    log("New config:", instance_configuration, pretty=True, lvl=debug)
 
-    ctx.obj['instances'][ctx.obj['instance']] = instance_configuration
+    ctx.obj["instances"][ctx.obj["instance"]] = instance_configuration
 
     if valid_configuration(ctx):
         write_instance(instance_configuration)
     else:
-        log('New configuration would not be valid', lvl=critical)
+        log("New configuration would not be valid", lvl=critical)
         sys.exit(EXIT_INVALID_CONFIGURATION)
 
 
@@ -145,60 +178,71 @@ def set_parameter(ctx, parameter, value):
 @click.pass_context
 def create(ctx):
     """Create a new instance"""
-    instance_name = ctx.obj['instance']
-    if instance_name in ctx.obj['instances']:
-        log('Instance exists!', lvl=warn)
+    instance_name = ctx.obj["instance"]
+    if instance_name in ctx.obj["instances"]:
+        log("Instance exists!", lvl=warn)
         sys.exit(EXIT_INSTANCE_EXISTS)
 
-    log('Creating instance:', instance_name)
+    log("Creating instance:", instance_name)
     instance_configuration = instance_template
-    instance_configuration['name'] = instance_name
-    ctx.obj['instances'][instance_name] = instance_configuration
+    instance_configuration["name"] = instance_name
+    ctx.obj["instances"][instance_name] = instance_configuration
 
     write_instance(instance_configuration)
 
 
-@instance.command(name='install', short_help="Install a fresh instance")
-@click.option('--force', '-f', is_flag=True, default=False)
-@click.option('--source', '-s', default='git', type=click.Choice(['link', 'copy', 'git']))
-@click.option('--url', '-u', default=None)
-@click.option('--import-file', '--import', default=None, help='Import the specified backup')
-@click.option('--no-sudo', is_flag=True, default=False, help='Do not use sudo to install (Mostly for tests)')
-@click.option('--skip-modules', is_flag=True, default=False)
-@click.option('--skip-data', is_flag=True, default=False)
-@click.option('--skip-frontend', is_flag=True, default=False)
-@click.option('--skip-test', is_flag=True, default=False)
+@instance.command(name="install", short_help="Install a fresh instance")
+@click.option("--force", "-f", is_flag=True, default=False)
+@click.option(
+    "--source", "-s", default="git", type=click.Choice(["link", "copy", "git"])
+)
+@click.option("--url", "-u", default=None)
+@click.option(
+    "--import-file", "--import", default=None, help="Import the specified backup"
+)
+@click.option(
+    "--no-sudo",
+    is_flag=True,
+    default=False,
+    help="Do not use sudo to install (Mostly for tests)",
+)
+@click.option("--skip-modules", is_flag=True, default=False)
+@click.option("--skip-data", is_flag=True, default=False)
+@click.option("--skip-frontend", is_flag=True, default=False)
+@click.option("--skip-test", is_flag=True, default=False)
 @click.pass_context
 def install(ctx, **kwargs):
     """Install a new environment of an instance"""
 
-    log('Installing instance')
+    log("Installing instance")
 
-    env = ctx.obj['instance_configuration']['environments']
+    env = ctx.obj["instance_configuration"]["environments"]
 
-    green = env['green']['installed']
-    blue = env['blue']['installed']
+    green = env["green"]["installed"]
+    blue = env["blue"]["installed"]
 
     if green or blue:
-        log('At least one environment is installed or in a non-clear state.\n'
-            'Please use \'iso instance upgrade\' to upgrade an instance.', lvl=warn)
+        log(
+            "At least one environment is installed or in a non-clear state.\n"
+            "Please use 'iso instance upgrade' to upgrade an instance.",
+            lvl=warn,
+        )
         sys.exit(50081)
 
-    _clear_instance(ctx, force=kwargs['force'], clear=False, no_archive=True)
+    _clear_instance(ctx, force=kwargs["force"], clear=False, no_archive=True)
     _install_environment(ctx, **kwargs)
 
-    ctx.obj['instance_configuration']['source'] = kwargs['source']
-    ctx.obj['instance_configuration']['url'] = kwargs['url']
+    ctx.obj["instance_configuration"]["source"] = kwargs["source"]
+    ctx.obj["instance_configuration"]["url"] = kwargs["url"]
 
-    write_instance(ctx.obj['instance_configuration'])
+    write_instance(ctx.obj["instance_configuration"])
 
-    _turnover(ctx, force=kwargs['force'])
+    _turnover(ctx, force=kwargs["force"])
 
 
-
-@instance.command(name='clear', short_help="Clear the whole instance (CAUTION)")
-@click.option('--force', '-f', is_flag=True, default=False)
-@click.option('--no-archive', '-n', is_flag=True, default=False)
+@instance.command(name="clear", short_help="Clear the whole instance (CAUTION)")
+@click.option("--force", "-f", is_flag=True, default=False)
+@click.option("--no-archive", "-n", is_flag=True, default=False)
 @click.pass_context
 def clear_instance(ctx, force, no_archive):
     """Clear all environments of an instance"""
@@ -207,62 +251,83 @@ def clear_instance(ctx, force, no_archive):
 
 
 def _clear_instance(ctx, force, clear, no_archive):
-    log('Clearing instance:', ctx.obj['instance'])
-    log('Clearing blue environment.', lvl=debug)
-    _clear_environment(ctx, force, 'blue', clear, no_archive)
-    log('Clearing green environment.', lvl=debug)
-    _clear_environment(ctx, force, 'green', clear, no_archive)
+    log("Clearing instance:", ctx.obj["instance"])
+    log("Clearing blue environment.", lvl=debug)
+    _clear_environment(ctx, force, "blue", clear, no_archive)
+    log("Clearing green environment.", lvl=debug)
+    _clear_environment(ctx, force, "green", clear, no_archive)
 
 
 @instance.command(short_help="Remove a whole instance (CAUTION)")
-@click.option('--clear', '-c', is_flag=True, help='Clear instance before removal', default=False)
-@click.option('--no-archive', '-n', is_flag=True, default=False)
+@click.option(
+    "--clear", "-c", is_flag=True, help="Clear instance before removal", default=False
+)
+@click.option("--no-archive", "-n", is_flag=True, default=False)
 @click.pass_context
 def remove(ctx, clear, no_archive):
     """Remove a whole instance"""
 
     if clear:
-        log('Destructively removing instance:', ctx.obj['instance'], lvl=warn)
+        log("Destructively removing instance:", ctx.obj["instance"], lvl=warn)
 
-    if not ask('Are you sure', default=False, data_type='bool'):
+    if not ask("Are you sure", default=False, data_type="bool"):
         sys.exit(EXIT_USER_BAILED_OUT)
 
     if clear:
         _clear_instance(ctx, force=True, clear=clear, no_archive=no_archive)
 
-    remove_instance(ctx.obj['instance'])
+    remove_instance(ctx.obj["instance"])
 
 
-@instance.command('install-module', short_help="Add (and install) a module to an instance")
-@click.option('--source', '-s', default='git', type=click.Choice(['link', 'copy', 'git', 'develop']))
-@click.option('--install-env', '--install', '-i', is_flag=True, default=False,
-              help='Install module on active environment')
-@click.option('--force', '-f', default=False, is_flag=True, help='Force installation (overwrites old modules)')
-@click.argument('url')
+@instance.command(
+    "install-module", short_help="Add (and install) a module to an instance"
+)
+@click.option(
+    "--source",
+    "-s",
+    default="git",
+    type=click.Choice(["link", "copy", "git", "develop"]),
+)
+@click.option(
+    "--install-env",
+    "--install",
+    "-i",
+    is_flag=True,
+    default=False,
+    help="Install module on active environment",
+)
+@click.option(
+    "--force",
+    "-f",
+    default=False,
+    is_flag=True,
+    help="Force installation (overwrites old modules)",
+)
+@click.argument("url")
 @click.pass_context
 def install_instance_module(ctx, source, url, install_env, force):
     """Add and install a module"""
 
-    instance_name = ctx.obj['instance']
-    instance_configuration = ctx.obj['instances'][instance_name]
+    instance_name = ctx.obj["instance"]
+    instance_configuration = ctx.obj["instances"][instance_name]
 
     descriptor = [source, url]
-    if descriptor not in instance_configuration['modules']:
-        instance_configuration['modules'].append(descriptor)
+    if descriptor not in instance_configuration["modules"]:
+        instance_configuration["modules"].append(descriptor)
         write_instance(instance_configuration)
     elif not force:
-        log('Module is already installed. Use --force to install anyway.')
+        log("Module is already installed. Use --force to install anyway.")
         sys.exit(50000)
 
     if install_env is True:
-        del ctx.params['install_env']
+        del ctx.params["install_env"]
         ctx.forward(install_environment_module)
 
-    log('Done: Install instance module')
+    log("Done: Install instance module")
 
 
 @instance.command(short_help="Activates the other environment")
-@click.option('--force', '-f', is_flag=True, default=False, help='Force turnover')
+@click.option("--force", "-f", is_flag=True, default=False, help="Force turnover")
 @click.pass_context
 def turnover(ctx, **kwargs):
     """Activates the other environment """
@@ -278,26 +343,30 @@ def _turnover(ctx, force):
     # else:
     next_environment = get_next_environment(ctx)
 
-    log('Activating environment:', next_environment)
-    env = ctx.obj['instance_configuration']['environments'][next_environment]
+    log("Activating environment:", next_environment)
+    env = ctx.obj["instance_configuration"]["environments"][next_environment]
 
-    log('Inspecting new environment')
+    log("Inspecting new environment")
 
     if not force:
-        if env.get('database', '') == '':
-            log('Database has not been set up correctly.', lvl=critical)
+        if env.get("database", "") == "":
+            log("Database has not been set up correctly.", lvl=critical)
             sys.exit(EXIT_INSTALLATION_FAILED)
 
-        if not env.get('installed', False) or not env.get('tested', False) or \
-            not env.get('provisioned', False) or not env.get('migrated', False):
-            log('Installation failed, cannot activate!', lvl=critical)
+        if (
+            not env.get("installed", False)
+            or not env.get("tested", False)
+            or not env.get("provisioned", False)
+            or not env.get("migrated", False)
+        ):
+            log("Installation failed, cannot activate!", lvl=critical)
             sys.exit(EXIT_INSTALLATION_FAILED)
 
     update_service(ctx, next_environment)
 
-    ctx.obj['instance_configuration']['environment'] = next_environment
+    ctx.obj["instance_configuration"]["environment"] = next_environment
 
-    write_instance(ctx.obj['instance_configuration'])
+    write_instance(ctx.obj["instance_configuration"])
 
     # TODO: Effect reload of service
     # * Systemctl reload
@@ -306,7 +375,7 @@ def _turnover(ctx, force):
     #  - if not, switch back to the other instance, maybe indicate a broken state for next_environment
     #  - if yes, Store instance configuration and terminate, we're done
 
-    log('Done: Turnover to', next_environment)
+    log("Done: Turnover to", next_environment)
 
 
 @instance.command(short_help="Upgrades the other environment")
@@ -314,7 +383,7 @@ def _turnover(ctx, force):
 @click.pass_context
 def upgrade(ctx):
     """Upgrades an instance on its other environment and turns over on success"""
-    log('Work in progress!')
+    log("Work in progress!")
 
 
 def update_service(ctx, next_environment):
@@ -323,60 +392,73 @@ def update_service(ctx, next_environment):
     validated, message = validate_services(ctx)
 
     if not validated:
-        log('Service configuration validation failed:', message, lvl=error)
+        log("Service configuration validation failed:", message, lvl=error)
         sys.exit(EXIT_SERVICE_INVALID)
 
-    init = ctx.obj['config']['meta']['init']
-    environment_config = ctx.obj['instance_configuration']['environments'][next_environment]
+    init = ctx.obj["config"]["meta"]["init"]
+    environment_config = ctx.obj["instance_configuration"]["environments"][
+        next_environment
+    ]
 
-    log('Updating %s configuration of instance %s to %s' % (init, ctx.obj['instance'], next_environment))
-    log('New environment:', environment_config, pretty=True)
+    log(
+        "Updating %s configuration of instance %s to %s"
+        % (init, ctx.obj["instance"], next_environment)
+    )
+    log("New environment:", environment_config, pretty=True)
 
     # TODO: Add update for systemd
     # * Stop possibly running service (it should not be running, though!)
     # * Actually update service files
 
-    instance_name = ctx.obj['instance']
-    config = ctx.obj['instance_configuration']
+    instance_name = ctx.obj["instance"]
+    config = ctx.obj["instance_configuration"]
 
-    env_path = '/var/lib/isomer/' + instance_name + '/' + next_environment
+    env_path = "/var/lib/isomer/" + instance_name + "/" + next_environment
 
     log("Updating systemd service for %s (%s)" % (instance_name, next_environment))
 
-    launcher = os.path.join(env_path, 'repository/iso')
-    executable = os.path.join(env_path, 'venv/bin/python3') + " " + launcher
-    executable += " --do-log --quiet --instance " + instance_name + ' launch'
+    launcher = os.path.join(env_path, "repository/iso")
+    executable = os.path.join(env_path, "venv/bin/python3") + " " + launcher
+    executable += " --do-log --quiet --instance " + instance_name + " launch"
 
     definitions = {
-        'instance': instance_name,
-        'executable': executable,
-        'environment': next_environment,
-        'user_name': config['user'],
-        'user_group': config['group'],
+        "instance": instance_name,
+        "executable": executable,
+        "environment": next_environment,
+        "user_name": config["user"],
+        "user_group": config["group"],
     }
-    service_name = 'isomer-' + instance_name + '.service'
+    service_name = "isomer-" + instance_name + ".service"
 
-    write_template(service_template, os.path.join('/etc/systemd/system/', service_name), definitions)
+    write_template(
+        service_template,
+        os.path.join("/etc/systemd/system/", service_name),
+        definitions,
+    )
 
 
 def _launch_service(ctx):
     """Actually enable and launch newly set up environment"""
-    instance_name = ctx.obj['instance']
+    instance_name = ctx.obj["instance"]
 
-    service_name = 'isomer-' + instance_name + '.service'
+    service_name = "isomer-" + instance_name + ".service"
 
-    success, result = run_process('/', ['systemctl', 'enable', service_name], sudo='root')
+    success, result = run_process(
+        "/", ["systemctl", "enable", service_name], sudo="root"
+    )
 
     if not success:
-        log('Error activating service:', format_result(result), pretty=True, lvl=error)
+        log("Error activating service:", format_result(result), pretty=True, lvl=error)
         sys.exit(5000)
 
-    log('Launching service')
+    log("Launching service")
 
-    success, result = run_process('/', ['systemctl', 'start', service_name], sudo='root')
+    success, result = run_process(
+        "/", ["systemctl", "start", service_name], sudo="root"
+    )
 
     if not success:
-        log('Error activating service:', format_result(result), pretty=True, lvl=error)
+        log("Error activating service:", format_result(result), pretty=True, lvl=error)
         sys.exit(5000)
 
     log("Done: Launch Service")
@@ -394,8 +476,14 @@ def validate_services(ctx):
     return True, "VALIDATION_NOT_IMPLEMENTED"
 
 
-@instance.command(short_help='instance ssl certificate')
-@click.option('--selfsigned', help="Use a self-signed certificate", default=False, is_flag=True, hidden=True)
+@instance.command(short_help="instance ssl certificate")
+@click.option(
+    "--selfsigned",
+    help="Use a self-signed certificate",
+    default=False,
+    is_flag=True,
+    hidden=True,
+)
 @click.pass_context
 def cert(ctx, selfsigned):
     """instance a local SSL certificate"""
@@ -406,38 +494,61 @@ def cert(ctx, selfsigned):
 def instance_cert(ctx, selfsigned):
     """instance a local SSL certificate"""
 
-    instance_configuration = ctx.obj['instance_configuration']
-    instance_name = ctx.obj['instance']
+    instance_configuration = ctx.obj["instance_configuration"]
+    instance_name = ctx.obj["instance"]
     next_environment = get_next_environment(ctx)
-    hostnames = instance_configuration.get('web_hostnames', False)
-    hostnames = hostnames.replace(' ', '')
+    hostnames = instance_configuration.get("web_hostnames", False)
+    hostnames = hostnames.replace(" ", "")
 
-    instance_argument = '' if instance_name == 'default' else '-i %s ' % instance_name
+    instance_argument = "" if instance_name == "default" else "-i %s " % instance_name
 
-    if not hostnames or hostnames == 'localhost':
-        log('Please configure the public fully qualified domain names of this instance.\n'
+    if not hostnames or hostnames == "localhost":
+        log(
+            "Please configure the public fully qualified domain names of this instance.\n"
             "Use 'iso %sinstance set web_hostname your.hostname.tld' to do that.\n"
-            "You can add multiple names by separating them with commas." % instance_argument, lvl=error)
+            "You can add multiple names by separating them with commas."
+            % instance_argument,
+            lvl=error,
+        )
         sys.exit(50031)
 
     set_instance(instance_name, next_environment)
 
     if not selfsigned:
-        contact = instance_configuration.get('contact', False)
+        contact = instance_configuration.get("contact", False)
         if not contact:
-            log('You need to specify a contact mail address for this instance to generate certificates.\n'
-                "Use 'iso %sinstance set contact your@address.com' to do that." % instance_argument, lvl=error)
+            log(
+                "You need to specify a contact mail address for this instance to generate certificates.\n"
+                "Use 'iso %sinstance set contact your@address.com' to do that."
+                % instance_argument,
+                lvl=error,
+            )
             sys.exit(50032)
 
-        success, result = run_process('/', [
-            'certbot', '--nginx', 'certonly',
-            '-m', contact, '-d', hostnames,
-            '--agree-tos', '-n'])
+        success, result = run_process(
+            "/",
+            [
+                "certbot",
+                "--nginx",
+                "certonly",
+                "-m",
+                contact,
+                "-d",
+                hostnames,
+                "--agree-tos",
+                "-n",
+            ],
+        )
         if not success:
-            log('Error getting certificate:', format_result(result), pretty=True, lvl=error)
+            log(
+                "Error getting certificate:",
+                format_result(result),
+                pretty=True,
+                lvl=error,
+            )
             sys.exit(50033)
     else:
-        log('This has been removed.')
+        log("This has been removed.")
         sys.exit()
         # log('Generating self signed (insecure) certificate/key combination')
         #
@@ -504,23 +615,26 @@ def instance_cert(ctx, selfsigned):
         # log('Done: instance Cert')
 
 
-@instance.command(short_help='install systemd service')
+@instance.command(short_help="install systemd service")
 @click.pass_context
 def service(ctx):
     """instance systemd service configuration"""
 
-    update_service(ctx, ctx.obj['instance_configuration']['environment'])
-    log('Done: Update init service')
+    update_service(ctx, ctx.obj["instance_configuration"]["environment"])
+    log("Done: Update init service")
 
 
-@instance.command(short_help='instance nginx configuration')
-@click.option('--hostname', default=None, help='Override public Hostname (FQDN) Default from active system '
-                                               'configuration')
+@instance.command(short_help="instance nginx configuration")
+@click.option(
+    "--hostname",
+    default=None,
+    help="Override public Hostname (FQDN) Default from active system " "configuration",
+)
 @click.pass_context
 def update_nginx(ctx, hostname):
     """instance nginx configuration"""
 
-    ctx.obj['hostname'] = hostname
+    ctx.obj["hostname"] = hostname
 
     _create_nginx_config(ctx)
     log("Done: Update nginx config")
@@ -531,66 +645,75 @@ def _create_nginx_config(ctx):
 
     # TODO: Specify template url very precisely. Currently one needs to be in the repository root
 
-    instance_name = ctx.obj['instance']
-    config = ctx.obj['instance_configuration']
+    instance_name = ctx.obj["instance"]
+    config = ctx.obj["instance_configuration"]
 
-    current_env = config['environment']
-    env = config['environments'][current_env]
+    current_env = config["environment"]
+    env = config["environments"][current_env]
 
-    dbhost = config['database_host']
-    dbname = env['database']
+    dbhost = config["database_host"]
+    dbname = env["database"]
 
-    hostnames = ctx.obj['web_hostnames']
+    hostnames = ctx.obj["web_hostnames"]
     if hostnames is None:
-        hostnames = config['web_hostnames']
+        hostnames = config["web_hostnames"]
     if hostnames is None:
         try:
             configuration = _get_system_configuration(dbhost, dbname)
             hostnames = configuration.hostname
         except Exception as e:
-            log('Exception:', e, type(e), exc=True, lvl=error)
-            log("""Could not determine public fully qualified hostname!
+            log("Exception:", e, type(e), exc=True, lvl=error)
+            log(
+                """Could not determine public fully qualified hostname!
 Check systemconfig (see db view and db modify commands) or specify
 manually with --hostname host.domain.tld
 
-Using 'localhost' for now""", lvl=warn)
-            hostnames = 'localhost'
-    port = config['web_port']
-    address = config['web_address']
+Using 'localhost' for now""",
+                lvl=warn,
+            )
+            hostnames = "localhost"
+    port = config["web_port"]
+    address = config["web_address"]
 
-    log("Creating nginx configuration for %s:%i using %s@%s" % (hostnames, port, dbname, dbhost))
+    log(
+        "Creating nginx configuration for %s:%i using %s@%s"
+        % (hostnames, port, dbname, dbhost)
+    )
 
     definitions = {
-        'server_public_name': hostnames.replace(',', ' '),
-        'ssl_certificate': cert_file,
-        'ssl_key': key_file,
-        'host_url': 'http://%s:%i/' % (address, port),
-        'instance': instance_name,
-        'environment': current_env
+        "server_public_name": hostnames.replace(",", " "),
+        "ssl_certificate": cert_file,
+        "ssl_key": key_file,
+        "host_url": "http://%s:%i/" % (address, port),
+        "instance": instance_name,
+        "environment": current_env,
     }
 
-    if distribution == 'DEBIAN':
-        configuration_file = '/etc/nginx/sites-available/isomer.%s.conf' % instance_name
-        configuration_link = '/etc/nginx/sites-enabled/isomer.%s.conf' % instance_name
-    elif distribution == 'ARCH':
-        configuration_file = '/etc/nginx/nginx.conf'
+    if distribution == "DEBIAN":
+        configuration_file = "/etc/nginx/sites-available/isomer.%s.conf" % instance_name
+        configuration_link = "/etc/nginx/sites-enabled/isomer.%s.conf" % instance_name
+    elif distribution == "ARCH":
+        configuration_file = "/etc/nginx/nginx.conf"
         configuration_link = None
     else:
-        log('Unsure how to proceed, you may need to specify your '
-            'distribution', lvl=error)
+        log(
+            "Unsure how to proceed, you may need to specify your " "distribution",
+            lvl=error,
+        )
         return
 
-    log('Writing nginx Isomer site definition')
+    log("Writing nginx Isomer site definition")
     write_template(nginx_template, configuration_file, definitions)
 
     if configuration_link is not None:
-        log('Enabling nginx Isomer site (symlink)')
+        log("Enabling nginx Isomer site (symlink)")
         if not os.path.exists(configuration_link):
             os.symlink(configuration_file, configuration_link)
 
-    log('Restarting nginx service')
-    run_process('/', ['systemctl', 'restart', 'nginx.service'], sudo='root')
+    log("Restarting nginx service")
+    run_process("/", ["systemctl", "restart", "nginx.service"], sudo="root")
 
     log("Done: instance nginx configuration")
+
 
 # TODO: Add instance user

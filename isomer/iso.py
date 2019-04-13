@@ -34,8 +34,10 @@ __license__ = "AGPLv3"
 import sys
 
 if sys.version_info.major < 3:
-    print('The iso tool has been evoked with an older Python version. '
-          'Please restart the iso tool to use Python3.')
+    print(
+        "The iso tool has been evoked with an older Python version. "
+        "Please restart the iso tool to use Python3."
+    )
     sys.exit()
 
 try:
@@ -46,11 +48,13 @@ except ImportError as e:
     # python3-dev
     # python3-cffi, libffi-dev, libssl-dev (for spur)
     # python3-pip
-    print('Cannot run iso-tool:', e, type(e))
-    print('Please run "python3 setup.py install" first.\n'
-          'If you get an error about setuptools, install python3 setuptools for your distribution.\n\n'
-          'For more information, please read the manual installation instructions:\n'
-          'https://isomer.readthedocs.io/en/latest/start/installing.html#manual')
+    print("Cannot run iso-tool:", e, type(e))
+    print(
+        'Please run "python3 setup.py install" first.\n'
+        "If you get an error about setuptools, install python3 setuptools for your distribution.\n\n"
+        "For more information, please read the manual installation instructions:\n"
+        "https://isomer.readthedocs.io/en/latest/start/installing.html#manual"
+    )
     sys.exit()
 
 
@@ -68,16 +72,20 @@ def main():
         from isomer.tool.tool import isotool
     except ImportError as e:
         print(e)
-        if not ask('Dependencies not installed, do you want to try to install them',
-                   default=False, data_type='bool', show_hint=True):
+        if not ask(
+            "Dependencies not installed, do you want to try to install them",
+            default=False,
+            data_type="bool",
+            show_hint=True,
+        ):
             sys.exit()
 
         install_isomer()
-        print('Please restart the tool')
+        print("Please restart the tool")
         sys.exit()
 
     isotool(obj={})
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

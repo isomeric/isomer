@@ -41,8 +41,12 @@ from circuits.io import stdin
 
 from isomer.component import ConfigurableComponent, handler
 from isomer.events.client import send
-from isomer.events.system import frontendbuildrequest, componentupdaterequest, \
-    logtailrequest, debugrequest
+from isomer.events.system import (
+    frontendbuildrequest,
+    componentupdaterequest,
+    logtailrequest,
+    debugrequest,
+)
 from isomer.logger import isolog, critical, error, warn, debug, verbose, verbosity
 
 try:
@@ -82,16 +86,19 @@ class cli_help(Event):
 
         command Show complete documentation of a hook command
     """
+
     pass
 
 
 class cli_errors(Event):
     """Display errors in the live log"""
+
     pass
 
 
 class cli_locations(Event):
     """Display all locations of running instance"""
+
     pass
 
 
@@ -101,11 +108,13 @@ class cli_log_level(Event):
     Argument:
         [int]   New logging level (0-100)
     """
+
     pass
 
 
 class cli_compgraph(Event):
     """Draw current component graph"""
+
     pass
 
 
@@ -113,22 +122,24 @@ class HFDebugger(ConfigurableComponent):
     """
     Handles various debug requests.
     """
+
     configprops = {
-        'notificationusers': {
-            'type': 'array',
-            'title': 'Notification receivers',
-            'description': 'Users that should be notified about exceptions.',
-            'default': [],
-            'items': {'type': 'string'}
+        "notificationusers": {
+            "type": "array",
+            "title": "Notification receivers",
+            "description": "Users that should be notified about exceptions.",
+            "default": [],
+            "items": {"type": "string"},
         }
     }
-    channel = 'isomer-web'
+    channel = "isomer-web"
 
     def __init__(self, root=None, *args):
         super(HFDebugger, self).__init__("DBG", *args)
 
         if not root:
             from isomer.logger import root
+
             self.root = root
         else:
             self.root = root
@@ -143,10 +154,10 @@ class HFDebugger(ConfigurableComponent):
             self.log("Cannot use objgraph.", lvl=warn)
 
         try:
-            self.fireEvent(cli_register_event('errors', cli_errors))
-            self.fireEvent(cli_register_event('log_level', cli_log_level))
-            self.fireEvent(cli_register_event('compgraph', cli_compgraph))
-            self.fireEvent(cli_register_event('locations', cli_locations))
+            self.fireEvent(cli_register_event("errors", cli_errors))
+            self.fireEvent(cli_register_event("log_level", cli_log_level))
+            self.fireEvent(cli_register_event("compgraph", cli_compgraph))
+            self.fireEvent(cli_register_event("locations", cli_locations))
         except AttributeError:
             pass  # We're running in a test environment and root is not yet running
 
@@ -154,8 +165,9 @@ class HFDebugger(ConfigurableComponent):
 
     @handler("cli_errors")
     def cli_errors(self, *args):
-        self.log('All errors since startup:')
+        self.log("All errors since startup:")
         from isomer.logger import LiveLog
+
         for logline in LiveLog:
             if logline[1] >= error:
                 self.log(logline, pretty=True)
@@ -163,38 +175,40 @@ class HFDebugger(ConfigurableComponent):
     @handler("cli_log_level")
     def cli_log_level(self, *args):
         new_level = int(args[0])
-        self.log('Adjusting logging level to', new_level)
+        self.log("Adjusting logging level to", new_level)
 
-        verbosity['global'] = new_level
-        verbosity['console'] = new_level
-        verbosity['file'] = new_level
+        verbosity["global"] = new_level
+        verbosity["console"] = new_level
+        verbosity["file"] = new_level
 
-    @handler('cli_compgraph')
+    @handler("cli_compgraph")
     def cli_compgraph(self, event):
-        self.log('Drawing component graph')
+        self.log("Drawing component graph")
         from circuits.tools import graph
 
         graph(self)
         self._drawgraph()
 
     def _drawgraph(self):
-        objgraph.show_backrefs([self.root],
-                               max_depth=5,
-                               filter=lambda x: type(x) not in [list, tuple, set],
-                               highlight=lambda x: type(x) in [ConfigurableComponent],
-                               filename='backref-graph.png')
+        objgraph.show_backrefs(
+            [self.root],
+            max_depth=5,
+            filter=lambda x: type(x) not in [list, tuple, set],
+            highlight=lambda x: type(x) in [ConfigurableComponent],
+            filename="backref-graph.png",
+        )
         self.log("Backref graph written.", lvl=critical)
 
     @handler("cli_locations")
     def cli_locations(self, *args):
-        self.log('All locations for this instance:')
+        self.log("All locations for this instance:")
         from isomer.misc.path import locations, get_path
+
         for path in locations:
-            self.log(get_path(path, ''), pretty=True)
+            self.log(get_path(path, ""), pretty=True)
 
     @handler("exception", channel="*", priority=100.0)
-    def _on_exception(self, error_type, value, traceback,
-                      handler=None, fevent=None):
+    def _on_exception(self, error_type, value, traceback, handler=None, fevent=None):
 
         try:
             s = []
@@ -216,21 +230,19 @@ class HFDebugger(ConfigurableComponent):
             self.log("\n".join(s), lvl=critical)
 
             alert = {
-                'component': 'isomer.alert.manager',
-                'action': 'notify',
-                'data': {
-                    'type': 'danger',
-                    'message': "\n".join(s),
-                    'title': 'Exception Monitor'
-                }
+                "component": "isomer.alert.manager",
+                "action": "notify",
+                "data": {
+                    "type": "danger",
+                    "message": "\n".join(s),
+                    "title": "Exception Monitor",
+                },
             }
             for user in self.config.notificationusers:
-                self.fireEvent(send(None, alert, username=user,
-                                    sendtype='user'))
+                self.fireEvent(send(None, alert, username=user, sendtype="user"))
 
         except Exception as e:
-            self.log("Exception during exception handling: ", e, type(e),
-                     lvl=critical)
+            self.log("Exception during exception handling: ", e, type(e), lvl=critical)
 
     @handler(debugrequest)
     def debugrequest(self, event):
@@ -240,8 +252,13 @@ class HFDebugger(ConfigurableComponent):
             # TODO: Clear this up and make it CLI events.
             if event.data == "storejson":
                 self.log("Storing received object to /tmp", lvl=critical)
-                fp = open('/tmp/isomer_debugger_' + str(
-                    event.user.useruuid) + "_" + str(uuid4()), "w")
+                fp = open(
+                    "/tmp/isomer_debugger_"
+                    + str(event.user.useruuid)
+                    + "_"
+                    + str(uuid4()),
+                    "w",
+                )
                 json.dump(event.data, fp, indent=True)
                 fp.close()
             if event.data == "memdebug":
@@ -266,17 +283,18 @@ class HFDebugger(ConfigurableComponent):
 
                 self.fireEvent(frontendbuildrequest(force=True), "setup")
             if event.data == "logtail":
-                self.fireEvent(logtailrequest(event.user, None, None,
-                                              event.client), "logger")
+                self.fireEvent(
+                    logtailrequest(event.user, None, None, event.client), "logger"
+                )
 
             # TODO: WTF. This needs to move out, asap
             if event.data == "trigger_anchorwatch":
                 from isomer.anchor.anchorwatcher import cli_trigger_anchorwatch
+
                 self.fireEvent(cli_trigger_anchorwatch())
 
         except Exception as e:
-            self.log("Exception during debug handling:", e, type(e),
-                     lvl=critical)
+            self.log("Exception during debug handling:", e, type(e), lvl=critical)
 
 
 class CLI(ConfigurableComponent):
@@ -293,7 +311,7 @@ class CLI(ConfigurableComponent):
 
         self.log("Started")
         stdin.register(self)
-        self.fire(cli_register_event('help', cli_help))
+        self.fire(cli_register_event("help", cli_help))
 
     @handler("read", channel="stdin")
     def stdin_read(self, data):
@@ -307,37 +325,43 @@ class CLI(ConfigurableComponent):
         self.log("Incoming:", data, lvl=verbose)
 
         if len(data) == 0:
-            self.log('Use /help to get a list of enabled cli hooks')
+            self.log("Use /help to get a list of enabled cli hooks")
             return
 
         if data[0] == "/":
             cmd = data[1:]
             args = []
-            if ' ' in cmd:
-                cmd, args = cmd.split(' ', maxsplit=1)
-                args = args.split(' ')
+            if " " in cmd:
+                cmd, args = cmd.split(" ", maxsplit=1)
+                args = args.split(" ")
             if cmd in self.hooks:
-                self.log('Firing hooked event:', cmd, args, lvl=debug)
+                self.log("Firing hooked event:", cmd, args, lvl=debug)
                 self.fireEvent(self.hooks[cmd](*args))
             # TODO: Move these out, so we get a simple logic here
-            elif cmd == 'frontend':
-                self.log("Sending %s frontend rebuild event" %
-                         ("(forced)" if 'force' in args else ''))
+            elif cmd == "frontend":
+                self.log(
+                    "Sending %s frontend rebuild event"
+                    % ("(forced)" if "force" in args else "")
+                )
                 self.fireEvent(
-                    frontendbuildrequest(force='force' in args,
-                                         install='install' in args),
-                    "setup")
-            elif cmd == 'backend':
+                    frontendbuildrequest(
+                        force="force" in args, install="install" in args
+                    ),
+                    "setup",
+                )
+            elif cmd == "backend":
                 self.log("Sending backend reload event")
                 self.fireEvent(componentupdaterequest(force=False), "setup")
             else:
-                self.log('Unknown Command:', cmd, '. Use /help to get a list of enabled '
-                                                  'cli hooks')
+                self.log(
+                    "Unknown Command: %s. Use /help to get a list of enabled "
+                    "cli hooks" % cmd,
+                )
 
-    @handler('cli_help')
+    @handler("cli_help")
     def cli_help(self, *args):
-        if len(args) == 0 or args[0].startswith('-'):
-            self.log('Registered CLI hooks:')
+        if len(args) == 0 or args[0].startswith("-"):
+            self.log("Registered CLI hooks:")
             # TODO: Use std_table for a pretty table
             command_length = 5
             object_length = 5
@@ -345,24 +369,29 @@ class CLI(ConfigurableComponent):
                 command_length = max(len(hook), command_length)
                 object_length = max(len(str(self.hooks[hook])), object_length)
 
-            if '-v' not in args:
+            if "-v" not in args:
                 object_length = 0
 
             for hook in sorted(self.hooks):
-                self.log('/%s %s: %s' % (
-                    hook.ljust(command_length),
-                    (" - " + str(self.hooks[hook]) if object_length != 0 else "").ljust(object_length),
-                    str(self.hooks[hook].__doc__).split('\n', 1)[0]
-
-                ))
+                self.log(
+                    "/%s %s: %s"
+                    % (
+                        hook.ljust(command_length),
+                        (
+                            " - " + str(self.hooks[hook]) if object_length != 0 else ""
+                        ).ljust(object_length),
+                        str(self.hooks[hook].__doc__).split("\n", 1)[0],
+                    )
+                )
         else:
-            self.log('Help for command', args[0], ':')
+            self.log("Help for command", args[0], ":")
             self.log(self.hooks[args[0]].__doc__)
 
-    @handler('cli_register_event')
+    @handler("cli_register_event")
     def register_event(self, event):
         """Registers a new command line interface event hook as command"""
 
-        self.log('Registering event hook:', event.cmd, event.thing,
-                 pretty=True, lvl=verbose)
+        self.log(
+            "Registering event hook:", event.cmd, event.thing, pretty=True, lvl=verbose
+        )
         self.hooks[event.cmd] = event.thing

@@ -46,71 +46,76 @@ def config(ctx):
     """[GROUP] Configuration management operations"""
 
     from isomer import database
-    database.initialize(ctx.obj['dbhost'], ctx.obj['dbname'])
+
+    database.initialize(ctx.obj["dbhost"], ctx.obj["dbname"])
 
     from isomer.schemata.component import ComponentConfigSchemaTemplate
-    ctx.obj['col'] = model_factory(ComponentConfigSchemaTemplate)
+
+    ctx.obj["col"] = model_factory(ComponentConfigSchemaTemplate)
 
 
 @config.command(short_help="Delete component configuration")
-@click.argument('componentname')
+@click.argument("componentname")
 @click.pass_context
 def delete(ctx, componentname):
     """Delete an existing component configuration. This will trigger
     the creation of its default configuration upon next restart."""
-    col = ctx.obj['col']
+    col = ctx.obj["col"]
 
-    if col.count({'name': componentname}) > 1:
-        log('More than one component configuration of this name! Try '
+    if col.count({"name": componentname}) > 1:
+        log(
+            "More than one component configuration of this name! Try "
             'one of the uuids as argument. Get a list with "config '
-            'list"')
+            'list"'
+        )
         return
 
-    log('Deleting component configuration', componentname,
-        emitter='MANAGE')
+    log("Deleting component configuration", componentname, emitter="MANAGE")
 
-    configuration = col.find_one({'name': componentname})
-
-    if configuration is None:
-        configuration = col.find_one({'uuid': componentname})
+    configuration = col.find_one({"name": componentname})
 
     if configuration is None:
-        log('Component configuration not found:', componentname,
-            emitter='MANAGE')
+        configuration = col.find_one({"uuid": componentname})
+
+    if configuration is None:
+        log("Component configuration not found:", componentname, emitter="MANAGE")
         return
 
     configuration.delete()
-    log('Done')
+    log("Done")
 
 
 @config.command(short_help="Show component configurations")
-@click.option('--component', default=None)
+@click.option("--component", default=None)
 @click.pass_context
 def show(ctx, component):
     """Show the stored, active configuration of a component."""
 
-    col = ctx.obj['col']
+    col = ctx.obj["col"]
 
-    if col.count({'name': component}) > 1:
-        log('More than one component configuration of this name! Try '
+    if col.count({"name": component}) > 1:
+        log(
+            "More than one component configuration of this name! Try "
             'one of the uuids as argument. Get a list with "config '
-            'list"')
+            'list"'
+        )
         return
 
     if component is None:
         configurations = col.find()
         for configuration in configurations:
-            log("%-15s : %s" % (configuration.name,
-                                configuration.uuid),
-                emitter='MANAGE')
+            log(
+                "%-15s : %s" % (configuration.name, configuration.uuid),
+                emitter="MANAGE",
+            )
     else:
-        configuration = col.find_one({'name': component})
+        configuration = col.find_one({"name": component})
 
         if configuration is None:
-            configuration = col.find_one({'uuid': component})
+            configuration = col.find_one({"uuid": component})
 
         if configuration is None:
-            log('No component with that name or uuid found.')
+            log("No component with that name or uuid found.")
             return
 
         print(json.dumps(configuration.serializablefields(), indent=4))

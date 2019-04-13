@@ -14,8 +14,16 @@ The backend package dealing with the web frontend interface.
 
 __author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
 
-__all__ = ['activitymonitor', 'auth', 'builder', 'clientmanager',
-           'clientobjects', 'configurator', 'objectmanager', 'schemamanager',
-           'syslog']
+__all__ = [
+    "activitymonitor",
+    "auth",
+    "builder",
+    "clientmanager",
+    "clientobjects",
+    "configurator",
+    "objectmanager",
+    "schemamanager",
+    "syslog",
+]
 
-__import__('pkg_resources').declare_namespace(__name__)
+__import__("pkg_resources").declare_namespace(__name__)

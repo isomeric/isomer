@@ -41,11 +41,13 @@ from isomer.logger import isolog, debug, verbose, warn, error
 def log(*args, **kwargs):
     """Log as Emitter:MANAGE"""
 
-    kwargs.update({'emitter': 'PROVISIONS', 'frame_ref': 2})
+    kwargs.update({"emitter": "PROVISIONS", "frame_ref": 2})
     isolog(*args, **kwargs)
 
 
-def provisionList(items, database_name, overwrite=False, clear=False, skip_user_check=False):
+def provisionList(
+    items, database_name, overwrite=False, clear=False, skip_user_check=False
+):
     """Provisions a list of items according to their schema
 
     :param database_name:
@@ -56,27 +58,29 @@ def provisionList(items, database_name, overwrite=False, clear=False, skip_user_
     :return:
     """
 
-    log('Provisioning', items, database_name, lvl=debug)
+    log("Provisioning", items, database_name, lvl=debug)
 
     def get_system_user():
         """Retrieves the node local system user"""
 
-        user = objectmodels['user'].find_one({'name': 'System'})
+        user = objectmodels["user"].find_one({"name": "System"})
 
         try:
-            log('System user uuid: ', user.uuid, lvl=verbose)
+            log("System user uuid: ", user.uuid, lvl=verbose)
             return user.uuid
         except AttributeError as system_user_error:
-            log('No system user found:', system_user_error, lvl=warn)
-            log('Please install the user provision to setup a system user or check your database configuration',
-                lvl=error)
+            log("No system user found:", system_user_error, lvl=warn)
+            log(
+                "Please install the user provision to setup a system user or check your database configuration",
+                lvl=error,
+            )
             return False
 
     # TODO: Do not check this on specific objects but on the model (i.e. once)
     def needs_owner(obj):
         """Determines whether a basic object has an ownership field"""
-        for privilege in obj._fields.get('perms', None):
-            if 'owner' in obj._fields['perms'][privilege]:
+        for privilege in obj._fields.get("perms", None):
+            if "owner" in obj._fields["perms"][privilege]:
                 return True
 
         return False
@@ -102,7 +106,7 @@ def provisionList(items, database_name, overwrite=False, clear=False, skip_user_
         # This is usually only here for provisioning the system user
         # One way to avoid this, is to create (instead of provision)
         # this one upon system installation.
-        system_user = '0ba87daa-d315-462e-9f2e-6091d768fd36'
+        system_user = "0ba87daa-d315-462e-9f2e-6091d768fd36"
 
     col_name = database_object.collection_name()
 
@@ -113,16 +117,16 @@ def provisionList(items, database_name, overwrite=False, clear=False, skip_user_
 
     for no, item in enumerate(items):
         new_object = None
-        item_uuid = item['uuid']
+        item_uuid = item["uuid"]
         log("Validating object (%i/%i):" % (no + 1, len(items)), item_uuid, lvl=debug)
 
-        if database_object.count({'uuid': item_uuid}) > 0:
-            log('Object already present', lvl=warn)
+        if database_object.count({"uuid": item_uuid}) > 0:
+            log("Object already present", lvl=warn)
             if overwrite is False:
                 log("Not updating item", item, lvl=warn)
             else:
                 log("Overwriting item: ", item_uuid, lvl=warn)
-                new_object = database_object.find_one({'uuid': item_uuid})
+                new_object = database_object.find_one({"uuid": item_uuid})
                 new_object._fields.update(item)
         else:
             new_object = database_object(item)
@@ -130,18 +134,18 @@ def provisionList(items, database_name, overwrite=False, clear=False, skip_user_
         if new_object is not None:
             try:
                 if needs_owner(new_object):
-                    if not hasattr(new_object, 'owner'):
-                        log('Adding system owner to object.', lvl=verbose)
+                    if not hasattr(new_object, "owner"):
+                        log("Adding system owner to object.", lvl=verbose)
                         new_object.owner = system_user
             except Exception as e:
-                log('Error during ownership test:', e, type(e),
-                    exc=True, lvl=error)
+                log("Error during ownership test:", e, type(e), exc=True, lvl=error)
             try:
                 new_object.validate()
                 new_object.save()
                 counter += 1
             except ValidationError as e:
                 raise ValidationError(
-                    "Could not provision object: " + str(item_uuid), e)
+                    "Could not provision object: " + str(item_uuid), e
+                )
 
     log("Provisioned %i out of %i items successfully." % (counter, len(items)))

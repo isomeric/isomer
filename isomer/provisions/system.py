@@ -38,30 +38,42 @@ from isomer.logger import isolog, warn
 from uuid import uuid4
 
 SystemConfiguration = {
-    'uuid': str(uuid4()),
-    'salt': std_salt(),
-    'active': True,
-    'name': 'Default System Configuration',
-    'description': 'Default System description',
-    'hostname': 'localhost'
+    "uuid": str(uuid4()),
+    "salt": std_salt(),
+    "active": True,
+    "name": "Default System Configuration",
+    "description": "Default System description",
+    "hostname": "localhost",
 }
 
 
-def provision_system_config(items, database_name, overwrite=False, clear=False, skip_user_check=False):
+def provision_system_config(
+    items, database_name, overwrite=False, clear=False, skip_user_check=False
+):
     """Provision a basic system configuration"""
 
     from isomer.provisions.base import provisionList
     from isomer.database import objectmodels
 
-    default_system_config_count = objectmodels['systemconfig'].count({
-        'name': 'Default System Configuration'})
+    default_system_config_count = objectmodels["systemconfig"].count(
+        {"name": "Default System Configuration"}
+    )
 
     if default_system_config_count == 0 or (clear or overwrite):
-        provisionList([SystemConfiguration], 'systemconfig', overwrite, clear, skip_user_check)
-        isolog('Provisioning: System: Done.', emitter='PROVISIONS')
+        provisionList(
+            [SystemConfiguration], "systemconfig", overwrite, clear, skip_user_check
+        )
+        isolog("Provisioning: System: Done.", emitter="PROVISIONS")
     else:
-        isolog('Default system configuration already present.', lvl=warn,
-               emitter='PROVISIONS')
+        isolog(
+            "Default system configuration already present.",
+            lvl=warn,
+            emitter="PROVISIONS",
+        )
 
 
-provision = {'data': SystemConfiguration, 'method': provision_system_config, 'dependencies': 'user'}
+provision = {
+    "data": SystemConfiguration,
+    "method": provision_system_config,
+    "dependencies": "user",
+}

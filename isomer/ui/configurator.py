@@ -41,19 +41,19 @@ from formal import model_factory
 class getlist(authorized_event):
     """A client requires a schema to validate data or display a form"""
 
-    roles = ['admin']
+    roles = ["admin"]
 
 
 class get(authorized_event):
     """A client requires a schema to validate data or display a form"""
 
-    roles = ['admin']
+    roles = ["admin"]
 
 
 class put(authorized_event):
     """A client requires a schema to validate data or display a form"""
 
-    roles = ['admin']
+    roles = ["admin"]
 
 
 class Configurator(ConfigurableComponent):
@@ -63,12 +63,12 @@ class Configurator(ConfigurableComponent):
     (You're probably looking at it right now)
     """
 
-    channel = 'isomer-web'
+    channel = "isomer-web"
 
     configprops = {}
 
     def __init__(self, *args):
-        super(Configurator, self).__init__('CONF', *args)
+        super(Configurator, self).__init__("CONF", *args)
 
     @handler(getlist)
     def getlist(self, event):
@@ -83,22 +83,26 @@ class Configurator(ConfigurableComponent):
             data = []
             for comp in componentlist:
                 try:
-                    data.append({
-                        'name': comp.name,
-                        'uuid': comp.uuid,
-                        'class': comp.componentclass,
-                        'active': comp.active
-                    })
+                    data.append(
+                        {
+                            "name": comp.name,
+                            "uuid": comp.uuid,
+                            "class": comp.componentclass,
+                            "active": comp.active,
+                        }
+                    )
                 except AttributeError:
-                    self.log('Bad component without component class encountered:', lvl=warn)
+                    self.log(
+                        "Bad component without component class encountered:", lvl=warn
+                    )
                     self.log(comp.serializablefields(), pretty=True, lvl=warn)
 
-            data = sorted(data, key=lambda x: x['name'])
+            data = sorted(data, key=lambda x: x["name"])
 
             response = {
-                'component': 'isomer.ui.configurator',
-                'action': 'getlist',
-                'data': data
+                "component": "isomer.ui.configurator",
+                "action": "getlist",
+                "data": data,
             }
             self.fireEvent(send(event.client.uuid, response))
             return
@@ -109,34 +113,35 @@ class Configurator(ConfigurableComponent):
     def put(self, event):
         """Store a given configuration"""
 
-        self.log("Configuration put request ",
-                 event.user)
+        self.log("Configuration put request ", event.user)
 
         try:
-            component = model_factory(Schema).find_one({
-                'uuid': event.data['uuid']
-            })
+            component = model_factory(Schema).find_one({"uuid": event.data["uuid"]})
 
             component.update(event.data)
             component.save()
 
             response = {
-                'component': 'isomer.ui.configurator',
-                'action': 'put',
-                'data': True
+                "component": "isomer.ui.configurator",
+                "action": "put",
+                "data": True,
             }
-            self.log('Updated component configuration:',
-                     component.name)
+            self.log("Updated component configuration:", component.name)
 
             self.fireEvent(reload_configuration(component.name))
         except (KeyError, ValueError, ValidationError, PermissionError) as e:
             response = {
-                'component': 'isomer.ui.configurator',
-                'action': 'put',
-                'data': False
+                "component": "isomer.ui.configurator",
+                "action": "put",
+                "data": False,
             }
-            self.log('Storing component configuration failed: ',
-                     type(e), e, exc=True, lvl=error)
+            self.log(
+                "Storing component configuration failed: ",
+                type(e),
+                e,
+                exc=True,
+                lvl=error,
+            )
 
         self.fireEvent(send(event.client.uuid, response))
         return
@@ -146,24 +151,20 @@ class Configurator(ConfigurableComponent):
         """Get a stored configuration"""
 
         try:
-            comp = event.data['uuid']
+            comp = event.data["uuid"]
         except KeyError:
             comp = None
 
         if not comp:
-            self.log('Invalid get request without schema or component',
-                     lvl=error)
+            self.log("Invalid get request without schema or component", lvl=error)
             return
 
-        self.log("Config data get  request for ", event.data, "from",
-                 event.user)
+        self.log("Config data get  request for ", event.data, "from", event.user)
 
-        component = model_factory(Schema).find_one({
-            'uuid': comp
-        })
+        component = model_factory(Schema).find_one({"uuid": comp})
         response = {
-            'component': 'isomer.ui.configurator',
-            'action': 'get',
-            'data': component.serializablefields()
+            "component": "isomer.ui.configurator",
+            "action": "get",
+            "data": component.serializablefields(),
         }
         self.fireEvent(send(event.client.uuid, response))

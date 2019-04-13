@@ -49,7 +49,7 @@ from isomer.logger import isolog, warn, critical, debug, verbose, error
 
 def db_log(*args, **kwargs):
     """Log as emitter 'DB'"""
-    kwargs.update({'emitter': 'DB', 'frame_ref': 2})
+    kwargs.update({"emitter": "DB", "frame_ref": 2})
     isolog(*args, **kwargs)
 
 
@@ -69,10 +69,12 @@ def clear_all():
     *This command is a maintenance tool and clears the complete database.*
     """
 
-    sure = input("Are you sure to drop the complete database content? (Type "
-                 "in upppercase YES)")
-    if not (sure == 'YES'):
-        db_log('Not deleting the database.')
+    sure = input(
+        "Are you sure to drop the complete database content? (Type "
+        "in upppercase YES)"
+    )
+    if not (sure == "YES"):
+        db_log("Not deleting the database.")
         sys.exit(5)
 
     client = pymongo.MongoClient(host=dbhost, port=dbport)
@@ -93,14 +95,20 @@ def _build_model_factories(store):
         schema = None
 
         try:
-            schema = store[schemaname]['schema']
+            schema = store[schemaname]["schema"]
         except KeyError:
             db_log("No schema found for ", schemaname, lvl=critical, exc=True)
 
         try:
             result[schemaname] = formal.model_factory(schema)
         except Exception as e:
-            db_log("Could not create factory for schema ", schemaname, schema, lvl=critical, exc=True)
+            db_log(
+                "Could not create factory for schema ",
+                schemaname,
+                schema,
+                lvl=critical,
+                exc=True,
+            )
 
     return result
 
@@ -119,21 +127,27 @@ def _build_collections(store):
         indices = None
 
         try:
-            schema = store[schemaname]['schema']
-            indices = store[schemaname].get('indices', None)
+            schema = store[schemaname]["schema"]
+            indices = store[schemaname].get("indices", None)
         except KeyError:
             db_log("No schema found for ", schemaname, lvl=critical)
 
         try:
             result[schemaname] = db[schemaname]
         except Exception:
-            db_log("Could not get collection for schema ", schemaname, schema, lvl=critical, exc=True)
+            db_log(
+                "Could not get collection for schema ",
+                schemaname,
+                schema,
+                lvl=critical,
+                exc=True,
+            )
 
         if indices is None:
             continue
 
         col = db[schemaname]
-        db_log('Adding indices to', schemaname, lvl=debug)
+        db_log("Adding indices to", schemaname, lvl=debug)
         i = 0
         keys = list(indices.keys())
 
@@ -141,29 +155,29 @@ def _build_collections(store):
             index_name = keys[i]
             index = indices[index_name]
 
-            index_type = index.get('type', None)
-            index_unique = index.get('unique', False)
-            index_sparse = index.get('sparse', True)
-            index_reindex = index.get('reindex', False)
+            index_type = index.get("type", None)
+            index_unique = index.get("unique", False)
+            index_sparse = index.get("sparse", True)
+            index_reindex = index.get("reindex", False)
 
-            if index_type in (None, 'text'):
+            if index_type in (None, "text"):
                 index_type = pymongo.TEXT
-            elif index_type == '2dsphere':
+            elif index_type == "2dsphere":
                 index_type = pymongo.GEOSPHERE
 
             def do_index():
-                col.ensure_index([(index_name, index_type)],
-                                 unique=index_unique,
-                                 sparse=index_sparse)
+                col.ensure_index(
+                    [(index_name, index_type)], unique=index_unique, sparse=index_sparse
+                )
 
-            db_log('Enabling index of type', index_type, 'on', index_name, lvl=debug)
+            db_log("Enabling index of type", index_type, "on", index_name, lvl=debug)
             try:
                 do_index()
                 i += 1
             except pymongo.errors.OperationFailure:
                 db_log(col.list_indexes().__dict__, pretty=True, lvl=verbose)
                 if not index_reindex:
-                    db_log('Index was not created!', lvl=warn)
+                    db_log("Index was not created!", lvl=warn)
                     i += 1
                 else:
                     try:
@@ -171,7 +185,7 @@ def _build_collections(store):
                         do_index()
                         i += 1
                     except pymongo.errors.OperationFailure as e:
-                        db_log('Index recreation problem:', exc=True, lvl=error)
+                        db_log("Index recreation problem:", exc=True, lvl=error)
                         col.drop_indexes()
                         i = 0
 
@@ -180,8 +194,13 @@ def _build_collections(store):
     return result
 
 
-def initialize(address='127.0.0.1:27017', database_name='isomer-default',
-               instance_name="default", reload=False, ignore_fail=False):
+def initialize(
+    address="127.0.0.1:27017",
+    database_name="isomer-default",
+    instance_name="default",
+    reload=False,
+    ignore_fail=False,
+):
     """Initializes the database connectivity, schemata and finally object models"""
 
     global objectmodels
@@ -193,34 +212,44 @@ def initialize(address='127.0.0.1:27017', database_name='isomer-default',
     global initialized
 
     if initialized and not reload:
-        isolog('Already initialized and not reloading.', lvl=warn, emitter="DB", frame_ref=2)
+        isolog(
+            "Already initialized and not reloading.",
+            lvl=warn,
+            emitter="DB",
+            frame_ref=2,
+        )
         return
 
-    dbhost = address.split(':')[0]
+    dbhost = address.split(":")[0]
     dbport = int(address.split(":")[1]) if ":" in address else 27017
     dbname = database_name
 
-    db_log("Using database:", dbname, '@', dbhost, ':', dbport)
+    db_log("Using database:", dbname, "@", dbhost, ":", dbport)
 
     try:
         client = pymongo.MongoClient(host=dbhost, port=dbport)
         db = client[dbname]
-        db_log("Database: ", db.command('buildinfo'), lvl=debug)
+        db_log("Database: ", db.command("buildinfo"), lvl=debug)
     except Exception as e:
-        db_log("No database available! Check if you have mongodb > 2.2 "
-               "installed and running as well as listening on port 27017 "
-               "of localhost and check if you specified the correct "
-               "instance and environment. (Error: %s) -> EXIT" % e, lvl=critical)
+        db_log(
+            "No database available! Check if you have mongodb > 2.2 "
+            "installed and running as well as listening on port 27017 "
+            "of localhost and check if you specified the correct "
+            "instance and environment. (Error: %s) -> EXIT" % e,
+            lvl=critical,
+        )
         if not ignore_fail:
             sys.exit(5000)
         else:
             return False
 
     formal.connect(database_name)
-    formal.connect_sql(database_name, database_type='sql_memory')
+    formal.connect_sql(database_name, database_type="sql_memory")
 
     schemastore.schemastore = schemastore.build_schemastore_new()
-    schemastore.l10n_schemastore = schemastore.build_l10n_schemastore(schemastore.schemastore)
+    schemastore.l10n_schemastore = schemastore.build_l10n_schemastore(
+        schemastore.schemastore
+    )
     objectmodels = _build_model_factories(schemastore.schemastore)
     collections = _build_collections(schemastore.schemastore)
     instance = instance_name

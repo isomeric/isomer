@@ -48,21 +48,21 @@ class TagManager(ConfigurableComponent):
     Various tag related operations.
     """
 
-    channel = 'isomer-web'
+    channel = "isomer-web"
 
     configprops = {}
 
     def __init__(self, *args):
-        super(TagManager, self).__init__('TM', *args)
+        super(TagManager, self).__init__("TM", *args)
 
         self.tags = {}
 
-        tag = objectmodels['tag']
+        tag = objectmodels["tag"]
 
         for item in tag.find():
             self.tags[item.name.upper()] = item
 
-        self.log('Tags:', list(self.tags.keys()), pretty=True, lvl=verbose)
+        self.log("Tags:", list(self.tags.keys()), pretty=True, lvl=verbose)
 
         # tagged = self._get_tagged('PR')
 
@@ -73,12 +73,12 @@ class TagManager(ConfigurableComponent):
     # @handler('getTagged')
     def _get_tagged(self, tag):
         tag = self.tags[tag]
-        self.log('TAG UUID', tag.uuid)
+        self.log("TAG UUID", tag.uuid)
         tagged = []
         for model in objectmodels.values():
             self.log(model, pretty=True)
-            self.log('Find:', model.find, pretty=True)
-            for item in model.find({'tags': {'$in': [tag.uuid]}}):
+            self.log("Find:", model.find, pretty=True)
+            for item in model.find({"tags": {"$in": [tag.uuid]}}):
                 tagged.append(item.serializablefields())
 
         return tagged
@@ -86,15 +86,16 @@ class TagManager(ConfigurableComponent):
     @handler(get_tagged)
     def get_tagged(self, event):
         """Return a list of tagged objects for a schema"""
-        self.log("Tagged objects request for", event.data, "from",
-                 event.user, lvl=debug)
+        self.log(
+            "Tagged objects request for", event.data, "from", event.user, lvl=debug
+        )
         if event.data.upper() in self.tags:
             tagged = self._get_tagged(event.data.upper())
 
             response = {
-                'component': 'isomer.ui.tagmanager',
-                'action': 'get_tagged',
-                'data': tagged
+                "component": "isomer.ui.tagmanager",
+                "action": "get_tagged",
+                "data": tagged,
             }
             self.fireEvent(send(event.client.uuid, response))
         else:

@@ -10,41 +10,45 @@ from isomer.logger import isolog, debug, verbose, error, warn
 
 def backup_log(*args, **kwargs):
     """Log as emitter 'BACKUP'"""
-    kwargs.update({'emitter': 'BACKUP', 'frame_ref': 2})
+    kwargs.update({"emitter": "BACKUP", "frame_ref": 2})
     isolog(*args, **kwargs)
 
 
 def dump(db_host, db_port, db_name, filename):
     """Dump a full database to JSON"""
 
-    backup_log('Connecting database', db_host, db_port, db_name, lvl=debug)
+    backup_log("Connecting database", db_host, db_port, db_name, lvl=debug)
 
     client = pymongo.MongoClient(host=str(db_host), port=int(db_port))
     db = client[str(db_name)]
 
-    backup_log('Dumping data from database', db_name)
+    backup_log("Dumping data from database", db_name)
 
     content = []
 
     for collection_name in db.collection_names():
-        backup_log('Archiving collection:', collection_name, lvl=debug)
+        backup_log("Archiving collection:", collection_name, lvl=debug)
         collection = db[collection_name]
         cursor = collection.find({})
 
         objects = []
 
         for document in cursor:
-            backup_log('Archiving:', document[:50] if len(document) >= 50 else document, lvl=verbose)
-            document['_id'] = str(document['_id'])
+            backup_log(
+                "Archiving:",
+                document[:50] if len(document) >= 50 else document,
+                lvl=verbose,
+            )
+            document["_id"] = str(document["_id"])
             objects.append(document)
 
-        collection = {'collection': collection_name, 'data': objects}
+        collection = {"collection": collection_name, "data": objects}
         content.append(collection)
 
     with open(filename, "w") as file:
         json.dump(content, file)
 
-    backup_log('Done')
+    backup_log("Done")
 
     return True
 
@@ -52,40 +56,47 @@ def dump(db_host, db_port, db_name, filename):
 def load(db_host, db_port, db_name, filename):
     """Load a full database dump from JSON"""
 
-    backup_log('Connecting database')
+    backup_log("Connecting database")
 
     client = pymongo.MongoClient(db_host, db_port)
     db = client[db_name]
 
-    backup_log('Loading data')
+    backup_log("Loading data")
 
     with open(filename, "r") as file:
         data = json.load(file)
 
-    backup_log('Storing data to database')
+    backup_log("Storing data to database")
 
     for import_item in data:
-        collection_name = import_item['collection']
+        collection_name = import_item["collection"]
 
         collection = db[collection_name]
         requests = []
 
-        for document in import_item['data']:
-            document['_id'] = bson.ObjectId(document['_id'])
-            requests.append(pymongo.ReplaceOne({'uuid': document['uuid']}, document, upsert=True))
+        for document in import_item["data"]:
+            document["_id"] = bson.ObjectId(document["_id"])
+            requests.append(
+                pymongo.ReplaceOne({"uuid": document["uuid"]}, document, upsert=True)
+            )
 
         size = len(requests)
 
         if size > 0:
             collection.bulk_write(requests)
-        backup_log('Imported %i object%s into collection \'%s\'' % (size, 's' if size != 1 else '', collection_name))
+        backup_log(
+            "Imported %i object%s into collection '%s'"
+            % (size, "s" if size != 1 else "", collection_name)
+        )
 
-    backup_log('Done')
+    backup_log("Done")
 
     return True
 
 
-def backup(schema, uuid, export_filter, export_format, filename, pretty, export_all, omit):
+def backup(
+    schema, uuid, export_filter, export_format, filename, pretty, export_all, omit
+):
     """Exports all collections to (JSON-) files."""
 
     export_format = export_format.upper()
@@ -99,16 +110,16 @@ def backup(schema, uuid, export_filter, export_format, filename, pretty, export_
 
     if filename:
         try:
-            f = open(filename, 'w')
+            f = open(filename, "w")
         except (IOError, PermissionError) as e:
-            backup_log('Could not open output file for writing:', exc=True, lvl=error)
+            backup_log("Could not open output file for writing:", exc=True, lvl=error)
             return
 
     def output(what, convert=False):
         """Output the backup in a specified format."""
 
         if convert:
-            if export_format == 'JSON':
+            if export_format == "JSON":
                 data = json.dumps(what, indent=indent)
             else:
                 data = ""
@@ -122,7 +133,7 @@ def backup(schema, uuid, export_filter, export_format, filename, pretty, export_
 
     if schema is None:
         if export_all is False:
-            backup_log('No schema given.', lvl=warn)
+            backup_log("No schema given.", lvl=warn)
             return
         else:
             schemata = objectmodels.keys()
@@ -135,7 +146,7 @@ def backup(schema, uuid, export_filter, export_format, filename, pretty, export_
         model = objectmodels[schema_item]
 
         if uuid:
-            obj = model.find({'uuid': uuid})
+            obj = model.find({"uuid": uuid})
         elif export_filter:
             obj = model.find(literal_eval(export_filter))
         else:
@@ -164,21 +175,23 @@ def backup(schema, uuid, export_filter, export_format, filename, pretty, export_
         f.close()
 
 
-def internal_restore(schema, uuid, object_filter, import_format, filename, all_schemata, dry):
+def internal_restore(
+    schema, uuid, object_filter, import_format, filename, all_schemata, dry
+):
     """Foobar"""
     import_format = import_format.upper()
 
-    if import_format == 'JSON':
-        with open(filename, 'r') as f:
+    if import_format == "JSON":
+        with open(filename, "r") as f:
             json_data = f.read()
         data = json.loads(json_data)  # , parse_float=True, parse_int=True)
     else:
-        backup_log('Importing non json data is WiP!', lvl=error)
+        backup_log("Importing non json data is WiP!", lvl=error)
         return
 
     if schema is None:
         if all_schemata is False:
-            backup_log('No schema given. Read the help', lvl=warn)
+            backup_log("No schema given. Read the help", lvl=warn)
             return
         else:
             schemata = data.keys()
@@ -186,7 +199,7 @@ def internal_restore(schema, uuid, object_filter, import_format, filename, all_s
         schemata = [schema]
 
     if object_filter is not None:
-        backup_log('Object filtering on import is WiP! Ignoring for now.', lvl=warn)
+        backup_log("Object filtering on import is WiP! Ignoring for now.", lvl=warn)
 
     all_items = {}
     total = 0
@@ -198,7 +211,7 @@ def internal_restore(schema, uuid, object_filter, import_format, filename, all_s
         items = []
         if uuid:
             for item in objects:
-                if item['uuid'] == uuid:
+                if item["uuid"] == uuid:
                     items = [model(item)]
         else:
             for item in objects:
@@ -209,15 +222,15 @@ def internal_restore(schema, uuid, object_filter, import_format, filename, all_s
         total += schema_total
 
         if dry:
-            backup_log('Would import', schema_total, 'items of', schema_item)
+            backup_log("Would import", schema_total, "items of", schema_item)
         all_items[schema_item] = items
 
     if dry:
-        backup_log('Would import', total, 'objects.')
+        backup_log("Would import", total, "objects.")
     else:
-        backup_log('Importing', total, 'objects.')
+        backup_log("Importing", total, "objects.")
         for schema_name, item_list in all_items.items():
-            backup_log('Importing', len(item_list), 'objects of type', schema_name)
+            backup_log("Importing", len(item_list), "objects of type", schema_name)
             for item in item_list:
-                item._fields['_id'] = bson.objectid.ObjectId(item._fields['_id'])
+                item._fields["_id"] = bson.objectid.ObjectId(item._fields["_id"])
                 item.save()

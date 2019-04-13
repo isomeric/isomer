@@ -33,8 +33,16 @@ from isomer.logger import isolog, warn, events
 class send(Event):
     """Send a packet to a known client by UUID"""
 
-    def __init__(self, uuid, packet, sendtype="client",
-                 raw=False, username=None, fail_quiet=False, *args):
+    def __init__(
+        self,
+        uuid,
+        packet,
+        sendtype="client",
+        raw=False,
+        username=None,
+        fail_quiet=False,
+        *args
+    ):
         """
 
         :param uuid: Unique User ID of known connection
@@ -52,9 +60,13 @@ class send(Event):
         self.raw = raw
         self.fail_quiet = fail_quiet
 
-        isolog("[CM-EVENT] Send event generated:", uuid, str(packet)[:50],
-               sendtype,
-               lvl=events)
+        isolog(
+            "[CM-EVENT] Send event generated:",
+            uuid,
+            str(packet)[:50],
+            sendtype,
+            lvl=events,
+        )
 
 
 class broadcast(Event):
@@ -71,8 +83,9 @@ class broadcast(Event):
         self.broadcasttype = broadcasttype
         self.content = content
 
-        isolog("[CM-EVENT] Broadcast event generated:", broadcasttype,
-               content, lvl=events)
+        isolog(
+            "[CM-EVENT] Broadcast event generated:", broadcasttype, content, lvl=events
+        )
 
 
 class clientdisconnect(Event):
@@ -91,8 +104,12 @@ class clientdisconnect(Event):
         self.clientuuid = clientuuid
         self.useruuid = useruuid
 
-        isolog("[CM-EVENT] Client disconnect event generated:", clientuuid,
-               useruuid, lvl=events)
+        isolog(
+            "[CM-EVENT] Client disconnect event generated:",
+            clientuuid,
+            useruuid,
+            lvl=events,
+        )
 
 
 class userlogin(Event):
@@ -113,8 +130,9 @@ class userlogin(Event):
         self.client = client
         self.user = user
 
-        isolog("[CM-EVENT] User login event generated:", clientuuid, useruuid,
-               lvl=events)
+        isolog(
+            "[CM-EVENT] User login event generated:", clientuuid, useruuid, lvl=events
+        )
 
 
 class userlogout(Event):
@@ -133,15 +151,15 @@ class userlogout(Event):
         self.useruuid = useruuid
         self.clientuuid = clientuuid
 
-        isolog("[CM-EVENT] User logout event generated:", useruuid,
-               lvl=events)
+        isolog("[CM-EVENT] User logout event generated:", useruuid, lvl=events)
 
 
 class authenticationrequest(Event):
     """A client wants to authenticate a client connection"""
 
-    def __init__(self, username, password, clientuuid, requestedclientuuid,
-                 sock, auto, *args):
+    def __init__(
+        self, username, password, clientuuid, requestedclientuuid, sock, auto, *args
+    ):
         """
 
         :param username: Account username
@@ -180,5 +198,4 @@ class authentication(Event):
         self.useruuid = useruuid
         self.sock = sock
 
-        isolog("[AUTH-EVENT] Authentication granted:", self.__dict__,
-               lvl=events)
+        isolog("[AUTH-EVENT] Authentication granted:", self.__dict__, lvl=events)

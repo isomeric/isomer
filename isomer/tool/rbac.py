@@ -42,20 +42,31 @@ from isomer.tool.database import db
 
 @db.group()
 @click.option("--schema", "-s", default=None, help="Specify object schema to modify")
-@click.option("--filter", "-f", "--object-filter", default=None, help="Filter objects (pymongo query syntax)")
+@click.option(
+    "--filter",
+    "-f",
+    "--object-filter",
+    default=None,
+    help="Filter objects (pymongo query syntax)",
+)
 @click.option("--action", "-a", default=None, help="Specify action to modify")
 @click.option("--role", "-r", default=None, help="Specify role")
-@click.option("--all", "--all-schemata", default=False, is_flag=True,
-              help="Agree to work on all documents, if no schema specified")
+@click.option(
+    "--all",
+    "--all-schemata",
+    default=False,
+    is_flag=True,
+    help="Agree to work on all documents, if no schema specified",
+)
 @click.pass_context
 def rbac(ctx, schema, object_filter, action, role, all_schemata):
     """[GROUP] Role based access control"""
 
-    database = ctx.obj['db']
+    database = ctx.obj["db"]
 
     if schema is None:
         if all_schemata is False:
-            log('No schema given. Read the RBAC group help', lvl=warn)
+            log("No schema given. Read the RBAC group help", lvl=warn)
             sys.exit()
         else:
             schemata = database.objectmodels.keys()
@@ -74,25 +85,28 @@ def rbac(ctx, schema, object_filter, action, role, all_schemata):
             things.append(obj)
 
     if len(things) == 0:
-        log('No objects matched the criteria.', lvl=warn)
+        log("No objects matched the criteria.", lvl=warn)
         sys.exit()
 
-    ctx.obj['objects'] = things
-    ctx.obj['action'] = action
-    ctx.obj['role'] = role
+    ctx.obj["objects"] = things
+    ctx.obj["action"] = action
+    ctx.obj["role"] = role
 
 
-@rbac.command(short_help='Add role to action')
+@rbac.command(short_help="Add role to action")
 @click.pass_context
 def add_action_role(ctx):
     """Adds a role to an action on objects"""
 
-    objects = ctx.obj['objects']
-    action = ctx.obj['action']
-    role = ctx.obj['role']
+    objects = ctx.obj["objects"]
+    action = ctx.obj["action"]
+    role = ctx.obj["role"]
 
     if action is None or role is None:
-        log('You need to specify an action or role to the RBAC command group for this to work.', lvl=warn)
+        log(
+            "You need to specify an action or role to the RBAC command group for this to work.",
+            lvl=warn,
+        )
         return
 
     for item in objects:
@@ -103,17 +117,20 @@ def add_action_role(ctx):
     log("Done")
 
 
-@rbac.command(short_help='Add role to action')
+@rbac.command(short_help="Add role to action")
 @click.pass_context
 def del_action_role(ctx):
     """Deletes a role from an action on objects"""
 
-    objects = ctx.obj['objects']
-    action = ctx.obj['action']
-    role = ctx.obj['role']
+    objects = ctx.obj["objects"]
+    action = ctx.obj["action"]
+    role = ctx.obj["role"]
 
     if action is None or role is None:
-        log('You need to specify an action or role to the RBAC command group for this to work.', lvl=warn)
+        log(
+            "You need to specify an action or role to the RBAC command group for this to work.",
+            lvl=warn,
+        )
         return
 
     for item in objects:
@@ -124,28 +141,28 @@ def del_action_role(ctx):
     log("Done")
 
 
-@rbac.command(short_help='Change owner')
-@click.argument('owner')
+@rbac.command(short_help="Change owner")
+@click.argument("owner")
 @click.option("--uuid", help="Specify user by uuid", default=False, is_flag=True)
 @click.pass_context
 def change_owner(ctx, owner, uuid):
     """Changes the ownership of objects"""
 
-    objects = ctx.obj['objects']
-    database = ctx.obj['db']
+    objects = ctx.obj["objects"]
+    database = ctx.obj["db"]
 
     if uuid is True:
-        owner_filter = {'uuid': owner}
+        owner_filter = {"uuid": owner}
     else:
-        owner_filter = {'name': owner}
+        owner_filter = {"name": owner}
 
-    owner = database.objectmodels['user'].find_one(owner_filter)
+    owner = database.objectmodels["user"].find_one(owner_filter)
     if owner is None:
-        log('User unknown.', lvl=error)
+        log("User unknown.", lvl=error)
         return
 
     for item in objects:
         item.owner = owner.uuid
         item.save()
 
-    log('Done')
+    log("Done")

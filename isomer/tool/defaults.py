@@ -36,49 +36,82 @@ import distro
 __author__ = "Heiko 'riot' Weinen"
 __license__ = "AGPLv3"
 
-distribution = 'DEBIAN'
+distribution = "DEBIAN"
 
-db_host_default = '127.0.0.1:27017'
-db_host_help = 'Define hostname for database server (default: ' + \
-               db_host_default + ')'
-db_host_metavar = '<ip:port>'
+db_host_default = "127.0.0.1:27017"
+db_host_help = "Define hostname for database server (default: " + db_host_default + ")"
+db_host_metavar = "<ip:port>"
 
-db_default = 'isomer'
-db_help = 'Define name of database (default: ' + db_default + ')'
-db_metavar = '<name>'
+db_default = "isomer"
+db_help = "Define name of database (default: " + db_default + ")"
+db_metavar = "<name>"
 
 key_file = "/etc/ssl/certs/isomer/selfsigned.key"
 cert_file = "/etc/ssl/certs/isomer/selfsigned.crt"
 combined_file = "/etc/ssl/certs/isomer/selfsigned.pem"
 
-source_url = 'https://github.com/isomeric/isomer'
+source_url = "https://github.com/isomeric/isomer"
 
 distribution_name = distro.codename()
 
 platforms = {
-    'Debian GNU/Linux': {
-        'pre_install':[
-            ['apt-get', '-y', 'install', 'apt-transport-https', 'wget', 'sudo', 'gnupg', 'gdebi-core'],
-            ['sh', '-c', 'wget --quiet -O - https://deb.nodesource.com/gpgkey/nodesource.gpg.key | sudo apt-key add -'],
-            ['apt-get', 'update'],
-            ['wget', 'https://deb.nodesource.com/node_8.x/pool/main/n/nodejs/nodejs_8.15.1-1nodesource1_amd64.deb'],
-            ['gdebi', '-n', 'nodejs_8.15.1-1nodesource1_amd64.deb'],
-            ['wget', 'http://httpredir.debian.org/debian/pool/main/m/mongodb/mongodb-server_3.4.18-2_all.deb'],
-            ['gdebi', '-n', 'mongodb-server_3.4.18-2_all.deb'],
+    "Debian GNU/Linux": {
+        "pre_install": [
+            [
+                "apt-get",
+                "-y",
+                "install",
+                "apt-transport-https",
+                "wget",
+                "sudo",
+                "gnupg",
+                "gdebi-core",
+            ],
+            [
+                "sh",
+                "-c",
+                "wget --quiet -O - https://deb.nodesource.com/gpgkey/nodesource.gpg.key | sudo apt-key add -",
+            ],
+            ["apt-get", "update"],
+            [
+                "wget",
+                "https://deb.nodesource.com/node_8.x/pool/main/n/nodejs/nodejs_8.15.1-1nodesource1_amd64.deb",
+            ],
+            ["gdebi", "-n", "nodejs_8.15.1-1nodesource1_amd64.deb"],
+            [
+                "wget",
+                "http://httpredir.debian.org/debian/pool/main/m/mongodb/mongodb-server_3.4.18-2_all.deb",
+            ],
+            ["gdebi", "-n", "mongodb-server_3.4.18-2_all.deb"],
         ],
-        'post_install': [['systemctl', 'start', 'mongodb.service']],
-        'tool': ['apt-get', 'install', '-y'],
-        'packages': [
-            'python3', 'python3-pip', 'python3-dev', 'virtualenv', 'git',
-            'python3-bson', 'python3-pymongo', 'python3-pymongo-ext', 'python3-bson-ext',
-            'python3-cffi', 'libffi-dev',
-            'nginx-full', 'libssl-dev', 'certbot', 'python3-certbot', 'python3-certbot-nginx',
-            'enchant',
+        "post_install": [["systemctl", "start", "mongodb.service"]],
+        "tool": ["apt-get", "install", "-y"],
+        "packages": [
+            "python3",
+            "python3-pip",
+            "python3-dev",
+            "virtualenv",
+            "git",
+            "python3-bson",
+            "python3-pymongo",
+            "python3-pymongo-ext",
+            "python3-bson-ext",
+            "python3-cffi",
+            "libffi-dev",
+            "nginx-full",
+            "libssl-dev",
+            "certbot",
+            "python3-certbot",
+            "python3-certbot-nginx",
+            "enchant",
             # TODO: Kick out module dependencies (mostly gdal, grib and serial)
-            'python3-grib', 'python3-serial', 'gdal-bin', 'python-gdal',
-        ]
+            "python3-grib",
+            "python3-serial",
+            "gdal-bin",
+            "python-gdal",
+        ],
     },
-    'Ubuntu': 'Debian GNU/Linux'
+    "Ubuntu": "Debian GNU/Linux",
 }
 
 service_template = """[Unit]
@@ -160,7 +193,7 @@ key_defaults = {
     "type": "rsa",
     "bits": 4096,
     "filename": "",
-    "comment": "Isomer Remote Key"
+    "comment": "Isomer Remote Key",
 }
 
 EXIT_INVALID_ENVIRONMENT = 1

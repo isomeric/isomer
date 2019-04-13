@@ -35,11 +35,13 @@ Major Isomer event declarations
 from circuits.core import Event
 
 from isomer.logger import isolog, events
+
 # from isomer.ui.clientobjects import User
 from isomer.events.system import authorized_event
 
 
 # Object Management
+
 
 class objectevent(Event):
     """A unspecified objectevent"""
@@ -51,8 +53,13 @@ class objectevent(Event):
         self.schema = schema
         self.client = client
 
-        isolog("Object event created: ", self.__doc__,
-               self.__dict__, lvl=events, emitter="OBJECT-EVENT")
+        isolog(
+            "Object event created: ",
+            self.__doc__,
+            self.__dict__,
+            lvl=events,
+            emitter="OBJECT-EVENT",
+        )
 
 
 class objectchange(objectevent):
@@ -69,6 +76,7 @@ class objectdeletion(objectevent):
 
 # Backend-side object change
 
+
 class updatesubscriptions(Event):
     """A backend component needs to write changes to an object.
     Clients that are subscribed should be notified etc.
@@ -80,8 +88,13 @@ class updatesubscriptions(Event):
         self.schema = schema
         self.data = data
 
-        isolog("Object event created: ", self.__doc__,
-               self.__dict__, lvl=events, emitter="OBJECT-EVENT")
+        isolog(
+            "Object event created: ",
+            self.__doc__,
+            self.__dict__,
+            lvl=events,
+            emitter="OBJECT-EVENT",
+        )
 
 
 class search(authorized_event):

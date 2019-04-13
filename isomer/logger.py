@@ -74,20 +74,20 @@ off = 100
 
 # https://en.wikipedia.org/wiki/ANSI_escape_code#Colors
 level_data = {
-    temp: ['TEMP', '\033[1;30m'],
-    events: ['EVENT', '\033[1:36m'],
-    verbose: ['VERB', '\033[1;30m'],
-    network: ['NET', '\033[1;34m'],
-    debug: ['DEBUG', '\033[1;97m'],
-    info: ['INFO', '\033[1;92m'],
-    warn: ['WARN', '\033[1;93m'],
-    error: ['ERROR', '\033[1;31;43m'],
-    critical: ['CRIT', '\033[1;33;41m'],
-    hilight: ['HILIGHT', '\033[1;4;34;106m'],
-    version: ['VER', '\033[1;96;44m']
+    temp: ["TEMP", "\033[1;30m"],
+    events: ["EVENT", "\033[1:36m"],
+    verbose: ["VERB", "\033[1;30m"],
+    network: ["NET", "\033[1;34m"],
+    debug: ["DEBUG", "\033[1;97m"],
+    info: ["INFO", "\033[1;92m"],
+    warn: ["WARN", "\033[1;93m"],
+    error: ["ERROR", "\033[1;31;43m"],
+    critical: ["CRIT", "\033[1;33;41m"],
+    hilight: ["HILIGHT", "\033[1;4;34;106m"],
+    version: ["VER", "\033[1;96;44m"],
 }
 
-terminator = '\033[0m'
+terminator = "\033[0m"
 
 count = 0
 
@@ -96,12 +96,7 @@ logfile = "/var/log/isomer/service.log"
 console = verbose
 live = False
 
-verbosity = {
-    'global': console,
-    'file': off,
-    'system': info,
-    'console': console
-}
+verbosity = {"global": console, "file": off, "system": info, "console": console}
 
 uncut = True
 color = False
@@ -125,7 +120,7 @@ def set_logfile(path, instance):
     """Specify logfile path"""
 
     global logfile
-    logfile = os.path.normpath(path) + '/isomer.' + instance + '.log'
+    logfile = os.path.normpath(path) + "/isomer." + instance + ".log"
 
 
 def get_logfile():
@@ -202,12 +197,20 @@ def isolog(*what, **kwargs):
     :param sourceloc: Give specific source code location hints, used internally
     """
 
+    global count
+    global verbosity
+
+    lvl = kwargs.get("lvl", info)
+
+    if lvl < verbosity["global"]:
+        return
+
     def assemble_things(things):
         content = ""
 
         for thing in things:
             content += " "
-            if kwargs.get('pretty', False) and not isinstance(thing, str):
+            if kwargs.get("pretty", False) and not isinstance(thing, str):
                 content += "\n" + pprint.pformat(thing)
             else:
                 content += str(thing)
@@ -217,7 +220,7 @@ def isolog(*what, **kwargs):
     def write_to_log(message):
         try:
             f = open(logfile, "a")
-            f.write(message + '\n')
+            f.write(message + "\n")
             f.flush()
             f.close()
         except IOError:
@@ -234,8 +237,10 @@ def isolog(*what, **kwargs):
             isolog("Too long log line encountered:", message[:20], lvl=warn)
 
     def get_callee():
-        if 'sourceloc' not in kwargs:
-            frame = kwargs.get('frame', frame_ref)
+        global lvl
+
+        if "sourceloc" not in kwargs:
+            frame = kwargs.get("frame", frame_ref)
 
             # Get the previous frame in the stack, otherwise it would
             # be this function
@@ -255,32 +260,20 @@ def isolog(*what, **kwargs):
             else:
                 line_no = func.co_firstlineno
 
-            callee = "[%.10s@%s:%i]" % (
-                func.co_name,
-                func.co_filename,
-                line_no
-            )
+            callee = "[%.10s@%s:%i]" % (func.co_name, func.co_filename, line_no)
         else:
-            callee = kwargs['sourceloc']
+            callee = kwargs["sourceloc"]
 
         return callee
 
     # Count all messages (missing numbers give a hint at too high log level)
-    global count
-    global verbosity
-
     count += 1
 
-    lvl = kwargs.get('lvl', info)
-
-    if lvl < verbosity['global']:
-        return
-
-    emitter = kwargs.get('emitter', 'UNKNOWN')
-    traceback = kwargs.get('tb', False)
-    frame_ref = kwargs.get('frame_ref', 0)
-    no_color = kwargs.get('nc', False)
-    exception = kwargs.get('exc', False)
+    emitter = kwargs.get("emitter", "UNKNOWN")
+    traceback = kwargs.get("tb", False)
+    frame_ref = kwargs.get("frame_ref", 0)
+    no_color = kwargs.get("nc", False)
+    exception = kwargs.get("exc", False)
 
     timestamp = time.time()
     runtime = timestamp - start
@@ -289,7 +282,7 @@ def isolog(*what, **kwargs):
     if exception:
         exc_type, exc_obj, exc_tb = sys.exc_info()  # NOQA
 
-    if verbosity['global'] <= debug or traceback:
+    if verbosity["global"] <= debug or traceback:
         # Automatically log the current function details.
         callee = get_callee()
 
@@ -299,7 +292,7 @@ def isolog(*what, **kwargs):
         level_data[lvl][0],
         runtime,
         count,
-        emitter
+        emitter,
     )
 
     if callee:
@@ -320,13 +313,13 @@ def isolog(*what, **kwargs):
     if not uncut and lvl > 10 and len(msg) > 1000:
         msg = msg[:1000]
 
-    if lvl >= verbosity['file']:
+    if lvl >= verbosity["file"]:
         write_to_log(msg)
 
     if is_marked(msg):
         lvl = hilight
 
-    if lvl >= verbosity['console']:
+    if lvl >= verbosity["console"]:
         output = str(msg)
         if color and not no_color:
             output = level_data[lvl][1] + output + terminator

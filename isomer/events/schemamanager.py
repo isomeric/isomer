@@ -37,6 +37,7 @@ from isomer.events.system import authorized_event
 
 # Schema client services
 
+
 class configuration(authorized_event):
     """A client requires a schema to validate data or display a form"""
 

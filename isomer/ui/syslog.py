@@ -24,7 +24,7 @@ class Syslog(ConfigurableComponent):
     """
 
     def __init__(self, *args):
-        super(Syslog, self).__init__('SYSLOG', *args)
+        super(Syslog, self).__init__("SYSLOG", *args)
 
         self.log("Started")
 
@@ -33,30 +33,29 @@ class Syslog(ConfigurableComponent):
         self.log_file = open(get_logfile())
         self.log_position = 0
 
-        self.follow_timer = Timer(1, Event.create('syslog_follow'),
-                                  persist=True)
+        self.follow_timer = Timer(1, Event.create("syslog_follow"), persist=True)
 
     @handler(subscribe)
     def subscribe(self, event):
         self.subscribers.append(event.client.uuid)
 
-    @handler('clientdisconnect', priority=1000)
+    @handler("clientdisconnect", priority=1000)
     def disconnect(self, event):
-        self.log('Disconnected: ', event.clientuuid, lvl=debug)
+        self.log("Disconnected: ", event.clientuuid, lvl=debug)
         if event.clientuuid in self.subscribers:
             self.subscribers.remove(event.clientuuid)
 
     def _logupdate(self, new_messages):
         packet = {
-            'component': 'isomer.ui.syslog',
-            'action': 'update',
-            'data': new_messages
+            "component": "isomer.ui.syslog",
+            "action": "update",
+            "data": new_messages,
         }
 
         for subscriber in self.subscribers:
             self.fireEvent(send(subscriber, packet, fail_quiet=True))
 
-    @handler('syslog_follow')
+    @handler("syslog_follow")
     def follow(self):
         where = self.log_file.tell()
         line = self.log_file.readline()
@@ -68,24 +67,19 @@ class Syslog(ConfigurableComponent):
     @handler(history)
     def history(self, event):
         try:
-            limit = event.data['limit']
-            end = event.data['end']
+            limit = event.data["limit"]
+            end = event.data["end"]
         except (KeyError, AttributeError) as e:
-            self.log('Error during event lookup:', e, type(e), exc=True,
-                     lvl=error)
+            self.log("Error during event lookup:", e, type(e), exc=True, lvl=error)
             return
 
-        self.log('History requested:', limit, end, lvl=debug)
+        self.log("History requested:", limit, end, lvl=debug)
 
         messages = []
 
         history_packet = {
-            'component': 'isomer.ui.syslog',
-            'action': 'history',
-            'data': {
-                'limit': limit,
-                'end': end,
-                'history': messages
-            }
+            "component": "isomer.ui.syslog",
+            "action": "history",
+            "data": {"limit": limit, "end": end, "history": messages},
         }
         self.fireEvent(send(event.client.uuid, history_packet))

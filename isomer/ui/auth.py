@@ -44,6 +44,7 @@ from isomer.misc import std_hash, std_salt, std_uuid, std_now, std_human_uid
 
 class AuthenticationError(Exception):
     """Something unspecified went wrong during authentication"""
+
     pass
 
 
@@ -61,25 +62,25 @@ class Authenticator(ConfigurableComponent):
     Authenticates users against the database.
     """
 
-    channel = 'isomer-web'
+    channel = "isomer-web"
 
     configprops = {}
 
     def __init__(self, *args):
-        super(Authenticator, self).__init__('AUTH', *args)
+        super(Authenticator, self).__init__("AUTH", *args)
         # self.log(objectmodels['systemconfig'], lvl=error)
 
         self.failing_clients = {}
 
-        systemconfig = objectmodels['systemconfig'].find_one({'active': True})
+        systemconfig = objectmodels["systemconfig"].find_one({"active": True})
 
         # TODO: Decouple systemconfig creation from authenticator
         try:
-            salt = systemconfig.salt.encode('ascii')
-            self.log('Using active systemconfig salt')
+            salt = systemconfig.salt.encode("ascii")
+            self.log("Using active systemconfig salt")
         except (KeyError, AttributeError):
-            self.log('No active system configuration found!', lvl=error)
-            salt = std_salt().encode('ascii')
+            self.log("No active system configuration found!", lvl=error)
+            salt = std_salt().encode("ascii")
 
         self.salt = salt
         self.systemconfig = systemconfig
@@ -90,26 +91,24 @@ class Authenticator(ConfigurableComponent):
     def add_auth_hook(self, event):
         """Register event hook on reception of add_auth_hook-event"""
 
-        self.log('Adding authentication hook for', event.authenticator_name)
+        self.log("Adding authentication hook for", event.authenticator_name)
         self.auth_hooks[event.authenticator_name] = event.event
 
-    def _fail(self, event, message='Invalid credentials'):
+    def _fail(self, event, message="Invalid credentials"):
         """Sends a failure message to the requesting client"""
 
-        notification = {
-            'component': 'auth',
-            'action': 'fail',
-            'data': message
-        }
+        notification = {"component": "auth", "action": "fail", "data": message}
 
         ip = event.sock.getpeername()[0]
 
         self.failing_clients[ip] = event
-        Timer(3, Event.create('notify_fail', event.clientuuid, notification, ip)).register(self)
+        Timer(
+            3, Event.create("notify_fail", event.clientuuid, notification, ip)
+        ).register(self)
 
     def notify_fail(self, uuid, notification, ip):
-        self.log('Transmitting delayed fail notification', lvl=debug)
-        self.fireEvent(send(uuid, notification, sendtype='client'))
+        self.log("Transmitting delayed fail notification", lvl=debug)
+        self.fireEvent(send(uuid, notification, sendtype="client"))
         del self.failing_clients[ip]
 
     def _login(self, event, user_account, user_profile, client_config):
@@ -120,12 +119,15 @@ class Authenticator(ConfigurableComponent):
 
         user_account.passhash = ""
         self.fireEvent(
-            authentication(user_account.name, (
-                user_account, user_profile, client_config),
-                           event.clientuuid,
-                           user_account.uuid,
-                           event.sock),
-            "auth")
+            authentication(
+                user_account.name,
+                (user_account, user_profile, client_config),
+                event.clientuuid,
+                user_account.uuid,
+                event.sock,
+            ),
+            "auth",
+        )
 
     @handler("authenticationrequest", channel="auth")
     def authenticationrequest(self, event):
@@ -134,7 +136,7 @@ class Authenticator(ConfigurableComponent):
         """
 
         if event.sock.getpeername()[0] in self.failing_clients:
-            self.log('Client failed a login and has to wait', lvl=debug)
+            self.log("Client failed a login and has to wait", lvl=debug)
             return
 
         if event.auto:
@@ -151,34 +153,30 @@ class Authenticator(ConfigurableComponent):
 
         # noinspection PyBroadException
         try:
-            client_config = objectmodels['client'].find_one({
-                'uuid': event.requestedclientuuid
-            })
+            client_config = objectmodels["client"].find_one(
+                {"uuid": event.requestedclientuuid}
+            )
         except Exception:
             client_config = None
 
         if client_config is None or client_config.autologin is False:
-            self.log("Autologin failed:", event.requestedclientuuid,
-                     lvl=error)
+            self.log("Autologin failed:", event.requestedclientuuid, lvl=error)
             self._fail(event)
             return
 
         try:
-            user_account = objectmodels['user'].find_one({
-                'uuid': client_config.owner
-            })
+            user_account = objectmodels["user"].find_one({"uuid": client_config.owner})
             if user_account is None:
                 raise AuthenticationError
             self.log("Autologin for", user_account.name, lvl=debug)
         except Exception as e:
-            self.log("No user object due to error: ", e, type(e),
-                     lvl=error)
+            self.log("No user object due to error: ", e, type(e), lvl=error)
             self._fail(event)
             return
 
         if user_account.active is False:
             self.log("Account deactivated.")
-            self._fail(event, 'Account deactivated.')
+            self._fail(event, "Account deactivated.")
             return
 
         user_profile = self._get_profile(user_account)
@@ -192,29 +190,25 @@ class Authenticator(ConfigurableComponent):
 
         # TODO: Refactor to simplify
 
-        self.log("Auth request for ", event.username, 'client:',
-                 event.clientuuid)
+        self.log("Auth request for ", event.username, "client:", event.clientuuid)
 
         # TODO: Define the requirements for secure passwords etc.
         # They're also required in the Enrol module..!
 
         if (len(event.username) < 1) or (len(event.password) < 5):
             self.log("Illegal username or password received, login cancelled", lvl=warn)
-            self._fail(event, 'Password or username too short')
+            self._fail(event, "Password or username too short")
             return
 
         client_config = None
 
         try:
-            user_account = objectmodels['user'].find_one({
-                'name': event.username
-            })
+            user_account = objectmodels["user"].find_one({"name": event.username})
             # self.log("Account: %s" % user_account._fields, lvl=debug)
             if user_account is None:
                 raise AuthenticationError
         except Exception as e:
-            self.log("No userobject due to error: ", e, type(e),
-                     lvl=error)
+            self.log("No userobject due to error: ", e, type(e), lvl=error)
             self._fail(event)
             return
 
@@ -222,7 +216,7 @@ class Authenticator(ConfigurableComponent):
 
         if user_account.active is False:
             self.log("Account deactivated.")
-            self._fail(event, 'Account deactivated.')
+            self._fail(event, "Account deactivated.")
             return
 
         if not std_hash(event.password, self.salt) == user_account.passhash:
@@ -230,28 +224,27 @@ class Authenticator(ConfigurableComponent):
             self._fail(event)
             return
 
-        self.log("Passhash matches, checking client and profile.",
-                 lvl=debug)
+        self.log("Passhash matches, checking client and profile.", lvl=debug)
 
         requested_client_uuid = event.requestedclientuuid
         if requested_client_uuid is not None:
-            client_config = objectmodels['client'].find_one({
-                'uuid': requested_client_uuid
-            })
+            client_config = objectmodels["client"].find_one(
+                {"uuid": requested_client_uuid}
+            )
 
         if client_config:
-            self.log("Checking client configuration permissions",
-                     lvl=debug)
+            self.log("Checking client configuration permissions", lvl=debug)
             # TODO: Shareable client configurations?
             if client_config.owner != user_account.uuid:
                 client_config = None
-                self.log("Unauthorized client configuration "
-                         "requested",
-                         lvl=warn)
+                self.log("Unauthorized client configuration " "requested", lvl=warn)
         else:
-            self.log("Unknown client configuration requested: ",
-                     requested_client_uuid, event.__dict__,
-                     lvl=warn)
+            self.log(
+                "Unknown client configuration requested: ",
+                requested_client_uuid,
+                event.__dict__,
+                lvl=warn,
+            )
 
         if not client_config:
             self.log("Creating new default client configuration")
@@ -259,11 +252,13 @@ class Authenticator(ConfigurableComponent):
             # -> Create a new client configuration
             uuid = event.clientuuid if event.clientuuid is not None else str(uuid4())
 
-            client_config = objectmodels['client']({'uuid': uuid})
+            client_config = objectmodels["client"]({"uuid": uuid})
 
-            client_config.name = std_human_uid(kind='place')
+            client_config.name = std_human_uid(kind="place")
 
-            client_config.description = "New client configuration from " + user_account.name
+            client_config.description = (
+                "New client configuration from " + user_account.name
+            )
             client_config.owner = user_account.uuid
 
             # TODO: Get client configuration storage done right, this one is too simple
@@ -279,24 +274,21 @@ class Authenticator(ConfigurableComponent):
 
         try:
             # TODO: Load active profile, not just any
-            user_profile = objectmodels['profile'].find_one(
-                {'owner': str(user_account.uuid)})
-            self.log("Profile: ", user_profile,
-                     user_account.uuid, lvl=debug)
+            user_profile = objectmodels["profile"].find_one(
+                {"owner": str(user_account.uuid)}
+            )
+            self.log("Profile: ", user_profile, user_account.uuid, lvl=debug)
         except Exception as e:
-            self.log("No profile due to error: ", e, type(e),
-                     lvl=error)
+            self.log("No profile due to error: ", e, type(e), lvl=error)
             user_profile = None
 
         if not user_profile:
             default = {
-                'uuid': std_uuid(),
-                'owner': user_account.uuid,
-                'userdata': {
-                    'notes': 'Default profile of ' + user_account.name
-                }
+                "uuid": std_uuid(),
+                "owner": user_account.uuid,
+                "userdata": {"notes": "Default profile of " + user_account.name},
             }
-            user_profile = objectmodels['profile'](default)
+            user_profile = objectmodels["profile"](default)
             user_profile.save()
 
         return user_profile

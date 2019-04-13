@@ -37,153 +37,146 @@ from isomer.schemata.base import base_object, uuid_object, language_field
 from isomer.misc import i18n as _
 
 ScreenRotationSchema = {
-    'id': '#screenrotation',
-    'type': 'object',
-    'properties': {
-        'state': {'type': 'string', 'minLength': 1, 'title': _('New State'),
-                  'description': _('State to switch to')
-                  },
-        'args': {
-            'type': 'array',
-            'items': {
-                'type': 'object',
-                'properties': {
-                    'name': {'type': 'string', 'title': _('Argument Name')
-                             },
-                    'value': {'type': 'string', 'title': _('Argument Value')
-                              }
-                }
-            }
+    "id": "#screenrotation",
+    "type": "object",
+    "properties": {
+        "state": {
+            "type": "string",
+            "minLength": 1,
+            "title": _("New State"),
+            "description": _("State to switch to"),
         },
-        'duration': {'type': 'number', 'title': _('Duration'),
-                     'description': _('Timeout in seconds to swith to the next '
-                                      'screen')}
-    }
+        "args": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "name": {"type": "string", "title": _("Argument Name")},
+                    "value": {"type": "string", "title": _("Argument Value")},
+                },
+            },
+        },
+        "duration": {
+            "type": "number",
+            "title": _("Duration"),
+            "description": _("Timeout in seconds to swith to the next " "screen"),
+        },
+    },
 }
 
-ClientconfigSchema = base_object(
-    'client',
-    roles_list=['crew'],
-    roles_create=['crew'],
-)
+ClientconfigSchema = base_object("client", roles_list=["crew"], roles_create=["crew"])
 
-ClientconfigSchema['properties'].update({
-    'autologin': {
-        'type': 'boolean', 'title': _('Automatic login'),
-        'description': _('Automatically logs in this client.')
-    },
-    'active': {
-        'type': 'boolean', 'title': _('Active client'),
-        'description': _('Indicates whether client is currently active.')
-    },
-    'locked': {
-        'type': 'boolean', 'title': _('Locked client'),
-        'description': _('Determines whether the client should be '
-                         'locked against changes.')
-    },
-    'fullscreen': {
-        'type': 'boolean', 'title': _('Switch fullscreen'),
-        'description': _('Switch to fullscreen after login')
-    },
-    'hide_menu': {
-        'type': 'boolean', 'title': _('Hide menu'),
-        'description': _('Hide menu after login')
-    },
-    'language': language_field(),
-    'infoscreen': {
-        'type': 'boolean', 'title': _('Infoscreen client'),
-        'description': _('This client rotates set up infoscreens')
-    },
-    'currentview': {
-        'type': 'string', 'minLength': 1, 'title': _('Name'),
-        'description': _('Client name')
-    },
-    'theme': {
-        'type': 'string', 'title': _('Client Theme'),
-        'description': _('Theme used for user interface')
-    },
-    'description': {
-        'type': 'string', 'format': 'html',
-        'title': _('Client description'),
-        'description': _('Client description')
-    },
-    'infoscreenrotations': {
-        'type': 'array',
-        'items': ScreenRotationSchema
-    },
-    'modules': {
-        'type': 'object',
-        'default': {}
+ClientconfigSchema["properties"].update(
+    {
+        "autologin": {
+            "type": "boolean",
+            "title": _("Automatic login"),
+            "description": _("Automatically logs in this client."),
+        },
+        "active": {
+            "type": "boolean",
+            "title": _("Active client"),
+            "description": _("Indicates whether client is currently active."),
+        },
+        "locked": {
+            "type": "boolean",
+            "title": _("Locked client"),
+            "description": _(
+                "Determines whether the client should be " "locked against changes."
+            ),
+        },
+        "fullscreen": {
+            "type": "boolean",
+            "title": _("Switch fullscreen"),
+            "description": _("Switch to fullscreen after login"),
+        },
+        "hide_menu": {
+            "type": "boolean",
+            "title": _("Hide menu"),
+            "description": _("Hide menu after login"),
+        },
+        "language": language_field(),
+        "infoscreen": {
+            "type": "boolean",
+            "title": _("Infoscreen client"),
+            "description": _("This client rotates set up infoscreens"),
+        },
+        "currentview": {
+            "type": "string",
+            "minLength": 1,
+            "title": _("Name"),
+            "description": _("Client name"),
+        },
+        "theme": {
+            "type": "string",
+            "title": _("Client Theme"),
+            "description": _("Theme used for user interface"),
+        },
+        "description": {
+            "type": "string",
+            "format": "html",
+            "title": _("Client description"),
+            "description": _("Client description"),
+        },
+        "infoscreenrotations": {"type": "array", "items": ScreenRotationSchema},
+        "modules": {"type": "object", "default": {}},
     }
-})
+)
 
 ClientconfigForm = [
     {
-        'type': 'section',
-        'htmlClass': 'row',
-        'items': [
+        "type": "section",
+        "htmlClass": "row",
+        "items": [
             {
-                'type': 'section',
-                'htmlClass': 'col-xs-4',
-                'items': [
-                    'name', 'theme', 'infoscreen'
-                ]
+                "type": "section",
+                "htmlClass": "col-xs-4",
+                "items": ["name", "theme", "infoscreen"],
             },
             {
-                'type': 'section',
-                'htmlClass': 'col-xs-4',
-                'items': [
-                    'language', {'key': 'active', 'readonly': True}, 'locked'
-                ]
+                "type": "section",
+                "htmlClass": "col-xs-4",
+                "items": ["language", {"key": "active", "readonly": True}, "locked"],
             },
             {
-                'type': 'section',
-                'htmlClass': 'col-xs-4',
-                'items': [
-                    'autologin', 'fullscreen', 'hide_menu'
-                ]
-            }
-        ]
+                "type": "section",
+                "htmlClass": "col-xs-4",
+                "items": ["autologin", "fullscreen", "hide_menu"],
+            },
+        ],
     },
     {
-        'key': 'infoscreenrotations',
-        'add': "Add infoscreen",
-        'condition': 'model.infoscreen',
-        'style': {
-            'add': "btn-success"
-        },
-        'items': [
-            'infoscreenrotations[].state',
-            'infoscreenrotations[].duration',
+        "key": "infoscreenrotations",
+        "add": "Add infoscreen",
+        "condition": "model.infoscreen",
+        "style": {"add": "btn-success"},
+        "items": [
+            "infoscreenrotations[].state",
+            "infoscreenrotations[].duration",
             {
-                'key': 'infoscreenrotations[].args',
-                'add': 'Add argument',
-                'style': {
-                    'add': 'btn-success',
-                },
-                'items': [
-                    'infoscreenrotations[].args[].name',
-                    'infoscreenrotations[].args[].value'
-                ]
-            }
-        ]
+                "key": "infoscreenrotations[].args",
+                "add": "Add argument",
+                "style": {"add": "btn-success"},
+                "items": [
+                    "infoscreenrotations[].args[].name",
+                    "infoscreenrotations[].args[].value",
+                ],
+            },
+        ],
     },
-    'description',
+    "description",
     {
-        'id': 'modules',
-        'type': 'section',
-        'htmlClass': 'row',
-        'items': [
-            {
-                'type': 'help',
-                'helpvalue': _('<h2>Default module configurations</h2>')
-            }
-        ]
+        "id": "modules",
+        "type": "section",
+        "htmlClass": "row",
+        "items": [
+            {"type": "help", "helpvalue": _("<h2>Default module configurations</h2>")}
+        ],
     },
-    savebutton
+    savebutton,
 ]
 
-Client = {'schema': ClientconfigSchema, 'form': ClientconfigForm}
+Client = {"schema": ClientconfigSchema, "form": ClientconfigForm}
 
 __schema__ = ClientconfigSchema
 __form__ = ClientconfigForm

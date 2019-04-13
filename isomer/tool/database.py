@@ -47,92 +47,103 @@ from isomer.tool import log, ask
 def db(ctx):
     """[GROUP] Database management operations"""
 
-    #log(ctx.obj, pretty=True)
+    # log(ctx.obj, pretty=True)
     from isomer import database
-    database.initialize(ctx.obj['dbhost'], ctx.obj['dbname'])
-    ctx.obj['db'] = database
+
+    database.initialize(ctx.obj["dbhost"], ctx.obj["dbname"])
+    ctx.obj["db"] = database
 
 
-@db.command(short_help='List all mongodb databases')
+@db.command(short_help="List all mongodb databases")
 @click.pass_context
 def list_all(ctx):
     """List all available Mongo Databases on the configured database host."""
     from pymongo import MongoClient
 
-    client = MongoClient(ctx.obj['dbhost'])
+    client = MongoClient(ctx.obj["dbhost"])
     log(client.list_database_names())
-    log('Done')
+    log("Done")
 
 
-@db.command(short_help='Rename database')
-@click.argument('source')
-@click.argument('destination')
-@click.option('--keep', is_flag=True, help='Keep original database', default=False)
-@click.option('--clear-target', is_flag=True, help='Erase target if it exists', default=False)
+@db.command(short_help="Rename database")
+@click.argument("source")
+@click.argument("destination")
+@click.option("--keep", is_flag=True, help="Keep original database", default=False)
+@click.option(
+    "--clear-target", is_flag=True, help="Erase target if it exists", default=False
+)
 @click.pass_context
 def rename(ctx, source, destination, keep, clear_target):
     """Rename Mongodb databases"""
 
     from pymongo import MongoClient
 
-    client = MongoClient(ctx.obj['dbhost'])
+    client = MongoClient(ctx.obj["dbhost"])
 
     if source not in client.list_database_names():
-        log('Source database', source, 'does not exist!', lvl=warn)
+        log("Source database", source, "does not exist!", lvl=warn)
         sys.exit(-1)
 
     database = client.admin
-    log('Copying', source, 'to', destination)
+    log("Copying", source, "to", destination)
 
     if destination in client.list_database_names():
-        log('Destination exists')
+        log("Destination exists")
         if clear_target:
-            log('Clearing')
+            log("Clearing")
             client.drop_database(destination)
         else:
-            log('Not destroying existing data', lvl=warn)
+            log("Not destroying existing data", lvl=warn)
             sys.exit(-1)
 
-    database.command('copydb', fromdb=source, todb=destination)
+    database.command("copydb", fromdb=source, todb=destination)
 
     if not keep:
-        log('Deleting old database')
+        log("Deleting old database")
         client.drop_database(source)
 
-    log('Done')
+    log("Done")
 
 
-@db.command(short_help='Irrevocably remove collection content')
-@click.argument('schema')
+@db.command(short_help="Irrevocably remove collection content")
+@click.argument("schema")
 @click.pass_context
 def clear(ctx, schema):
     """Clears an entire database collection irrevocably. Use with caution!"""
 
-    response = ask('Are you sure you want to delete the collection "%s"' % (
-        schema), default='N', data_type='bool')
+    response = ask(
+        'Are you sure you want to delete the collection "%s"' % schema,
+        default="N",
+        data_type="bool",
+    )
     if response is True:
-        host, port = ctx.obj['dbhost'].split(':')
+        host, port = ctx.obj["dbhost"].split(":")
 
         client = pymongo.MongoClient(host=host, port=int(port))
-        database = client[ctx.obj['dbname']]
+        database = client[ctx.obj["dbname"]]
 
-        log("Clearing collection for", schema, lvl=warn,
-            emitter='MANAGE')
+        log("Clearing collection for", schema, lvl=warn, emitter="MANAGE")
         result = database.drop_collection(schema)
-        if not result['ok']:
+        if not result["ok"]:
             log("Could not drop collection:", lvl=error)
             log(result, pretty=True, lvl=error)
         else:
             log("Done")
 
 
-@db.command(short_help='Irrevocably remove database')
-@click.option('--force', '-f', help="Force deletion without user intervention", is_flag=True, default=False)
+@db.command(short_help="Irrevocably remove database")
+@click.option(
+    "--force",
+    "-f",
+    help="Force deletion without user intervention",
+    is_flag=True,
+    default=False,
+)
 @click.pass_context
 def delete(ctx, force):
     """Deletes an entire database irrevocably. Use with extreme caution!"""
 
-    delete_database(ctx.obj['dbhost'], ctx.obj['dbname'], force)
+    delete_database(ctx.obj["dbhost"], ctx.obj["dbname"], force)
 
 
 def delete_database(db_host, db_name, force):
@@ -141,10 +152,13 @@ def delete_database(db_host, db_name, force):
     if force:
         response = True
     else:
-        response = ask('Are you sure you want to delete database "%s"' % (
-            db_name), default='N', data_type='bool')
+        response = ask(
+            'Are you sure you want to delete database "%s"' % db_name,
+            default="N",
+            data_type="bool",
+        )
     if response is True:
-        host, port = db_host.split(':')
+        host, port = db_host.split(":")
         log("Dropping database", db_name, lvl=warn)
 
         client = pymongo.MongoClient(host=host, port=int(port))
@@ -154,13 +168,12 @@ def delete_database(db_host, db_name, force):
 
 
 @db.group(cls=DYMGroup)
-@click.option("--schema", help="Specify schema to work with",
-              default=None)
+@click.option("--schema", help="Specify schema to work with", default=None)
 @click.pass_context
 def migrations(ctx, schema):
     """[GROUP] Data migration management"""
 
-    ctx.obj['schema'] = schema
+    ctx.obj["schema"] = schema
 
 
 @migrations.command(short_help="make new migrations")
@@ -168,4 +181,4 @@ def migrations(ctx, schema):
 def make(ctx):
     """Makes new migrations for all or the specified schema"""
 
-    make_migrations(ctx.obj['schema'])
+    make_migrations(ctx.obj["schema"])

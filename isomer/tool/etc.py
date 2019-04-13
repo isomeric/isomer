@@ -40,14 +40,19 @@ from tomlkit import document, table, nl, comment
 from isomer.misc import std_now
 from isomer.tool import log, error, debug, verbose, warn
 from isomer.tool.defaults import EXIT_NO_PERMISSION
-from isomer.misc.path import get_etc_path, get_etc_instance_path, get_etc_remote_path, get_etc_remote_keys_path
+from isomer.misc.path import (
+    get_etc_path,
+    get_etc_instance_path,
+    get_etc_remote_path,
+    get_etc_remote_keys_path,
+)
 
 NonExistentKey = NonExistentKey
 
 
 def create_configuration(ctx):
     """Creates an initial configuration"""
-    log('Creating new configuration from template', lvl=verbose)
+    log("Creating new configuration from template", lvl=verbose)
 
     if not os.path.exists(get_etc_path()):
         try:
@@ -56,11 +61,15 @@ def create_configuration(ctx):
             os.makedirs(get_etc_remote_path())
             os.makedirs(get_etc_remote_keys_path())
         except PermissionError:
-            log('PermissionError: Could not create configuration directory "%s"' % get_etc_path(), lvl=warn)
+            log(
+                'PermissionError: Could not create configuration directory "%s"'
+                % get_etc_path(),
+                lvl=warn,
+            )
             sys.exit(EXIT_NO_PERMISSION)
 
     write_configuration(configuration_template)
-    ctx.obj['config'] = configuration_template
+    ctx.obj["config"] = configuration_template
 
     return ctx
 
@@ -68,28 +77,31 @@ def create_configuration(ctx):
 def write_configuration(config):
     """Write the main system configuration"""
 
-    filename = os.path.join(get_etc_path(), 'isomer.conf')
+    filename = os.path.join(get_etc_path(), "isomer.conf")
 
     try:
-        with open(filename, 'w') as f:
+        with open(filename, "w") as f:
             f.write(dumps(config))
-        log('Isomer configuration stored.', lvl=debug)
+        log("Isomer configuration stored.", lvl=debug)
     except PermissionError:
-        log('PermissionError: Could not write instance management configuration file', lvl=error)
+        log(
+            "PermissionError: Could not write instance management configuration file",
+            lvl=error,
+        )
         sys.exit(EXIT_NO_PERMISSION)
 
 
 def load_configuration():
     """Read the main system configuration"""
 
-    filename = os.path.join(get_etc_path(), 'isomer.conf')
+    filename = os.path.join(get_etc_path(), "isomer.conf")
 
     try:
-        with open(filename, 'r') as f:
+        with open(filename, "r") as f:
             config = loads(f.read())
-            log('Isomer configuration loaded.', lvl=debug)
+            log("Isomer configuration loaded.", lvl=debug)
     except FileNotFoundError:
-        log('Configuration not found.', lvl=warn)
+        log("Configuration not found.", lvl=warn)
         return None
 
     return config
@@ -99,14 +111,18 @@ def valid_configuration(ctx):
     """Validates an isomer site configuration"""
 
     ports = []
-    for name, item in ctx.obj['instances'].items():
-        log('Valdiating instance', name, lvl=debug)
+    for name, item in ctx.obj["instances"].items():
+        log("Valdiating instance", name, lvl=debug)
         log(item, pretty=True, lvl=verbose)
-        if item['web_port'] in ports:
-            log('Duplicate web port found in instance: %s:%i' % (name, item['web_port']), lvl=error)
+        if item["web_port"] in ports:
+            log(
+                "Duplicate web port found in instance: %s:%i"
+                % (name, item["web_port"]),
+                lvl=error,
+            )
             return False
         else:
-            ports.append(item['web_port'])
+            ports.append(item["web_port"])
 
     return True
 
@@ -114,10 +130,10 @@ def valid_configuration(ctx):
 def load_instance(instance):
     """Read a single instance configuration"""
 
-    file = os.path.join(get_etc_instance_path(), instance + '.conf')
+    file = os.path.join(get_etc_instance_path(), instance + ".conf")
     with open(file) as f:
         config = loads(f.read())
-        log('Instance configuration loaded.', lvl=debug)
+        log("Instance configuration loaded.", lvl=debug)
 
     return config
 
@@ -132,8 +148,8 @@ def load_instances():
             name = os.path.join(root, file)
 
             with open(name) as f:
-                config[file.split('.')[0]] = loads(f.read())
-                log('Instance configuration loaded.', lvl=debug)
+                config[file.split(".")[0]] = loads(f.read())
+                log("Instance configuration loaded.", lvl=debug)
 
     return config
 
@@ -141,25 +157,30 @@ def load_instances():
 def write_instance(instance_configuration):
     """Write a new or updated instance"""
 
-    filename = os.path.join(get_etc_instance_path(), instance_configuration['name'] + '.conf')
+    filename = os.path.join(
+        get_etc_instance_path(), instance_configuration["name"] + ".conf"
+    )
     try:
-        with open(filename, 'w') as f:
+        with open(filename, "w") as f:
             f.write(dumps(instance_configuration))
-        log('Instance configuration stored.', lvl=debug)
+        log("Instance configuration stored.", lvl=debug)
     except PermissionError:
-        log('PermissionError: Could not write instance management configuration file', lvl=error)
+        log(
+            "PermissionError: Could not write instance management configuration file",
+            lvl=error,
+        )
         sys.exit(EXIT_NO_PERMISSION)
 
 
 def remove_instance(instance_configuration):
     """Remove the configuration file for an instance"""
 
-    filename = os.path.join(get_etc_instance_path(), instance_configuration + '.conf')
+    filename = os.path.join(get_etc_instance_path(), instance_configuration + ".conf")
     if os.path.exists(filename):
-        log('Removing instance', instance_configuration)
+        log("Removing instance", instance_configuration)
         os.remove(filename)
     else:
-        log('Instance not found.')
+        log("Instance not found.")
 
 
 def load_remotes():
@@ -170,8 +191,8 @@ def load_remotes():
     for root, _, files in os.walk(get_etc_remote_path()):
         for file in files:
             with open(os.path.join(root, file)) as f:
-                config[file.rstrip('.conf')] = loads(f.read())
-                log('Remote configuration loaded.', lvl=debug)
+                config[file.rstrip(".conf")] = loads(f.read())
+                log("Remote configuration loaded.", lvl=debug)
 
     return config
 
@@ -179,69 +200,74 @@ def load_remotes():
 def write_remote(remote):
     """Write a new or updated remote"""
 
-    filename = os.path.join(get_etc_remote_path(), remote['name'] + '.conf')
+    filename = os.path.join(get_etc_remote_path(), remote["name"] + ".conf")
     try:
-        with open(filename, 'w') as f:
+        with open(filename, "w") as f:
             f.write(dumps(remote))
-        log('Instance configuration stored.', lvl=debug)
+        log("Instance configuration stored.", lvl=debug)
     except PermissionError:
-        log('PermissionError: Could not write instance management configuration file', lvl=error)
+        log(
+            "PermissionError: Could not write instance management configuration file",
+            lvl=error,
+        )
         sys.exit(EXIT_NO_PERMISSION)
 
 
 configuration_template = document()
-configuration_template.add(comment('Isomer Instance Management Configuration'))
-configuration_template.add(comment('Created on %s' % std_now()))
+configuration_template.add(comment("Isomer Instance Management Configuration"))
+configuration_template.add(comment("Created on %s" % std_now()))
 configuration_template.add(nl())
 
 meta = table()
-meta.add('distribution', 'debian')
-meta['distribution'].comment('Currently only debian supported')
-meta.add('init', 'systemd')
-meta['init'].comment('Currently only systemd supported')
-meta.add('prefix', '')
+meta.add("distribution", "debian")
+meta["distribution"].comment("Currently only debian supported")
+meta.add("init", "systemd")
+meta["init"].comment("Currently only systemd supported")
+meta.add("prefix", "")
 
-configuration_template.add('meta', meta)
+configuration_template.add("meta", meta)
 
 instance_template = table()
-instance_template.add('name', '')
-instance_template.add('contact', '')
-instance_template.add('active', False)
-instance_template.add('environment', 'blue')
-instance_template.add('loglevel', '20')
-instance_template.add('quiet', True)
-instance_template.add('database_host', 'localhost')
-instance_template.add('database_port', 27017)
-instance_template.add('database_type', 'mongodb')
-instance_template.add('user', 'isomer')
-instance_template.add('group', 'isomer')
-instance_template.add('web_address', '127.0.0.1')
-instance_template['web_address'].comment('Local listening address of backend')
-instance_template.add('web_hostnames', 'localhost')
-instance_template['web_hostnames'].comment('Comma separated list of FQDN hostnames')
-instance_template.add('web_port', 8055)
-instance_template.add('web_certificate', '')
-instance_template.add('source', '')
-instance_template['source'].comment('git, link or copy')
-instance_template.add('url', '')
-instance_template.add('modules', [])
+instance_template.add("name", "")
+instance_template.add("contact", "")
+instance_template.add("active", False)
+instance_template.add("environment", "blue")
+instance_template.add("loglevel", "20")
+instance_template.add("quiet", True)
+instance_template.add("database_host", "localhost")
+instance_template.add("database_port", 27017)
+instance_template.add("database_type", "mongodb")
+instance_template.add("user", "isomer")
+instance_template.add("group", "isomer")
+instance_template.add("web_address", "127.0.0.1")
+instance_template["web_address"].comment("Local listening address of backend")
+instance_template.add("web_hostnames", "localhost")
+instance_template["web_hostnames"].comment("Comma separated list of FQDN hostnames")
+instance_template.add("web_port", 8055)
+instance_template.add("web_certificate", "")
+instance_template.add("source", "")
+instance_template["source"].comment("git, link or copy")
+instance_template.add("url", "")
+instance_template.add("modules", [])
 
-instance_template['database_type'].comment('Currently only mongodb supported')
-instance_template.add('webserver', 'nginx')
-instance_template['webserver'].comment('Currently only nginx supported')
-instance_template.add('service_template', 'builtin')
-instance_template['service_template'].comment('Currently only a builtin one is supported')
+instance_template["database_type"].comment("Currently only mongodb supported")
+instance_template.add("webserver", "nginx")
+instance_template["webserver"].comment("Currently only nginx supported")
+instance_template.add("service_template", "builtin")
+instance_template["service_template"].comment(
+    "Currently only a builtin one is supported"
+)
 
 environment_template = table()
-environment_template.add('version', '')
-environment_template.add('old_version', '')
-environment_template.add('database', '')
-environment_template.add('modules', {})
-environment_template.add('installed', False)
-environment_template.add('provisioned', False)
-environment_template.add('migrated', False)
-environment_template.add('frontend', False)
-environment_template.add('tested', False)
+environment_template.add("version", "")
+environment_template.add("old_version", "")
+environment_template.add("database", "")
+environment_template.add("modules", {})
+environment_template.add("installed", False)
+environment_template.add("provisioned", False)
+environment_template.add("migrated", False)
+environment_template.add("frontend", False)
+environment_template.add("tested", False)
 
 environments = table()
 blue = environment_template
@@ -252,27 +278,27 @@ environments.add("green", green)
 
 archive = table()
 
-environments.add('archive', archive)
+environments.add("archive", archive)
 
 instance_template.add("environments", environments)
 
 remote_template = document()
-remote_template.add(comment('Isomer Remote Instance Configuration'))
-remote_template.add(comment('Created on %s' % std_now()))
+remote_template.add(comment("Isomer Remote Instance Configuration"))
+remote_template.add(comment("Created on %s" % std_now()))
 remote_template.add(nl())
 
-remote_template.add('platform', '')
-remote_template.add('name', '')
-remote_template.add('use_sudo', False)
-remote_template.add('source', '')
-remote_template.add('url', '')
+remote_template.add("platform", "")
+remote_template.add("name", "")
+remote_template.add("use_sudo", False)
+remote_template.add("source", "")
+remote_template.add("url", "")
 
 login_table = table()
 
-login_table.add('hostname', '')
-login_table.add('password', '')
-login_table.add('username', '')
-login_table.add('private_key_file', '')
-login_table.add('port', 22)
+login_table.add("hostname", "")
+login_table.add("password", "")
+login_table.add("username", "")
+login_table.add("private_key_file", "")
+login_table.add("port", 22)
 
-remote_template.add('login', login_table)
+remote_template.add("login", login_table)

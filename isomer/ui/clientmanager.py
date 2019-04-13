@@ -43,13 +43,22 @@ from base64 import b64decode
 from isomer.component import handler
 from circuits.net.events import write
 from circuits import Event, Timer
-from isomer.events.system import get_anonymous_events, get_user_events, authorized_event, anonymous_event
-from isomer.events.client import authenticationrequest, send, clientdisconnect, \
-    userlogin, userlogout
+from isomer.events.system import (
+    get_anonymous_events,
+    get_user_events,
+    authorized_event,
+    anonymous_event,
+)
+from isomer.events.client import (
+    authenticationrequest,
+    send,
+    clientdisconnect,
+    userlogin,
+    userlogout,
+)
 from isomer.component import ConfigurableComponent
 from isomer.database import objectmodels
-from isomer.logger import error, warn, critical, debug, info, network, \
-    verbose, hilight
+from isomer.logger import error, warn, critical, debug, info, network, verbose, hilight
 from isomer.ui.clientobjects import Socket, Client, User
 from isomer.debugger import cli_register_event
 from isomer.misc import std_table, i18n as _, all_languages, language_token_to_name
@@ -57,31 +66,37 @@ from isomer.misc import std_table, i18n as _, all_languages, language_token_to_n
 
 class cli_users(Event):
     """Display the list of connected users from the clientmanager"""
+
     pass
 
 
 class cli_clients(Event):
     """Display the list of connected clients from the clientmanager"""
+
     pass
 
 
 class cli_client(Event):
     """Display detailed info about a connected client"""
+
     pass
 
 
 class cli_events(Event):
     """Display the list of authorized and anonymous events"""
+
     pass
 
 
 class cli_sources(Event):
     """Display the list of authorized and anonymous events"""
+
     pass
 
 
 class cli_who(Event):
     """Display the list of all users and clients"""
+
     pass
 
 
@@ -94,6 +109,7 @@ class reset_flood_offenders(Event):
 
 
 # Ping for latency measurement
+
 
 class ping(authorized_event):
     pass
@@ -121,10 +137,10 @@ class ClientManager(ConfigurableComponent):
     communication.
     """
 
-    channel = 'isomer-web'
+    channel = "isomer-web"
 
     def __init__(self, *args):
-        super(ClientManager, self).__init__('CM', *args)
+        super(ClientManager, self).__init__("CM", *args)
 
         self._clients = {}
         self._sockets = {}
@@ -137,47 +153,56 @@ class ClientManager(ConfigurableComponent):
         self.authorized_events = {}
         self.anonymous_events = {}
 
-        self.fireEvent(cli_register_event('users', cli_users))
-        self.fireEvent(cli_register_event('clients', cli_clients))
-        self.fireEvent(cli_register_event('client', cli_client))
-        self.fireEvent(cli_register_event('events', cli_events))
-        self.fireEvent(cli_register_event('sources', cli_sources))
-        self.fireEvent(cli_register_event('who', cli_who))
+        self.fireEvent(cli_register_event("users", cli_users))
+        self.fireEvent(cli_register_event("clients", cli_clients))
+        self.fireEvent(cli_register_event("client", cli_client))
+        self.fireEvent(cli_register_event("events", cli_events))
+        self.fireEvent(cli_register_event("sources", cli_sources))
+        self.fireEvent(cli_register_event("who", cli_who))
 
         self._flood_counters_resetter = Timer(
-            2, Event.create('reset_flood_counters'), persist=True
+            2, Event.create("reset_flood_counters"), persist=True
         ).register(self)
         self._flood_offender_resetter = Timer(
-            10, Event.create('reset_flood_offenders'), persist=True
+            10, Event.create("reset_flood_offenders"), persist=True
         ).register(self)
 
-    @handler('cli_client')
+    @handler("cli_client")
     def client_details(self, *args):
         """Display known details about a given client"""
 
-        self.log(_('Client details:', lang='de'))
+        self.log(_("Client details:", lang="de"))
         client = self._clients[args[0]]
 
-        self.log('UUID:', client.uuid, 'IP:', client.ip, 'Name:', client.name, 'User:', self._users[client.useruuid],
-                 pretty=True)
+        self.log(
+            "UUID:",
+            client.uuid,
+            "IP:",
+            client.ip,
+            "Name:",
+            client.name,
+            "User:",
+            self._users[client.useruuid],
+            pretty=True,
+        )
 
-    @handler('cli_clients')
+    @handler("cli_clients")
     def client_list(self, *args):
         """Display a list of connected clients"""
         if len(self._clients) == 0:
-            self.log('No clients connected')
+            self.log("No clients connected")
         else:
             self.log(self._clients, pretty=True)
 
-    @handler('cli_users')
+    @handler("cli_users")
     def users_list(self, *args):
         """Display a list of connected users"""
         if len(self._users) == 0:
-            self.log('No users connected')
+            self.log("No users connected")
         else:
             self.log(self._users, pretty=True)
 
-    @handler('cli_sources')
+    @handler("cli_sources")
     def sources_list(self, *args):
         """Display a list of all registered events"""
 
@@ -190,7 +215,7 @@ class ClientManager(ConfigurableComponent):
         for source in sources:
             pprint(source)
 
-    @handler('cli_events')
+    @handler("cli_events")
     def events_list(self, *args):
         """Display a list of all registered events"""
 
@@ -206,7 +231,7 @@ class ClientManager(ConfigurableComponent):
                     elif a[key] == b[key]:
                         pass  # same leaf value
                     else:
-                        raise Exception('Conflict at %s' % '.'.join(path + [str(key)]))
+                        raise Exception("Conflict at %s" % ".".join(path + [str(key)]))
                 else:
                     a[key] = b[key]
             return a
@@ -221,16 +246,16 @@ class ClientManager(ConfigurableComponent):
 
         self.log(events, pretty=True)
 
-    @handler('cli_who')
+    @handler("cli_who")
     def who(self, *args):
         """Display a table of connected users and clients"""
         if len(self._users) == 0:
-            self.log('No users connected')
+            self.log("No users connected")
             if len(self._clients) == 0:
-                self.log('No clients connected')
+                self.log("No clients connected")
                 return
 
-        Row = namedtuple("Row", ['User', 'Client', 'IP'])
+        Row = namedtuple("Row", ["User", "Client", "IP"])
         rows = []
 
         for user in self._users.values():
@@ -241,12 +266,12 @@ class ClientManager(ConfigurableComponent):
 
         for key, client in self._clients.items():
             if client.useruuid is None:
-                row = Row('ANON', key, client.ip)
+                row = Row("ANON", key, client.ip)
                 rows.append(row)
 
         self.log("\n" + std_table(rows))
 
-    @handler('ready')
+    @handler("ready")
     def ready(self):
         """Compile events"""
 
@@ -269,8 +294,9 @@ class ClientManager(ConfigurableComponent):
                 useruuid = self._clients[clientuuid].useruuid
 
                 self.log("Firing disconnect event", lvl=debug)
-                self.fireEvent(clientdisconnect(clientuuid, self._clients[
-                    clientuuid].useruuid))
+                self.fireEvent(
+                    clientdisconnect(clientuuid, self._clients[clientuuid].useruuid)
+                )
 
                 self.log("Logging out relevant client", lvl=debug)
                 if useruuid is not None:
@@ -279,17 +305,19 @@ class ClientManager(ConfigurableComponent):
                         self._logout_client(useruuid, clientuuid)
                         self.log("Client logged out", useruuid, clientuuid)
                     except Exception as e:
-                        self.log("Couldn't clean up logged in user! ",
-                                 self._users[useruuid], e, type(e),
-                                 lvl=critical)
-                self.log("Deleting Client (", self._clients.keys, ")",
-                         lvl=debug)
+                        self.log(
+                            "Couldn't clean up logged in user! ",
+                            self._users[useruuid],
+                            e,
+                            type(e),
+                            lvl=critical,
+                        )
+                self.log("Deleting Client (", self._clients.keys, ")", lvl=debug)
                 del self._clients[clientuuid]
                 self.log("Deleting Socket", lvl=debug)
                 del self._sockets[sock]
         except Exception as e:
-            self.log("Error during disconnect handling: ", e, type(e),
-                     lvl=critical)
+            self.log("Error during disconnect handling: ", e, type(e), lvl=critical)
 
     def _logout_client(self, useruuid, clientuuid):
         """Log out a client and possibly associated user"""
@@ -305,9 +333,15 @@ class ClientManager(ConfigurableComponent):
 
             self._clients[clientuuid].useruuid = None
         except Exception as e:
-            self.log("Error during client logout: ", e, type(e),
-                     clientuuid, useruuid, lvl=error,
-                     exc=True)
+            self.log(
+                "Error during client logout: ",
+                e,
+                type(e),
+                clientuuid,
+                useruuid,
+                lvl=error,
+                exc=True,
+            )
 
     @handler("connect", channel="wsserver")
     def connect(self, *args):
@@ -327,9 +361,7 @@ class ClientManager(ConfigurableComponent):
                 #  with account uuid
 
                 self._clients[clientuuid] = Client(
-                    sock=sock,
-                    ip=ip,
-                    clientuuid=clientuuid,
+                    sock=sock, ip=ip, clientuuid=clientuuid
                 )
 
                 self.log("Client connected:", clientuuid, lvl=debug)
@@ -352,13 +384,9 @@ class ClientManager(ConfigurableComponent):
                 # make sense instead of looking this up all the time.
 
                 if event.uuid is None:
-                    userobject = objectmodels['user'].find_one({
-                        'name': event.username
-                    })
+                    userobject = objectmodels["user"].find_one({"name": event.username})
                 else:
-                    userobject = objectmodels['user'].find_one({
-                        'uuid': event.uuid
-                    })
+                    userobject = objectmodels["user"].find_one({"uuid": event.uuid})
 
                 if userobject is None:
                     self.log("No user by that name known.", lvl=warn)
@@ -366,8 +394,11 @@ class ClientManager(ConfigurableComponent):
                 else:
                     uuid = userobject.uuid
 
-                self.log("Broadcasting to all of users clients: '%s': '%s" % (
-                    uuid, str(event.packet)[:20]), lvl=network)
+                self.log(
+                    "Broadcasting to all of users clients: '%s': '%s"
+                    % (uuid, str(event.packet)[:20]),
+                    lvl=network,
+                )
                 if uuid not in self._users:
                     self.log("User not connected!", event, lvl=critical)
                     return
@@ -377,16 +408,18 @@ class ClientManager(ConfigurableComponent):
                     sock = self._clients[clientuuid].sock
 
                     if not event.raw:
-                        self.log("Sending json to client", jsonpacket[:50],
-                                 lvl=network)
+                        self.log("Sending json to client", jsonpacket[:50], lvl=network)
 
                         self.fireEvent(write(sock, jsonpacket), "wsserver")
                     else:
                         self.log("Sending raw data to client")
                         self.fireEvent(write(sock, event.packet), "wsserver")
             else:  # only to client
-                self.log("Sending to user's client: '%s': '%s'" % (
-                    event.uuid, jsonpacket[:20]), lvl=network)
+                self.log(
+                    "Sending to user's client: '%s': '%s'"
+                    % (event.uuid, jsonpacket[:20]),
+                    lvl=network,
+                )
                 if event.uuid not in self._clients:
                     if not event.fail_quiet:
                         self.log("Unknown client!", event.uuid, lvl=critical)
@@ -401,8 +434,11 @@ class ClientManager(ConfigurableComponent):
                     self.fireEvent(write(sock, event.packet[:20]), "wsserver")
 
         except Exception as e:
-            self.log("Exception during sending: %s (%s)" % (e, type(e)),
-                     lvl=critical, exc=True)
+            self.log(
+                "Exception during sending: %s (%s)" % (e, type(e)),
+                lvl=critical,
+                exc=True,
+            )
 
     def broadcast(self, event):
         """Broadcasts an event either to all users or clients, depending on
@@ -410,30 +446,27 @@ class ClientManager(ConfigurableComponent):
         try:
             if event.broadcasttype == "users":
                 if len(self._users) > 0:
-                    self.log("Broadcasting to all users:",
-                             event.content, lvl=network)
+                    self.log("Broadcasting to all users:", event.content, lvl=network)
                     for useruuid in self._users.keys():
-                        self.fireEvent(
-                            send(useruuid, event.content, sendtype="user"))
+                        self.fireEvent(send(useruuid, event.content, sendtype="user"))
                         # else:
                         #    self.log("Not broadcasting, no users connected.",
                         #            lvl=debug)
 
             elif event.broadcasttype == "clients":
                 if len(self._clients) > 0:
-                    self.log("Broadcasting to all clients: ",
-                             event.content, lvl=network)
+                    self.log(
+                        "Broadcasting to all clients: ", event.content, lvl=network
+                    )
                     for client in self._clients.values():
-                        self.fireEvent(write(client.sock, event.content),
-                                       "wsserver")
+                        self.fireEvent(write(client.sock, event.content), "wsserver")
                         # else:
                         #    self.log("Not broadcasting, no clients
                         # connected.",
                         #            lvl=debug)
             elif event.broadcasttype == "socks":
                 if len(self._sockets) > 0:
-                    self.log("Emergency?! Broadcasting to all sockets: ",
-                             event.content)
+                    self.log("Emergency?! Broadcasting to all sockets: ", event.content)
                     for sock in self._sockets:
                         self.fireEvent(write(sock, event.content), "wsserver")
                         # else:
@@ -449,10 +482,10 @@ class ClientManager(ConfigurableComponent):
 
         for role in user.account.roles:
             if role in event.roles:
-                self.log('Access granted', lvl=verbose)
+                self.log("Access granted", lvl=verbose)
                 return True
 
-        self.log('Access denied', lvl=verbose)
+        self.log("Access denied", lvl=verbose)
         return False
 
     def _handle_authorized_events(self, component, action, data, user, client):
@@ -463,45 +496,73 @@ class ClientManager(ConfigurableComponent):
                 self.log(component, action, data, user, client, lvl=info)
 
             if not user and component in self.authorized_events.keys():
-                self.log("Unknown client tried to do an authenticated "
-                         "operation: %s",
-                         component, action, data, user)
+                self.log(
+                    "Unknown client tried to do an authenticated " "operation: %s",
+                    component,
+                    action,
+                    data,
+                    user,
+                )
                 return
 
-            event = self.authorized_events[component][action]['event'](user, action, data, client)
+            event = self.authorized_events[component][action]["event"](
+                user, action, data, client
+            )
 
-            self.log('Authorized event roles:', event.roles, lvl=verbose)
+            self.log("Authorized event roles:", event.roles, lvl=verbose)
             if not self._check_permissions(user, event):
                 result = {
-                    'component': 'isomer.ui.clientmanager',
-                    'action': 'Permission',
-                    'data': _('You have no role that allows this action.', lang='de')
+                    "component": "isomer.ui.clientmanager",
+                    "action": "Permission",
+                    "data": _("You have no role that allows this action.", lang="de"),
                 }
                 self.fireEvent(send(event.client.uuid, result))
                 return
 
-            self.log("Firing authorized event: ", component, action,
-                     str(data)[:100], lvl=debug)
+            self.log(
+                "Firing authorized event: ",
+                component,
+                action,
+                str(data)[:100],
+                lvl=debug,
+            )
             # self.log("", (user, action, data, client), lvl=critical)
             self.fireEvent(event)
         except Exception as e:
-            self.log("Critical error during authorized event handling:",
-                     component, action, e,
-                     type(e), lvl=critical, exc=True)
+            self.log(
+                "Critical error during authorized event handling:",
+                component,
+                action,
+                e,
+                type(e),
+                lvl=critical,
+                exc=True,
+            )
 
     def _handle_anonymous_events(self, component, action, data, client):
         """Handler for anonymous (public) events"""
         try:
-            event = self.anonymous_events[component][action]['event']
+            event = self.anonymous_events[component][action]["event"]
 
-            self.log("Firing anonymous event: ", component, action,
-                     str(data)[:20], lvl=network)
+            self.log(
+                "Firing anonymous event: ",
+                component,
+                action,
+                str(data)[:20],
+                lvl=network,
+            )
             # self.log("", (user, action, data, client), lvl=critical)
             self.fireEvent(event(action, data, client))
         except Exception as e:
-            self.log("Critical error during anonymous event handling:",
-                     component, action, e,
-                     type(e), lvl=critical, exc=True)
+            self.log(
+                "Critical error during anonymous event handling:",
+                component,
+                action,
+                e,
+                type(e),
+                lvl=critical,
+                exc=True,
+            )
 
     def _handle_authentication_events(self, data, action, clientuuid, sock):
         """Handler for authentication events"""
@@ -518,25 +579,23 @@ class ClientManager(ConfigurableComponent):
 
                     self.log("Autologin for", requested_clientuuid, lvl=debug)
                 else:
-                    username = data['username']
-                    password = data['password']
+                    username = data["username"]
+                    password = data["password"]
 
-                    if 'clientuuid' in data:
-                        requested_clientuuid = data['clientuuid']
+                    if "clientuuid" in data:
+                        requested_clientuuid = data["clientuuid"]
                     else:
                         requested_clientuuid = None
                     auto = False
 
                     self.log("Auth request by", username, lvl=verbose)
 
-                self.fireEvent(authenticationrequest(
-                    username,
-                    password,
-                    clientuuid,
-                    requested_clientuuid,
-                    sock,
-                    auto,
-                ), "auth")
+                self.fireEvent(
+                    authenticationrequest(
+                        username, password, clientuuid, requested_clientuuid, sock, auto
+                    ),
+                    "auth",
+                )
                 return
             except Exception as e:
                 self.log("Login failed: ", e, type(e), lvl=warn, exc=True)
@@ -553,20 +612,20 @@ class ClientManager(ConfigurableComponent):
                 else:
                     self.log("Client is not connected!", lvl=warn)
             except Exception as e:
-                self.log("Error during client logout: ", e, type(e),
-                         lvl=error, exc=True)
+                self.log(
+                    "Error during client logout: ", e, type(e), lvl=error, exc=True
+                )
         else:
-            self.log("Unsupported auth action requested:",
-                     action, lvl=warn)
+            self.log("Unsupported auth action requested:", action, lvl=warn)
 
-    @handler('reset_flood_counters')
+    @handler("reset_flood_counters")
     def _reset_flood_counters(self, *args):
         """Resets the flood counters on event trigger"""
 
         # self.log('Resetting flood counter')
         self._flood_counter = {}
 
-    @handler('reset_flood_offenders')
+    @handler("reset_flood_offenders")
     def _reset_flood_offenders(self, *args):
         """Resets the list of flood offenders on event trigger"""
 
@@ -575,7 +634,7 @@ class ClientManager(ConfigurableComponent):
 
         for offender, offence_time in self._flooding.items():
             if time() - offence_time < 10:
-                self.log('Removed offender from flood list:', offender)
+                self.log("Removed offender from flood list:", offender)
                 offenders.append(offender)
 
         for offender in offenders:
@@ -591,12 +650,12 @@ class ClientManager(ConfigurableComponent):
 
         if self._flood_counter[clientuuid] > 100:
             packet = {
-                'component': 'isomer.ui.clientmanager',
-                'action': 'Flooding',
-                'data': True
+                "component": "isomer.ui.clientmanager",
+                "action": "Flooding",
+                "data": True,
             }
             self.fireEvent(send(clientuuid, packet))
-            self.log('Flooding from', clientuuid)
+            self.log("Flooding from", clientuuid)
             return True
 
     @handler("read", channel="wsserver")
@@ -606,8 +665,13 @@ class ClientManager(ConfigurableComponent):
 
         self.log("Beginning new transaction: ", args, lvl=network)
 
-        sock = msg = user = password = client = client_uuid = user_uuid = request_data = \
-            request_action = None
+        sock = (
+            msg
+        ) = (
+            user
+        ) = (
+            password
+        ) = client = client_uuid = user_uuid = request_data = request_action = None
 
         try:
             sock, msg = args[0], args[1]
@@ -619,7 +683,7 @@ class ClientManager(ConfigurableComponent):
             return
 
         if sock is None or msg is None:
-            self.log('Socket or message are invalid!', lvl=error)
+            self.log("Socket or message are invalid!", lvl=error)
             return
 
         if client_uuid in self._flooding:
@@ -633,82 +697,97 @@ class ClientManager(ConfigurableComponent):
             return
 
         try:
-            request_component = msg['component']
-            request_action = msg['action']
+            request_component = msg["component"]
+            request_action = msg["action"]
         except (KeyError, AttributeError) as e:
             self.log("Unpacking error: ", msg, e, type(e), lvl=error)
             return
 
-        if self._check_flood_protection(request_component, request_action,
-                                        client_uuid):
-            self.log('Flood protection triggered')
+        if self._check_flood_protection(request_component, request_action, client_uuid):
+            self.log("Flood protection triggered")
             self._flooding[client_uuid] = time()
 
         try:
             # TODO: Do not unpickle or decode anything from unsafe events
-            request_data = msg['data']
-            if isinstance(request_data, (dict, list)) and 'raw' in request_data:
+            request_data = msg["data"]
+            if isinstance(request_data, (dict, list)) and "raw" in request_data:
                 # self.log(request_data['raw'], lvl=critical)
-                request_data['raw'] = b64decode(request_data['raw'])
+                request_data["raw"] = b64decode(request_data["raw"])
                 # self.log(request_data['raw'])
         except (KeyError, AttributeError) as e:
             self.log("No payload.", lvl=network)
             request_data = None
 
         if request_component == "auth":
-            self._handle_authentication_events(request_data, request_action,
-                                               client_uuid, sock)
+            self._handle_authentication_events(
+                request_data, request_action, client_uuid, sock
+            )
             return
         else:
-            self._forward_event(client_uuid, request_component, request_action, request_data)
+            self._forward_event(
+                client_uuid, request_component, request_action, request_data
+            )
 
-    def _forward_event(self, client_uuid, request_component, request_action, request_data):
+    def _forward_event(
+        self, client_uuid, request_component, request_action, request_data
+    ):
         """Determine what exactly to do with the event and forward it to its destination"""
         try:
             client = self._clients[client_uuid]
         except KeyError as e:
-            self.log('Could not get client for request!', e, type(e), lvl=warn)
+            self.log("Could not get client for request!", e, type(e), lvl=warn)
             return
 
-        if request_component in self.anonymous_events and request_action in self.anonymous_events[request_component]:
-            self.log('Executing anonymous event:', request_component,
-                     request_action)
+        if (
+            request_component in self.anonymous_events
+            and request_action in self.anonymous_events[request_component]
+        ):
+            self.log("Executing anonymous event:", request_component, request_action)
             try:
-                self._handle_anonymous_events(request_component, request_action,
-                                              request_data, client)
+                self._handle_anonymous_events(
+                    request_component, request_action, request_data, client
+                )
             except Exception as e:
-                self.log("Anonymous request failed:", e, type(e), lvl=warn,
-                         exc=True)
+                self.log("Anonymous request failed:", e, type(e), lvl=warn, exc=True)
             return
 
         elif request_component in self.authorized_events:
             try:
                 user_uuid = client.useruuid
-                self.log("Authenticated operation requested by ",
-                         user_uuid, client.config, lvl=network)
+                self.log(
+                    "Authenticated operation requested by ",
+                    user_uuid,
+                    client.config,
+                    lvl=network,
+                )
             except Exception as e:
                 self.log("No user_uuid!", e, type(e), lvl=critical)
                 return
 
-            self.log('Checking if user is logged in', lvl=verbose)
+            self.log("Checking if user is logged in", lvl=verbose)
 
             try:
                 user = self._users[user_uuid]
             except KeyError:
-                if not (request_action == 'ping' and request_component == 'isomer.ui.clientmanager'):
+                if not (
+                    request_action == "ping"
+                    and request_component == "isomer.ui.clientmanager"
+                ):
                     self.log("User not logged in.", lvl=warn)
 
                 return
 
-            self.log('Handling event:', request_component, request_action, lvl=verbose)
+            self.log("Handling event:", request_component, request_action, lvl=verbose)
             try:
-                self._handle_authorized_events(request_component, request_action,
-                                               request_data, user, client)
+                self._handle_authorized_events(
+                    request_component, request_action, request_data, user, client
+                )
             except Exception as e:
-                self.log("User request failed: ", e, type(e), lvl=warn,
-                         exc=True)
+                self.log("User request failed: ", e, type(e), lvl=warn, exc=True)
         else:
-            self.log('Invalid event received:', request_component, request_action, lvl=warn)
+            self.log(
+                "Invalid event received:", request_component, request_action, lvl=warn
+            )
 
     @handler("authentication", channel="auth")
     def authentication(self, event):
@@ -716,8 +795,9 @@ class ClientManager(ConfigurableComponent):
         then notifies the client"""
 
         try:
-            self.log("Authorization has been granted by DB check:",
-                     event.username, lvl=debug)
+            self.log(
+                "Authorization has been granted by DB check:", event.username, lvl=debug
+            )
 
             account, profile, clientconfig = event.userdata
 
@@ -726,8 +806,7 @@ class ClientManager(ConfigurableComponent):
             clientuuid = clientconfig.uuid
 
             if clientuuid != originatingclientuuid:
-                self.log("Mutating client uuid to request id:",
-                         clientuuid, lvl=network)
+                self.log("Mutating client uuid to request id:", clientuuid, lvl=network)
             # Assign client to user
             if useruuid in self._users:
                 signedinuser = self._users[useruuid]
@@ -736,8 +815,7 @@ class ClientManager(ConfigurableComponent):
                 self._users[account.uuid] = signedinuser
 
             if clientuuid in signedinuser.clients:
-                self.log("Client configuration already logged in.",
-                         lvl=critical)
+                self.log("Client configuration already logged in.", lvl=critical)
                 # TODO: What now??
                 # Probably senseful would be to add the socket to the
                 # client's other socket
@@ -746,9 +824,13 @@ class ClientManager(ConfigurableComponent):
                 # which could be remedied by duplicating the configuration
             else:
                 signedinuser.clients.append(clientuuid)
-                self.log("Active client (", clientuuid, ") registered to "
-                                                        "user", useruuid,
-                         lvl=debug)
+                self.log(
+                    "Active client (",
+                    clientuuid,
+                    ") registered to " "user",
+                    useruuid,
+                    lvl=debug,
+                )
 
             # Update socket..
             socket = self._sockets[event.sock]
@@ -770,67 +852,73 @@ class ClientManager(ConfigurableComponent):
                 useruuid=useruuid,
                 name=clientconfig.name,
                 config=clientconfig,
-                language=language
+                language=language,
             )
 
-            del (self._clients[originatingclientuuid])
+            del self._clients[originatingclientuuid]
             self._clients[clientuuid] = newclient
 
             authpacket = {
-                "component": "auth", "action": "login",
-                "data": account.serializablefields()
+                "component": "auth",
+                "action": "login",
+                "data": account.serializablefields(),
             }
-            self.log("Transmitting Authorization to client", authpacket,
-                     lvl=network)
-            self.fireEvent(
-                write(event.sock, json.dumps(authpacket)),
-                "wsserver"
-            )
+            self.log("Transmitting Authorization to client", authpacket, lvl=network)
+            self.fireEvent(write(event.sock, json.dumps(authpacket)), "wsserver")
 
             profilepacket = {
-                "component": "profile", "action": "get",
-                "data": profile.serializablefields()
+                "component": "profile",
+                "action": "get",
+                "data": profile.serializablefields(),
             }
-            self.log("Transmitting Profile to client", profilepacket,
-                     lvl=network)
-            self.fireEvent(write(event.sock, json.dumps(profilepacket)),
-                           "wsserver")
+            self.log("Transmitting Profile to client", profilepacket, lvl=network)
+            self.fireEvent(write(event.sock, json.dumps(profilepacket)), "wsserver")
 
             clientconfigpacket = {
-                "component": "clientconfig", "action": "get",
-                "data": clientconfig.serializablefields()
+                "component": "clientconfig",
+                "action": "get",
+                "data": clientconfig.serializablefields(),
             }
-            self.log("Transmitting client configuration to client",
-                     clientconfigpacket, lvl=network)
-            self.fireEvent(write(event.sock, json.dumps(clientconfigpacket)),
-                           "wsserver")
+            self.log(
+                "Transmitting client configuration to client",
+                clientconfigpacket,
+                lvl=network,
+            )
+            self.fireEvent(
+                write(event.sock, json.dumps(clientconfigpacket)), "wsserver"
+            )
 
             self.fireEvent(userlogin(clientuuid, useruuid, clientconfig, signedinuser))
 
-            self.log("User configured: Name",
-                     signedinuser.account.name, "Profile",
-                     signedinuser.profile.uuid, "Clients",
-                     signedinuser.clients,
-                     lvl=debug)
+            self.log(
+                "User configured: Name",
+                signedinuser.account.name,
+                "Profile",
+                signedinuser.profile.uuid,
+                "Clients",
+                signedinuser.clients,
+                lvl=debug,
+            )
 
         except Exception as e:
-            self.log("Error (%s, %s) during auth grant: %s" % (
-                type(e), e, event), lvl=error)
+            self.log(
+                "Error (%s, %s) during auth grant: %s" % (type(e), e, event), lvl=error
+            )
 
     @handler(selectlanguage)
     def selectlanguage(self, event):
         """Store client's selection of a new translation"""
 
-        self.log('Language selection event:', event.client, pretty=True)
+        self.log("Language selection event:", event.client, pretty=True)
 
         if event.data not in all_languages():
-            self.log('Unavailable language selected:', event.data, lvl=warn)
+            self.log("Unavailable language selected:", event.data, lvl=warn)
             language = None
         else:
             language = event.data
 
         if language is None:
-            language = 'en'
+            language = "en"
 
         event.client.language = language
 
@@ -842,11 +930,11 @@ class ClientManager(ConfigurableComponent):
     def getlanguages(self, event):
         """Compile and return a human readable list of registered translations"""
 
-        self.log('Client requests all languages.', lvl=verbose)
+        self.log("Client requests all languages.", lvl=verbose)
         result = {
-            'component': 'isomer.ui.clientmanager',
-            'action': 'getlanguages',
-            'data': language_token_to_name(all_languages())
+            "component": "isomer.ui.clientmanager",
+            "action": "getlanguages",
+            "data": language_token_to_name(all_languages()),
         }
         self.fireEvent(send(event.client.uuid, result))
 
@@ -854,11 +942,11 @@ class ClientManager(ConfigurableComponent):
     def ping(self, event):
         """Perform a ping to measure client <-> node latency"""
 
-        self.log('Client ping received:', event.data, lvl=verbose)
+        self.log("Client ping received:", event.data, lvl=verbose)
         response = {
-            'component': 'isomer.ui.clientmanager',
-            'action': 'pong',
-            'data': [event.data, time() * 1000]
+            "component": "isomer.ui.clientmanager",
+            "action": "pong",
+            "data": [event.data, time() * 1000],
         }
 
         self.fire(send(event.client.uuid, response))

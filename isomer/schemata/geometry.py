@@ -49,22 +49,22 @@ GeometrySchema = {
             "title": "Point",
             "properties": {
                 "type": {"enum": ["Point"]},
-                "coordinates": {"$ref": "#/definitions/position"}
-            }
+                "coordinates": {"$ref": "#/definitions/position"},
+            },
         },
         {
             "title": "MultiPoint",
             "properties": {
                 "type": {"enum": ["MultiPoint"]},
-                "coordinates": {"$ref": "#/definitions/positionArray"}
-            }
+                "coordinates": {"$ref": "#/definitions/positionArray"},
+            },
         },
         {
             "title": "LineString",
             "properties": {
                 "type": {"enum": ["LineString"]},
-                "coordinates": {"$ref": "#/definitions/lineString"}
-            }
+                "coordinates": {"$ref": "#/definitions/lineString"},
+            },
         },
         {
             "title": "MultiLineString",
@@ -72,16 +72,16 @@ GeometrySchema = {
                 "type": {"enum": ["MultiLineString"]},
                 "coordinates": {
                     "type": "array",
-                    "items": {"$ref": "#/definitions/lineString"}
-                }
-            }
+                    "items": {"$ref": "#/definitions/lineString"},
+                },
+            },
         },
         {
             "title": "Polygon",
             "properties": {
                 "type": {"enum": ["Polygon"]},
-                "coordinates": {"$ref": "#/definitions/polygon"}
-            }
+                "coordinates": {"$ref": "#/definitions/polygon"},
+            },
         },
         {
             "title": "MultiPolygon",
@@ -89,10 +89,10 @@ GeometrySchema = {
                 "type": {"enum": ["MultiPolygon"]},
                 "coordinates": {
                     "type": "array",
-                    "items": {"$ref": "#/definitions/polygon"}
-                }
-            }
-        }
+                    "items": {"$ref": "#/definitions/polygon"},
+                },
+            },
+        },
     ],
     "definitions": {
         "position": {
@@ -100,33 +100,27 @@ GeometrySchema = {
             "type": "array",
             "minItems": 2,
             "items": [{"type": "number"}, {"type": "number"}],
-            "additionalItems": False
+            "additionalItems": False,
         },
         "positionArray": {
             "description": "An array of positions",
             "type": "array",
-            "items": {"$ref": "#/definitions/position"}
+            "items": {"$ref": "#/definitions/position"},
         },
         "lineString": {
             "description": "An array of two or more positions",
-            "allOf": [
-                {"$ref": "#/definitions/positionArray"},
-                {"minItems": 2}
-            ]
+            "allOf": [{"$ref": "#/definitions/positionArray"}, {"minItems": 2}],
         },
         "linearRing": {
             "description": "An array of four positions where the first equals the last",
-            "allOf": [
-                {"$ref": "#/definitions/positionArray"},
-                {"minItems": 4}
-            ]
+            "allOf": [{"$ref": "#/definitions/positionArray"}, {"minItems": 4}],
         },
         "polygon": {
             "description": "An array of linear rings",
             "type": "array",
-            "items": {"$ref": "#/definitions/linearRing"}
-        }
-    }
+            "items": {"$ref": "#/definitions/linearRing"},
+        },
+    },
 }
 
 GeometryForm = noform

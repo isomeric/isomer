@@ -51,16 +51,27 @@ import os
 from circuits import Event
 from circuits.web import Server, Static
 from circuits.web.websockets.dispatcher import WebSocketsDispatcher
+
 # from circuits.web.errors import redirect
 # from circuits.app.daemon import Daemon
 
 from isomer.misc.path import set_instance, get_path
 from isomer.component import handler, ConfigurableComponent
+
 # from isomer.schemata.component import ComponentBaseConfigSchema
 from isomer.database import initialize  # , schemastore
 from isomer.events.system import populate_user_events, frontendbuildrequest
-from isomer.logger import isolog, verbose, debug, warn, error, critical, \
-    setup_root, verbosity, set_logfile
+from isomer.logger import (
+    isolog,
+    verbose,
+    debug,
+    warn,
+    error,
+    critical,
+    setup_root,
+    verbosity,
+    set_logfile,
+)
 from isomer.debugger import cli_register_event
 from isomer.ui.builder import install_frontend
 from isomer.tool.defaults import EXIT_NO_CERTIFICATE
@@ -72,26 +83,31 @@ from isomer.tool.etc import load_instance
 
 class ready(Event):
     """Event fired to signal completeness of the local node's setup"""
+
     pass
 
 
 class cli_components(Event):
     """List registered and running components"""
+
     pass
 
 
 class cli_reload_db(Event):
     """Reload database and schemata (Dangerous!) WiP - does nothing right now"""
+
     pass
 
 
 class cli_reload(Event):
     """Reload all components and data models"""
+
     pass
 
 
 class cli_info(Event):
     """Provide information about the running instance"""
+
     pass
 
 
@@ -100,11 +116,13 @@ class cli_quit(Event):
 
     Uses sys.exit() to quit.
     """
+
     pass
 
 
 class cli_drop_privileges(Event):
     """Try to drop possible root privileges"""
+
     pass
 
 
@@ -118,11 +136,11 @@ class FrontendHandler(pyinotify.ProcessEvent):
         install_frontend(self.launcher.instance, install=False, development=True)
 
 
-def drop_privileges(uid_name='isomer', gid_name='isomer'):
+def drop_privileges(uid_name="isomer", gid_name="isomer"):
     """Attempt to drop privileges and change user to 'isomer' user/group"""
 
     if os.getuid() != 0:
-        isolog("Not root, cannot drop privileges", lvl=warn, emitter='CORE')
+        isolog("Not root, cannot drop privileges", lvl=warn, emitter="CORE")
         return
 
     try:
@@ -139,75 +157,98 @@ def drop_privileges(uid_name='isomer', gid_name='isomer'):
 
         # Ensure a very conservative umask
         # old_umask = os.umask(22)
-        isolog('Privileges dropped', emitter='CORE')
+        isolog("Privileges dropped", emitter="CORE")
     except Exception as e:
-        isolog('Could not drop privileges:', e, type(e), exc=True, lvl=error, emitter='CORE')
+        isolog(
+            "Could not drop privileges:",
+            e,
+            type(e),
+            exc=True,
+            lvl=error,
+            emitter="CORE",
+        )
 
 
 class Core(ConfigurableComponent):
     """Isomer Core Backend Application"""
+
     # TODO: Move most of this stuff over to a new FrontendBuilder
 
     configprops = {
-        'enabled': {
-            'type': 'array',
-            'title': 'Available modules',
-            'description': 'Modules found and activatable by the system.',
-            'default': [],
-            'items': {'type': 'string'}
+        "enabled": {
+            "type": "array",
+            "title": "Available modules",
+            "description": "Modules found and activatable by the system.",
+            "default": [],
+            "items": {"type": "string"},
         },
-        'components': {
-            'type': 'object',
-            'title': 'Components',
-            'description': 'Component metadata',
-            'default': {}
+        "components": {
+            "type": "object",
+            "title": "Components",
+            "description": "Component metadata",
+            "default": {},
         },
-        'frontendenabled': {
-            'type': 'boolean',
-            'title': 'Frontend enabled',
-            'description': 'Option to toggle frontend activation',
-            'default': True
-        }
+        "frontendenabled": {
+            "type": "boolean",
+            "title": "Frontend enabled",
+            "description": "Option to toggle frontend activation",
+            "default": True,
+        },
     }
 
     def __init__(self, name, instance, **kwargs):
         super(Core, self).__init__("CORE", **kwargs)
         self.log("Starting system (channel ", self.channel, ")")
 
-        self.insecure = kwargs['insecure']
-        self.development = kwargs['dev']
+        self.insecure = kwargs["insecure"]
+        self.development = kwargs["dev"]
 
         self.instance = name
 
-        host = kwargs.get('web_address', None)
-        port = kwargs.get('web_port', None)
+        host = kwargs.get("web_address", None)
+        port = kwargs.get("web_port", None)
 
         # self.log(instance, pretty=True, lvl=verbose)
 
-        self.host = instance['web_address'] if host is None else host
-        self.port = instance['web_port'] if port is None else port
+        self.host = instance["web_address"] if host is None else host
+        self.port = instance["web_port"] if port is None else port
 
-        self.log('Web configuration: %s:%i' % (self.host, int(self.port)), lvl=debug)
+        self.log("Web configuration: %s:%i" % (self.host, int(self.port)), lvl=debug)
 
-        self.certificate = certificate = instance['web_certificate'] if instance['web_certificate'] != '' else None
+        self.certificate = certificate = (
+            instance["web_certificate"] if instance["web_certificate"] != "" else None
+        )
 
         if certificate:
             if not os.path.exists(certificate):
-                self.log("SSL certificate usage requested but certificate "
-                         "cannot be found!", lvl=error)
+                self.log(
+                    "SSL certificate usage requested but certificate "
+                    "cannot be found!",
+                    lvl=error,
+                )
                 sys.exit(EXIT_NO_CERTIFICATE)
 
         # TODO: Find a way to synchronize this with the paths in i.u.builder
         if self.development:
-            self.frontend_root = os.path.abspath(os.path.dirname(os.path.realpath(__file__)) + "/../frontend")
-            self.frontend_target = get_path('lib', 'frontend-dev')
-            self.module_root = os.path.abspath(os.path.dirname(os.path.realpath(__file__)) + "/../modules")
+            self.frontend_root = os.path.abspath(
+                os.path.dirname(os.path.realpath(__file__)) + "/../frontend"
+            )
+            self.frontend_target = get_path("lib", "frontend-dev")
+            self.module_root = os.path.abspath(
+                os.path.dirname(os.path.realpath(__file__)) + "/../modules"
+            )
         else:
-            self.frontend_root = get_path('lib', 'repository/frontend')
-            self.frontend_target = get_path('lib', 'frontend')
+            self.frontend_root = get_path("lib", "repository/frontend")
+            self.frontend_target = get_path("lib", "frontend")
             self.module_root = ""
 
-        self.log('Frontend & module paths:', self.frontend_root, self.frontend_target, self.module_root, lvl=verbose)
+        self.log(
+            "Frontend & module paths:",
+            self.frontend_root,
+            self.frontend_target,
+            self.module_root,
+            lvl=verbose,
+        )
 
         self.loadable_components = {}
         self.running_components = {}
@@ -224,8 +265,8 @@ class Core(ConfigurableComponent):
             # 'camera',
             # 'logger',
             # 'debugger',
-            'recorder',
-            'playback',
+            "recorder",
+            "playback",
             # 'sensors',
             # 'navdatasim'
             # 'ldap',
@@ -246,7 +287,7 @@ class Core(ConfigurableComponent):
             # 'machineroom'
         ]
 
-        self.component_blacklist += kwargs['blacklist']
+        self.component_blacklist += kwargs["blacklist"]
 
         self.update_components()
         self._write_config()
@@ -254,8 +295,7 @@ class Core(ConfigurableComponent):
         self.server = None
 
         if self.insecure:
-            self.log("Not dropping privileges - this may be insecure!",
-                     lvl=warn)
+            self.log("Not dropping privileges - this may be insecure!", lvl=warn)
 
     @handler("started", channel="*")
     def ready(self, source):
@@ -263,6 +303,7 @@ class Core(ConfigurableComponent):
         configuration schema-store, run the local server and drop privileges"""
 
         from isomer.schemastore import configschemastore
+
         configschemastore[self.name] = self.configschema
 
         self._start_server()
@@ -270,76 +311,87 @@ class Core(ConfigurableComponent):
         if not self.insecure:
             self._drop_privileges()
 
-        self.fireEvent(cli_register_event('components', cli_components))
-        self.fireEvent(cli_register_event('drop_privileges', cli_drop_privileges))
-        self.fireEvent(cli_register_event('reload_db', cli_reload_db))
-        self.fireEvent(cli_register_event('reload', cli_reload))
-        self.fireEvent(cli_register_event('quit', cli_quit))
-        self.fireEvent(cli_register_event('info', cli_info))
+        self.fireEvent(cli_register_event("components", cli_components))
+        self.fireEvent(cli_register_event("drop_privileges", cli_drop_privileges))
+        self.fireEvent(cli_register_event("reload_db", cli_reload_db))
+        self.fireEvent(cli_register_event("reload", cli_reload))
+        self.fireEvent(cli_register_event("quit", cli_quit))
+        self.fireEvent(cli_register_event("info", cli_info))
 
     @handler("frontendbuildrequest", channel="setup")
     def trigger_frontend_build(self, event):
         """Event hook to trigger a new frontend build"""
 
         from isomer.database import instance
-        install_frontend(instance=instance,
-                         forcerebuild=event.force,
-                         install=event.install,
-                         development=self.development
-                         )
 
-    @handler('cli_drop_privileges')
+        install_frontend(
+            instance=instance,
+            forcerebuild=event.force,
+            install=event.install,
+            development=self.development,
+        )
+
+    @handler("cli_drop_privileges")
     def cli_drop_privileges(self, event):
         """Drop possible user privileges"""
 
-        self.log('Trying to drop privileges', lvl=debug)
+        self.log("Trying to drop privileges", lvl=debug)
         self._drop_privileges()
 
-    @handler('cli_components')
+    @handler("cli_components")
     def cli_components(self, event):
         """List all running components"""
 
-        self.log('Running components: ', sorted(self.running_components.keys()))
+        self.log("Running components: ", sorted(self.running_components.keys()))
 
-    @handler('cli_reload_db')
+    @handler("cli_reload_db")
     def cli_reload_db(self, event):
         """Experimental call to reload the database"""
 
-        self.log('This command is WiP.')
+        self.log("This command is WiP.")
 
         initialize()
 
-    @handler('cli_reload')
+    @handler("cli_reload")
     def cli_reload(self, event):
         """Experimental call to reload the component tree"""
 
-        self.log('Reloading all components.')
+        self.log("Reloading all components.")
 
         self.update_components(forcereload=True)
         initialize()
 
         from isomer.debugger import cli_compgraph
+
         self.fireEvent(cli_compgraph())
 
-    @handler('cli_quit')
+    @handler("cli_quit")
     def cli_quit(self, event):
         """Stop the instance immediately"""
 
-        self.log('Quitting on CLI request.')
+        self.log("Quitting on CLI request.")
         if self.frontend_watcher is not None:
             self.frontend_watcher.stop()
         sys.exit()
 
-    @handler('cli_info')
+    @handler("cli_info")
     def cli_info(self, event):
         """Provides information about the running instance"""
 
-        self.log('Instance:', self.instance,
-                 'Dev:', self.development,
-                 'Host:', self.host,
-                 'Port:', self.port,
-                 'Insecure:', self.insecure,
-                 'Frontend:', self.frontend_target)
+        self.log(
+            "Instance:",
+            self.instance,
+            "Dev:",
+            self.development,
+            "Host:",
+            self.host,
+            "Port:",
+            self.port,
+            "Insecure:",
+            self.insecure,
+            "Frontend:",
+            self.frontend_target,
+        )
 
     def _start_server(self, *args):
         """Run the node local server"""
@@ -349,7 +401,10 @@ class Core(ConfigurableComponent):
         if secure:
             self.log("Running SSL server with cert:", self.certificate)
         else:
-            self.log("Running insecure server without SSL. Do not use without SSL proxy in production!", lvl=warn)
+            self.log(
+                "Running insecure server without SSL. Do not use without SSL proxy in production!",
+                lvl=warn,
+            )
 
         try:
             self.server = Server(
@@ -361,14 +416,19 @@ class Core(ConfigurableComponent):
             ).register(self)
         except PermissionError as e:
             if self.port <= 1024:
-                self.log('Could not open privileged port (%i), check permissions!' % self.port, e, lvl=critical)
+                self.log(
+                    "Could not open privileged port (%i), check permissions!"
+                    % self.port,
+                    e,
+                    lvl=critical,
+                )
             else:
-                self.log('Could not open port (%i):' % self.port, e, lvl=critical)
+                self.log("Could not open port (%i):" % self.port, e, lvl=critical)
         except OSError as e:
             if e.errno == 98:
-                self.log('Port (%i) is already opened!' % self.port, lvl=critical)
+                self.log("Port (%i) is already opened!" % self.port, lvl=critical)
             else:
-                self.log('Could not open port (%i):' % self.port, e, lvl=critical)
+                self.log("Could not open port (%i):" % self.port, e, lvl=critical)
 
     def _drop_privileges(self, *args):
         self.log("Dropping privileges", lvl=debug)
@@ -380,8 +440,9 @@ class Core(ConfigurableComponent):
     # def trigger_component_update(self, event):
     #     self.update_components(forcereload=event.force)
 
-    def update_components(self, forcereload=False, forcerebuild=False,
-                          forcecopy=True, install=False):
+    def update_components(
+        self, forcereload=False, forcerebuild=False, forcecopy=True, install=False
+    ):
         """Check all known entry points for components. If necessary,
         manage configuration updates"""
 
@@ -397,29 +458,33 @@ class Core(ConfigurableComponent):
             from pkg_resources import iter_entry_points
 
             entry_point_tuple = (
-                iter_entry_points(group='isomer.base', name=None),
-                iter_entry_points(group='isomer.sails', name=None),
-                iter_entry_points(group='isomer.components', name=None)
+                iter_entry_points(group="isomer.base", name=None),
+                iter_entry_points(group="isomer.sails", name=None),
+                iter_entry_points(group="isomer.components", name=None),
             )
-            self.log('Entrypoints:', entry_point_tuple, pretty=True, lvl=verbose)
+            self.log("Entrypoints:", entry_point_tuple, pretty=True, lvl=verbose)
             for iterator in entry_point_tuple:
                 for entry_point in iterator:
-                    self.log('Entrypoint:', entry_point, pretty=True, lvl=verbose)
+                    self.log("Entrypoint:", entry_point, pretty=True, lvl=verbose)
                     try:
                         name = entry_point.name
                         location = entry_point.dist.location
                         loaded = entry_point.load()
 
-                        self.log("Entry point: ", entry_point,
-                                 name,
-                                 entry_point.resolve(), lvl=verbose)
+                        self.log(
+                            "Entry point: ",
+                            entry_point,
+                            name,
+                            entry_point.resolve(),
+                            lvl=verbose,
+                        )
 
                         self.log("Loaded: ", loaded, lvl=verbose)
                         comp = {
-                            'package': entry_point.dist.project_name,
-                            'location': location,
-                            'version': str(entry_point.dist.parsed_version),
-                            'description': loaded.__doc__
+                            "package": entry_point.dist.project_name,
+                            "location": location,
+                            "version": str(entry_point.dist.parsed_version),
+                            "description": loaded.__doc__,
                         }
 
                         components[name] = comp
@@ -428,9 +493,15 @@ class Core(ConfigurableComponent):
                         self.log("Loaded component:", comp, lvl=verbose)
 
                     except Exception as e:
-                        self.log("Could not inspect entrypoint: ", e,
-                                 type(e), entry_point, iterator, lvl=error,
-                                 exc=True)
+                        self.log(
+                            "Could not inspect entrypoint: ",
+                            e,
+                            type(e),
+                            entry_point,
+                            iterator,
+                            lvl=error,
+                            exc=True,
+                        )
 
                         # for name in components.keys():
                         #     try:
@@ -455,8 +526,9 @@ class Core(ConfigurableComponent):
             self.log("Component update error: ", e, type(e), lvl=error, exc=True)
             return
 
-        self.log("Checking component frontend bits in ", self.frontend_root,
-                 lvl=verbose)
+        self.log(
+            "Checking component frontend bits in ", self.frontend_root, lvl=verbose
+        )
 
         # pprint(self.config._fields)
         diff = set(components) ^ set(self.config.components)
@@ -476,21 +548,22 @@ class Core(ConfigurableComponent):
 
         self.log(self.config, self.config.frontendenabled, lvl=verbose)
         if self.config.frontendenabled and not self.frontend_running or restart:
-            self.log("Restarting webfrontend services on",
-                     self.frontend_target)
+            self.log("Restarting webfrontend services on", self.frontend_target)
 
-            self.static = Static("/",
-                                 docroot=self.frontend_target).register(
-                self)
+            self.static = Static("/", docroot=self.frontend_target).register(self)
             self.websocket = WebSocketsDispatcher("/websocket").register(self)
             self.frontend_running = True
 
             if self.development:
                 self.frontend_watch_manager = pyinotify.WatchManager()
-                self.frontend_watcher = pyinotify.ThreadedNotifier(self.frontend_watch_manager, FrontendHandler(self))
+                self.frontend_watcher = pyinotify.ThreadedNotifier(
+                    self.frontend_watch_manager, FrontendHandler(self)
+                )
                 self.frontend_watcher.start()
-                mask = pyinotify.IN_DELETE | pyinotify.IN_CREATE | pyinotify.IN_CLOSE_WRITE
-                self.log('Frontend root:', self.frontend_root, lvl=debug)
+                mask = (
+                    pyinotify.IN_DELETE | pyinotify.IN_CREATE | pyinotify.IN_CLOSE_WRITE
+                )
+                self.log("Frontend root:", self.frontend_root, lvl=debug)
                 self.frontend_watch_manager.add_watch(self.module_root, mask, rec=True)
 
     def _instantiate_components(self, clear=True):
@@ -501,6 +574,7 @@ class Core(ConfigurableComponent):
             # from copy import deepcopy
             from circuits.tools import kill
             from circuits import Component
+
             for comp in self.running_components.values():
                 self.log(comp, type(comp), isinstance(comp, Component), pretty=True)
                 kill(comp)
@@ -522,28 +596,34 @@ class Core(ConfigurableComponent):
             # del removables
             self.running_components = {}
 
-        self.log('Not running blacklisted components: ',
-                 self.component_blacklist,
-                 lvl=debug)
+        self.log(
+            "Not running blacklisted components: ", self.component_blacklist, lvl=debug
+        )
 
         running = set(self.loadable_components.keys()).difference(
-            self.component_blacklist)
-        self.log('Starting components: ', sorted(running))
+            self.component_blacklist
+        )
+        self.log("Starting components: ", sorted(running))
         for name, componentdata in self.loadable_components.items():
             if name in self.component_blacklist:
                 continue
             self.log("Running component: ", name, lvl=verbose)
             try:
                 if name in self.running_components:
-                    self.log("Component already running: ", name,
-                             lvl=warn)
+                    self.log("Component already running: ", name, lvl=warn)
                 else:
                     runningcomponent = componentdata()
                     runningcomponent.register(self)
                     self.running_components[name] = runningcomponent
             except Exception as e:
-                self.log("Could not register component: ", name, e,
-                         type(e), lvl=error, exc=True)
+                self.log(
+                    "Could not register component: ",
+                    name,
+                    e,
+                    type(e),
+                    lvl=error,
+                    exc=True,
+                )
 
     def started(self, component):
         """Sets up the application after startup."""
@@ -553,8 +633,13 @@ class Core(ConfigurableComponent):
         populate_user_events()
 
         from isomer.events.system import AuthorizedEvents
-        self.log(len(AuthorizedEvents), "authorized event sources:",
-                 list(AuthorizedEvents.keys()), lvl=debug)
+
+        self.log(
+            len(AuthorizedEvents),
+            "authorized event sources:",
+            list(AuthorizedEvents.keys()),
+            lvl=debug,
+        )
 
         self._instantiate_components()
         self._start_frontend()
@@ -568,83 +653,126 @@ def construct_graph(name, instance, args):
 
     setup_root(app)
 
-    if args['debug']:
+    if args["debug"]:
         from circuits import Debugger
-        isolog("Starting circuits debugger", lvl=warn, emitter='GRAPH')
+
+        isolog("Starting circuits debugger", lvl=warn, emitter="GRAPH")
         dbg = Debugger().register(app)
         # TODO: Make these configurable from modules, navdata is _very_ noisy
         # but should not be listed _here_
-        dbg.IgnoreEvents.extend([
-            "read", "_read", "write", "_write",
-            "stream_success", "stream_complete",
-            "serial_packet", "raw_data", "stream",
-            "navdatapush", "referenceframe",
-            "updateposition", "updatesubscriptions",
-            "generatevesseldata", "generatenavdata", "sensordata",
-            "reset_flood_offenders", "reset_flood_counters",  # Flood counters
-            "task_success", "task_done",  # Thread completion
-            "keepalive"  # IRC Gateway
-        ])
+        dbg.IgnoreEvents.extend(
+            [
+                "read",
+                "_read",
+                "write",
+                "_write",
+                "stream_success",
+                "stream_complete",
+                "serial_packet",
+                "raw_data",
+                "stream",
+                "navdatapush",
+                "referenceframe",
+                "updateposition",
+                "updatesubscriptions",
+                "generatevesseldata",
+                "generatenavdata",
+                "sensordata",
+                "reset_flood_offenders",
+                "reset_flood_counters",  # Flood counters
+                "task_success",
+                "task_done",  # Thread completion
+                "keepalive",  # IRC Gateway
+            ]
+        )
 
-    isolog("Beginning graph assembly.", emitter='GRAPH')
+    isolog("Beginning graph assembly.", emitter="GRAPH")
 
-    if args['draw_graph']:
+    if args["draw_graph"]:
         from circuits.tools import graph
 
         graph(app)
 
-    if args['open_gui']:
+    if args["open_gui"]:
         import webbrowser
-        # TODO: Fix up that url:
-        webbrowser.open("http://%s:%i/" % (args['host'], args['port']))
 
-    isolog("Graph assembly done.", emitter='GRAPH')
+        # TODO: Fix up that url:
+        webbrowser.open("http://%s:%i/" % (args["host"], args["port"]))
+
+    isolog("Graph assembly done.", emitter="GRAPH")
 
     return app
 
 
 @click.command()
-@click.option("--web-port", "-p", help="Define port for UI server", type=int, default=None)
-@click.option("--web-address", "-a", help="Define listening address for UI server",
-              type=str, default='127.0.0.1')
-@click.option("--web-certificate", '-c', help="Certificate file path", type=str, default=None)
+@click.option(
+    "--web-port", "-p", help="Define port for UI server", type=int, default=None
+)
+@click.option(
+    "--web-address",
+    "-a",
+    help="Define listening address for UI server",
+    type=str,
+    default="127.0.0.1",
+)
+@click.option(
+    "--web-certificate", "-c", help="Certificate file path", type=str, default=None
+)
 @click.option("--profile", help="Enable profiler", is_flag=True)
-@click.option("--open-gui", help="Launch web browser for GUI inspection after startup", is_flag=True)
-@click.option("--draw-graph", help="Draw a snapshot of the component graph after construction", is_flag=True)
+@click.option(
+    "--open-gui",
+    help="Launch web browser for GUI inspection after startup",
+    is_flag=True,
+)
+@click.option(
+    "--draw-graph",
+    help="Draw a snapshot of the component graph after construction",
+    is_flag=True,
+)
 @click.option("--live-log", help="Log to in-memory structure as well", is_flag=True)
 @click.option("--debug", help="Run circuits debugger", is_flag=True)
 @click.option("--dev", help="Run development server", is_flag=True, default=True)
 @click.option("--insecure", help="Keep privileges - INSECURE", is_flag=True)
 @click.option("--no-run", "-n", help="Only assemble system, do not run", is_flag=True)
-@click.option("--blacklist", "-b", help="Blacklist a component (can be repeated)", multiple=True, default=[])
+@click.option(
+    "--blacklist",
+    "-b",
+    help="Blacklist a component (can be repeated)",
+    multiple=True,
+    default=[],
+)
 @click.pass_context
 def launch(ctx, run=True, **args):
     """Assemble and run an Isomer instance"""
 
-    instance_name = ctx.obj['instance']
+    instance_name = ctx.obj["instance"]
     instance = load_instance(instance_name)
-    environment_name = ctx.obj['environment']
+    environment_name = ctx.obj["environment"]
 
-    isolog('Launching instance %s - (%s)' % (instance_name, environment_name))
+    isolog("Launching instance %s - (%s)" % (instance_name, environment_name))
 
-    database_host = ctx.obj['dbhost']
-    database_name = ctx.obj['dbname']
+    database_host = ctx.obj["dbhost"]
+    database_name = ctx.obj["dbname"]
 
-    if ctx.params['live_log'] is True:
+    if ctx.params["live_log"] is True:
         from isomer import logger
+
         logger.live = True
 
-    if args['web_certificate'] is not None:
-        isolog("Warning! Using SSL on the backend is currently not recommended!",
-               lvl=critical, emitter='CORE')
+    if args["web_certificate"] is not None:
+        isolog(
+            "Warning! Using SSL on the backend is currently not recommended!",
+            lvl=critical,
+            emitter="CORE",
+        )
 
-    isolog("Initializing database access", emitter='CORE', lvl=debug)
+    isolog("Initializing database access", emitter="CORE", lvl=debug)
     initialize(database_host, database_name, instance_name)
-    isolog('Setting instance paths', emitter='CORE', lvl=debug)
+    isolog("Setting instance paths", emitter="CORE", lvl=debug)
     set_instance(instance_name, environment_name)
 
     server = construct_graph(instance_name, instance, args)
-    if run and not args['no_run']:
+    if run and not args["no_run"]:
         server.run()
 
     return server

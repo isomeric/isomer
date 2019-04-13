@@ -35,12 +35,25 @@ This is a namespace package.
 
 __author__ = "Heiko 'riot' Weinen"
 __license__ = "AGPLv3"
-__all__ = ['events', 'provisions', 'schemata', 'ui', 'misc', 'tool', 'iso',
-           'component', 'database', 'debugger', 'launcher', 'logger', 'migration']
+__all__ = [
+    "events",
+    "provisions",
+    "schemata",
+    "ui",
+    "misc",
+    "tool",
+    "iso",
+    "component",
+    "database",
+    "debugger",
+    "launcher",
+    "logger",
+    "migration",
+]
 
 # See http://peak.telecommunity.com/DevCenter/setuptools#namespace-packages
 try:  # pragma: no cover
-    __import__('pkg_resources').declare_namespace(__name__)
+    __import__("pkg_resources").declare_namespace(__name__)
 except ImportError:  # pragma: no cover
 
     from pkgutil import extend_path
@@ -49,7 +62,7 @@ except ImportError:  # pragma: no cover
     import os
 
     for _path in __path__:
-        _path = os.path.join(_path, '__init__.py')
+        _path = os.path.join(_path, "__init__.py")
         if _path != __file__ and os.path.exists(_path):
             with open(_path) as fd:
                 exec(fd, globals())

@@ -36,16 +36,15 @@ from isomer.ui.objectmanager.crud import CrudOperations
 
 
 class RoleOperations(CrudOperations):
-
     @handler(remove_role)
     def remove_role(self, event):
-        schema = event.data.get('schema', None)
-        uuid = event.data.get('uuid', None)
-        action = event.data.get('action', None)
-        role = event.data.get('role', None)
+        schema = event.data.get("schema", None)
+        uuid = event.data.get("uuid", None)
+        action = event.data.get("action", None)
+        role = event.data.get("role", None)
 
         if schema is None or uuid is None or action is None or role is None:
-            self.log('Invalid request, arguments missing:', event.data, lvl=error)
+            self.log("Invalid request, arguments missing:", event.data, lvl=error)
             return
 
         user = event.user
@@ -54,28 +53,35 @@ class RoleOperations(CrudOperations):
             uuid = [uuid]
 
         for item in uuid:
-            obj = objectmodels[schema].find_one({'uuid': item})
+            obj = objectmodels[schema].find_one({"uuid": item})
 
-            if not self._check_permissions(user, 'write', obj):
-                self.log('Revoking role not possible due to insufficient permissions.')
+            if not self._check_permissions(user, "write", obj):
+                self.log("Revoking role not possible due to insufficient permissions.")
                 return
 
-            self.log('Removing role', role, 'of', action, 'on', schema, ':', item)
+            self.log("Removing role", role, "of", action, "on", schema, ":", item)
             try:
                 obj.perms[action].remove(role)
                 obj.save()
             except ValueError:
-                self.log('Could not remove role, it is not existing:', role, action, schema, ':', item)
+                self.log(
+                    "Could not remove role, it is not existing:",
+                    role,
+                    action,
+                    schema,
+                    ":",
+                    item,
+                )
 
     @handler(add_role)
     def add_role(self, event):
-        schema = event.data.get('schema', None)
-        uuid = event.data.get('uuid', None)
-        action = event.data.get('action', None)
-        role = event.data.get('role', None)
+        schema = event.data.get("schema", None)
+        uuid = event.data.get("uuid", None)
+        action = event.data.get("action", None)
+        role = event.data.get("role", None)
 
         if schema is None or uuid is None or action is None or role is None:
-            self.log('Invalid request, arguments missing:', event.data, lvl=error)
+            self.log("Invalid request, arguments missing:", event.data, lvl=error)
             return
 
         user = event.user
@@ -84,15 +90,15 @@ class RoleOperations(CrudOperations):
             uuid = [uuid]
 
         for item in uuid:
-            obj = objectmodels[schema].find_one({'uuid': item})
+            obj = objectmodels[schema].find_one({"uuid": item})
 
-            if not self._check_permissions(user, 'write', obj):
-                self.log('Adding role not possible due to insufficient permissions.')
+            if not self._check_permissions(user, "write", obj):
+                self.log("Adding role not possible due to insufficient permissions.")
                 return
 
-            self.log('Appending role', role, 'of', action, 'on', schema, ':', item)
+            self.log("Appending role", role, "of", action, "on", schema, ":", item)
             if role not in obj.perms[action]:
                 obj.perms[action].append(role)
                 obj.save()
             else:
-                self.log('Role already present, not adding')
+                self.log("Role already present, not adding")
