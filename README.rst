@@ -188,7 +188,8 @@ You can also find us here:
 
 * `github.com/Hackerfleet <https://github.com/Hackerfleet>`__
 * `reddit <https://reddit.com/r/hackerfleet>`__
-* `Twitter <https://twitter.com/hackerfleet>`__
+* `Hackerfleet Twitter <https://twitter.com/hackerfleet>`__
+* `Isomer Twitter <https://twitter.com/isomerframework>`__
 * `Facebook <https://www.facebook.com/Hackerfleet>`__
 * `soup.io <http://hackerfleet.soup.io/>`__
 * `G+ <https://plus.google.com/105528689027070271173>`__
