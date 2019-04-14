@@ -80,7 +80,8 @@ def test_install():
 
     result = run_cli(
         isotool,
-        ['environment', 'install', '--no-sudo', '--source', 'copy', '--url', repo_path],
+        ['--clog', '10', 'environment', 'install', '--no-sudo', '--source', 'copy',
+         '--url', repo_path],
         full_log=True
     )
 
@@ -89,10 +90,12 @@ def test_install():
     assert os.path.exists('/tmp/isomer-test/var/lib/isomer/default/green')
     assert os.path.exists('/tmp/isomer-test/var/cache/isomer/default/green')
     assert os.path.exists('/tmp/isomer-test/var/local/isomer/default/green')
-    assert os.path.exists('/tmp/isomer-test/var/lib/isomer/default/green/venv/bin/python3')
+    assert os.path.exists(
+        '/tmp/isomer-test/var/lib/isomer/default/green/venv/bin/python3')
     assert os.path.exists('/tmp/isomer-test/var/lib/isomer/default/green/venv/bin/iso')
     assert os.path.exists('/tmp/isomer-test/var/lib/isomer/default/green/repository')
-    assert os.path.exists('/tmp/isomer-test/var/lib/isomer/default/green/repository/frontend')
+    assert os.path.exists(
+        '/tmp/isomer-test/var/lib/isomer/default/green/repository/frontend')
 
     instance_configuration = load_instance('default')
     environment = instance_configuration['environments']['green']
