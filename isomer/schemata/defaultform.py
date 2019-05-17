@@ -105,17 +105,54 @@ def lookup_field(
     return result
 
 
-def lookup_object(key, lookup_type):
+def lookup_object(key, lookup_type=None, actions=None):
     """Returns a lookup button to inspect a selected object"""
+
+    if lookup_type is None:
+        lookup_type = key
+
+    if actions is None:
+        actions = ['edit', 'create']
+
+    template = ""
+
+    for action in actions:
+        uuid_key = f"{{model.{key}}}"
+        condition = f'ng-show="model.{key} != null"'
+
+        if action == 'edit':
+            icon = 'pencil'
+            button_class = 'success'
+        elif action == 'view':
+            icon = 'search'
+            button_class = 'info'
+        elif action == 'create':
+            icon = 'plus'
+            condition = ''
+            button_class = 'info'
+            uuid_key = ""
+        elif action == 'unset':
+            # TODO: This needs to change the link to unset the model attribute
+            icon = 'plus'
+            condition = ""
+            button_class = 'info'
+        elif action == 'delete':
+            icon = 'trash'
+            button_class = 'danger'
+        else:
+            icon = 'question'
+            condition = ''
+            button_class = 'info'
+
+        template += f'<a {condition} class="btn btn-{button_class} btn-sm"' \
+            f'href="/#!/editor/{lookup_type}/{uuid_key}/{action}">' \
+            f'<span class="fa fa-{icon}"></span>' \
+            f'</a>'
 
     result = {
         "key": "lookup_" + key,
         "type": "template",
-        "template": '<a href="/#!/editor/'
-        + lookup_type
-        + "/{{$ctrl.model."
-        + key
-        + '}}/edit">Edit</a>',
+        "template": template
     }
 
     return result
