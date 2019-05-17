@@ -145,6 +145,7 @@ See https://github.com/isomeric/isomer""",
         'pycountry>=18.2',
         'pyinotify>=0.9.6',
         'pystache>=0.5.4',
+        'pytz>=2019.1',
         'tomlkit>=0.4.6',
         'spur>=0.3.20'
     ],
