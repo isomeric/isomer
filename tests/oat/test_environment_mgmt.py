@@ -37,7 +37,7 @@ import pytest
 from isomer.tool.etc import load_instance
 from isomer.tool.tool import isotool
 
-from .test_instance_mgmt import reset_base, run_cli
+from . import reset_base, run_cli
 
 
 def test_instance_clear():
@@ -76,7 +76,7 @@ def test_install():
     assert os.path.exists('/tmp/isomer-test/etc/isomer/instances/default.conf')
     assert os.path.exists('/tmp/isomer-test/var/lib/isomer/default/green')
 
-    repo_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../'))
+    repo_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../..'))
 
     result = run_cli(
         isotool,

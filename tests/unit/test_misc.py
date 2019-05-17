@@ -116,7 +116,7 @@ def test_write_template_file():
 
 
 def test_path_tools():
-    path.set_instance('TESTING', 'MAUVE')
+    path.set_instance('TESTING', 'MAUVE', '/tmp/isomer-test')
 
     assert path.INSTANCE == 'TESTING'
     assert path.ENVIRONMENT == 'MAUVE'
