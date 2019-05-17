@@ -136,7 +136,6 @@ ProfileSchema["properties"].update(
         "settings": {
             "id": "#profile.settings",
             "type": "object",
-            "default": {},
             "properties": {
                 "language": language_field(),
                 "color": {
