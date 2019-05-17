@@ -157,8 +157,8 @@ See https://github.com/isomeric/isomer""",
     debugger=isomer.debugger:HFDebugger
     cli=isomer.debugger:CLI
     syslog=isomer.ui.syslog:Syslog
-    maintenance=isomer.database:Maintenance
-    backup=isomer.database:BackupManager
+    maintenance=isomer.database.components:Maintenance
+    backup=isomer.database.components:BackupManager
 
     [isomer.sails]
     auth=isomer.ui.auth:Authenticator
