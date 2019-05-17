@@ -17,7 +17,11 @@ install:
   - pip install --no-cache  -r requirements.txt
   - pip install -e .
 #  - docker build -t isomeric/isomer -f docker/Dockerfile.debian .
-script: python setup.py test
+script:
+  - pytest tests/unit
+  - pytest tests/integration
+  - pytest tests/system
+  - travis_wait pytest tests/oat
 # -  docker run -i -t isomeric/isomer /etc/init.d/mongodb start && py.test tests
 after_success:
   - coveralls
