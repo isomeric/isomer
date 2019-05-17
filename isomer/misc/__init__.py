@@ -30,6 +30,8 @@ import json
 
 import os
 
+import pytz
+
 from datetime import datetime
 from uuid import uuid4
 
@@ -150,10 +152,10 @@ def std_hash(word, salt):
     return hex_hash
 
 
-def std_now(delta=None, format="iso"):
-    """Return current (UTC) timestamp in ISO format"""
+def std_now(delta=None, format="iso", tz='UTC'):
+    """Return current timestamp in ISO format"""
 
-    now = datetime.now()
+    now = datetime.now(tz=pytz.timezone(tz))
 
     if delta is not None:
         now = now + delta
