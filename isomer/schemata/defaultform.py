@@ -117,8 +117,8 @@ def lookup_object(key, lookup_type=None, actions=None):
     template = ""
 
     for action in actions:
-        uuid_key = f"{{model.{key}}}"
-        condition = f'ng-show="model.{key} != null"'
+        uuid_key = "{{model.%s}}" % key
+        condition = 'ng-show="model.%s != null"' % key
 
         if action == 'edit':
             icon = 'pencil'
@@ -144,10 +144,10 @@ def lookup_object(key, lookup_type=None, actions=None):
             condition = ''
             button_class = 'info'
 
-        template += f'<a {condition} class="btn btn-{button_class} btn-sm"' \
-            f'href="/#!/editor/{lookup_type}/{uuid_key}/{action}">' \
-            f'<span class="fa fa-{icon}"></span>' \
-            f'</a>'
+        template += '<a %s class="btn btn-%s btn-sm"' \
+            'href="/#!/editor/%s/%s/%s">' \
+            '<span class="fa fa-%s"></span>' \
+            '</a>' % (condition, button_class, lookup_type, uuid_key, action, icon)
 
     result = {
         "key": "lookup_" + key,
