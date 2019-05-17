@@ -233,9 +233,9 @@ def initialize(
     except Exception as e:
         db_log(
             "No database available! Check if you have mongodb > 2.2 "
-            "installed and running as well as listening on port 27017 "
-            "of localhost and check if you specified the correct "
-            "instance and environment. (Error: %s) -> EXIT" % e,
+            "installed and running as well as listening on port %i "
+            "of %s and check if you specified the correct "
+            "instance and environment. (Error: %s) -> EXIT" % (dbport, dbhost, e),
             lvl=critical,
         )
         if not ignore_fail:
@@ -243,7 +243,7 @@ def initialize(
         else:
             return False
 
-    formal.connect(database_name)
+    formal.connect(database_name, host=dbhost, port=dbport)
     formal.connect_sql(database_name, database_type="sql_memory")
 
     schemastore.schemastore = schemastore.build_schemastore_new()
