@@ -20,10 +20,15 @@
 
 """
 
-Module: OM
-==========
+Module: objectmanager.crud
+==========================
 
-OM manager
+CRUD operations for objects. CRUD stands for
+
+* Create
+* Read
+* Update
+* Delete
 
 
 """
@@ -47,10 +52,15 @@ from isomer.events.objectmanager import (
 )
 from isomer.logger import warn, verbose, error, debug, critical
 from pymongo import ASCENDING, DESCENDING
-from isomer.ui.objectmanager.basemanager import ObjectBaseManager, WARNSIZE
+
+from isomer.ui.objectmanager.cli import CliManager
+
+WARN_SIZE = 500
 
 
-class CrudOperations(ObjectBaseManager):
+class CrudOperations(CliManager):
+    """Adds CRUD (create, read, update, delete) functionality"""
+
     @handler(get)
     def get(self, event):
         """Get a specified object"""
@@ -167,7 +177,7 @@ class CrudOperations(ObjectBaseManager):
 
         size = objectmodels[schema].count(object_filter)
 
-        if size > WARNSIZE and (limit > 0 and limit > WARNSIZE):
+        if size > WARN_SIZE and (limit > 0 and limit > WARN_SIZE):
             self.log(
                 "Getting a very long (", size, ") list of items for ", schema, lvl=warn
             )
@@ -275,7 +285,7 @@ class CrudOperations(ObjectBaseManager):
         opts = schemastore[schema].get("options", {})
         hidden = opts.get("hidden", [])
 
-        if objectmodels[schema].count(object_filter) > WARNSIZE:
+        if objectmodels[schema].count(object_filter) > WARN_SIZE:
             self.log("Getting a very long list of items for ", schema, lvl=warn)
 
         try:

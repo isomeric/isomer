@@ -20,20 +20,43 @@
 
 """
 
-Package: objectmanager
-======================
 
-Isomer's core object management component providing CRUD with RBAC and
-publish/subscriber functionality.
+Module clientmanager.latency
+============================
+
+Latency analysis for clients
 
 """
 
 __author__ = "Heiko 'riot' Weinen"
 __license__ = "AGPLv3"
 
-from isomer.ui.objectmanager.subscriptions import SubscriptionOperations
+from time import time
+
+from isomer.events.system import authorized_event
+from isomer.component import handler
+from isomer.events.client import send
+from isomer.logger import verbose
+
+from isomer.ui.clientmanager.languages import LanguageManager
 
 
-class ObjectManager(SubscriptionOperations):
-    """Combined functionality object management component"""
+class ping(authorized_event):
     pass
+
+
+class LatencyManager(LanguageManager):
+    """Respond to authorized ping requests"""
+
+    @handler(ping)
+    def ping(self, event):
+        """Perform a ping to measure client <-> node latency"""
+
+        self.log("Client ping received:", event.data, lvl=verbose)
+        response = {
+            "component": "isomer.ui.clientmanager",
+            "action": "pong",
+            "data": [event.data, time() * 1000],
+        }
+
+        self.fire(send(event.client.uuid, response))

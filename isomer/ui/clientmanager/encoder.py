@@ -20,20 +20,28 @@
 
 """
 
-Package: objectmanager
-======================
 
-Isomer's core object management component providing CRUD with RBAC and
-publish/subscriber functionality.
+Module clientmanager.encoder
+============================
+
+Enhanced JSON encoding
+
 
 """
 
 __author__ = "Heiko 'riot' Weinen"
 __license__ = "AGPLv3"
 
-from isomer.ui.objectmanager.subscriptions import SubscriptionOperations
+import datetime
+import json
 
 
-class ObjectManager(SubscriptionOperations):
-    """Combined functionality object management component"""
-    pass
+class ComplexEncoder(json.JSONEncoder):
+    """A JSON encoder that converts dates to ISO 8601 formatting"""
+
+    def default(self, obj):
+        """Convert datetime objects to ISO 8601 format"""
+        if isinstance(obj, (datetime.time, datetime.date)):
+            return obj.isoformat()
+            # Let the base class default method raise the TypeError
+        return json.JSONEncoder.default(self, obj)

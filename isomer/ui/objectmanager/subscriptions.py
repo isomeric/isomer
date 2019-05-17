@@ -20,10 +20,10 @@
 
 """
 
-Module: OM
-==========
+Module: objectmanager.subscriptions
+===================================
 
-OM manager
+Subscription management for objects
 
 
 """
@@ -36,6 +36,8 @@ from isomer.ui.objectmanager.roles import RoleOperations
 
 
 class SubscriptionOperations(RoleOperations):
+    """Adds subscription functionality"""
+
     @handler(subscribe)
     def subscribe(self, event):
         """Subscribe to an object's future changes"""

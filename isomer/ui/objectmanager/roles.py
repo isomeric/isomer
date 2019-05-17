@@ -20,10 +20,10 @@
 
 """
 
-Module: OM
-==========
+Module: objectmanager.roles
+===========================
 
-OM manager
+RBAC (role based access control) support functionality for objects
 
 
 """
@@ -36,8 +36,12 @@ from isomer.ui.objectmanager.crud import CrudOperations
 
 
 class RoleOperations(CrudOperations):
+    """Adds RBAC (role based access control) support functionality"""
+
     @handler(remove_role)
     def remove_role(self, event):
+        """Remove a role from one or many objects' permissions"""
+
         schema = event.data.get("schema", None)
         uuid = event.data.get("uuid", None)
         action = event.data.get("action", None)
@@ -75,6 +79,8 @@ class RoleOperations(CrudOperations):
 
     @handler(add_role)
     def add_role(self, event):
+        """Add a role to one or many objects' permissions"""
+
         schema = event.data.get("schema", None)
         uuid = event.data.get("uuid", None)
         action = event.data.get("action", None)

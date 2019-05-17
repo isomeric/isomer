@@ -20,29 +20,19 @@
 
 """
 
-Module: OM
-==========
+Module objectmanager.basemanager
+================================
 
-OM manager
-
+Basic object management functionality and component set up.
 
 """
 
-from circuits import Event
-from isomer.component import ConfigurableComponent, handler
+from isomer.component import ConfigurableComponent
 from isomer.database import objectmodels
 from isomer.schemastore import schemastore
-from isomer.debugger import cli_register_event
+
 from isomer.events.client import send
 from isomer.logger import verbose, warn, error
-
-WARNSIZE = 500
-
-
-class cli_subscriptions(Event):
-    """Display a list of all registered subscriptions"""
-
-    pass
 
 
 class ObjectBaseManager(ConfigurableComponent):
@@ -59,12 +49,7 @@ class ObjectBaseManager(ConfigurableComponent):
 
         self.subscriptions = {}
 
-        self.fireEvent(cli_register_event("om_subscriptions", cli_subscriptions))
         self.log("Started")
-
-    @handler("cli_subscriptions")
-    def cli_subscriptions(self, event):
-        self.log("Subscriptions", self.subscriptions, pretty=True)
 
     def _check_permissions(self, subject, action, obj):
         # self.log('Roles of user:', subject.account.roles, lvl=verbose)

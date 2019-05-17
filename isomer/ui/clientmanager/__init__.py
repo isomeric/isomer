@@ -20,20 +20,31 @@
 
 """
 
-Package: objectmanager
-======================
 
-Isomer's core object management component providing CRUD with RBAC and
-publish/subscriber functionality.
+Module clientmanager
+====================
+
+Coordinates clients communicating via websocket
+
+This component is split up into several maintainable pieces:
+
+* Authentication
+* CLI
+* Flood protection
+* Language support
+* Latency measurement
 
 """
 
 __author__ = "Heiko 'riot' Weinen"
 __license__ = "AGPLv3"
 
-from isomer.ui.objectmanager.subscriptions import SubscriptionOperations
+from isomer.ui.clientmanager.latency import LatencyManager
 
 
-class ObjectManager(SubscriptionOperations):
-    """Combined functionality object management component"""
+class ClientManager(LatencyManager):
+    """
+    Handles client connections and requests as well as client-outbound
+    communication.
+    """
     pass

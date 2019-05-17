@@ -20,20 +20,35 @@
 
 """
 
-Package: objectmanager
-======================
+Module: objectmanager.cli
+=========================
 
-Isomer's core object management component providing CRUD with RBAC and
-publish/subscriber functionality.
+Command line interface functionality for debugging object handling
+
 
 """
+from circuits import Event
 
-__author__ = "Heiko 'riot' Weinen"
-__license__ = "AGPLv3"
+from isomer.debugger import cli_register_event
+from isomer.component import handler
 
-from isomer.ui.objectmanager.subscriptions import SubscriptionOperations
+from isomer.ui.objectmanager.basemanager import ObjectBaseManager
 
 
-class ObjectManager(SubscriptionOperations):
-    """Combined functionality object management component"""
+class cli_subscriptions(Event):
+    """Display a list of all registered subscriptions"""
+
     pass
+
+
+class CliManager(ObjectBaseManager):
+    """Adds cli commands to inspect object management"""
+
+    def __init__(self, *args, **kwargs):
+        super(CliManager, self).__init__(*args, **kwargs)
+
+        self.fireEvent(cli_register_event("om_subscriptions", cli_subscriptions))
+
+    @handler("cli_subscriptions")
+    def cli_subscriptions(self, event):
+        self.log("Subscriptions", self.subscriptions, pretty=True)
