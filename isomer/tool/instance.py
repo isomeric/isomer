@@ -75,6 +75,7 @@ from isomer.tool.defaults import (
     nginx_template,
     cert_file,
     key_file,
+    combined_file,
     distribution,
 )
 from isomer.tool.defaults import (
@@ -146,7 +147,7 @@ def set_parameter(ctx, parameter, value):
 
     try:
         parameter_type = type(defaults[parameter])
-        log(parameter_type, pretty=True, lvl=warn)
+        log(parameter_type, pretty=True, lvl=debug)
 
         if parameter_type == tomlkit.items.Integer:
             converted_value = int(value)
@@ -169,6 +170,7 @@ def set_parameter(ctx, parameter, value):
 
     if valid_configuration(ctx):
         write_instance(instance_configuration)
+        log('Done')
     else:
         log("New configuration would not be valid", lvl=critical)
         sys.exit(EXIT_INVALID_CONFIGURATION)
@@ -196,7 +198,7 @@ def create(ctx):
 @click.option(
     "--source", "-s", default="git", type=click.Choice(["link", "copy", "git"])
 )
-@click.option("--url", "-u", default=None)
+@click.option("--url", "-u", default="")
 @click.option(
     "--import-file", "--import", default=None, help="Import the specified backup"
 )
@@ -505,7 +507,7 @@ def instance_cert(ctx, selfsigned):
     if not hostnames or hostnames == "localhost":
         log(
             "Please configure the public fully qualified domain names of this instance.\n"
-            "Use 'iso %sinstance set web_hostname your.hostname.tld' to do that.\n"
+            "Use 'iso %sinstance set web_hostnames your.hostname.tld' to do that.\n"
             "You can add multiple names by separating them with commas."
             % instance_argument,
             lvl=error,
@@ -547,72 +549,90 @@ def instance_cert(ctx, selfsigned):
                 lvl=error,
             )
             sys.exit(50033)
-    else:
-        log("This has been removed.")
-        sys.exit()
-        # log('Generating self signed (insecure) certificate/key combination')
-        #
-        # try:
-        #     os.mkdir('/etc/ssl/certs/isomer')
-        # except FileExistsError:
-        #     pass
-        # except PermissionError:
-        #     log("Need root (e.g. via sudo) to generate ssl certificate")
-        #     sys.exit(1)
-        #
-        # def create_self_signed_cert():
-        #     """Create a simple self signed SSL certificate"""
-        #
-        #     # create a key pair
-        #     k = crypto.PKey()
-        #     k.generate_key(crypto.TYPE_RSA, 1024)
-        #
-        #     if os.path.exists(cert_file):
-        #         try:
-        #             certificate = open(cert_file, "rb").read()
-        #             old_cert = crypto.load_certificate(crypto.FILETYPE_PEM,
-        #                                                certificate)
-        #             serial = old_cert.get_serial_number() + 1
-        #         except (crypto.Error, OSError) as e:
-        #             log('Could not read old certificate to increment '
-        #                 'serial:', type(e), e, exc=True, lvl=warn)
-        #             serial = 1
-        #     else:
-        #         serial = 1
-        #
-        #     # create a self-signed certificate
-        #     certificate = crypto.X509()
-        #     certificate.get_subject().C = "DE"
-        #     certificate.get_subject().ST = "Berlin"
-        #     certificate.get_subject().L = "Berlin"
-        #     # noinspection PyPep8
-        #     certificate.get_subject().O = "Hackerfleet"
-        #     certificate.get_subject().OU = "Hackerfleet"
-        #     certificate.get_subject().CN = gethostname()
-        #     certificate.set_serial_number(serial)
-        #     certificate.gmtime_adj_notBefore(0)
-        #     certificate.gmtime_adj_notAfter(10 * 365 * 24 * 60 * 60)
-        #     certificate.set_issuer(certificate.get_subject())
-        #     certificate.set_pubkey(k)
-        #     certificate.sign(k, b'sha512')
-        #
-        #     open(key_file, "wt").write(str(
-        #         crypto.dump_privatekey(crypto.FILETYPE_PEM, k),
-        #         encoding="ASCII"))
-        #
-        #     open(cert_file, "wt").write(str(
-        #         crypto.dump_certificate(crypto.FILETYPE_PEM, certificate),
-        #         encoding="ASCII"))
-        #
-        #     open(combined_file, "wt").write(str(
-        #         crypto.dump_certificate(crypto.FILETYPE_PEM, certificate),
-        #         encoding="ASCII") + str(
-        #         crypto.dump_privatekey(crypto.FILETYPE_PEM, k),
-        #         encoding="ASCII"))
-        #
-        # create_self_signed_cert()
-        #
-        # log('Done: instance Cert')
+
+
+@instance.command(short_help="instance snakeoil certificate")
+@click.pass_context
+def snakeoil(ctx):
+    """instance a local snakeoil SSL certificate"""
+
+    _instance_snakeoil(ctx)
+
+
+def _instance_snakeoil(ctx):
+    """Generates a snakeoil certificate that has only been self signed"""
+
+    log('Generating self signed (insecure) certificate/key combination')
+
+    try:
+        os.mkdir('/etc/ssl/certs/isomer')
+    except FileExistsError:
+        pass
+    except PermissionError:
+        log("Need root (e.g. via sudo) to generate ssl certificate")
+        sys.exit(1)
+
+    try:
+        import crypto
+    except ImportError:
+        log("Need python3-crypto to do this.")
+        sys.exit(1)
+
+    from socket import gethostname
+
+    def create_self_signed_cert():
+        """Create a simple self signed SSL certificate"""
+
+        # create a key pair
+        k = crypto.PKey()
+        k.generate_key(crypto.TYPE_RSA, 1024)
+
+        if os.path.exists(cert_file):
+            try:
+                certificate = open(cert_file, "rb").read()
+                old_cert = crypto.load_certificate(crypto.FILETYPE_PEM,
+                                                   certificate)
+                serial = old_cert.get_serial_number() + 1
+            except (crypto.Error, OSError) as e:
+                log('Could not read old certificate to increment '
+                    'serial:', type(e), e, exc=True, lvl=warn)
+                serial = 1
+        else:
+            serial = 1
+
+        # create a self-signed certificate
+        certificate = crypto.X509()
+        certificate.get_subject().C = "DE"
+        certificate.get_subject().ST = "Berlin"
+        certificate.get_subject().L = "Berlin"
+        # noinspection PyPep8
+        certificate.get_subject().O = "Hackerfleet"
+        certificate.get_subject().OU = "Hackerfleet"
+        certificate.get_subject().CN = gethostname()
+        certificate.set_serial_number(serial)
+        certificate.gmtime_adj_notBefore(0)
+        certificate.gmtime_adj_notAfter(10 * 365 * 24 * 60 * 60)
+        certificate.set_issuer(certificate.get_subject())
+        certificate.set_pubkey(k)
+        certificate.sign(k, b'sha512')
+
+        open(key_file, "wt").write(str(
+            crypto.dump_privatekey(crypto.FILETYPE_PEM, k),
+            encoding="ASCII"))
+
+        open(cert_file, "wt").write(str(
+            crypto.dump_certificate(crypto.FILETYPE_PEM, certificate),
+            encoding="ASCII"))
+
+        open(combined_file, "wt").write(str(
+            crypto.dump_certificate(crypto.FILETYPE_PEM, certificate),
+            encoding="ASCII") + str(
+            crypto.dump_privatekey(crypto.FILETYPE_PEM, k),
+            encoding="ASCII"))
+
+    create_self_signed_cert()
+
+    log('Done: instance snakeoil cert')
 
 
 @instance.command(short_help="install systemd service")
@@ -654,9 +674,9 @@ def _create_nginx_config(ctx):
     dbhost = config["database_host"]
     dbname = env["database"]
 
-    hostnames = ctx.obj["web_hostnames"]
+    hostnames = ctx.obj.get("web_hostnames", None)
     if hostnames is None:
-        hostnames = config["web_hostnames"]
+        hostnames = config.get("web_hostnames", None)
     if hostnames is None:
         try:
             configuration = _get_system_configuration(dbhost, dbname)
@@ -714,6 +734,5 @@ Using 'localhost' for now""",
     run_process("/", ["systemctl", "restart", "nginx.service"], sudo="root")
 
     log("Done: instance nginx configuration")
-
 
 # TODO: Add instance user
