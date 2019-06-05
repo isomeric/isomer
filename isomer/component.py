@@ -202,10 +202,17 @@ class ConfigurableMeta(LoggingMeta):
     configprops = {}
     configform = []
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, no_db=False, **kwargs):
         """Check for configuration issues and instantiate a component"""
 
         super(ConfigurableMeta, self).__init__(*args, **kwargs)
+
+        if no_db is True:
+            self.no_db = True
+            self.log('Not using database!')
+            return
+        else:
+            self.no_db = False
 
         self.configschema = deepcopy(ComponentBaseConfigSchema)
 
@@ -243,6 +250,10 @@ class ConfigurableMeta(LoggingMeta):
         store"""
 
         super(ConfigurableMeta, self).register(*args)
+
+        if self.no_db:
+            return
+
         from isomer.schemastore import configschemastore
 
         # self.log('ADDING SCHEMA:')
@@ -371,7 +382,7 @@ class ConfigurableController(ConfigurableMeta, Controller):
     """Configurable controller for direct web access"""
 
     def __init__(self, uniquename=None, *args, **kwargs):
-        ConfigurableMeta.__init__(self, uniquename)
+        ConfigurableMeta.__init__(self, uniquename, **kwargs)
         Controller.__init__(self, *args, **kwargs)
 
 
