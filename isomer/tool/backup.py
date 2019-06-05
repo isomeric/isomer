@@ -40,6 +40,8 @@ import click
 from isomer.database.backup import backup as internal_backup, internal_restore
 from isomer.tool.database import db
 
+from isomer.database.backup import dump as _dump, load as _load
+
 
 @db.command("export", short_help="export objects to json")
 @click.option("--schema", "-s", default=None, help="Specify schema to export")
@@ -123,3 +125,19 @@ def db_import(schema, uuid, object_filter, import_format, filename, all_schemata
     internal_restore(
         schema, uuid, object_filter, import_format, filename, all_schemata, dry
     )
+
+
+@db.command("load", short_help="Load a full database dump")
+@click.argument("filename")
+@click.pass_context
+def load(ctx, filename):
+    host, port = ctx.obj.get('dbhost').split(':')
+    _load(host, port, ctx.obj.get('dbname'), filename)
+
+
+@db.command("dump", short_help="Create a full database dump")
+@click.argument("filename")
+@click.pass_context
+def load(ctx, filename):
+    host, port = ctx.obj.get('dbhost').split(':')
+    _dump(host, port, ctx.obj.get('dbname'), filename)
