@@ -116,6 +116,14 @@ def set_color():
     color = True
 
 
+def set_verbosity(new_lvl):
+    """Adjust logging verbosity"""
+    global verbosity
+    verbosity['global'] = new_lvl
+    verbosity['console'] = new_lvl
+    verbosity['file'] = new_lvl
+
+
 def set_logfile(path, instance):
     """Specify logfile path"""
 
