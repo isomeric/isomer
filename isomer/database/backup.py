@@ -4,7 +4,6 @@ from ast import literal_eval
 import bson
 import pymongo
 
-from isomer.database import objectmodels
 from isomer.logger import isolog, debug, verbose, error, warn
 
 
@@ -99,6 +98,8 @@ def backup(
 ):
     """Exports all collections to (JSON-) files."""
 
+    from isomer.database import objectmodels
+
     export_format = export_format.upper()
 
     if pretty:
@@ -179,6 +180,9 @@ def internal_restore(
     schema, uuid, object_filter, import_format, filename, all_schemata, dry
 ):
     """Foobar"""
+
+    from isomer.database import objectmodels
+
     import_format = import_format.upper()
 
     if import_format == "JSON":
