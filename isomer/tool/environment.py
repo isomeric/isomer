@@ -681,7 +681,7 @@ def _install_environment(
 
         log("Repo:", repository, lvl=debug)
         env["version"] = repository.git.describe()
-    except (exc.InvalidGitRepositoryError, exc.NoSuchPathError):
+    except (exc.InvalidGitRepositoryError, exc.NoSuchPathError, exc.GitCommandError):
         env["version"] = version
         log(
             "Not running from a git repository; Using isomer.version:",
