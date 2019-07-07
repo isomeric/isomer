@@ -32,36 +32,40 @@ Test Isomer Launcher
 """
 
 from circuits import Manager
-import pytest
+# import pytest
+from isomer.debugger import HFDebugger
+from isomer.events.system import debugrequest
+from isomer.ui.clientobjects import User
 from isomer import logger
-# from time import sleep
+from time import sleep
 
 # from pprint import pprint
 
 m = Manager()
-component = pytest.TestComponent()
-component.register(m)
+hfd = HFDebugger()
+hfd.register(m)
 
 
-def test_component_logging():
-    """Throws an exception inside the system and tests if the debugger picks
+def test_instantiate():
+    """Tests correct instantiation"""
+
+    assert type(hfd) == HFDebugger
+
+
+def test_exception_monitor():
+    """Throws an exception inside the c_system and tests if the debugger picks
     it up correctly"""
 
     m.start()
 
     logger.live = True
-    component.log('FOOBAR')
+    hfd.log('FOOBAR')
+
+    m.fireEvent(debugrequest(User(None, None, None), 'debugrequest', 'exception', None),
+                "isomer-web")
+
+    sleep(0.2)
 
     lastlog = logger.LiveLog[-1][-1]
 
-    assert "FOOBAR" in lastlog
-
-
-def test_script_logging():
-    logger.live = True
-
-    logger.isolog('FOOBAR')
-
-    lastlog = logger.LiveLog[-1][-1]
-
-    assert "FOOBAR" in lastlog
+    assert "ERROR" in lastlog
