@@ -27,6 +27,7 @@ import types
 sys.path.insert(0, os.path.abspath('../..'))
 sys.path.insert(0, os.path.abspath('../../modules'))
 sys.path.insert(0, os.path.abspath('../../isomer'))
+sys.path.insert(0, os.path.abspath('../../tests'))
 
 version_module = types.ModuleType('version')
 exec(
@@ -68,7 +69,8 @@ extensions = [
     'sphinxcontrib.seqdiag',
     'sphinxcontrib.actdiag',
     'sphinxcontrib.spelling',
-    'sphinx_click.ext'
+    'sphinx_click.ext',
+    'sphinxcontrib.bibtex'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -496,6 +498,13 @@ epub_exclude_files = ['search.html']
 intersphinx_mapping = {'https://docs.python.org/': None}
 
 
+def skip(app, what, name, obj, would_skip, options):
+    if name == "__init__" or what == "module" and str(obj).endswith("__init__.py"):
+        return False
+    return would_skip
+
+
 def setup(app):
-    # ifconfig variables
+    """Set up the sphinx process"""
     app.add_config_value('devel', '', devel)
+    app.connect("autodoc-skip-member", skip)
