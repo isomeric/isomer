@@ -23,4 +23,5 @@
 
 def test_empty():
     """Does nothing. Placeholder for the still empty b test suite (integration)."""
-    return True
+
+    assert True
