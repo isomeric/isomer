@@ -35,6 +35,8 @@ sphinxcontrib-seqdiag
 sphinxcontrib-blockdiag
 sphinxcontrib-spelling
 sphinx-click
+# BEHOLD:
+sphinxcontrib-bibtex
 #sphinxcontrib-autojs
 pyenchant
 sphinx-git
