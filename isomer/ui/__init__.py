@@ -7,7 +7,7 @@ Package Isomer.web
 
 The backend package dealing with the web frontend interface.
 
-:copyright: (C) 2011-2019 Heiko 'riot' Weinen@c-base.org
+:copyright: (C) 2011-2019 Heiko 'riot' Weinen riot@c-base.org
 :license: AGPLv3 (See LICENSE)
 
 """
