@@ -117,7 +117,7 @@ def add_action_role(ctx):
     log("Done")
 
 
-@rbac.command(short_help="Add role to action")
+@rbac.command(short_help="Delete an action role")
 @click.pass_context
 def del_action_role(ctx):
     """Deletes a role from an action on objects"""
