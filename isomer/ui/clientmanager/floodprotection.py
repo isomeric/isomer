@@ -33,6 +33,8 @@ Protection against erroneously flooding clients.
 __author__ = "Heiko 'riot' Weinen"
 __license__ = "AGPLv3"
 
+from time import time
+
 from circuits import Timer, Event
 
 from isomer.component import handler
