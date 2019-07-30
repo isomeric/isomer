@@ -382,13 +382,17 @@ class CrudOperations(CliManager):
 
         self.log("Object stored.")
 
+        notification = objectchange(storage_object.uuid, schema, client)
+
+        self._update_subscribers(schema, storage_object)
+
         result = {
             "component": "isomer.events.objectmanager",
             "action": "change",
             "data": {"schema": schema, "uuid": uuid},
         }
 
-        self._respond(None, result, event)
+        self._respond(notification, result, event)
 
     @handler(put)
     def put(self, event):
