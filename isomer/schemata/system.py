@@ -92,6 +92,17 @@ SystemconfigSchema["properties"].update(
             "default": "localhost",
         },
         "modules": {"type": "object", "default": {}},
+        "packages": {
+            "type": "array",
+            "default": [],
+            "items": {
+                "type": "object",
+                "properties": {
+                    "name": {"type": "string"},
+                    "version": {"type": "string"}
+                }
+            }
+        }
     }
 )
 
