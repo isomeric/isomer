@@ -179,7 +179,7 @@ def install_frontend(
             shutil.rmtree(os.path.join(component_folder, thing))
 
     if install:
-        cmdline = ["npm", "install"]
+        cmdline = ["npm", "install", "--no-save"]
 
         log("Running", cmdline, lvl=verbose)
         npminstall = Popen(cmdline, cwd=frontend_root)
@@ -350,7 +350,7 @@ def install_frontend(
                 log("Module without frontend:", package_name, component, lvl=debug)
 
         if install:
-            command_line = ["npm", "install"] + installation_packages
+            command_line = ["npm", "install", "--no-save"] + installation_packages
             log("Running", command_line, lvl=verbose)
 
             # TODO: Switch to i.t.run_process
