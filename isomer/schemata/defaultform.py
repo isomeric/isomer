@@ -279,6 +279,21 @@ def rating_widget(key="rating", maximum=10):
 #     return result, {'type': 'section', 'condition': 'form.'+key+'_collapsed', 'items': elements}
 
 
+def event_button(key, title, event, action, data=None):
+    """Template for an event emitting button"""
+    if data is None:
+        data = "$ctrl.model.uuid"
+
+    widget = {
+        'key': key,
+        'type': 'button',
+        'onClick': '$ctrl.formAction("%s", "%s", "%s")' % (event, action, data),
+        'title': title
+    }
+
+    return widget
+
+
 def country_field(key="country"):
     """Provides a select box for country selection"""
 
