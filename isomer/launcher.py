@@ -250,6 +250,7 @@ class Core(ConfigurableComponent):
             lvl=verbose,
         )
 
+        self.modules_loaded = {}
         self.loadable_components = {}
         self.running_components = {}
 
@@ -378,19 +379,16 @@ class Core(ConfigurableComponent):
     def cli_info(self, event):
         """Provides information about the running instance"""
 
-        self.log(
-            "Instance:",
-            self.instance,
-            "Dev:",
-            self.development,
-            "Host:",
-            self.host,
-            "Port:",
-            self.port,
-            "Insecure:",
-            self.insecure,
-            "Frontend:",
-            self.frontend_target,
+        self.log("Instance: %s Dev: %s Host: %s Port: %s Insecure: %s Frontend: %s\nModules:" % (
+                self.instance,
+                self.development,
+                self.host,
+                self.port,
+                self.insecure,
+                self.frontend_target
+            ),
+            self.modules_loaded,
+            pretty=True
         )
 
     def _start_server(self, *args):
@@ -452,6 +450,7 @@ class Core(ConfigurableComponent):
 
         self.log("Updating components")
         components = {}
+        packages = {}
 
         try:
 
@@ -468,6 +467,8 @@ class Core(ConfigurableComponent):
                     self.log("Entrypoint:", entry_point, pretty=True, lvl=verbose)
                     try:
                         name = entry_point.name
+                        package = entry_point.dist.project_name
+                        version = str(entry_point.dist.parsed_version)
                         location = entry_point.dist.location
                         loaded = entry_point.load()
 
@@ -479,16 +480,24 @@ class Core(ConfigurableComponent):
                             lvl=verbose,
                         )
 
+                        module_name = location.split("/")[-1]
+                        if module_name in self.modules_loaded:
+                            self.modules_loaded[module_name].append(name)
+                        else:
+                            self.modules_loaded[module_name] = [name]
+
                         self.log("Loaded: ", loaded, lvl=verbose)
                         comp = {
-                            "package": entry_point.dist.project_name,
+                            "package": package,
                             "location": location,
-                            "version": str(entry_point.dist.parsed_version),
+                            "version": version,
                             "description": loaded.__doc__,
                         }
 
                         components[name] = comp
                         self.loadable_components[name] = loaded
+
+                        packages.setdefault(package, {'version': version, 'name': package})
 
                         self.log("Loaded component:", comp, lvl=verbose)
 
@@ -525,6 +534,14 @@ class Core(ConfigurableComponent):
         except Exception as e:
             self.log("Component update error: ", e, type(e), lvl=error, exc=True)
             return
+
+        from isomer.database import objectmodels
+        systemconfig = objectmodels['systemconfig'].find_one({'active': True})
+
+        systemconfig.packages = sorted(list(packages.values()), key=lambda x: x['name'])
+        systemconfig.save()
+
+        self.log(list(packages.values()), lvl=critical)
 
         self.log(
             "Checking component frontend bits in ", self.frontend_root, lvl=verbose
