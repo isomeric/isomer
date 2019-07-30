@@ -74,6 +74,9 @@ def add_datafiles(*paths):
 
 add_datafiles('frontend', 'docs', 'locale')
 
+with open('README.rst', 'r') as f:
+    readme = f.read()
+
 setup(
     name="isomer",
     description="isomer",
@@ -88,10 +91,10 @@ setup(
         'Environment :: Web Environment',
         'Environment :: Other Environment',
         'Environment :: No Input/Output (Daemon)',
-        'Framework :: Isomer :: 1',
+        # 'Framework :: Isomer :: 1',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)',
-        'Operating System :: Linux',
+        'Operating System :: POSIX :: Linux',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3 :: Only',
         'Programming Language :: Python :: 3.5',
@@ -117,15 +120,7 @@ setup(
         'isomer.provisions'
     ],
     namespace_packages=['isomer'],
-    long_description="""
-Isomer - A distributed application framework
-============================================
-
-A modern, opensource approach to collaborative productivity.
-
-This software package is supposed to run on your ship/car/plane/ufo's board
-computer.
-See https://github.com/isomeric/isomer""",
+    long_description=readme,
     dependency_links=[
         'https://github.com/ri0t/click-repl/archive/master.zip#egg=click-repl-0.1.3-ri0t',
     ],
