@@ -60,6 +60,7 @@ tool
 __author__ = "Heiko 'riot' Weinen"
 __license__ = "AGPLv3"
 
+import spur
 import getpass
 import sys
 import distro
@@ -81,21 +82,6 @@ from isomer.tool.defaults import (
     EXIT_INVALID_CONFIGURATION,
     EXIT_INSTANCE_UNKNOWN,
 )
-
-try:
-    import spur
-except ImportError:
-    import subprocess
-
-    class spur_mock(object):
-        """Mock object for cases where spur was not installed."""
-
-        @staticmethod
-        def LocalShell():
-            """Only defines a local shell which behaves like a standard library subprocess"""
-            return subprocess
-
-    spur = spur_mock()
 
 
 def log(*args, **kwargs):

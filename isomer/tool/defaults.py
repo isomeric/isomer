@@ -66,6 +66,10 @@ platforms = {
                 "sudo",
                 "gnupg",
                 "gdebi-core",
+                "python3",
+                "python3-pip",
+                "python3-spur",
+                "virtualenv"
             ],
             [
                 "sh",
@@ -83,12 +87,15 @@ platforms = {
                 "http://httpredir.debian.org/debian/pool/main/m/mongodb/mongodb-server_3.4.18-2_all.deb",
             ],
             ["gdebi", "-n", "mongodb-server_3.4.18-2_all.deb"],
+            [
+                "wget",
+                "http://httpredir.debian.org/debian/pool/main/m/mongodb/mongodb-server_3.4.18-2_all.deb",
+            ],
+            ["gdebi", "-n", "mongodb-server_3.4.18-2_all.deb"],
         ],
         "post_install": [["systemctl", "start", "mongodb.service"]],
         "tool": ["apt-get", "install", "-y"],
         "packages": [
-            "python3",
-            "python3-pip",
             "python3-dev",
             "virtualenv",
             "git",
