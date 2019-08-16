@@ -51,6 +51,7 @@ from isomer.events.objectmanager import (
     objectdeletion,
 )
 from isomer.logger import warn, verbose, error, debug, critical
+from isomer.misc import nested_map_find, nested_map_update, std_uuid
 from pymongo import ASCENDING, DESCENDING
 
 from isomer.ui.objectmanager.cli import CliManager
@@ -394,6 +395,45 @@ class CrudOperations(CliManager):
 
         self._respond(notification, result, event)
 
+    def _validate(self, schema_name, model, client_data):
+        """Validates and tries to fix up to 10 errors in client model data.."""
+        # TODO: This should probably move to Formal.
+        #  Also i don't like artificially limiting this.
+        #  Alas, never giving it up is even worse :)
+
+        give_up = 10
+        validated = False
+
+        while give_up > 0 and validated is False:
+            try:
+                validated = model(client_data)
+            except ValidationError as e:
+                self.log('Validation Error:', e, e.__dict__, pretty=True)
+                give_up -= 1
+                if e.validator == 'type':
+                    schema_data = schemastore[schema_name]['schema']
+                    if e.validator_value == 'number':
+                        definition = nested_map_find(schema_data,
+                                                     list(e.schema_path)[:-1])
+
+                        if 'default' in definition:
+                            client_data = nested_map_update(
+                                client_data, definition['default'], list(e.path)
+                            )
+                        else:
+                            client_data = nested_map_update(
+                                client_data, None, list(e.path)
+                            )
+                if e.validator == 'pattern' and \
+                        'uuid' == e.path[0] and \
+                        client_data['uuid'] == 'create':
+                    client_data['uuid'] = std_uuid()
+
+        if validated is False:
+            raise ValidationError
+
+        return client_data
+
     @handler(put)
     def put(self, event):
         """Put an object"""
@@ -404,8 +444,8 @@ class CrudOperations(CliManager):
             return
 
         try:
-            clientobject = data["obj"]
-            uuid = clientobject["uuid"]
+            client_object = data["obj"]
+            uuid = client_object["uuid"]
         except KeyError as e:
             self.log("Put request with missing arguments!", e, data, lvl=critical)
             return
@@ -415,15 +455,21 @@ class CrudOperations(CliManager):
             created = False
             storage_object = None
 
+            try:
+                client_object = self._validate(schema, model, client_object)
+            except ValidationError:
+                self._cancel_by_error(event, 'Invalid data')
+                return
+
             if uuid != "create":
                 storage_object = model.find_one({"uuid": uuid})
             if uuid == "create" or model.count({"uuid": uuid}) == 0:
                 if uuid == "create":
                     uuid = str(uuid4())
                 created = True
-                clientobject["uuid"] = uuid
-                clientobject["owner"] = user.uuid
-                storage_object = model(clientobject)
+                client_object["uuid"] = uuid
+                client_object["owner"] = user.uuid
+                storage_object = model(client_object)
                 if not self._check_create_permission(user, schema):
                     self._cancel_by_permission(schema, data, event)
                     return
@@ -434,10 +480,10 @@ class CrudOperations(CliManager):
                     return
 
                 self.log("Updating object:", storage_object._fields, lvl=debug)
-                storage_object.update(clientobject)
+                storage_object.update(client_object)
 
             else:
-                storage_object = model(clientobject)
+                storage_object = model(client_object)
                 if not self._check_permissions(user, "write", storage_object):
                     self._cancel_by_permission(schema, data, event)
                     return
@@ -446,7 +492,8 @@ class CrudOperations(CliManager):
                 try:
                     storage_object.validate()
                 except ValidationError:
-                    self.log("Validation of new object failed!", clientobject, lvl=warn)
+                    self.log("Validation of new object failed!", client_object,
+                             lvl=warn)
 
             storage_object.save()
 
@@ -477,6 +524,7 @@ class CrudOperations(CliManager):
             self.log(
                 "Error during object storage:",
                 e,
+                e.__dict__,
                 type(e),
                 data,
                 lvl=error,
