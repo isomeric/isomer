@@ -179,7 +179,7 @@ def fieldset(title, items, options=None):
     return result
 
 
-def section(rows, columns, items, label=None):
+def section(rows, columns, items, label=None, condition=None):
     """A section consisting of rows and columns"""
 
     # TODO: Integrate label
@@ -211,6 +211,9 @@ def section(rows, columns, items, label=None):
         sections.append(column)
 
     result = {"type": "section", "htmlClass": "row", "items": sections}
+
+    if condition is not None:
+        result['condition'] = condition
 
     return result
 
@@ -317,6 +320,16 @@ def area_field(key="area"):
 
     widget = {"key": key, "type": "uiselect", "titleMap": title_map}
 
+    return widget
+
+
+def horizontal_divider():
+    """Inserts a horizontal ruler/divider"""
+
+    widget = {
+        "type": "help",
+        "helpvalue": "<hr />"
+    }
     return widget
 
 
