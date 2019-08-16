@@ -25,11 +25,10 @@ __license__ = "AGPLv3"
 Miscellaneous utility functions for Isomer
 """
 
+import copy
 import gettext
 import json
-
 import os
-
 import pytz
 
 from datetime import datetime
@@ -134,6 +133,31 @@ def i18n(msg, event=None, lang="en", domain="backend"):
 
     domain = Domain(domain)
     return domain.get(language, msg)
+
+
+def nested_map_find(d, keys):
+    """Looks up a nested dictionary by traversing a list of keys"""
+
+    if isinstance(keys, str):
+        keys = keys.split('.')
+    rv = d
+    for key in keys:
+        rv = rv[key]
+    return rv
+
+
+def nested_map_update(d, u, *keys):
+    """Modifies a nested dictionary by traversing a list of keys"""
+    d = copy.deepcopy(d)
+    keys = keys[0]
+    if len(keys) > 1:
+        d[keys[0]] = nested_map_update(d[keys[0]], u, keys[1:])
+    else:
+        if u is not None:
+            d[keys[0]] = u
+        else:
+            del d[keys[0]]
+    return d
 
 
 def std_hash(word, salt):

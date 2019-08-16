@@ -36,6 +36,7 @@ Test Isomer Tools
 import re
 import pytest
 from tempfile import NamedTemporaryFile
+from copy import copy
 # from datetime import datetime
 import dateutil.parser
 
@@ -49,12 +50,37 @@ content = {
     'placeholder': 'Isomer dev'
 }
 
+nested_map = {
+    "app": {
+        "Garden": {
+            "Flowers": {
+                "Red flower": "Rose",
+                "White Flower": "Jasmine",
+                "Yellow Flower": "Marigold"
+            }
+        },
+        "Fruits": {
+            "Yellow fruit": "Mango",
+            "Green fruit": "Guava",
+            "White Flower": "groovy"
+        },
+        "Trees": {
+            "label": {
+                "Yellow fruit": "Pumpkin",
+                "White Flower": "Bogan"
+            }
+        }
+    }
+}
+
+key = 'app.Garden.Flowers.White Flower'.split('.')
+
 
 def test_uuid():
     uuid = misc.std_uuid()
 
     assert isinstance(uuid, str)
-    assert re.match('(\w{8}(-\w{4}){3}-\w{12}?)', uuid)
+    assert re.match(r'(\w{8}(-\w{4}){3}-\w{12}?)', uuid)
 
 
 def test_std_now():
@@ -65,7 +91,7 @@ def test_std_now():
     try:
         result = dateutil.parser.parse(now)
     except ValueError:
-        pytest.fail('std_now produces nom parsable datetime strings')
+        pytest.fail('std_now produces non parsable datetime strings')
 
 
 def test_std_table():
@@ -125,6 +151,32 @@ def test_path_tools():
     assert 'local' in path.locations
     assert 'lib' in path.locations
 
-    assert path.get_path('cache', '') == '/tmp/isomer-test/var/cache/isomer/TESTING/MAUVE'
-    assert path.get_path('local', 'foo') == '/tmp/isomer-test/var/local/isomer/TESTING/MAUVE/foo'
-    assert path.get_path('lib', 'bar/qux') == '/tmp/isomer-test/var/lib/isomer/TESTING/MAUVE/bar/qux'
+    assert path.get_path('cache',
+                         '') == '/tmp/isomer-test/var/cache/isomer/TESTING/MAUVE'
+    assert path.get_path('local',
+                         'foo') == '/tmp/isomer-test/var/local/isomer/TESTING/MAUVE/foo'
+    assert path.get_path('lib',
+                         'bar/qux') == '/tmp/isomer-test/var/lib/isomer/TESTING/MAUVE/bar/qux'
+
+
+def test_nested_map_find():
+    """Tests if nested dictionaries can be traversed"""
+
+    assert misc.nested_map_find(nested_map, key) == 'Jasmine'
+
+
+def test_nested_map_update():
+    """Tests if nested dictionaries can be updated"""
+
+    assert misc.nested_map_find(
+        misc.nested_map_update(nested_map, 'Tulip', key),
+        key) == 'Tulip'
+
+
+def test_nested_map_delete():
+    """Tests if nested dictionaries items can be deleted"""
+
+    deletable_map = copy(nested_map)
+
+    with pytest.raises(KeyError):
+        misc.nested_map_find(misc.nested_map_update(deletable_map, None, key), key)
