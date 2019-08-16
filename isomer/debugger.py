@@ -59,6 +59,13 @@ try:
 except ImportError:
     hpy = None
 
+try:
+    from pympler import tracker, muppy, summary
+except ImportError:
+    tracker = None
+    muppy = None
+    summary = None
+
 
 class clicommand(Event):
     """Event to execute previously registered CLI event hooks"""
@@ -112,13 +119,47 @@ class cli_log_level(Event):
     pass
 
 
-class cli_compgraph(Event):
+class cli_comp_graph(Event):
     """Draw current component graph"""
 
     pass
 
 
-class HFDebugger(ConfigurableComponent):
+class cli_mem_summary(Event):
+    """Draw current component graph"""
+
+    pass
+
+class cli_mem_diff(Event):
+    """Draw current component graph"""
+
+    pass
+
+
+class cli_mem_hogs(Event):
+    """Draw current component graph"""
+
+    pass
+
+
+class cli_mem_growth(Event):
+    """Draw current component graph"""
+
+    pass
+
+
+class cli_mem_heap(Event):
+    """Draw current component graph"""
+
+    pass
+
+
+class TestException(BaseException):
+    """Generic exception to test exception monitoring"""
+    pass
+
+
+class IsomerDebugger(ConfigurableComponent):
     """
     Handles various debug requests.
     """
@@ -135,7 +176,7 @@ class HFDebugger(ConfigurableComponent):
     channel = "isomer-web"
 
     def __init__(self, root=None, *args):
-        super(HFDebugger, self).__init__("DBG", *args)
+        super(IsomerDebugger, self).__init__("DBG", *args)
 
         if not root:
             from isomer.logger import root
@@ -156,12 +197,29 @@ class HFDebugger(ConfigurableComponent):
         try:
             self.fireEvent(cli_register_event("errors", cli_errors))
             self.fireEvent(cli_register_event("log_level", cli_log_level))
-            self.fireEvent(cli_register_event("compgraph", cli_compgraph))
+            self.fireEvent(cli_register_event("comp_graph", cli_comp_graph))
+            self.fireEvent(cli_register_event("mem_growth", cli_mem_growth))
+            self.fireEvent(cli_register_event("mem_hogs", cli_mem_hogs))
+            self.fireEvent(cli_register_event("mem_heap", cli_mem_heap))
+            self.fireEvent(cli_register_event("mem_summary", cli_mem_summary))
+            self.fireEvent(cli_register_event("mem_diff", cli_mem_diff))
             self.fireEvent(cli_register_event("locations", cli_locations))
         except AttributeError:
             pass  # We're running in a test environment and root is not yet running
 
+        self.tracker = tracker.SummaryTracker()
+
         self.log("Started. Notification users: ", self.config.notificationusers)
+
+    def _drawgraph(self):
+        objgraph.show_backrefs(
+            [self.root],
+            max_depth=5,
+            filter=lambda x: type(x) not in [list, tuple, set],
+            highlight=lambda x: type(x) in [ConfigurableComponent],
+            filename="backref-graph.png",
+        )
+        self.log("Backref graph written.", lvl=critical)
 
     @handler("cli_errors")
     def cli_errors(self, *args):
@@ -189,16 +247,6 @@ class HFDebugger(ConfigurableComponent):
         graph(self)
         self._drawgraph()
 
-    def _drawgraph(self):
-        objgraph.show_backrefs(
-            [self.root],
-            max_depth=5,
-            filter=lambda x: type(x) not in [list, tuple, set],
-            highlight=lambda x: type(x) in [ConfigurableComponent],
-            filename="backref-graph.png",
-        )
-        self.log("Backref graph written.", lvl=critical)
-
     @handler("cli_locations")
     def cli_locations(self, *args):
         self.log("All locations for this instance:")
@@ -206,6 +254,52 @@ class HFDebugger(ConfigurableComponent):
 
         for path in locations:
             self.log(get_path(path, ""), pretty=True)
+
+    @handler("cli_mem_summary")
+    def cli_mem_summary(self, event):
+        all_objects = muppy.get_objects()
+        state = summary.summarize(all_objects)
+        summary.print_(state)
+
+    @handler("cli_mem_diff")
+    def cli_mem_diff(self, event):
+        self.tracker.print_diff()
+
+    @handler("cli_mem_hogs")
+    def cli_mem_hogs(self, *args):
+        self.log("Memory hogs:", lvl=critical)
+        objgraph.show_most_common_types(limit=20)
+
+    @handler("cli_mem_growth")
+    def cli_mem_growth(self, *args):
+        self.log("Memory growth since last call:", lvl=critical)
+        objgraph.show_growth()
+
+    @handler("cli_mem_heap")
+    def cli_mem_heap(self, *args):
+        self.log("Heap log:", self.heapy.heap(), lvl=critical)
+
+    @handler("cli_exception_test")
+    def cli_exception_test(self, *args):
+        raise TestException
+
+    @handler("debug_store_json")
+    def debug_store_json(self, event):
+        # TODO: Does this actually work? Is this useful? Necessary?
+        self.log("Storing received object to /tmp", lvl=critical)
+        fp = open(
+            "/tmp/isomer_debugger_"
+            + str(event.user.useruuid)
+            + "_"
+            + str(uuid4()),
+            "w",
+        )
+        json.dump(event.data, fp, indent=True)
+        fp.close()
+
+    @handler(logtailrequest)
+    def logtailrequest(self, event):
+        self.log('Log requested')
 
     @handler("exception", channel="*", priority=100.0)
     def _on_exception(self, error_type, value, traceback, handler=None, fevent=None):
@@ -243,58 +337,6 @@ class HFDebugger(ConfigurableComponent):
 
         except Exception as e:
             self.log("Exception during exception handling: ", e, type(e), lvl=critical)
-
-    @handler(debugrequest)
-    def debugrequest(self, event):
-        """Handler for client-side debug requests"""
-        try:
-            self.log("Event: ", event.__dict__, lvl=critical)
-            # TODO: Clear this up and make it CLI events.
-            if event.data == "storejson":
-                self.log("Storing received object to /tmp", lvl=critical)
-                fp = open(
-                    "/tmp/isomer_debugger_"
-                    + str(event.user.useruuid)
-                    + "_"
-                    + str(uuid4()),
-                    "w",
-                )
-                json.dump(event.data, fp, indent=True)
-                fp.close()
-            if event.data == "memdebug":
-                self.log("Memory hogs:", lvl=critical)
-                objgraph.show_most_common_types(limit=20)
-            if event.data == "growth":
-                self.log("Memory growth since last call:", lvl=critical)
-                objgraph.show_growth()
-            if event.data == "graph":
-                self._drawgraph()
-            if event.data == "exception":
-                class TestException(BaseException):
-                    """Generic exception to test exception monitoring"""
-
-                    pass
-
-                raise TestException
-            if event.data == "heap":
-                self.log("Heap log:", self.heapy.heap(), lvl=critical)
-            if event.data == "buildfrontend":
-                self.log("Sending frontend build command")
-
-                self.fireEvent(frontendbuildrequest(force=True), "setup")
-            if event.data == "logtail":
-                self.fireEvent(
-                    logtailrequest(event.user, None, None, event.client), "logger"
-                )
-
-            # TODO: WTF. This needs to move out, asap
-            if event.data == "trigger_anchorwatch":
-                from isomer.anchor.anchorwatcher import cli_trigger_anchorwatch
-
-                self.fireEvent(cli_trigger_anchorwatch())
-
-        except Exception as e:
-            self.log("Exception during debug handling:", e, type(e), lvl=critical)
 
 
 class CLI(ConfigurableComponent):

@@ -33,7 +33,7 @@ Test Isomer Launcher
 
 from circuits import Manager
 # import pytest
-from isomer.debugger import HFDebugger
+from isomer.debugger import IsomerDebugger
 from isomer.events.system import debugrequest
 from isomer.ui.clientobjects import User
 from isomer import logger
@@ -42,14 +42,14 @@ from time import sleep
 # from pprint import pprint
 
 m = Manager()
-hfd = HFDebugger()
+hfd = IsomerDebugger()
 hfd.register(m)
 
 
 def test_instantiate():
     """Tests correct instantiation"""
 
-    assert type(hfd) == HFDebugger
+    assert type(hfd) == IsomerDebugger
 
 
 def test_exception_monitor():

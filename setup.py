@@ -150,7 +150,7 @@ setup(
     iso=isomer.iso:main
 
     [isomer.base]
-    debugger=isomer.debugger:HFDebugger
+    debugger=isomer.debugger:IsomerDebugger
     cli=isomer.debugger:CLI
     syslog=isomer.ui.syslog:Syslog
     maintenance=isomer.database.components:Maintenance
