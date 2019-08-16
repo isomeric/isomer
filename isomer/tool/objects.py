@@ -164,6 +164,34 @@ def delete(ctx, schema, uuid, object_filter, yes):
     log("Done")
 
 
+@objects.command(short_help="drop a whole collection of objects")
+@click.option("--schema", default=None)
+@click.option(
+    "--yes", "-y", help="Assume yes to a safety question", default=False, is_flag=True
+)
+@click.pass_context
+def drop(ctx, schema, yes):
+    """Delete a whole collection of stored objects (CAUTION!)"""
+
+    database = ctx.obj["db"]
+
+    if schema is None:
+        log("No schema given. Read the help", lvl=warn)
+        return
+
+    if not yes and not ask(
+        "Are you sure you want to drop the whole collection",
+        default=False,
+        data_type="bool",
+        show_hint=True,
+    ):
+        return
+
+    model = database.objectmodels[schema]
+    collection = model.collection()
+    collection.drop()
+
+
 @objects.command(short_help="Validates stored objects")
 @click.option("--schema", "-s", default=None, help="Specify object schema to validate")
 @click.option(
