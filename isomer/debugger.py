@@ -207,7 +207,10 @@ class IsomerDebugger(ConfigurableComponent):
         except AttributeError:
             pass  # We're running in a test environment and root is not yet running
 
-        self.tracker = tracker.SummaryTracker()
+        try:
+            self.tracker = tracker.SummaryTracker()
+        except AttributeError:
+            self.log('No pympler library for memory analysis installed.', lvl=warn)
 
         self.log("Started. Notification users: ", self.config.notificationusers)
 
