@@ -27,7 +27,6 @@ import types
 sys.path.insert(0, os.path.abspath('../..'))
 sys.path.insert(0, os.path.abspath('../../modules'))
 sys.path.insert(0, os.path.abspath('../../isomer'))
-sys.path.insert(0, os.path.abspath('../../tests'))
 
 version_module = types.ModuleType('version')
 exec(
