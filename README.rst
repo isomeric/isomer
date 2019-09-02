@@ -1,28 +1,24 @@
-.. image:: https://travis-ci.org/isomeric/isomer.svg?branch=master
+.. image:: https://travis-ci.org/isomeric/isomer.png?branch=master
     :target: https://travis-ci.org/isomeric/isomer
     :alt: Build Status
 
-.. image:: https://landscape.io/github/isomeric/isomer/master/landscape.svg?style=flat
-    :target: https://landscape.io/github/isomeric/isomer/master
-    :alt: Quality
-
-.. image:: https://coveralls.io/repos/isomeric/isomer/badge.svg
+.. image:: https://coveralls.io/repos/isomeric/isomer/badge.png
     :target: https://coveralls.io/r/isomeric/isomer
     :alt: Coverage
 
-.. image:: https://requires.io/github/isomeric/isomer/requirements.svg?branch=master
+.. image:: https://requires.io/github/isomeric/isomer/requirements.png?branch=master
     :target: https://requires.io/github/isomeric/isomer/requirements/?branch=master
     :alt: Requirements Status
 
-.. image:: https://img.shields.io/badge/IRC-%23hackerfleet%20on%20freenode-blue.svg
+.. image:: https://img.shields.io/badge/IRC-%23hackerfleet%20on%20freenode-blue.png
     :target: http://webchat.freenode.net/?randomnick=1&channels=hackerfleet&uio=d4>
     :alt: IRC Channel
 
-.. image:: https://www.codetriage.com/isomeric/isomer/badges/users.svg
+.. image:: https://www.codetriage.com/isomeric/isomer/badges/users.png
     :target: https://www.codetriage.com/isomeric/isomer
     :alt: Help via codetriage.com
 
-.. image:: https://img.shields.io/badge/dynamic/json.svg?url=https://pypistats.org/api/packages/isomer/recent?mirrors=false&label=downloads&query=$.data.last_month&suffix=/month
+.. image:: https://img.shields.io/badge/dynamic/json.png?url=https://pypistats.org/api/packages/isomer/recent?mirrors=false&label=downloads&query=$.data.last_month&suffix=/month
     :target: https://pypistats.org/packages/isomer
 
 Please be wary of bugs and report strange things, thank you!
