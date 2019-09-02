@@ -1,6 +1,6 @@
 # Running Tests
 pluggy>= 0.9
 tox
-pytest==4.4.0
+pytest==5.1.1
 coveralls
 pytest-cov
