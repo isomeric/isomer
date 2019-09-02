@@ -1,117 +1,117 @@
-tests.0\_unit package
+tests.a\_unit package
 =====================
 
 Submodules
 ----------
 
-tests.0\_unit.test\_auth module
+tests.a\_unit.test\_auth module
 -------------------------------
 
-.. automodule:: tests.0_unit.test_auth
+.. automodule:: tests.a_unit.test_auth
    :members:
    :undoc-members:
    :show-inheritance:
 
-tests.0\_unit.test\_clientmanager module
+tests.a\_unit.test\_clientmanager module
 ----------------------------------------
 
-.. automodule:: tests.0_unit.test_clientmanager
+.. automodule:: tests.a_unit.test_clientmanager
    :members:
    :undoc-members:
    :show-inheritance:
 
-tests.0\_unit.test\_component module
+tests.a\_unit.test\_component module
 ------------------------------------
 
-.. automodule:: tests.0_unit.test_component
+.. automodule:: tests.a_unit.test_component
    :members:
    :undoc-members:
    :show-inheritance:
 
-tests.0\_unit.test\_configurator module
+tests.a\_unit.test\_configurator module
 ---------------------------------------
 
-.. automodule:: tests.0_unit.test_configurator
+.. automodule:: tests.a_unit.test_configurator
    :members:
    :undoc-members:
    :show-inheritance:
 
-tests.0\_unit.test\_debugger module
+tests.a\_unit.test\_debugger module
 -----------------------------------
 
-.. automodule:: tests.0_unit.test_debugger
+.. automodule:: tests.a_unit.test_debugger
    :members:
    :undoc-members:
    :show-inheritance:
 
-tests.0\_unit.test\_logger module
+tests.a\_unit.test\_logger module
 ---------------------------------
 
-.. automodule:: tests.0_unit.test_logger
+.. automodule:: tests.a_unit.test_logger
    :members:
    :undoc-members:
    :show-inheritance:
 
-tests.0\_unit.test\_maintenance module
+tests.a\_unit.test\_maintenance module
 --------------------------------------
 
-.. automodule:: tests.0_unit.test_maintenance
+.. automodule:: tests.a_unit.test_maintenance
    :members:
    :undoc-members:
    :show-inheritance:
 
-tests.0\_unit.test\_misc module
+tests.a\_unit.test\_misc module
 -------------------------------
 
-.. automodule:: tests.0_unit.test_misc
+.. automodule:: tests.a_unit.test_misc
    :members:
    :undoc-members:
    :show-inheritance:
 
-tests.0\_unit.test\_objectmanager module
+tests.a\_unit.test\_objectmanager module
 ----------------------------------------
 
-.. automodule:: tests.0_unit.test_objectmanager
+.. automodule:: tests.a_unit.test_objectmanager
    :members:
    :undoc-members:
    :show-inheritance:
 
-tests.0\_unit.test\_provisions module
+tests.a\_unit.test\_provisions module
 -------------------------------------
 
-.. automodule:: tests.0_unit.test_provisions
+.. automodule:: tests.a_unit.test_provisions
    :members:
    :undoc-members:
    :show-inheritance:
 
-tests.0\_unit.test\_schemamanager module
+tests.a\_unit.test\_schemamanager module
 ----------------------------------------
 
-.. automodule:: tests.0_unit.test_schemamanager
+.. automodule:: tests.a_unit.test_schemamanager
    :members:
    :undoc-members:
    :show-inheritance:
 
-tests.0\_unit.test\_schemastore module
+tests.a\_unit.test\_schemastore module
 --------------------------------------
 
-.. automodule:: tests.0_unit.test_schemastore
+.. automodule:: tests.a_unit.test_schemastore
    :members:
    :undoc-members:
    :show-inheritance:
 
-tests.0\_unit.test\_schemata module
+tests.a\_unit.test\_schemata module
 -----------------------------------
 
-.. automodule:: tests.0_unit.test_schemata
+.. automodule:: tests.a_unit.test_schemata
    :members:
    :undoc-members:
    :show-inheritance:
 
-tests.0\_unit.test\_tool module
+tests.a\_unit.test\_tool module
 -------------------------------
 
-.. automodule:: tests.0_unit.test_tool
+.. automodule:: tests.a_unit.test_tool
    :members:
    :undoc-members:
    :show-inheritance:
@@ -120,7 +120,7 @@ tests.0\_unit.test\_tool module
 Module contents
 ---------------
 
-.. automodule:: tests.0_unit
+.. automodule:: tests.a_unit
    :members:
    :undoc-members:
    :show-inheritance:

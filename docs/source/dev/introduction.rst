@@ -1,6 +1,6 @@
 .. _Issue Tracker: https://github.com/isomeric/isomer/issues
 .. _FreeNode IRC Network: http://freenode.net
-.. _IRC Channel: http://webchat.freenode.net/?randomnick=1&channels=hackerfleet&uio=d4
+.. _#hackerfleet IRC Channel: http://webchat.freenode.net/?randomnick=1&channels=hackerfleet&uio=d4
 
 
 Development Introduction
@@ -15,8 +15,8 @@ documentation <environment>`.
 Communication
 -------------
 
-- `IRC Channel`_ on the `FreeNode IRC Network`_
-- `Issue Tracker`_
+- `#hackerfleet IRC Channel`_ on the `FreeNode IRC Network`_
+- `Issue Tracker`_ located at `https://github.com/isomeric/isomer/issues`
 
 
 .. note:: If you are familiar with `IRC <http://en.wikipedia.org/wiki/Internet_Relay_Chat>`_

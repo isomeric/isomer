@@ -1,21 +1,21 @@
-tests.3\_oat package
+tests.d\_oat package
 ====================
 
 Submodules
 ----------
 
-tests.3\_oat.test\_environment\_mgmt module
+tests.d\_oat.test\_environment\_mgmt module
 -------------------------------------------
 
-.. automodule:: tests.3_oat.test_environment_mgmt
+.. automodule:: tests.d_oat.test_environment_mgmt
    :members:
    :undoc-members:
    :show-inheritance:
 
-tests.3\_oat.test\_instance\_mgmt module
+tests.d\_oat.test\_instance\_mgmt module
 ----------------------------------------
 
-.. automodule:: tests.3_oat.test_instance_mgmt
+.. automodule:: tests.d_oat.test_instance_mgmt
    :members:
    :undoc-members:
    :show-inheritance:
@@ -24,7 +24,7 @@ tests.3\_oat.test\_instance\_mgmt module
 Module contents
 ---------------
 
-.. automodule:: tests.3_oat
+.. automodule:: tests.d_oat
    :members:
    :undoc-members:
    :show-inheritance:

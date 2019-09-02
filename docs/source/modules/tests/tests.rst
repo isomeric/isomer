@@ -6,7 +6,10 @@ Subpackages
 
 .. toctree::
 
-   tests.3_oat
+   tests.a_unit
+   tests.b_integration
+   tests.c_system
+   tests.d_oat
 
 Submodules
 ----------

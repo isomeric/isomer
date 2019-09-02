@@ -16,9 +16,9 @@ Cyclomatic Complexity
 Coding Style
 ------------
 
-- Code shall confirm to the `PEP8 <http://legacy.python.org/dev/peps/pep-0008/>`_ Style Guide.
+.. note:: We do accept "black" formatting.
 
-.. note:: This includes the 79 character limit!
+- Code shall confirm to the `PEP8 <http://legacy.python.org/dev/peps/pep-0008/>`_ Style Guide.
 
 - Doc Strings shall confirm to the `PEP257 <http://legacy.python.org/dev/peps/pep-0257/>`_ Convention.
 

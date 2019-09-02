@@ -19,7 +19,7 @@ import types
 
 # import sphinx_bootstrap_theme
 
-#from imp import new_module
+# from imp import new_module
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -116,8 +116,8 @@ devel = release.split('dev')[1] if "dev" in version_module.version_info else Fal
 # Usually you set "language" from the command line for these cases.
 language = None
 
-locale_dirs = ['locale/']   # path is example but recommended.
-gettext_compact = False     # optional.
+locale_dirs = ['locale/']  # path is example but recommended.
+gettext_compact = False  # optional.
 
 # Spellcheck configuration
 spelling_word_list_filename = 'dictionary.txt'
@@ -161,12 +161,11 @@ todo_include_todos = devel is not False
 
 blockdiag_fontpath = seqdiag_fontpath = nwdiag_fontpath = actdiag_fontpath = 'source/fonts/clearsans/ClearSans-Medium.ttf'
 
-
 # -- Options for HTML output ----------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = 'sphinx_rtd_theme' # 'bootstrap'
+html_theme = 'sphinx_rtd_theme'  # 'bootstrap'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -256,7 +255,7 @@ bootstrap_html_theme_options = {
 # Add any paths that contain custom themes here, relative to this directory.
 # html_theme_path = []
 
-#html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
+# html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
@@ -352,7 +351,10 @@ latex_elements = {
     # 'pointsize': '10pt',
 
     # Additional stuff for the LaTeX preamble.
-    # 'preamble': '',
+    # 'preamble': """
+    # """,
+
+    'inputenc': '\usepackage[utf8x]{inputenc}',
 
     # Latex figure (float) alignment
     # 'figure_align': 'htbp',
