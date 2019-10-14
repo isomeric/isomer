@@ -138,13 +138,13 @@ def delete(ctx, schema, uuid, object_filter, yes):
 
     if uuid:
         count = model.count({"uuid": uuid})
-        obj = model.find({"uuid": uuid})
+        obj = model.find({"uuid": uuid}, validation=False)
     elif object_filter:
         count = model.count(literal_eval(object_filter))
-        obj = model.find(literal_eval(object_filter))
+        obj = model.find(literal_eval(object_filter), validation=False)
     else:
         count = model.count()
-        obj = model.find()
+        obj = model.find(validation=False)
 
     if count == 0:
         log("No objects to delete found")
