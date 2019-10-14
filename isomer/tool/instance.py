@@ -78,15 +78,9 @@ from isomer.tool.defaults import (
     combined_file,
     distribution,
 )
-from isomer.tool.defaults import (
-    EXIT_INSTALLATION_FAILED,
-    EXIT_USER_BAILED_OUT,
-    EXIT_INSTANCE_EXISTS,
-    EXIT_INSTANCE_UNKNOWN,
-    EXIT_SERVICE_INVALID,
-    EXIT_INVALID_CONFIGURATION,
-    EXIT_INVALID_PARAMETER,
-)
+from isomer.error import abort, EXIT_INVALID_CONFIGURATION, EXIT_INSTALLATION_FAILED, \
+    EXIT_INSTANCE_EXISTS, EXIT_INSTANCE_UNKNOWN, EXIT_SERVICE_INVALID, \
+    EXIT_USER_BAILED_OUT, EXIT_INVALID_PARAMETER
 from isomer.tool.environment import (
     _install_environment,
     install_environment_module,
@@ -119,7 +113,7 @@ def info_instance(ctx):
 
     if instance_name not in instances:
         log("Instance %s unknown!" % instance_name, lvl=warn)
-        sys.exit(EXIT_INSTANCE_UNKNOWN)
+        abort(EXIT_INSTANCE_UNKNOWN)
 
     log("Instance configuration:", instance_configuration, pretty=True)
     log("Active environment (%s):" % environment_name, environment_config, pretty=True)
@@ -161,7 +155,7 @@ def set_parameter(ctx, parameter, value):
             sorted(list(defaults.keys())),
             lvl=warn,
         )
-        sys.exit(EXIT_INVALID_PARAMETER)
+        abort(EXIT_INVALID_PARAMETER)
 
     instance_configuration[parameter] = converted_value
     log("New config:", instance_configuration, pretty=True, lvl=debug)
@@ -173,7 +167,7 @@ def set_parameter(ctx, parameter, value):
         log('Done')
     else:
         log("New configuration would not be valid", lvl=critical)
-        sys.exit(EXIT_INVALID_CONFIGURATION)
+        abort(EXIT_INVALID_CONFIGURATION)
 
 
 @instance.command(short_help="Create a new instance")
@@ -183,7 +177,7 @@ def create(ctx):
     instance_name = ctx.obj["instance"]
     if instance_name in ctx.obj["instances"]:
         log("Instance exists!", lvl=warn)
-        sys.exit(EXIT_INSTANCE_EXISTS)
+        abort(EXIT_INSTANCE_EXISTS)
 
     log("Creating instance:", instance_name)
     instance_configuration = instance_template
@@ -229,7 +223,7 @@ def install(ctx, **kwargs):
             "Please use 'iso instance upgrade' to upgrade an instance.",
             lvl=warn,
         )
-        sys.exit(50081)
+        abort(50081)
 
     _clear_instance(ctx, force=kwargs["force"], clear=False, no_archive=True)
     _install_environment(ctx, **kwargs)
@@ -273,7 +267,7 @@ def remove(ctx, clear, no_archive):
         log("Destructively removing instance:", ctx.obj["instance"], lvl=warn)
 
     if not ask("Are you sure", default=False, data_type="bool"):
-        sys.exit(EXIT_USER_BAILED_OUT)
+        abort(EXIT_USER_BAILED_OUT)
 
     if clear:
         _clear_instance(ctx, force=True, clear=clear, no_archive=no_archive)
@@ -319,7 +313,7 @@ def install_instance_module(ctx, source, url, install_env, force):
         write_instance(instance_configuration)
     elif not force:
         log("Module is already installed. Use --force to install anyway.")
-        sys.exit(50000)
+        abort(50000)
 
     if install_env is True:
         del ctx.params["install_env"]
@@ -353,7 +347,7 @@ def _turnover(ctx, force):
     if not force:
         if env.get("database", "") == "":
             log("Database has not been set up correctly.", lvl=critical)
-            sys.exit(EXIT_INSTALLATION_FAILED)
+            abort(EXIT_INSTALLATION_FAILED)
 
         if (
             not env.get("installed", False)
@@ -362,7 +356,7 @@ def _turnover(ctx, force):
             or not env.get("migrated", False)
         ):
             log("Installation failed, cannot activate!", lvl=critical)
-            sys.exit(EXIT_INSTALLATION_FAILED)
+            abort(EXIT_INSTALLATION_FAILED)
 
     update_service(ctx, next_environment)
 
@@ -395,7 +389,7 @@ def update_service(ctx, next_environment):
 
     if not validated:
         log("Service configuration validation failed:", message, lvl=error)
-        sys.exit(EXIT_SERVICE_INVALID)
+        abort(EXIT_SERVICE_INVALID)
 
     init = ctx.obj["config"]["meta"]["init"]
     environment_config = ctx.obj["instance_configuration"]["environments"][
@@ -451,7 +445,7 @@ def _launch_service(ctx):
 
     if not success:
         log("Error activating service:", format_result(result), pretty=True, lvl=error)
-        sys.exit(5000)
+        abort(5000)
 
     log("Launching service")
 
@@ -461,7 +455,7 @@ def _launch_service(ctx):
 
     if not success:
         log("Error activating service:", format_result(result), pretty=True, lvl=error)
-        sys.exit(5000)
+        abort(5000)
 
     log("Done: Launch Service")
 
@@ -512,7 +506,7 @@ def instance_cert(ctx, selfsigned):
             % instance_argument,
             lvl=error,
         )
-        sys.exit(50031)
+        abort(50031)
 
     set_instance(instance_name, next_environment)
 
@@ -525,7 +519,7 @@ def instance_cert(ctx, selfsigned):
                 % instance_argument,
                 lvl=error,
             )
-            sys.exit(50032)
+            abort(50032)
 
         success, result = run_process(
             "/",
@@ -548,7 +542,7 @@ def instance_cert(ctx, selfsigned):
                 pretty=True,
                 lvl=error,
             )
-            sys.exit(50033)
+            abort(50033)
 
 
 @instance.command(short_help="instance snakeoil certificate")
@@ -570,13 +564,13 @@ def _instance_snakeoil(ctx):
         pass
     except PermissionError:
         log("Need root (e.g. via sudo) to generate ssl certificate")
-        sys.exit(1)
+        abort(1)
 
     try:
         from OpenSSL import crypto
     except ImportError:
         log("Need python3-crypto to do this.")
-        sys.exit(1)
+        abort(1)
 
     from socket import gethostname
 

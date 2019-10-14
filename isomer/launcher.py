@@ -74,7 +74,7 @@ from isomer.logger import (
 )
 from isomer.debugger import cli_register_event
 from isomer.ui.builder import install_frontend
-from isomer.tool.defaults import EXIT_NO_CERTIFICATE
+from isomer.error import abort, EXIT_NO_CERTIFICATE
 from isomer.tool.etc import load_instance
 
 
@@ -226,7 +226,7 @@ class Core(ConfigurableComponent):
                     "cannot be found!",
                     lvl=error,
                 )
-                sys.exit(EXIT_NO_CERTIFICATE)
+                abort(EXIT_NO_CERTIFICATE)
 
         # TODO: Find a way to synchronize this with the paths in i.u.builder
         if self.development:
@@ -730,7 +730,7 @@ def construct_graph(name, instance, args):
     "-a",
     help="Define listening address for UI server",
     type=str,
-    default="127.0.0.1",
+    default=None,
 )
 @click.option(
     "--web-certificate", "-c", help="Certificate file path", type=str, default=None

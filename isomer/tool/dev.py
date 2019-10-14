@@ -45,6 +45,7 @@ from collections import OrderedDict, namedtuple
 from isomer.tool import log, ask, debug, verbose, warn
 from isomer.misc import std_table
 from isomer.tool.templates import write_template_file
+from isomer.error import abort
 
 paths = [
     "isomer",
@@ -174,7 +175,7 @@ def create_module(clear_target, target):
             shutil.rmtree(target)
         else:
             log("Target exists! Use --clear to delete it first.", emitter="MANAGE")
-            sys.exit(2)
+            abort(2)
 
     done = False
     info = None

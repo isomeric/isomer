@@ -39,7 +39,7 @@ from tomlkit import document, table, nl, comment
 
 from isomer.misc import std_now
 from isomer.tool import log, error, debug, verbose, warn
-from isomer.tool.defaults import EXIT_NO_PERMISSION
+from isomer.error import abort, EXIT_NO_PERMISSION
 from isomer.misc.path import (
     get_etc_path,
     get_etc_instance_path,
@@ -66,7 +66,7 @@ def create_configuration(ctx):
                 % get_etc_path(),
                 lvl=warn,
             )
-            sys.exit(EXIT_NO_PERMISSION)
+            abort(EXIT_NO_PERMISSION)
 
     write_configuration(configuration_template)
     ctx.obj["config"] = configuration_template
@@ -88,7 +88,7 @@ def write_configuration(config):
             "PermissionError: Could not write instance management configuration file",
             lvl=error,
         )
-        sys.exit(EXIT_NO_PERMISSION)
+        abort(EXIT_NO_PERMISSION)
 
 
 def load_configuration():
@@ -169,7 +169,7 @@ def write_instance(instance_configuration):
             "PermissionError: Could not write instance management configuration file",
             lvl=error,
         )
-        sys.exit(EXIT_NO_PERMISSION)
+        abort(EXIT_NO_PERMISSION)
 
 
 def remove_instance(instance_configuration):
@@ -210,7 +210,7 @@ def write_remote(remote):
             "PermissionError: Could not write instance management configuration file",
             lvl=error,
         )
-        sys.exit(EXIT_NO_PERMISSION)
+        abort(EXIT_NO_PERMISSION)
 
 
 configuration_template = document()

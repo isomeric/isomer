@@ -51,7 +51,8 @@ from isomer.tool import (
     format_result,
 )  # , ask_password
 from isomer.misc.path import get_etc_remote_keys_path
-from isomer.tool.defaults import platforms, key_defaults, EXIT_INVALID_PARAMETER
+from isomer.tool.defaults import platforms, key_defaults
+from isomer.error import abort, EXIT_INVALID_PARAMETER
 from isomer.tool.cli import cli
 from isomer.tool.etc import load_remotes, remote_template, write_remote
 
@@ -110,7 +111,7 @@ def remote(ctx, name, install, platform, source, url, existing):
 
     if host_config is None:
         log("Cannot proceed, remote unknown", lvl=error)
-        sys.exit(5000)
+        abort(5000)
 
     ctx.obj["host_config"] = host_config
 
@@ -197,7 +198,7 @@ def add(
                 "You'll need to install paramiko to generate remote keys. Use pip3 install paramiko",
                 lvl=error,
             )
-            sys.exit(5000)
+            abort(5000)
 
         if key_file == "":
             key_file = os.path.join(get_etc_remote_keys_path(), ctx.obj["remote"])
@@ -206,7 +207,7 @@ def add(
 
         if key_type == "dsa" and key_bits > 1024:
             log("DSA Keys must be 1024 bits", lvl=error)
-            sys.exit(5000)
+            abort(5000)
 
         # generating private key
         prv = key_dispatch_table[key_type].generate(bits=key_bits, progress_func=log)
@@ -289,7 +290,7 @@ def upload_key(ctx, accept):
         log(
             "Host not in known hosts or other problem. Use --accept to add to known_hosts."
         )
-        sys.exit(50071)
+        abort(50071)
     except FileNotFoundError as e:
         log("No authorized key file yet, creating")
         success, result = run_process(
@@ -361,7 +362,7 @@ def set_parameter(ctx, login, parameter, value):
             sorted(list(defaults.keys())),
             lvl=warn,
         )
-        sys.exit(EXIT_INVALID_PARAMETER)
+        abort(EXIT_INVALID_PARAMETER)
 
     if login:
         remote_config["login"][parameter] = converted_value
@@ -403,7 +404,7 @@ def install_remote(ctx, archive, setup):
 
     if shell is None:
         log("Remote was not configured properly.", lvl=warn)
-        sys.exit(5000)
+        abort(5000)
 
     if archive:
         log("Renaming remote isomer copy")
@@ -414,7 +415,7 @@ def install_remote(ctx, archive, setup):
         )
         if not success:
             log("Could not rename remote copy:", result, pretty=True, lvl=error)
-            sys.exit(5000)
+            abort(5000)
 
     if existing is None:
         url = ctx.obj["url"]
@@ -427,7 +428,7 @@ def install_remote(ctx, archive, setup):
 
         if url is None or source is None:
             log('Need a source and url to install. Try "iso remote --help".')
-            sys.exit(5000)
+            abort(5000)
 
         get_isomer(source, url, target, upgrade=ctx.obj["upgrade"], shell=shell)
         destination = os.path.join(remote_home, "isomer")

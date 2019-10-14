@@ -32,13 +32,14 @@ __author__ = "Heiko 'riot' Weinen"
 __license__ = "AGPLv3"
 
 import sys
+from isomer.error import abort
 
 if sys.version_info.major < 3:
     print(
         "The iso tool has been evoked with an older Python version. "
-        "Please restart the iso tool to use Python3."
+        "Please restart the iso tool in a valid environment."
     )
-    sys.exit()
+    abort(50053)
 
 try:
     from isomer.tool import install_isomer, ask
@@ -55,7 +56,7 @@ except ImportError as e:
         "For more information, please read the manual installation instructions:\n"
         "https://isomer.readthedocs.io/en/latest/start/installing.html#manual"
     )
-    sys.exit()
+    abort(50050)
 
 
 # TODO: Document zsh/bash autocompletion for iso tool
@@ -78,7 +79,7 @@ def main():
             data_type="bool",
             show_hint=True,
         ):
-            sys.exit()
+            abort(50051)
 
         install_isomer()
         print("Please restart the tool")

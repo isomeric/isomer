@@ -40,6 +40,7 @@ from click_didyoumean import DYMGroup
 from isomer.logger import warn, error
 from isomer.migration import make_migrations
 from isomer.tool import log, ask
+from isomer.error import abort
 
 
 @click.group(cls=DYMGroup)
@@ -82,7 +83,7 @@ def rename(ctx, source, destination, keep, clear_target):
 
     if source not in client.list_database_names():
         log("Source database", source, "does not exist!", lvl=warn)
-        sys.exit(-1)
+        abort(-1)
 
     database = client.admin
     log("Copying", source, "to", destination)
@@ -94,7 +95,7 @@ def rename(ctx, source, destination, keep, clear_target):
             client.drop_database(destination)
         else:
             log("Not destroying existing data", lvl=warn)
-            sys.exit(-1)
+            abort(-1)
 
     database.command("copydb", fromdb=source, todb=destination)
 

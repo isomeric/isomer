@@ -32,11 +32,12 @@ __author__ = "Heiko 'riot' Weinen"
 __license__ = "AGPLv3"
 
 import sys
+from isomer.error import abort
 
 if sys.version_info.major < 3:
     print('The iso test tool has been evoked with an older Python version. '
           'Please restart the iso test tool to use Python3.')
-    sys.exit()
+    abort(50053)
 
 from isomer.tool import install_isomer, ask
 from isomer.tool.tool import isotool

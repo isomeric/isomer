@@ -70,7 +70,8 @@ from isomer.tool import (
     get_next_environment,
 )
 from isomer.tool.database import delete_database
-from isomer.tool.defaults import EXIT_INVALID_SOURCE, source_url
+from isomer.tool.defaults import source_url
+from isomer.error import abort, EXIT_INVALID_SOURCE
 from isomer.tool.etc import write_instance, environment_template
 
 
@@ -119,7 +120,7 @@ def _clear_environment(ctx, force=False, clear_env=None, clear=False, no_archive
     if not no_archive:
         if not (_archive(ctx, force) or force):
             log("Archival failed, stopping.")
-            sys.exit(5000)
+            abort(5000)
 
     log("Clearing env:", env, lvl=debug)
 
@@ -208,10 +209,10 @@ def archive(ctx, force, dynamic):
     result = _archive(ctx, force, dynamic)
     if result:
         log("Archived to '%s'" % result)
-        sys.exit(0)
+        abort(0)
     else:
         log("Could not archive.", lvl=error)
-        sys.exit(50060)
+        abort(50060)
 
 
 def _archive(ctx, force=False, dynamic=False):
@@ -353,7 +354,7 @@ def install_environment_module(ctx, source, force, url):
 
     if not installed:
         log("Please install the '%s' environment first." % next_environment, lvl=error)
-        sys.exit(50000)
+        abort(50000)
 
     set_instance(instance_name, next_environment)
 
@@ -361,7 +362,7 @@ def install_environment_module(ctx, source, force, url):
 
     if result is False:
         log("Installation failed!", lvl=error)
-        sys.exit(50000)
+        abort(50000)
 
     package_name, package_version = result
 
@@ -423,7 +424,7 @@ def _install_module(source, url, force=False, user=None):
 
     if source not in ("git", "link", "copy"):
         log("Only installing from github or local is currently supported", lvl=error)
-        sys.exit(EXIT_INVALID_SOURCE)
+        abort(EXIT_INVALID_SOURCE)
 
     uuid = std_uuid()
     temporary_path = os.path.join(module_path, "%s" % uuid)
@@ -470,10 +471,10 @@ def _install_module(source, url, force=False, user=None):
             )
             if not success:
                 log("Could not remove previous version!", lvl=error)
-                sys.exit(50000)
+                abort(50000)
         else:
             log("Not overwriting previous version without --force", lvl=error)
-            sys.exit(50000)
+            abort(50000)
 
     log("Renaming to", final_path)
     os.rename(temporary_path, final_path)
@@ -664,7 +665,7 @@ def _install_environment(
         result = get_isomer(source, url, env_path, sudo=user)
         if result is False:
             log("Getting Isomer failed", lvl=critical)
-            sys.exit(50011)
+            abort(50011)
     except FileExistsError:
         if not force:
             log(
@@ -672,7 +673,7 @@ def _install_environment(
                 "inspect the environment before continuing! Use --force to ignore.",
                 lvl=warn,
             )
-            sys.exit(50012)
+            abort(50012)
         else:
             log("Isomer already present, forcing through anyway.")
 

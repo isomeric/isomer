@@ -44,6 +44,7 @@ import jsonschema
 import pymongo
 
 from isomer import schemastore
+from isomer.error import abort, abort, EXIT_NO_DATABASE
 from isomer.logger import isolog, warn, critical, debug, verbose, error
 
 
@@ -75,7 +76,7 @@ def clear_all():
     )
     if not (sure == "YES"):
         db_log("Not deleting the database.")
-        sys.exit(5)
+        sys.exit()
 
     client = pymongo.MongoClient(host=dbhost, port=dbport)
     db = client[dbname]
@@ -83,6 +84,11 @@ def clear_all():
     for col in db.collection_names(include_system_collections=False):
         db_log("Dropping collection ", col, lvl=warn)
         db.drop_collection(col)
+
+
+class IsomerBaseModel(formal.formalModel):
+    def save(self, *args, **kwargs):
+        print('Saving object!')
 
 
 def _build_model_factories(store):
@@ -100,7 +106,7 @@ def _build_model_factories(store):
             db_log("No schema found for ", schemaname, lvl=critical, exc=True)
 
         try:
-            result[schemaname] = formal.model_factory(schema)
+            result[schemaname] = formal.model_factory(schema, IsomerBaseModel)
         except Exception as e:
             db_log(
                 "Could not create factory for schema ",
@@ -239,7 +245,7 @@ def initialize(
             lvl=critical,
         )
         if not ignore_fail:
-            sys.exit(5000)
+            abort(EXIT_NO_DATABASE)
         else:
             return False
 
