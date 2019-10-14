@@ -54,7 +54,61 @@ source_url = "https://github.com/isomeric/isomer"
 
 distribution_name = distro.codename()
 
+node_source_list_docker = """
+deb https://deb.nodesource.com/node_11.x sid main
+deb-src https://deb.nodesource.com/node_11.x sid main
+"""
+
 platforms = {
+    "Docker": {
+        "pre_install": [
+            [
+                "apt-get",
+                "-y",
+                "install",
+                "apt-transport-https",
+                "wget",
+                "sudo",
+                "gnupg",
+                "gdebi-core",
+                "python3",
+                "python3-pip",
+                "python3-spur",
+                "virtualenv"
+            ],
+            [
+                "sh",
+                "-c",
+                "wget --quiet -O - https://deb.nodesource.com/gpgkey/nodesource.gpg.key | sudo apt-key add -",
+            ],
+            {
+                "action": "create_file",
+                "filename": "/etc/apt/sources.list.d/nodesource.list",
+                "content": node_source_list_docker
+            },
+            ["apt-get", "update"],
+        ],
+        "post_install": [],
+        "tool": ["apt-get", "install", "-y"],
+        "packages": [
+            "python3-dev",
+            "nodejs",
+            "virtualenv",
+            "mongodb-server",
+            "python3-bson",
+            "python3-pymongo",
+            "python3-pymongo-ext",
+            "python3-bson-ext",
+            "python3-cffi",
+            "libffi-dev",
+            "enchant",
+            # TODO: Kick out module dependencies (mostly gdal, grib and serial)
+            "python3-grib",
+            "python3-serial",
+            "gdal-bin",
+            "python-gdal",
+        ],
+    },
     "Debian GNU/Linux": {
         "pre_install": [
             [
@@ -202,25 +256,3 @@ key_defaults = {
     "filename": "",
     "comment": "Isomer Remote Key",
 }
-
-EXIT_INVALID_ENVIRONMENT = 1
-EXIT_INVALID_CONFIGURATION = 2
-EXIT_INVALID_SOURCE = 3
-EXIT_NO_PERMISSION = 5
-
-EXIT_INSTALLATION_FAILED = 11
-EXIT_PROVISIONING_FAILED = 12
-
-EXIT_INSTANCE_EXISTS = 21
-EXIT_INSTANCE_UNKNOWN = 22
-
-EXIT_SERVICE_INVALID = 31
-
-EXIT_USER_BAILED_OUT = 41
-
-EXIT_NOTHING_TO_ARCHIVE = 51
-
-EXIT_NO_CONFIGURATION = 61
-
-EXIT_INVALID_PARAMETER = 62
-EXIT_NO_CERTIFICATE = 63
