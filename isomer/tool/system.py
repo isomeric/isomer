@@ -56,18 +56,18 @@ __license__ = "AGPLv3"
 )
 @click.option("--use-sudo", "-u", is_flag=True, default=False)
 @click.option(
-    "--print-actions",
-    "-p",
+    "--log-actions",
+    "-l",
     help="Show what would be installed",
     is_flag=True,
     default=False,
 )
-def system(ctx, platform, use_sudo, print_actions):
+def system(ctx, platform, use_sudo, log_actions):
     """[GROUP] Various aspects of Isomer system handling"""
 
     ctx.obj["platform"] = platform
     ctx.obj["use_sudo"] = use_sudo
-    ctx.obj["print_actions"] = print_actions
+    ctx.obj["log_actions"] = log_actions
 
 
 @system.command(name="all", short_help="Perform all system setup tasks")
@@ -78,7 +78,7 @@ def system_all(ctx):
     use_sudo = ctx.obj["use_sudo"]
 
     install_isomer(
-        ctx.obj["platform"], use_sudo, show=ctx.obj["print_actions"], omit_common=True
+        ctx.obj["platform"], use_sudo, show=ctx.obj["log_actions"], omit_common=True
     )
     _add_system_user(use_sudo)
     _create_system_folders(use_sudo)
@@ -95,7 +95,7 @@ def dependencies(ctx):
     install_isomer(
         ctx.obj["platform"],
         ctx.obj["use_sudo"],
-        show=ctx.obj["print_actions"],
+        show=ctx.obj["log_actions"],
         omit_common=True,
     )
 
@@ -129,6 +129,17 @@ def _add_system_user(use_sudo=False):
     success, output = run_process("/", command, sudo=use_sudo)
     if success is False:
         log("Error adding system user:", lvl=error)
+        log(output, lvl=error)
+
+    command = [
+        "/usr/sbin/adduser",
+        "isomer",
+        "dialout",
+    ]
+
+    success, output = run_process("/", command, sudo=use_sudo)
+    if success is False:
+        log("Error adding system user to dialout group:", lvl=error)
         log(output, lvl=error)
 
     time.sleep(2)
