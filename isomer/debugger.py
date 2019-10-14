@@ -130,6 +130,7 @@ class cli_mem_summary(Event):
 
     pass
 
+
 class cli_mem_diff(Event):
     """Draw current component graph"""
 
@@ -369,6 +370,12 @@ class CLI(ConfigurableComponent):
         data = data.strip().decode("utf-8")
         self.log("Incoming:", data, lvl=verbose)
 
+        def show_error():
+            self.log(
+                "Unknown Command: '%s'. Use /help to get a list of enabled "
+                "cli hooks" % data, lvl=warn
+            )
+
         if len(data) == 0:
             self.log("Use /help to get a list of enabled cli hooks")
             return
@@ -398,10 +405,9 @@ class CLI(ConfigurableComponent):
                 self.log("Sending backend reload event")
                 self.fireEvent(componentupdaterequest(force=False), "setup")
             else:
-                self.log(
-                    "Unknown Command: %s. Use /help to get a list of enabled "
-                    "cli hooks" % cmd,
-                )
+                show_error()
+        else:
+            show_error()
 
     @handler("cli_help")
     def cli_help(self, *args):
