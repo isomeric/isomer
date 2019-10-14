@@ -79,9 +79,8 @@ from isomer.tool.defaults import (
     db_help,
     db_metavar,
     platforms,
-    EXIT_INVALID_CONFIGURATION,
-    EXIT_INSTANCE_UNKNOWN,
 )
+from isomer.error import abort, EXIT_INVALID_CONFIGURATION, EXIT_INSTANCE_UNKNOWN
 
 
 def log(*args, **kwargs):
@@ -102,7 +101,7 @@ def check_root():
             "$ sudo /home/user/.virtualenv/isomer/bin/python3 iso"
         )
 
-        sys.exit(50001)
+        abort.exit(50001)
 
 
 def run_process(cwd, args, shell=None, sudo=None, show=False):
@@ -199,7 +198,7 @@ def _get_credentials(username=None, password=None, dbhost=None):
             "Reinstall the system provisioning with"
             "iso install provisions -p system"
         )
-        sys.exit(3)
+        abort(3)
 
     if username is None:
         username = ask("Please enter username: ")
@@ -288,7 +287,7 @@ def get_isomer(source, url, destination, upgrade=False, shell=None, sudo=None):
             )
             if not success:
                 log(result, lvl=error)
-                sys.exit(50000)
+                abort(50000)
         else:
             log("Updating repository from", url)
             success, result = run_process(
@@ -299,7 +298,7 @@ def get_isomer(source, url, destination, upgrade=False, shell=None, sudo=None):
             )
             if not success:
                 log(result, lvl=error)
-                sys.exit(50000)
+                abort(50000)
 
         repository = os.path.join(destination, "repository")
         log("Initializing submodules")
@@ -308,13 +307,13 @@ def get_isomer(source, url, destination, upgrade=False, shell=None, sudo=None):
         )
         if not success:
             log(result, lvl=error)
-            sys.exit(50000)
+            abort(50000)
         success, result = run_process(
             repository, ["git", "submodule", "update"], shell, sudo
         )
         if not success:
             log(result, lvl=error)
-            sys.exit(50000)
+            abort(50000)
 
         log("Pulling frontend")
         success, result = run_process(
@@ -325,7 +324,7 @@ def get_isomer(source, url, destination, upgrade=False, shell=None, sudo=None):
         )
         if not success:
             log(result, lvl=error)
-            sys.exit(50000)
+            abort(50000)
     elif source == "link":
         if shell is not None:
             log(
@@ -342,7 +341,7 @@ def get_isomer(source, url, destination, upgrade=False, shell=None, sudo=None):
             )
             if not success:
                 log(result, lvl=error)
-                sys.exit(50000)
+                abort(50000)
         else:
             log("Repository already exists!", lvl=warn)
 
@@ -358,7 +357,7 @@ def get_isomer(source, url, destination, upgrade=False, shell=None, sudo=None):
             )
             if not success:
                 log(result, lvl=error)
-                sys.exit(50000)
+                abort(50000)
         else:
             log("Frontend already present")
     elif source == "copy":
@@ -380,7 +379,7 @@ def get_isomer(source, url, destination, upgrade=False, shell=None, sudo=None):
             success, result = run_process("/", ["chown", sudo, "-R", target])
             if not success:
                 log("Could not change ownership to", sudo, lvl=warn)
-                sys.exit(50000)
+                abort(50000)
         return True
 
     return success
@@ -412,7 +411,12 @@ def install_isomer(
             "https://isomer.readthedocs.io/en/latest/start/platforms/support.html",
             lvl=error,
         )
-        sys.exit(50000)
+        abort(50000)
+
+    def handle_command(command):
+        if command.get('action', None) == 'create_file':
+            with open(command['filename'], 'w') as f:
+                f.write(command['content'])
 
     def platform():
         """In a platform specific way, install all dependencies"""
@@ -423,11 +427,14 @@ def install_isomer(
         post_install_commands = platforms[platform_name]["post_install"]
 
         for command in pre_install_commands:
-            log("Running pre install command", " ".join(command))
-            success, output = run_process(cwd, command, shell, sudo=use_sudo)
-            if not success:
-                log("Could not run command %s!" % command, lvl=error)
-                log(output, pretty=True)
+            if isinstance(command, dict):
+                handle_command(command)
+            else:
+                log("Running pre install command", " ".join(command))
+                success, output = run_process(cwd, command, shell, sudo=use_sudo)
+                if not success:
+                    log("Could not run command %s!" % command, lvl=error)
+                    log(output, pretty=True)
 
         log("Installing platform dependencies")
         success, output = run_process(cwd, tool + packages, shell, sudo=use_sudo)
@@ -475,14 +482,14 @@ def _get_configuration(ctx):
         log("Instance:", ctx.obj["instance"], lvl=debug)
     except KeyError:
         log("Invalid configuration, stopping.", lvl=error)
-        sys.exit(EXIT_INVALID_CONFIGURATION)
+        abort(EXIT_INVALID_CONFIGURATION)
 
     try:
         instance_configuration = ctx.obj["instances"][ctx.obj["instance"]]
         log("Instance Configuration:", instance_configuration, lvl=verbose, pretty=True)
     except NonExistentKey:
         log("Instance %s does not exist" % ctx.obj["instance"], lvl=warn)
-        sys.exit(EXIT_INSTANCE_UNKNOWN)
+        abort(EXIT_INSTANCE_UNKNOWN)
 
     environment_name = instance_configuration["environment"]
     environment_config = instance_configuration["environments"][environment_name]
