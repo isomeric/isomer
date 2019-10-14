@@ -34,6 +34,7 @@ CRUD operations for objects. CRUD stands for
 """
 
 from uuid import uuid4
+from ast import literal_eval
 
 from isomer.component import handler
 from isomer.database import objectmodels, ValidationError
@@ -139,17 +140,22 @@ class CrudOperations(CliManager):
 
         def get_filter(filter_request):
             # result['$text'] = {'$search': str(data['search'])}
+            request_search = filter_request["search"]
+
             if filter_request.get("fulltext", False) is True:
-                result = {
-                    "name": {"$regex": str(filter_request["search"]), "$options": "$i"}
+                search_filter = {
+                    "name": {"$regex": str(request_search), "$options": "$i"}
                 }
             else:
-                if isinstance(filter_request["search"], dict):
-                    result = filter_request["search"]
-                else:
-                    result = {}
+                search_filter = {}
 
-            return result
+                if isinstance(request_search, dict):
+                    search_filter = request_search
+                elif isinstance(request_search, str) and len(request_search) > 0:
+                    if request_search != '*':
+                        search_filter = literal_eval(request_search)
+
+            return search_filter
 
         object_filter = get_filter(data)
 
