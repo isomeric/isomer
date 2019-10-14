@@ -21,8 +21,19 @@
 __author__ = "Heiko 'riot' Weinen"
 __license__ = "AGPLv3"
 
-from setuptools import setup
 import os
+import sys
+
+try:
+    from setuptools import setup
+except ImportError:
+    # TODO: See if this can be sorted out by isomer.error.bail()
+    print(
+        "You will need to manually install python3 and python3-setuptools for "
+        "your distribution"
+    )
+    sys.exit(50050)
+
 
 # TODO:
 # Classifiers
