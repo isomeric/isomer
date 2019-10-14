@@ -105,6 +105,40 @@ def lookup_field(
     return result
 
 
+def lookup_field_multiple(
+    key,
+    subkey=None,
+    button="Add",
+    lookup_type=None,
+    placeholder=None,
+    html_class="div",
+    select_type="strapselect",
+    mapping="uuid",
+):
+    if subkey is None:
+        subkey = key + "[]"
+
+    return {
+        "key": key,
+        "add": button,
+        "htmlClass": html_class,
+        "startEmpty": True,
+        "style": {"add": "btn-success"},
+        "items": [
+            {
+                "key": subkey,
+                "type": select_type,
+                "placeholder": placeholder,
+                "options": {
+                    "type": lookup_type,
+                    "asyncCallback": "$ctrl.getFormData",
+                    "map": {"valueProperty": mapping, "nameProperty": "name"},
+                },
+            },
+        ],
+    }
+
+
 def lookup_object(key, lookup_type=None, actions=None):
     """Returns a lookup button to inspect a selected object"""
 
@@ -145,9 +179,10 @@ def lookup_object(key, lookup_type=None, actions=None):
             button_class = 'info'
 
         template += '<a %s class="btn btn-%s btn-sm"' \
-            'href="/#!/editor/%s/%s/%s">' \
-            '<span class="fa fa-%s"></span>' \
-            '</a>' % (condition, button_class, lookup_type, uuid_key, action, icon)
+                    'href="/#!/editor/%s/%s/%s">' \
+                    '<span class="fa fa-%s"></span>' \
+                    '</a>' % (
+                    condition, button_class, lookup_type, uuid_key, action, icon)
 
     result = {
         "key": "lookup_" + key,
@@ -252,12 +287,12 @@ def rating_widget(key="rating", maximum=10):
         "key": "rating",
         "type": "template",
         "template": '<div class="rating">'
-        '   <span class="fa fa-star-o" ng-repeat="rating in []|range: {1} - model.{0}"'
-        '         ng-click="model.{0} = {1} - rating"></span>'
-        '   <span class="fa fa-star" ng-repeat="rating in []|range: model.{0}"'
-        '         ng-click="model.{0} = model.{0} - rating"></span>'
-        "</div>"
-        "<span>{{model.{0}}} out of 10</span>".format(key, maximum),
+                    '   <span class="fa fa-star-o" ng-repeat="rating in []|range: {1} - model.{0}"'
+                    '         ng-click="model.{0} = {1} - rating"></span>'
+                    '   <span class="fa fa-star" ng-repeat="rating in []|range: model.{0}"'
+                    '         ng-click="model.{0} = model.{0} - rating"></span>'
+                    "</div>"
+                    "<span>{{model.{0}}} out of 10</span>".format(key, maximum),
     }
 
     return widget
@@ -282,15 +317,15 @@ def rating_widget(key="rating", maximum=10):
 #     return result, {'type': 'section', 'condition': 'form.'+key+'_collapsed', 'items': elements}
 
 
-def event_button(key, title, event, action, data=None):
+def event_button(key, title, target, action, data=None):
     """Template for an event emitting button"""
     if data is None:
-        data = "$ctrl.model.uuid"
+        data = "model"
 
     widget = {
         'key': key,
         'type': 'button',
-        'onClick': '$ctrl.formAction("%s", "%s", "%s")' % (event, action, data),
+        'onClick': '$ctrl.formAction("%s", "%s", "%s")' % (target, action, data),
         'title': title
     }
 
