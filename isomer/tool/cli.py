@@ -253,8 +253,14 @@ def cli(
 
 @with_plugins(iter_entry_points("isomer.management"))
 @cli.group(cls=DYMGroup)
-def plugin():
+@click.pass_context
+def plugin(ctx):
     """[GROUP] Plugin commands"""
+
+    from isomer import database
+
+    database.initialize(ctx.obj["dbhost"], ctx.obj["dbname"])
+    ctx.obj["db"] = database
 
 
 cli.add_command(plugin)
