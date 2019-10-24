@@ -41,6 +41,9 @@ from isomer.database import objectmodels
 from isomer.logger import error, warn, debug
 from isomer.misc import std_hash, std_salt, std_uuid, std_now, std_human_uid
 
+minimum_password_length = 5
+minimum_username_length = 1
+
 
 class AuthenticationError(Exception):
     """Something unspecified went wrong during authentication"""
@@ -195,7 +198,8 @@ class Authenticator(ConfigurableComponent):
         # TODO: Define the requirements for secure passwords etc.
         # They're also required in the Enrol module..!
 
-        if (len(event.username) < 1) or (len(event.password) < 5):
+        if (len(event.username) < minimum_username_length) or (
+            len(event.password) < minimum_password_length):
             self.log("Illegal username or password received, login cancelled", lvl=warn)
             self._fail(event, "Password or username too short")
             return
