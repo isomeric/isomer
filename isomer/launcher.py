@@ -76,6 +76,8 @@ from isomer.debugger import cli_register_event
 from isomer.ui.builder import install_frontend
 from isomer.error import abort, EXIT_NO_CERTIFICATE
 from isomer.tool.etc import load_instance
+from isomer.provisions import build_provision_store
+from isomer.provisions.base import provision
 
 
 # from pprint import pprint
@@ -122,6 +124,11 @@ class cli_quit(Event):
 
 class cli_drop_privileges(Event):
     """Try to drop possible root privileges"""
+
+    pass
+
+class cli_check_provisions(Event):
+    """Check current provisioning state and trigger new provisioning"""
 
     pass
 
@@ -290,6 +297,7 @@ class Core(ConfigurableComponent):
 
         self.component_blacklist += kwargs["blacklist"]
 
+        self._check_provisions()
         self.update_components()
         self._write_config()
 
@@ -314,6 +322,7 @@ class Core(ConfigurableComponent):
 
         self.fireEvent(cli_register_event("components", cli_components))
         self.fireEvent(cli_register_event("drop_privileges", cli_drop_privileges))
+        self.fireEvent(cli_register_event("check_provisions", cli_check_provisions))
         self.fireEvent(cli_register_event("reload_db", cli_reload_db))
         self.fireEvent(cli_register_event("reload", cli_reload))
         self.fireEvent(cli_register_event("quit", cli_quit))
@@ -338,6 +347,13 @@ class Core(ConfigurableComponent):
 
         self.log("Trying to drop privileges", lvl=debug)
         self._drop_privileges()
+
+    @handler("cli_check_provisions")
+    def cli_check_provisions(self, event):
+        """Check current provisioning state and trigger new provisioning"""
+
+        self.log("Checking provisions", lvl=debug)
+        self._check_provisions()
 
     @handler("cli_components")
     def cli_components(self, event):
@@ -582,6 +598,24 @@ class Core(ConfigurableComponent):
                 )
                 self.log("Frontend root:", self.frontend_root, lvl=debug)
                 self.frontend_watch_manager.add_watch(self.module_root, mask, rec=True)
+
+    def _check_provisions(self):
+        from isomer.database import objectmodels
+        systemconfig = objectmodels['systemconfig'].find_one({'active': True})
+
+        if systemconfig is None:
+            # No provisions at all, apparently.
+            # Install all
+            pass
+        else:
+            provisioned_packages = set(systemconfig.provisions['packages'])
+            provision_store = set(build_provision_store().keys())
+            missing_provisions = provision_store - provisioned_packages
+            self.log('Provisioned packages:', provisioned_packages, lvl=debug)
+            self.log('Available provisions:', provision_store, lvl=debug)
+            if len(missing_provisions) > 0:
+                self.log('Installing missing provisions:', missing_provisions)
+                provision()
 
     def _instantiate_components(self, clear=True):
         """Inspect all loadable components and run them"""

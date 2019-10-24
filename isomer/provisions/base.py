@@ -34,7 +34,9 @@ Basic functionality around provisioning.
 
 """
 
+import networkx
 from jsonschema import ValidationError
+
 from isomer.logger import isolog, debug, verbose, warn, error
 
 
@@ -50,8 +52,8 @@ def provisionList(
 ):
     """Provisions a list of items according to their schema
 
-    :param database_name:
     :param items: A list of provisionable items.
+    :param database_name:
     :param overwrite: Causes existing items to be overwritten
     :param clear: Clears the collection first (Danger!)
     :param skip_user_check: Skips checking if a system user is existing already (for user provisioning)
@@ -149,3 +151,92 @@ def provisionList(
                 )
 
     log("Provisioned %i out of %i items successfully." % (counter, len(items)))
+
+
+def provision(list_provisions=False, overwrite=False, clear_provisions=False,
+              package=None):
+    from isomer.provisions import build_provision_store
+    from isomer.database import objectmodels
+
+    provision_store = build_provision_store()
+
+    def sort_dependencies(items):
+        """Topologically sort the dependency tree"""
+
+        g = networkx.DiGraph()
+        log("Sorting dependencies")
+
+        for key, item in items:
+            log("key: ", key, "item:", item, pretty=True, lvl=debug)
+            dependencies = item.get("dependencies", [])
+            if isinstance(dependencies, str):
+                dependencies = [dependencies]
+
+            if key not in g:
+                g.add_node(key)
+
+            for link in dependencies:
+                g.add_edge(key, link)
+
+        if not networkx.is_directed_acyclic_graph(g):
+            log("Cycles in provosioning dependency graph detected!", lvl=error)
+            log("Involved provisions:", list(networkx.simple_cycles(g)), lvl=error)
+
+        topology = list(networkx.algorithms.topological_sort(g))
+        topology.reverse()
+
+        # log(topology, pretty=True)
+
+        return topology
+
+    sorted_provisions = sort_dependencies(provision_store.items())
+
+    # These need to be installed first in that order:
+    sorted_provisions.remove('system')
+    sorted_provisions.remove('user')
+    sorted_provisions.insert(0, 'system')
+    sorted_provisions.insert(0, 'user')
+
+    if list_provisions:
+        log(sorted_provisions, pretty=True)
+        exit()
+
+    def provision_item(provision_name):
+        """Provision a single provisioning element"""
+
+        item = provision_store[provision_name]
+
+        method = item.get("method", provisionList)
+        model = item.get("model")
+        data = item.get("data")
+
+        method(data, model, overwrite=overwrite, clear=clear_provisions)
+
+        confirm_provision(provision_name)
+
+    def confirm_provision(provision_name):
+        if provision_name == 'user':
+            log('Not confirming system user provision')
+            return
+        systemconfig = objectmodels['systemconfig'].find_one({'active': True})
+        if provision_name not in systemconfig.provisions['packages']:
+            systemconfig.provisions['packages'].append(provision_name)
+            systemconfig.save()
+
+    if package is not None:
+        if package in provision_store:
+            log("Provisioning ", package, pretty=True)
+            provision_item(package)
+        else:
+            log(
+                "Unknown package: ",
+                package,
+                "\nValid provisionable packages are",
+                list(provision_store.keys()),
+                lvl=error,
+                emitter="MANAGE",
+            )
+    else:
+        for name in sorted_provisions:
+            log("Provisioning", name, pretty=True)
+            provision_item(name)

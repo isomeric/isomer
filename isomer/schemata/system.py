@@ -102,6 +102,21 @@ SystemconfigSchema["properties"].update(
                     "version": {"type": "string"}
                 }
             }
+        },
+        "provisions": {
+            "type": "object",
+            "default": {
+                "packages": []
+            },
+            "properties": {
+                "packages": {
+                    "type": "array",
+                    "default": [],
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
         }
     }
 )
