@@ -88,7 +88,7 @@ def clear_all():
 
 class IsomerBaseModel(formal.formalModel):
     def save(self, *args, **kwargs):
-        print('Saving object!')
+        super(IsomerBaseModel, self).save(*args, **kwargs)
 
 
 def _build_model_factories(store):
