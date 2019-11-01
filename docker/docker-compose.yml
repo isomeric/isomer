@@ -1,0 +1,29 @@
+version: '3.2'
+
+services:
+  isomer:
+    build:
+      context: ../
+    image: isomer:local
+    command: iso --dbhost db:27017 --clog 5 launch -a 0.0.0.0
+    ports:
+      - 0.0.0.0:8000:8000
+    networks:
+      - dock_net
+  db:
+    image: mongo:latest
+    volumes:
+      - dbdata:/data/db
+    ports:
+      - target: 27017
+        published: 27027
+        mode: host
+    networks:
+      - dock_net
+
+volumes:
+  dbdata:
+
+networks:
+  dock_net:
+    driver: bridge
