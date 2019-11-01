@@ -63,6 +63,9 @@ platforms = {
     "Docker": {
         "pre_install": [
             [
+                "apt-get", "update"
+            ],
+            [
                 "apt-get",
                 "-y",
                 "install",
@@ -70,7 +73,6 @@ platforms = {
                 "wget",
                 "sudo",
                 "gnupg",
-                "gdebi-core",
                 "python3",
                 "python3-pip",
                 "python3-spur",
