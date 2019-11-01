@@ -73,7 +73,8 @@ def provisionList(
         except AttributeError as system_user_error:
             log("No system user found:", system_user_error, lvl=warn)
             log(
-                "Please install the user provision to setup a system user or check your database configuration",
+                "Please install the user provision to setup a system user or "
+                "check your database configuration",
                 lvl=error,
             )
             return False
@@ -154,11 +155,14 @@ def provisionList(
 
 
 def provision(list_provisions=False, overwrite=False, clear_provisions=False,
-              package=None):
+              package=None, installed=None):
     from isomer.provisions import build_provision_store
     from isomer.database import objectmodels
 
     provision_store = build_provision_store()
+
+    if installed is None:
+        installed = []
 
     def sort_dependencies(items):
         """Topologically sort the dependency tree"""
@@ -179,11 +183,12 @@ def provision(list_provisions=False, overwrite=False, clear_provisions=False,
                 g.add_edge(key, link)
 
         if not networkx.is_directed_acyclic_graph(g):
-            log("Cycles in provosioning dependency graph detected!", lvl=error)
+            log("Cycles in provisioning dependency graph detected!", lvl=error)
             log("Involved provisions:", list(networkx.simple_cycles(g)), lvl=error)
 
         topology = list(networkx.algorithms.topological_sort(g))
         topology.reverse()
+        topology = list(set(topology).difference(installed))
 
         # log(topology, pretty=True)
 
