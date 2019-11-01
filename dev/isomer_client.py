@@ -10,13 +10,13 @@ from circuits.net.events import write
 from circuits.web.websockets.client import WebSocketClient
 from json import dumps, loads
 
-from dev.tools import ask
+from isomer.tool import ask
 
 
 class IsomerClient(LoggingComponent):
     def __init__(self, *args, **kwargs):
         super(IsomerClient, self).__init__(*args, **kwargs)
-        self.url = '{protocol}://{host}:{port}/websocket'.format(**kwargs)
+        self.url = '{protocol}://{host}:{port}/{url}'.format(**kwargs)
         self.client = WebSocketClient(self.url).register(self)
         self.username = kwargs.get('username')
         self.password = kwargs.get('password')
@@ -93,14 +93,15 @@ class IsomerClient(LoggingComponent):
 @click.command()
 @click.option("--protocol", help="Define protocol for server (ws/wss)",
               type=str, default='wss')
-@click.option("--port", help="Define port for server", type=int,
+@click.option("--port", "-p", help="Define port for server", type=int,
               default=443)
-@click.option("--host", help="Define hostname for server", type=str,
+@click.option("--host", "-h", help="Define hostname for server", type=str,
               default='0.0.0.0')
 @click.option("-u", "--username", help="Specify username", type=str,
               default='anonymous')
 @click.option("-p", "--password", help="Specify password", type=str,
               default='')
+@click.option("--url", help="Specify alternate url", default="websocket", type=str)
 @click.option("--debug", help="Start debugger", is_flag=True,
               default=False)
 def main(**kwargs):
