@@ -206,6 +206,7 @@ def create(ctx):
 @click.option("--skip-data", is_flag=True, default=False)
 @click.option("--skip-frontend", is_flag=True, default=False)
 @click.option("--skip-test", is_flag=True, default=False)
+@click.option("--skip-provisions", is_flag=True, default=False)
 @click.pass_context
 def install(ctx, **kwargs):
     """Install a new environment of an instance"""
@@ -352,7 +353,6 @@ def _turnover(ctx, force):
         if (
             not env.get("installed", False)
             or not env.get("tested", False)
-            or not env.get("provisioned", False)
             or not env.get("migrated", False)
         ):
             log("Installation failed, cannot activate!", lvl=critical)

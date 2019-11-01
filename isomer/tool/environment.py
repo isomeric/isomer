@@ -33,6 +33,7 @@ Environment management functionality.
     environment install
 
 """
+import pymongo
 
 __author__ = "Heiko 'riot' Weinen"
 __license__ = "AGPLv3"
@@ -138,9 +139,14 @@ def _clear_environment(ctx, force=False, clear_env=None, clear=False, no_archive
     if not clear:
         _create_folders(ctx)
 
-    delete_database(
-        ctx.obj["dbhost"], "%s_%s" % (instance_name, next_environment), force=True
-    )
+    try:
+        delete_database(
+            ctx.obj["dbhost"], "%s_%s" % (instance_name, next_environment), force=True
+        )
+    except pymongo.errors.ServerSelectionTimeoutError:
+        log("No database available")
+    except Exception as e:
+        log("Could not delete database:", e, lvl=warn, exc=True)
 
     ctx.obj["instance_configuration"]["environments"][
         next_environment
@@ -614,6 +620,7 @@ def _migrate(ctx):
 @click.option("--skip-data", is_flag=True, default=False)
 @click.option("--skip-frontend", is_flag=True, default=False)
 @click.option("--skip-test", is_flag=True, default=False)
+@click.option("--skip-provisions", is_flag=True, default=False)
 @click.pass_context
 def install_environment(ctx, **kwargs):
     """Install an environment"""
@@ -632,6 +639,7 @@ def _install_environment(
     skip_data,
     skip_frontend,
     skip_test,
+    skip_provisions
 ):
     """Internal function to perform environment installation"""
 
@@ -709,7 +717,7 @@ def _install_environment(
         if not skip_modules and _install_modules(ctx):
             log("Modules installed")
             # env['installed_modules'] = True
-        if not skip_data and _install_provisions(ctx, import_file=import_file):
+        if not skip_provisions and _install_provisions(ctx, import_file=import_file):
             log("Provisions installed")
             env["provisioned"] = True
         if not skip_data and _migrate(ctx):

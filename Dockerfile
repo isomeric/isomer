@@ -44,7 +44,7 @@ RUN ./iso system -l -p Docker all
 # Install instance
 
 RUN ./iso instance create
-RUN /etc/init.d/mongodb start && ./iso instance install -u /home/isomer/isomer
+RUN ./iso instance install -u /home/isomer/isomer --skip-provisions
 
 RUN ./iso instance set web_port 8000
 
