@@ -604,9 +604,8 @@ class Core(ConfigurableComponent):
         systemconfig = objectmodels['systemconfig'].find_one({'active': True})
 
         if systemconfig is None:
-            # No provisions at all, apparently.
-            # Install all
-            pass
+            self.log('No system configuration found, trying tp provision', lvl=warn)
+            provision()
         else:
             provisioned_packages = set(systemconfig.provisions['packages'])
             provision_store = set(build_provision_store().keys())
@@ -615,7 +614,7 @@ class Core(ConfigurableComponent):
             self.log('Available provisions:', provision_store, lvl=debug)
             if len(missing_provisions) > 0:
                 self.log('Installing missing provisions:', missing_provisions)
-                provision()
+                provision(installed=provisioned_packages)
 
     def _instantiate_components(self, clear=True):
         """Inspect all loadable components and run them"""
