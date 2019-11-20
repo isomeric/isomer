@@ -81,6 +81,7 @@ def lookup_field(
     html_class="div",
     select_type="strapselect",
     mapping="uuid",
+    search_filter=None
 ):
     """Generates a lookup field for form definitions"""
 
@@ -101,6 +102,9 @@ def lookup_field(
             "map": {"valueProperty": mapping, "nameProperty": "name"},
         },
     }
+
+    if search_filter is not None:
+        result["options"]["search_filter"] = search_filter
 
     return result
 

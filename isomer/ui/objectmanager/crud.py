@@ -153,7 +153,11 @@ class CrudOperations(CliManager):
                     search_filter = request_search
                 elif isinstance(request_search, str) and len(request_search) > 0:
                     if request_search != '*':
+                        self.log(request_search, lvl=warn)
+                        request_search = request_search.replace(r'\\\\', r'')
                         search_filter = literal_eval(request_search)
+
+            self.log('Final filter:', search_filter, lvl=debug)
 
             return search_filter
 
