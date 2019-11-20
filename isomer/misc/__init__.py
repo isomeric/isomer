@@ -25,6 +25,7 @@ __license__ = "AGPLv3"
 Miscellaneous utility functions for Isomer
 """
 
+import SecretColors
 import copy
 import gettext
 import json
@@ -831,6 +832,14 @@ attributes = [
     "Warmth",
     "Wisdom",
 ]
+
+
+def std_color(palette_name=None):
+    if palette_name is None:
+        palette_name = 'ibm'
+
+    color = SecretColors.Palette(palette_name, show_warning=False).random()
+    return color
 
 
 def std_human_uid(kind=None):

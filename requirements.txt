@@ -24,3 +24,4 @@ pytz>=2019.1
 setuptools
 spur>=0.3.20
 tomlkit
+SecretColors>=1.1.0
