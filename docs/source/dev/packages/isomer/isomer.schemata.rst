@@ -1,6 +1,11 @@
 isomer.schemata package
 =======================
 
+.. automodule:: isomer.schemata
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Submodules
 ----------
 
@@ -92,11 +97,3 @@ isomer.schemata.user module
    :undoc-members:
    :show-inheritance:
 
-
-Module contents
----------------
-
-.. automodule:: isomer.schemata
-   :members:
-   :undoc-members:
-   :show-inheritance:

@@ -1,6 +1,11 @@
 isomer.provisions package
 =========================
 
+.. automodule:: isomer.provisions
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Submodules
 ----------
 
@@ -28,11 +33,3 @@ isomer.provisions.user module
    :undoc-members:
    :show-inheritance:
 
-
-Module contents
----------------
-
-.. automodule:: isomer.provisions
-   :members:
-   :undoc-members:
-   :show-inheritance:

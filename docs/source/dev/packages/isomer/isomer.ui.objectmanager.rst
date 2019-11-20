@@ -1,6 +1,11 @@
 isomer.ui.objectmanager package
 ===============================
 
+.. automodule:: isomer.ui.objectmanager
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Submodules
 ----------
 
@@ -44,11 +49,3 @@ isomer.ui.objectmanager.subscriptions module
    :undoc-members:
    :show-inheritance:
 
-
-Module contents
----------------
-
-.. automodule:: isomer.ui.objectmanager
-   :members:
-   :undoc-members:
-   :show-inheritance:

@@ -31,8 +31,9 @@ Please make sure, you have python3 as well as python3-setuptools installed.
 Get Isomer
 ----------
 
-Currently, getting Isomer via git is recommended. We are working on Python packages, packages for multiple
-distributions as well as ready made images for various embedded systems.
+Currently, getting Isomer via git is recommended. We are working on Python
+packages, packages for multiple distributions as well as ready made images for
+various embedded systems.
 
 .. code-block:: sh
 
@@ -43,11 +44,13 @@ distributions as well as ready made images for various embedded systems.
 Install Management Tool
 -----------------------
 
-The management tool's automatic installation currently only supports Debian based systems.
+The management tool's automatic installation currently only supports Debian
+based systems.
 
 .. tip::
-   Feel free to contribute installation steps for other distros - that is mostly adapting the package manager
-   and package names in isomer/tool/defaults.py
+   Feel free to contribute installation steps for other distros - that is
+   mostly adapting the package manager and package names in
+   isomer/tool/defaults.py
 
 First, install the local management system:
 
@@ -56,7 +59,8 @@ First, install the local management system:
     cd ~/src/isomer
     python3 setup.py install
 
-If you run into trouble or get any unexpected errors, :ref:`try the complex installation procedure <complex_install>`.
+If you run into trouble or get any unexpected errors,
+:ref:`try the complex installation procedure <complex_install>`.
 
 Test the Tool
 -------------
@@ -67,12 +71,14 @@ Now run
 
     iso version
 
-to see if the tool installed correctly. It should print a few lines detailing its version number and invocation place.
+to see if the tool installed correctly. It should print a few lines detailing
+its version number and invocation place.
 
 Set up the system
 -----------------
 
-To run securely and provide a robust upgrade and backup mechanism, your system needs a few things set up:
+To run securely and provide a robust upgrade and backup mechanism, your system
+needs a few things set up:
 
 * a user account for running instances
 * some paths in `/var/lib/isomer`, `/var/local/isomer`, `/var/cache/isomer` and
@@ -111,5 +117,6 @@ The command to get the current testing release is:
 Planned Installations
 ---------------------
 
-* We're planning to offer ready-made SD card images for various embedded systems.
+* We're planning to offer ready-made SD card images for various embedded
+  systems.
 * A custom NixOS system is planned as well.

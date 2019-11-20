@@ -1,6 +1,11 @@
 isomer.tool package
 ===================
 
+.. automodule:: isomer.tool
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Submodules
 ----------
 
@@ -148,11 +153,3 @@ isomer.tool.user module
    :undoc-members:
    :show-inheritance:
 
-
-Module contents
----------------
-
-.. automodule:: isomer.tool
-   :members:
-   :undoc-members:
-   :show-inheritance:

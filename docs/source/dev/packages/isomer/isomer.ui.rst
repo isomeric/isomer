@@ -1,6 +1,11 @@
 isomer.ui package
 =================
 
+.. automodule:: isomer.ui
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Subpackages
 -----------
 
@@ -76,11 +81,3 @@ isomer.ui.tagmanager module
    :undoc-members:
    :show-inheritance:
 
-
-Module contents
----------------
-
-.. automodule:: isomer.ui
-   :members:
-   :undoc-members:
-   :show-inheritance:

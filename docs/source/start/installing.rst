@@ -6,11 +6,13 @@ Installing
 First of all: The manual installation procedure is rather complex right now and
 the documentation is being overhauled for the 1.0.0 release of Isomer.
 
-We've :ref:`simplified the process by supplying an install script <quick_install>`,
-but if you encounter any trouble/problems, checkout these detailed installation steps.
+We've :ref:`simplified the process by supplying an install script
+<quick_install>`, but if you encounter any trouble/problems, checkout these
+detailed installation steps.
 
-If you still can't get it to install, :ref:`contact us via irc or email <communication>`
-and we'll happily try to help you get your installation running.
+If you still can't get it to install, :ref:`contact us via irc or emai
+<communication>` and we'll happily try to help you get your installation
+running.
 
 This is very important for us, since the system has not yet been deployed
 very often and we're not yet aware of all of the pitfalls and traps on that
@@ -55,7 +57,8 @@ package. The simple (but not so good) way is to use Debian's packages:
     sudo apt-get install npm nodejs
     sudo npm install npm@4.2.0 -g
 
-The better way is `to install nodesource <https://github.com/nodesource/distributions#table-of-contents>`__.
+The better way is `to install nodesource
+<https://github.com/nodesource/distributions#table-of-contents>`__.
 
 If you want to install the full development dependencies to write
 documentation as well, you need to install the enchant package:
@@ -66,15 +69,15 @@ documentation as well, you need to install the enchant package:
 
 .. todo:: Remove module content:
 
-In case you want to use raster (or in future: vector) charts in Isomer' map module,
-you'll need to install libgdal and its binaries:
+In case you want to use raster (or in future: vector) charts in Isomer' map
+module, you'll need to install libgdal and its binaries:
 
 .. code-block:: sh
 
     sudo apt-get install gdal-bin python-gdal
 
-Note, that it is necessary to install python-gdal 2.7 - not the python3 variant,
-as the scripts are not included in that.
+Note, that it is necessary to install python-gdal 2.7 - not the python3
+variant, as the scripts are not included in that.
 
 .. _getting_source:
 
@@ -102,9 +105,9 @@ Backend
 .. caution::
     This is currently outdated!
 
-The management tool usually can install everything you need. It starts by adding
-a new system user for Isomer and generating a (currently only self signed)
-certificate.
+The management tool usually can install everything you need. It starts by
+adding a new system user for Isomer and generating a (currently only self
+signed) certificate.
 
 The process also involves installing the supplied modules, getting the frontend
 dependencies, building and installing the documentation, etc.

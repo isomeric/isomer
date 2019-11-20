@@ -1,6 +1,11 @@
 isomer package
 ==============
 
+.. automodule:: isomer
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Subpackages
 -----------
 
@@ -29,6 +34,14 @@ isomer.debugger module
 ----------------------
 
 .. automodule:: isomer.debugger
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+isomer.error module
+-------------------
+
+.. automodule:: isomer.error
    :members:
    :undoc-members:
    :show-inheritance:
@@ -89,11 +102,3 @@ isomer.version module
    :undoc-members:
    :show-inheritance:
 
-
-Module contents
----------------
-
-.. automodule:: isomer
-   :members:
-   :undoc-members:
-   :show-inheritance:

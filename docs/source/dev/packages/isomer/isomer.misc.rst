@@ -1,6 +1,11 @@
 isomer.misc package
 ===================
 
+.. automodule:: isomer.misc
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Submodules
 ----------
 
@@ -12,11 +17,3 @@ isomer.misc.path module
    :undoc-members:
    :show-inheritance:
 
-
-Module contents
----------------
-
-.. automodule:: isomer.misc
-   :members:
-   :undoc-members:
-   :show-inheritance:

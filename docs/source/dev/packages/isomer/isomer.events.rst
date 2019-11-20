@@ -1,6 +1,11 @@
 isomer.events package
 =====================
 
+.. automodule:: isomer.events
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Submodules
 ----------
 
@@ -36,11 +41,3 @@ isomer.events.system module
    :undoc-members:
    :show-inheritance:
 
-
-Module contents
----------------
-
-.. automodule:: isomer.events
-   :members:
-   :undoc-members:
-   :show-inheritance:

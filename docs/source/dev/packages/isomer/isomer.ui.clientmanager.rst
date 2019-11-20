@@ -1,6 +1,11 @@
 isomer.ui.clientmanager package
 ===============================
 
+.. automodule:: isomer.ui.clientmanager
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Submodules
 ----------
 
@@ -60,11 +65,3 @@ isomer.ui.clientmanager.latency module
    :undoc-members:
    :show-inheritance:
 
-
-Module contents
----------------
-
-.. automodule:: isomer.ui.clientmanager
-   :members:
-   :undoc-members:
-   :show-inheritance:

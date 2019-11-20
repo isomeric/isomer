@@ -14,7 +14,8 @@ Software Development Life Cycle (SDLC)
 --------------------------------------
 
 
-We employ the use of the `SCRUM Agile Process <http://en.wikipedia.org/wiki/Scrum_(development)>`_
+We employ the use of the
+`SCRUM Agile Process <http://en.wikipedia.org/wiki/Scrum_(development)>`_
 and use our `Issue Tracker`_ to track features, bugs, chores and releases.
 If you wish to contribute to Isomer, please familiarize yourself with SCRUM
 and `GitHub's Issue Tracker <https://github.com>`_.
@@ -28,17 +29,21 @@ Bug Reports
   https://github.com/isomeric/isomer/issues
 - Confirmation and Discussion of all New Bug Reports.
 - Once confirmed, a new Bug is raised in our `Issue Tracker`_
-- An appropriate milestone will be set (*depending on current milestone's schedule and resources*)
+- An appropriate milestone will be set (*depending on current milestone's
+  schedule and resources*)
 - A unit test developed that demonstrates the bug's failure.
 - A fix developed that passes the unit test and breaks no others.
-- A `New Pull Request <https://github.com/isomeric/isomer/compare/>`_ created with the fix.
+- A `New Pull Request <https://github.com/isomeric/isomer/compare/>`_ created
+  with the fix.
 
   This should contain:
-  - A new or modified unit test.
-  - A patch that fixes the bug ensuring all unit tests pass.
-  - The `Change Log <https://github.com/isomeric/isomer/tree/master/CHANGES.rst>`_ updated.
-  - Appropriate documentation updated.
-- The `Pull Request <https://github.com/isomeric/isomer/pulls>`_ is reviewed and approved by at least two other developers.
+   - A new or modified unit test.
+   - A patch that fixes the bug ensuring all unit tests pass.
+   - The `Change Log <https://github.com/isomeric/isomer/tree/master/CHANGES.rst>`_
+   updated.
+   - Appropriate documentation updated.
+- The `Pull Request <https://github.com/isomeric/isomer/pulls>`_ is reviewed
+  and approved by at least two other developers.
 
 
 Feature Requests
@@ -49,17 +54,22 @@ Feature Requests
   https://github.com/isomeric/isomer/issues
 - Confirmation and Discussion of all New Feature Requests.
 - Once confirmed, a new Feature is raised in our `Issue Tracker`_
-- An appropriate milestone will be set (*depending on current milestone's schedule and resources*)
+- An appropriate milestone will be set (*depending on current milestone's
+  schedule and resources*)
 - A unit test developed that demonstrates the new feature.
 - The new feature developed that passes the unit test and breaks no others.
-- A `New Pull Request <https://github.com/isomeric/isomer/compare/>`_ created with the fix.
+- A `New Pull Request <https://github.com/isomeric/isomer/compare/>`_ created
+  with the fix.
 
-  This must contains:
+  This must contain:
   - A new or modified unit test.
   - A patch that implements the new feature ensuring all unit tests pass.
-  - The `Change Log <https://github.com/isomeric/isomer/tree/master/CHANGES.rst>`_ updated.
+  - The `Change Log <https://github.com/isomeric/isomer/tree/master/CHANGES.rst>`_
+  updated.
   - Appropriate documentation updated.
-- The `Pull Request <https://github.com/isomeric/isomer/pulls>`_ is reviewed and approved by at least two other developers.
+
+- The `Pull Request <https://github.com/isomeric/isomer/pulls>`_ is reviewed
+  and approved by at least two other developers.
 
 
 Writing new Code
@@ -75,7 +85,8 @@ Writing new Code
 
 - Ensure any new or modified code does not break existing unit tests.
 - Update any relevant doc strings or documentation.
-- Update the `Change Log <https://github.com/isomeric/isomer/tree/master/CHANGES.rst>`_ appropriately.
+- Update the `Change Log <https://github.com/isomeric/isomer/tree/master/CHANGES.rst>`_
+  appropriately.
 - Submit a `New Pull Request <https://github.com/isomeric/isomer/compare/>`_.
 
 
@@ -91,8 +102,8 @@ To run the tests you will need the following installed:
 
 All of these can be installed via ``pip install -r requirements-dev.txt``.
 
-Please also ensure - if you can - that you you have all supported versions of Python
-that Isomer supports installed in your local environment.
+Please also ensure - if you can - that you you have all supported versions of
+Python that Isomer supports installed in your local environment.
 
 To run the tests::
 

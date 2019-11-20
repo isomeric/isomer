@@ -9,8 +9,8 @@ Development Introduction
 
 Here's how we do things in Isomer...
 
-If you're looking for instructions on how to set up a development environment, please check out :ref:`the workflow
-documentation <environment>`.
+If you're looking for instructions on how to set up a development environment,
+please check out :ref:`the workflow documentation <environment>`.
 
 Communication
 -------------
@@ -19,8 +19,10 @@ Communication
 - `Issue Tracker`_ located at `https://github.com/isomeric/isomer/issues`
 
 
-.. note:: If you are familiar with `IRC <http://en.wikipedia.org/wiki/Internet_Relay_Chat>`_
-        and use your own IRC Client then connect to the FreeNode Network and ``/join #hackerfleet``.
+.. note:: If you are familiar with
+        `IRC <http://en.wikipedia.org/wiki/Internet_Relay_Chat>`_
+        and use your own IRC Client then connect to the FreeNode Network and
+        ``/join #hackerfleet``.
 
 
 Standards
@@ -70,6 +72,7 @@ We use the following tools to develop Isomer and share code:
 - **Translations:**
   `Transifex <https://www.transifex.com/hackerfleet-community/isomer/>`__
 
-We strongly suggest familiarizing with all of them, to make sure you understand our CI.
+We strongly suggest familiarizing with all of them, to make sure you understand
+our CI.
 
 Big thanks to all of these magnificent and free-for-opensource services!

@@ -33,16 +33,16 @@ Metadata Configuration
 Environment System
 ^^^^^^^^^^^^^^^^^^
 
-An instance's actual software and aggregated things like user-uploaded data 
+An instance's actual software and aggregated things like user-uploaded data
 resides in so called Environments.
 
 Usually, an instance has at least two environments, a blue and a green one.
 Next to these 'production' instances is the archive of older environments that
 gets extended every time the instance is upgraded.
 
-One of the driving factors behind this process is the required stability when 
-using Isomer in situations where software upgrades could potentially break 
-an instance without any means of repair available. 
+One of the driving factors behind this process is the required stability when
+using Isomer in situations where software upgrades could potentially break
+an instance without any means of repair available.
 The implemented blue/green process allows downgrading to the earlier, uncom-
 promised state.
 
@@ -55,21 +55,21 @@ Explanation of the Blue/Green process
 
 * Only one environment per instance can be actively used at a time
 
-* Upgrade/downgrade or backup restore actions will always be performed on the 
+* Upgrade/downgrade or backup restore actions will always be performed on the
   non active environment
 
-* Both environments will exist in parallel for diagnostics and testing but 
-  control will be handed over to the newly installed environment for testing 
+* Both environments will exist in parallel for diagnostics and testing but
+  control will be handed over to the newly installed environment for testing
   itself
 
-* On success (and perhaps a confirmation of an administrator), the active 
+* On success (and perhaps a confirmation of an administrator), the active
   environment is turned over to the running one
 
 * Furthermore, the old archive gets updated and cleared out in preparation for
   another
 
 * On errors (or perhaps a cancellation request of an administrator), the newly
-  set up environment gets shut down, cleared and the old (working) environment 
+  set up environment gets shut down, cleared and the old (working) environment
   gets activated and started again
 
 .. _parallel_instances:
@@ -77,5 +77,5 @@ Explanation of the Blue/Green process
 Parallel Instances
 ------------------
 
-To allow running multiple Isomer systems on a single machine, multiple 
-instances can be set up to run in parallel.  
+To allow running multiple Isomer systems on a single machine, multiple
+instances can be set up to run in parallel.

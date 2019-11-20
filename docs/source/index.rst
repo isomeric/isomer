@@ -2,6 +2,13 @@
 Isomer Documentation
 ====================
 
+
+.. image:: _static/logo.png
+    :width: 350px
+    :align: right
+    :height: 350px
+    :alt: Isomer Logo
+
 :Version: |version|
 :Release: |release|
 :Date: |today|
@@ -36,8 +43,6 @@ Developer Documentation
     :maxdepth: 1
 
     dev/index
-    #dev/man/index
-    #dev/api/index
     changes
     roadmap
     contributors

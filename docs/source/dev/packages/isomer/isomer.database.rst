@@ -1,6 +1,11 @@
 isomer.database package
 =======================
 
+.. automodule:: isomer.database
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Submodules
 ----------
 
@@ -28,11 +33,3 @@ isomer.database.profiling module
    :undoc-members:
    :show-inheritance:
 
-
-Module contents
----------------
-
-.. automodule:: isomer.database
-   :members:
-   :undoc-members:
-   :show-inheritance:
