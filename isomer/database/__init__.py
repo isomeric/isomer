@@ -46,6 +46,7 @@ import pymongo
 from isomer import schemastore
 from isomer.error import abort, abort, EXIT_NO_DATABASE
 from isomer.logger import isolog, warn, critical, debug, verbose, error
+from isomer.misc import std_color
 
 
 def db_log(*args, **kwargs):
@@ -88,7 +89,13 @@ def clear_all():
 
 class IsomerBaseModel(formal.formalModel):
     def save(self, *args, **kwargs):
+        if self._fields.get('color', None) is None:
+            self._fields['color'] = std_color()
         super(IsomerBaseModel, self).save(*args, **kwargs)
+
+    @classmethod
+    def by_uuid(cls, uuid):
+        return cls.find_one({'uuid': uuid})
 
 
 def _build_model_factories(store):
