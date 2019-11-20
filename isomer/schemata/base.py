@@ -17,7 +17,6 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-from isomer.misc import all_languages
 
 __author__ = "Heiko 'riot' Weinen"
 __license__ = "AGPLv3"
@@ -37,6 +36,8 @@ base_object: For generating a basic Isomer object schema
 
 
 """
+
+from isomer.misc import all_languages
 
 
 def uuid_object(
@@ -63,6 +64,7 @@ def uuid_object(
 def base_object(
     name,
     no_perms=False,
+    no_color=False,
     has_owner=True,
     hide_owner=True,
     has_uuid=True,
@@ -146,6 +148,11 @@ def base_object(
             )
     else:
         base_schema["no_perms"] = True
+
+    if not no_color:
+        base_schema["properties"].update(
+            {"color": {"type": "string", "format": "colorpicker"}}
+        )
 
     # TODO: Using this causes all sorts of (obvious) problems with the object
     # manager
