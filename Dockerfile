@@ -26,7 +26,7 @@ ENV LC_ALL=C.UTF-8
 ENV LANG=C.UTF-8
 
 RUN apt-get update
-RUN apt-get -y install python3 python3-setuptools ca-certificates git
+RUN apt-get -y install build-essential python3-dev libffi-dev libssl-dev python3 python3-setuptools ca-certificates git
 
 WORKDIR /home/isomer
 
