@@ -28,8 +28,10 @@ Isomer - Be Collaborative!
 
 **A collaborative and modular infrastructure for your data.**
 
-* **Geo Information** Use a sophisticated map to annotate and review geographical information
-* **Vehicle support** Attach a sailyacht, your camper or pack one in your backpack
+* **Geo Information** Use a sophisticated map to annotate and review
+  geographical information
+* **Vehicle support** Attach a sailyacht, your camper or pack one in your
+  backpack
 * **Project planning** Issue tracking for collaborative teams
 * **Modular** Expandable with integrated modules, build your own
 * **Cloud independent** Run nodes on your own infrastructure
@@ -37,15 +39,18 @@ Isomer - Be Collaborative!
 Installation
 ============
 
-There is more than one way of installing Isomer, `see the detailed instructions for those
+There is more than one way of installing Isomer, `see the detailed instructions
+for those
 <http://isomer.readthedocs.io/en/latest/start/quick.html>`__.
 
-If you intend to set up a development environment, `please follow the development workflow instructions
+If you intend to set up a development environment, `please follow the
+development workflow instructions
 <http://isomer.readthedocs.io/en/latest/dev/workflow.html>`__.
 
-The simplest way is to use the management tool. It will try to detect your platform (Currently only
-Debian/Ubuntu are supported, others might work with a little bit of manual dependency installation) and
-try to install everything required:
+The simplest way is to use the management tool. It will try to detect your
+platform (Currently only Debian/Ubuntu are supported, others might work with
+a little bit of manual dependency installation) and try to install everything
+required:
 
 .. code-block:: sh
 
@@ -54,33 +59,39 @@ try to install everything required:
     git submodule update --init
     sudo ./iso
 
-Now set up user accounts and directories for your local system and install required software:
+Now set up user accounts and directories for your local system and install
+required software:
 
 .. code-block:: sh
 
     sudo iso system all
 
-This should install the local management tool, which you can use to create your default instance:
+This should install the local management tool, which you can use to create your
+default instance:
 
 .. code-block:: sh
 
     sudo iso instance create
     sudo iso instance install
 
-This assumes, that you're not running another web server on port 443 and that your firewall is
-configured to allow communications on that port.
-Isomer modules may require additional open ports, to find out about that, read their readme files.
+This assumes, that you're not running another web server on port 443 and that
+your firewall is configured to allow communications on that port.
+Isomer modules may require additional open ports, to find out about that, read
+their readme files.
 
-If you run into trouble or get any unexpected errors, contact us or `try the complex installation procedure
+If you run into trouble or get any unexpected errors, contact us or
+`try the complex installation procedure
 <http://isomer.readthedocs.io/en/latest/start/installing.html>`__.
 
 Modules
 =======
 
-The system is modular, so you can install what you need and leave out other things.
+The system is modular, so you can install what you need and leave out other
+things.
 
-A lot of the included modules are still Work in Progress, so help out, if you're interested
-in a powerful - **cloud independent** - collaboration tool suite.
+A lot of the included modules are still Work in Progress, so help out, if
+you're interested in a powerful - **cloud independent** - collaboration tool
+suite.
 
 General modules
 ---------------
@@ -88,7 +99,7 @@ General modules
 These are 'official' isomer modules. If you'd like to contribute your own,
 ping riot@c-base.org, to get it added to the list.
 
-Some (marked with *) are work in progress and probably not really usable, yet.
+Some (marked with \*) are work in progress and probably not really usable, yet.
 
 Again, help is very welcome!
 
@@ -119,7 +130,8 @@ wiki           Etherpad + Wiki = awesomeness
 Navigation (Hackerfleet) modules
 --------------------------------
 
-We primarily focused on navigation tools, so these are currently the 'more usable' modules.
+We primarily focused on navigation tools, so these are currently the
+'more usable' modules.
 They are far from complete, see the WiP list below.
 
 *Obligatory Warning*: **Do not use for navigational purposes!**
@@ -209,18 +221,22 @@ Code
 Assets
 ------
 
--  Fabulous icons by iconmonstr.com, the noun project and Hackerfleet contributors
+- Fabulous icons by iconmonstr.com, the noun project and Hackerfleet
+  contributors
 
 Support
 -------
 
--  `c-base e.V. <https://c-base.org>`__ our home base, the spacestation below Berlin Mitte
+-  `c-base e.V. <https://c-base.org>`__ our home base, the spacestation below
+   Berlin Mitte
 -  Lassulus for hosting and nix expertise
--  `Jetbrains s.r.o <https://jetbrains.com>`__ for the opensource license of their ultimate IDE
+-  `Jetbrains s.r.o <https://jetbrains.com>`__ for the opensource license of
+   their ultimate IDE
 -  `Github <https://github.com>`__ for hosting our code
 -  `Gitlab <https://gitlab.com>`__ for hosting our code ;)
 -  `Travis.CI <https://travis-ci.org>`__ for continuous integration services
--  `BrowserStack <https://browserstack.com>`__ for cross device testing capabilities
+-  `BrowserStack <https://browserstack.com>`__ for cross device testing
+   capabilities
 
 License
 =======
