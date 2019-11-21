@@ -197,10 +197,14 @@ def provision(list_provisions=False, overwrite=False, clear_provisions=False,
     sorted_provisions = sort_dependencies(provision_store.items())
 
     # These need to be installed first in that order:
-    sorted_provisions.remove('system')
-    sorted_provisions.remove('user')
-    sorted_provisions.insert(0, 'system')
-    sorted_provisions.insert(0, 'user')
+    if 'system' in sorted_provisions:
+        sorted_provisions.remove('system')
+    if 'user' in sorted_provisions:
+        sorted_provisions.remove('user')
+    if 'system' not in installed:
+        sorted_provisions.insert(0, 'system')
+    if 'user' not in installed:
+        sorted_provisions.insert(0, 'user')
 
     if list_provisions:
         log(sorted_provisions, pretty=True)
