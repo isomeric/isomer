@@ -5,7 +5,10 @@ services:
     build:
       context: ../
     image: isomer:local
-    command: iso --dbhost db:27017 --clog 5 launch -a 0.0.0.0
+    command: iso launch
+    environment:
+      ISOMER_DBHOST: db:27017
+      ISOMER_LAUNCH_WEB_ADDRESS: 0.0.0.0
     ports:
       - 0.0.0.0:8000:8000
     networks:
