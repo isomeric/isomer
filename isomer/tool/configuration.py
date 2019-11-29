@@ -32,11 +32,12 @@ __author__ = "Heiko 'riot' Weinen"
 __license__ = "AGPLv3"
 
 import json
-
 import click
-from click_didyoumean import DYMGroup
-from formal import model_factory
 
+from ast import literal_eval
+from click_didyoumean import DYMGroup
+
+from formal import model_factory
 from isomer.tool import log
 
 
@@ -54,31 +55,95 @@ def config(ctx):
     ctx.obj["col"] = model_factory(ComponentConfigSchemaTemplate)
 
 
-@config.command(short_help="Delete component configuration")
-@click.argument("componentname")
+@config.command(short_help="modify field values of component configurations")
+@click.argument("component")
+@click.argument("field")
+@click.argument("value")
 @click.pass_context
-def delete(ctx, componentname):
+def modify(ctx, component, field, value):
+    """Modify field values of objects"""
+    col = ctx.obj["col"]
+
+    configuration = get_configuration(col, component)
+
+    if configuration is None:
+        log("No component with that name or uuid found.")
+        return
+
+    log("Configuration found, modifying")
+    try:
+        new_value = literal_eval(value)
+    except ValueError:
+        log("Interpreting value as string")
+        new_value = str(value)
+
+    configuration._fields[field] = new_value
+    configuration.validate()
+    log("Changed configuration validated")
+    configuration.save()
+    log("Done")
+
+
+@config.command(short_help="Enable a component")
+@click.argument("component")
+@click.pass_context
+def enable(ctx, component):
+    """Enable field values of objects"""
+
+    col = ctx.obj["col"]
+
+    configuration = get_configuration(col, component)
+
+    if configuration is None:
+        log("No component with that name or uuid found.")
+        return
+
+    log("Configuration found, enabling")
+
+    configuration.active = True
+
+    configuration.validate()
+    configuration.save()
+    log("Done")
+
+
+@config.command(short_help="Disable a component")
+@click.argument("component")
+@click.pass_context
+def disable(ctx, component):
+    """Disable field values of objects"""
+
+    col = ctx.obj["col"]
+
+    configuration = get_configuration(col, component)
+
+    if configuration is None:
+        log("No component with that name or uuid found.")
+        return
+
+    log("Configuration found, disabling")
+
+    configuration.active = False
+
+    configuration.validate()
+    configuration.save()
+    log("Done")
+
+
+@config.command(short_help="Delete component configuration")
+@click.argument("component")
+@click.pass_context
+def delete(ctx, component):
     """Delete an existing component configuration. This will trigger
     the creation of its default configuration upon next restart."""
     col = ctx.obj["col"]
 
-    if col.count({"name": componentname}) > 1:
-        log(
-            "More than one component configuration of this name! Try "
-            'one of the uuids as argument. Get a list with "config '
-            'list"'
-        )
-        return
+    log("Deleting component configuration", component, emitter="MANAGE")
 
-    log("Deleting component configuration", componentname, emitter="MANAGE")
-
-    configuration = col.find_one({"name": componentname})
+    configuration = get_configuration(col, component)
 
     if configuration is None:
-        configuration = col.find_one({"uuid": componentname})
-
-    if configuration is None:
-        log("Component configuration not found:", componentname, emitter="MANAGE")
+        log("No component with that name or uuid found.")
         return
 
     configuration.delete()
@@ -109,13 +174,29 @@ def show(ctx, component):
                 emitter="MANAGE",
             )
     else:
-        configuration = col.find_one({"name": component})
-
-        if configuration is None:
-            configuration = col.find_one({"uuid": component})
+        configuration = get_configuration(col, component)
 
         if configuration is None:
             log("No component with that name or uuid found.")
             return
 
         print(json.dumps(configuration.serializablefields(), indent=4))
+
+
+def get_configuration(col, component):
+    """Get a configuration via name or uuid"""
+
+    if col.count({"name": component}) > 1:
+        log(
+            "More than one component configuration of this name! Try "
+            'one of the uuids as argument. Get a list with "config '
+            'list"'
+        )
+        return
+
+    configuration = col.find_one({"name": component})
+
+    if configuration is None:
+        configuration = col.find_one({"uuid": component})
+
+    return configuration
