@@ -33,55 +33,42 @@ Isomer - Be Collaborative!
 * **Vehicle support** Attach a sailyacht, your camper or pack one in your
   backpack
 * **Project planning** Issue tracking for collaborative teams
-* **Modular** Expandable with integrated modules, build your own
+* **Modular** Expandable with integrated modules or build your own
 * **Cloud independent** Run nodes on your own infrastructure
+
+Much more incoming!
 
 Installation
 ============
 
+Docker: Yes, please!
+^^^^^^^^^^^^^^^^^^^^
+
+If you just want to try it out or generally are happy with using docker:
+
+No need to clone the repo, just download the docker compose file and get
+everything from docker hub:
+
+.. code-block::
+
+    wget https://github.com/isomeric/isomer/raw/master/docker/docker-compose-hub.yml
+    docker-compose -f docker-compose-hub.yml up
+
+See the `docker detail page
+<https://isomer.readthedocs.io/en/latest/dev/system/docker.html#docker-details>`__
+for more information.
+
+
+Docker: No, thanks..
+^^^^^^^^^^^^^^^^^^^^
+
 There is more than one way of installing Isomer, `see the detailed instructions
-for those
-<http://isomer.readthedocs.io/en/latest/start/quick.html>`__.
+for those <https://isomer.readthedocs.io/en/latest/start/quick.html>`__.
 
 If you intend to set up a development environment, `please follow the
 development workflow instructions
-<http://isomer.readthedocs.io/en/latest/dev/workflow.html>`__.
+<https://isomer.readthedocs.io/en/latest/dev/workflow.html>`__.
 
-The simplest way is to use the management tool. It will try to detect your
-platform (Currently only Debian/Ubuntu are supported, others might work with
-a little bit of manual dependency installation) and try to install everything
-required:
-
-.. code-block:: sh
-
-    git clone https://github.com/isomeric/isomer ~/src/isomer
-    cd ~/src/isomer
-    git submodule update --init
-    sudo ./iso
-
-Now set up user accounts and directories for your local system and install
-required software:
-
-.. code-block:: sh
-
-    sudo iso system all
-
-This should install the local management tool, which you can use to create your
-default instance:
-
-.. code-block:: sh
-
-    sudo iso instance create
-    sudo iso instance install
-
-This assumes, that you're not running another web server on port 443 and that
-your firewall is configured to allow communications on that port.
-Isomer modules may require additional open ports, to find out about that, read
-their readme files.
-
-If you run into trouble or get any unexpected errors, contact us or
-`try the complex installation procedure
-<http://isomer.readthedocs.io/en/latest/start/installing.html>`__.
 
 Modules
 =======
@@ -154,6 +141,7 @@ nmea           NMEA-0183 Navigation and AIS data bus parser
 nodestate      Node wide status system
 robot          RC remote control unit
 switchboard    Virtual switchboard
+signal-k       Signal-K connector
 webguides      Importer for skipperguide.de wiki content into the map
 ============== ==============================================================
 
@@ -174,6 +162,7 @@ Other 3rd party modules
 ============== ==============================================================
   Name           Description
 ============== ==============================================================
+avio           Creative mixed media suite
 library        Library management
 polls          Tool for lightweight internet voting
 garden         Garden automation tools
@@ -235,6 +224,9 @@ Support
 -  `Github <https://github.com>`__ for hosting our code
 -  `Gitlab <https://gitlab.com>`__ for hosting our code ;)
 -  `Travis.CI <https://travis-ci.org>`__ for continuous integration services
+-  `Docker Inc. <https://docker.com>`__ for providing containerization
+   infrastructure
+-  `ReadTheDocs.org <https://readthedocs.org>`__ for hosting our documentation
 -  `BrowserStack <https://browserstack.com>`__ for cross device testing
    capabilities
 
