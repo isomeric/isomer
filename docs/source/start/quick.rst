@@ -1,7 +1,37 @@
+.. _quick_install:
+
 Quick Start Guide
 =================
 
-.. _quick_install:
+Docker
+------
+
+We're providing Docker images and composer files for quick and easy
+installation.
+
+The command to get the latest isomer is:
+
+  ``docker-compose -f docker/docker-compose-hub.yml up``
+
+This will spin up a database and Isomer itself.
+If that worked, you should :ref:`head over to the setup <setup>`
+
+If you run into trouble, check out the
+:ref:`docker section of the developers manual <docker_details>` or try the
+manual installation:
+
+Manual Installation
+===================
+
+If you run into trouble or get any unexpected errors,
+:ref:`try the complex installation procedure <complex_install>`, which details
+all the automated bits and steps.
+
+.. note::
+
+    We're working on a detailed error handling system that includes links
+    to online documentation and ad-hoc advice on how to fix problems.
+
 
 Concepts
 --------
@@ -59,9 +89,6 @@ First, install the local management system:
     cd ~/src/isomer
     python3 setup.py install
 
-If you run into trouble or get any unexpected errors,
-:ref:`try the complex installation procedure <complex_install>`.
-
 Test the Tool
 -------------
 
@@ -100,18 +127,7 @@ Now you should be able to create and install your instance:
     iso instance create
     iso instance install
 
-Docker
-------
-
-.. attention::
-    This image is currently in preparation, since a lot of things
-    changed facilitating a new approach to Docker.
-
-We're providing a Docker image for installation.
-
-The command to get the current testing release is:
-
-  ``docker run -i -t isomeric/isomer iso launch``
+If that runs through successfully , you should :ref:`head over to the <setup>`.
 
 
 Planned Installations

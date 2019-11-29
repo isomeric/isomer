@@ -40,8 +40,9 @@ Bug Reports
    - A new or modified unit test.
    - A patch that fixes the bug ensuring all unit tests pass.
    - The `Change Log <https://github.com/isomeric/isomer/tree/master/CHANGES.rst>`_
-   updated.
+     updated.
    - Appropriate documentation updated.
+
 - The `Pull Request <https://github.com/isomeric/isomer/pulls>`_ is reviewed
   and approved by at least two other developers.
 
@@ -62,11 +63,11 @@ Feature Requests
   with the fix.
 
   This must contain:
-  - A new or modified unit test.
-  - A patch that implements the new feature ensuring all unit tests pass.
-  - The `Change Log <https://github.com/isomeric/isomer/tree/master/CHANGES.rst>`_
-  updated.
-  - Appropriate documentation updated.
+   - A new or modified unit test.
+   - A patch that implements the new feature ensuring all unit tests pass.
+   - The `Change Log <https://github.com/isomeric/isomer/tree/master/CHANGES.rst>`_
+     updated.
+   - Appropriate documentation updated.
 
 - The `Pull Request <https://github.com/isomeric/isomer/pulls>`_ is reviewed
   and approved by at least two other developers.

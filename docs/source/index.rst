@@ -22,8 +22,7 @@ About
 .. toctree::
     :maxdepth: 1
 
-    about/hackerfleet
-    about/isomer
+    about/index
 
 User's Manual
 =============
@@ -33,7 +32,8 @@ User's Manual
     :glob:
 
     start/index
-    manual/*
+    manual/Users/index
+    manual/Administration/index
 
 Developer Documentation
 =======================

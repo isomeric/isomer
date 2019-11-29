@@ -25,6 +25,13 @@ And you're done!
 Setup
 -----
 
+.. attention::
+
+    This part needs an overhaul, as it pretty much details the standard
+    instance-base installation approach. This can be avoided by working
+    with simple plain virtual environments and a few of the iso tool
+    install commands.
+
 The setup guide shall aid you in setting up a development environment for all
 purposes and facettes of Isomer development. It is split up in a few parts
 and a common basic installation.
@@ -55,6 +62,14 @@ Now, use it to set up system directories and users:
 .. code-block:: sh
 
     iso system all
+
+In theory, doing all steps is not required, but for safe measure, you should
+probably at least run the dependency and path setup:
+
+.. code-block:: sh
+
+    iso system dependencies
+    iso system paths
 
 Create a new development instance (ignore the warning about a missing
 default instance):

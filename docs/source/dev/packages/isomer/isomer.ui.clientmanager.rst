@@ -9,59 +9,12 @@ isomer.ui.clientmanager package
 Submodules
 ----------
 
-isomer.ui.clientmanager.authentication module
----------------------------------------------
+.. toctree::
 
-.. automodule:: isomer.ui.clientmanager.authentication
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-isomer.ui.clientmanager.basemanager module
-------------------------------------------
-
-.. automodule:: isomer.ui.clientmanager.basemanager
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-isomer.ui.clientmanager.cli module
-----------------------------------
-
-.. automodule:: isomer.ui.clientmanager.cli
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-isomer.ui.clientmanager.encoder module
---------------------------------------
-
-.. automodule:: isomer.ui.clientmanager.encoder
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-isomer.ui.clientmanager.floodprotection module
-----------------------------------------------
-
-.. automodule:: isomer.ui.clientmanager.floodprotection
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-isomer.ui.clientmanager.languages module
-----------------------------------------
-
-.. automodule:: isomer.ui.clientmanager.languages
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-isomer.ui.clientmanager.latency module
---------------------------------------
-
-.. automodule:: isomer.ui.clientmanager.latency
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
+   isomer.ui.clientmanager.authentication
+   isomer.ui.clientmanager.basemanager
+   isomer.ui.clientmanager.cli
+   isomer.ui.clientmanager.encoder
+   isomer.ui.clientmanager.floodprotection
+   isomer.ui.clientmanager.languages
+   isomer.ui.clientmanager.latency

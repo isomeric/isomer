@@ -22,8 +22,8 @@ Warning: **Isomer is not compatible with Python 2 and 3.2!**
 
 .. _manual_installation:
 
-Manual
-======
+Manual Installation
+===================
 
 These instructions are for Debian or Ubuntu based systems. Installation
 on other distributions is possible and being worked on.
@@ -145,6 +145,42 @@ site definition
 Documentation
 -------------
 
+Before building any documentation, you'll need to install the
+``requirements-doc.txt`` (located in the Isomer repository root):
+
+.. code-block::
+
+    pip install -r requirements-doc.txt
+
+Manual build
+^^^^^^^^^^^^
+
+To build the html documentation, change to the docs subdirectory and use make
+to build the files:
+
+.. code-block:: sh
+
+    cd docs
+    make html
+
+The built files will reside in ``isomer/docs/build/html``.
+
+You can also build the PDF file (and various other formats) by using the
+Makefile inside the docs directory.
+
+.. code-block:: sh
+
+    cd docs
+    make latexpdf
+
+The rendered pdf output will reside in ``isomer/docs/build/pdf
+
+Just running make without arguments gives you a list of the other available
+documentation formats.
+
+Automatic build & installation
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 .. caution::
     This is currently outdated!
 
@@ -160,16 +196,6 @@ run these commands:
 This installs all necessary documentation tools and copies the files to the
 expected Isomer web data folder.
 
-You can also build the PDF file (and various other formats) by using the
-Makefile inside the docs directory.
-
-.. code-block:: sh
-
-    cd docs
-    make pdf
-
-Just running make without arguments gives you a list of the other available
-documentation formats.
 
 Installing from a Source Package
 --------------------------------

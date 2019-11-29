@@ -9,43 +9,10 @@ isomer.ui.objectmanager package
 Submodules
 ----------
 
-isomer.ui.objectmanager.basemanager module
-------------------------------------------
+.. toctree::
 
-.. automodule:: isomer.ui.objectmanager.basemanager
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-isomer.ui.objectmanager.cli module
-----------------------------------
-
-.. automodule:: isomer.ui.objectmanager.cli
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-isomer.ui.objectmanager.crud module
------------------------------------
-
-.. automodule:: isomer.ui.objectmanager.crud
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-isomer.ui.objectmanager.roles module
-------------------------------------
-
-.. automodule:: isomer.ui.objectmanager.roles
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-isomer.ui.objectmanager.subscriptions module
---------------------------------------------
-
-.. automodule:: isomer.ui.objectmanager.subscriptions
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
+   isomer.ui.objectmanager.basemanager
+   isomer.ui.objectmanager.cli
+   isomer.ui.objectmanager.crud
+   isomer.ui.objectmanager.roles
+   isomer.ui.objectmanager.subscriptions

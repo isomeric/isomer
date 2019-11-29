@@ -1,22 +1,21 @@
-Developer Documentation
-=======================
+System Structure
+================
 
 Domains
 -------
 
 .. toctree::
-    :maxdepth: 1
-    :glob:
+    :maxdepth: 3
 
-    backend/*
-    frontend/*
+    backend/index
+    frontend/index
 
 
 Concepts & Mechanisms
 ---------------------
 
 .. toctree::
+    :maxdepth: 2
+    :glob:
 
-    authentication
-    schemata
-    provisions
+    *

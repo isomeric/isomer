@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 
+from isomer.tool.tool import isotool
 from copy import copy
+
 
 def print_commands(command, output, groups=[]):
     if 'commands' in command.__dict__:
@@ -12,12 +14,14 @@ def print_commands(command, output, groups=[]):
             subgroups.append(command.name)
             print_commands(item, output, subgroups)
     else:
-        output.append("    %s -> %s [weight=%1.1f];" % (groups[-1], command.name, len(groups)))
+        output.append(
+            "    %s -> %s [weight=%1.1f];" % (groups[-1], command.name, len(groups)))
 
 
-with open('iso.dot', 'w') as f:
-    f.write('strict digraph {\n')
-    output = []
-    print_commands(cli, output)
-    f.writelines(output)
-    f.write('}')
+def write_command_map():
+    with open('iso.dot', 'w') as f:
+        f.write('strict digraph {\n')
+        output = []
+        print_commands(isotool, output)
+        f.writelines(output)
+        f.write('}')

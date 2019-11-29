@@ -9,27 +9,8 @@ isomer.provisions package
 Submodules
 ----------
 
-isomer.provisions.base module
------------------------------
+.. toctree::
 
-.. automodule:: isomer.provisions.base
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-isomer.provisions.system module
--------------------------------
-
-.. automodule:: isomer.provisions.system
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-isomer.provisions.user module
------------------------------
-
-.. automodule:: isomer.provisions.user
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
+   isomer.provisions.base
+   isomer.provisions.system
+   isomer.provisions.user

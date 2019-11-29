@@ -1,6 +1,9 @@
 Getting Started
 ===============
 
+This part shall guide you to a quick installation and setup of your own Isomer
+instance.
+
 .. toctree::
     :maxdepth: 1
 
@@ -8,11 +11,4 @@ Getting Started
     requirements
     downloading
     installing
-    instances
-    tools
-
-.. todo:: Simplify the installation documents by stringing them together, so the other setup documents are more visible
-.. todo:: Add setup section
-.. todo:: Add crew setup
-.. todo:: Add vessel setup
-.. todo:: Add generic preferences setup
+    setup

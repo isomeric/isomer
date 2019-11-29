@@ -9,11 +9,6 @@ isomer.misc package
 Submodules
 ----------
 
-isomer.misc.path module
------------------------
+.. toctree::
 
-.. automodule:: isomer.misc.path
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
+   isomer.misc.path
