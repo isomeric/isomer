@@ -56,7 +56,7 @@ from circuits.web.websockets.dispatcher import WebSocketsDispatcher
 # from circuits.app.daemon import Daemon
 
 from isomer.misc.path import set_instance, get_path
-from isomer.component import handler, ConfigurableComponent
+from isomer.component import handler, ConfigurableComponent, ComponentDisabled
 
 # from isomer.schemata.component import ComponentBaseConfigSchema
 from isomer.database import initialize  # , schemastore
@@ -135,6 +135,7 @@ class cli_check_provisions(Event):
 
 class FrontendHandler(pyinotify.ProcessEvent):
     def __init__(self, launcher, *args, **kwargs):
+        """Initialize the frontend handler"""
         super(FrontendHandler, self).__init__(*args, **kwargs)
         self.launcher = launcher
 
@@ -662,7 +663,12 @@ class Core(ConfigurableComponent):
                 if name in self.running_components:
                     self.log("Component already running: ", name, lvl=warn)
                 else:
-                    runningcomponent = componentdata()
+                    try:
+                        runningcomponent = componentdata()
+                    except ComponentDisabled:
+                        self.log('Not registering disabled component', lvl=debug)
+                        continue
+
                     runningcomponent.register(self)
                     self.running_components[name] = runningcomponent
             except Exception as e:
