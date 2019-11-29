@@ -568,7 +568,7 @@ def _install_provisions(ctx, import_file=None, skip_provisions=False):
                 os.path.join(env_path, "venv", "bin", "python3"),
                 "./iso",
                 "-nc",
-                "--clog",
+                "--flog",
                 "5",
                 "--config-dir",
                 get_etc_path(),

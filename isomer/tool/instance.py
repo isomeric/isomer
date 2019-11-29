@@ -415,7 +415,7 @@ def update_service(ctx, next_environment):
 
     launcher = os.path.join(env_path, "repository/iso")
     executable = os.path.join(env_path, "venv/bin/python3") + " " + launcher
-    executable += " --do-log --quiet --instance " + instance_name + " launch"
+    executable += " --quiet --instance " + instance_name + " launch"
 
     definitions = {
         "instance": instance_name,
