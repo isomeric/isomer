@@ -8,6 +8,7 @@ docs/build
 __pycache__
 *.egg*
 docs/isomer-docs-docs.xml
+/docs/source/manual/Administration/iso.dot
 
 # cache
 *.pyc
@@ -35,3 +36,4 @@ shelf
 
 # Scratchspace
 scratch
+
