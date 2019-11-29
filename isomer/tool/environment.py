@@ -35,9 +35,6 @@ Environment management functionality.
 """
 import pymongo
 
-__author__ = "Heiko 'riot' Weinen"
-__license__ = "AGPLv3"
-
 import grp
 import os
 import pwd

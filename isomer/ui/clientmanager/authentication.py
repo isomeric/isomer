@@ -29,9 +29,6 @@ Handles authentication and authorization related aspects
 
 """
 
-__author__ = "Heiko 'riot' Weinen"
-__license__ = "AGPLv3"
-
 import json
 
 from circuits.net.events import write
@@ -268,9 +265,7 @@ class AuthenticationManager(ClientBaseManager):
 
             self.log(
                 "Firing authorized event: ",
-                component,
-                action,
-                str(data)[:100],
+                event,
                 lvl=debug,
             )
             # self.log("", (user, action, data, client), lvl=critical)

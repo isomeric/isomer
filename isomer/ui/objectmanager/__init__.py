@@ -28,9 +28,6 @@ publish/subscriber functionality.
 
 """
 
-__author__ = "Heiko 'riot' Weinen"
-__license__ = "AGPLv3"
-
 from isomer.ui.objectmanager.subscriptions import SubscriptionOperations
 
 

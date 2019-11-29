@@ -28,9 +28,6 @@ Instance component configuration management.
 
 """
 
-__author__ = "Heiko 'riot' Weinen"
-__license__ = "AGPLv3"
-
 import json
 import click
 

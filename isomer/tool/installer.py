@@ -29,9 +29,6 @@ i.e. isomer.tool.instance and isomer.tool.environment
 
 """
 
-__author__ = "Heiko 'riot' Weinen"
-__license__ = "AGPLv3"
-
 import click
 import os
 import shutil

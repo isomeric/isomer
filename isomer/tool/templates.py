@@ -28,9 +28,6 @@ Internal template handling utilities.
 
 """
 
-__author__ = "Heiko 'riot' Weinen"
-__license__ = "AGPLv3"
-
 from isomer.tool import log, error, debug
 
 

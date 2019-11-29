@@ -36,9 +36,6 @@ This component is split up into several maintainable pieces:
 
 """
 
-__author__ = "Heiko 'riot' Weinen"
-__license__ = "AGPLv3"
-
 from isomer.ui.clientmanager.latency import LatencyManager
 
 

@@ -18,9 +18,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-__author__ = "Heiko 'riot' Weinen"
-__license__ = "AGPLv3"
-
 """
 
 Schema: Profile

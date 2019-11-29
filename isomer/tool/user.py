@@ -27,8 +27,6 @@ Module: User
 User management functions.
 
 """
-__author__ = "Heiko 'riot' Weinen"
-__license__ = "AGPLv3"
 
 from uuid import uuid4
 

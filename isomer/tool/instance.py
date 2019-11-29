@@ -40,9 +40,6 @@ Instance management functionality.
 
 """
 
-__author__ = "Heiko 'riot' Weinen"
-__license__ = "AGPLv3"
-
 import sys
 
 import tomlkit

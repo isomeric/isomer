@@ -33,9 +33,6 @@ the management tool.
 
 import distro
 
-__author__ = "Heiko 'riot' Weinen"
-__license__ = "AGPLv3"
-
 distribution = "DEBIAN"
 
 db_host_default = "127.0.0.1:27017"

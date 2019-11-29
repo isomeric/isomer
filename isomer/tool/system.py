@@ -42,9 +42,6 @@ from isomer.logger import error
 from isomer.misc.path import locations, get_path, get_log_path
 from isomer.tool import platforms, install_isomer, log, run_process, ask
 
-__author__ = "Heiko 'riot' Weinen"
-__license__ = "AGPLv3"
-
 
 @click.group(cls=DYMGroup)
 @click.pass_context

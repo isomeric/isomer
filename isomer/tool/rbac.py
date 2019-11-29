@@ -27,9 +27,6 @@ Role based access control management functionality.
 
 """
 
-__author__ = "Heiko 'riot' Weinen"
-__license__ = "AGPLv3"
-
 import json
 import sys
 

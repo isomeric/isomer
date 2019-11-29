@@ -26,18 +26,14 @@ Package: Provisions
 Initial client configuration data.
 This contains tilelayer urls, api stuff etc.
 
-:copyright: (C) 2011-2019 Heiko 'riot' Weinen riot@c-base.org
-:license: AGPLv3 (See LICENSE)
-
 """
 
 from isomer.logger import isolog, debug, warn  # , verbose, error, warn
 from pkg_resources import iter_entry_points
 
-__author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
 
-
-# TODO: This probably has to be moved somewhere else (due to clashes with namespace-architecture)
+# TODO: This probably has to be moved somewhere else (due to clashes with
+#  namespace-architecture)
 def build_provision_store():
     available = {}
 

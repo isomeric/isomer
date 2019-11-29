@@ -32,9 +32,6 @@ See isomer.database.dump and isomer.database.load for functionality without any 
 
 """
 
-__author__ = "Heiko 'riot' Weinen"
-__license__ = "AGPLv3"
-
 import click
 
 from isomer.database.backup import backup as internal_backup, internal_restore

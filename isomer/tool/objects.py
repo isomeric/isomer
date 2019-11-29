@@ -28,9 +28,6 @@ Object management functionality and utilities.
 
 """
 
-__author__ = "Heiko 'riot' Weinen"
-__license__ = "AGPLv3"
-
 from ast import literal_eval
 from pprint import pprint
 

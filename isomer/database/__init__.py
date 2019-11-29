@@ -35,9 +35,6 @@ Objectstore builder functions.
 
 """
 
-__author__ = "Heiko 'riot' Weinen"
-__license__ = "AGPLv3"
-
 import sys
 import formal
 import jsonschema

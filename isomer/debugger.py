@@ -18,9 +18,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-__author__ = "Heiko 'riot' Weinen"
-__license__ = "AGPLv3"
-
 """
 
 
@@ -346,6 +343,15 @@ class IsomerDebugger(ConfigurableComponent):
 class CLI(ConfigurableComponent):
     """
     Command Line Interface support
+
+    This is disabled by default.
+    To enable the command line interface, use either the Configuration frontend
+    or the iso tool:
+
+    .. code-block::
+
+        iso config enable CLI
+
     """
 
     configprops = {}

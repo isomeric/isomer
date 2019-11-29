@@ -29,9 +29,6 @@ Basic client management functionality and component set up.
 
 """
 
-__author__ = "Heiko 'riot' Weinen"
-__license__ = "AGPLv3"
-
 import json
 from base64 import b64decode
 from time import time

@@ -27,9 +27,6 @@ Assembly of all Isomer tool functionality.
 
 """
 
-__author__ = "Heiko 'riot' Weinen"
-__license__ = "AGPLv3"
-
 from isomer.tool.configuration import config
 from isomer.tool.backup import db_export, db_import
 from isomer.tool.database import db

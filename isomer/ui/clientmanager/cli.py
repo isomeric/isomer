@@ -28,9 +28,6 @@ Command line interface functionality for debugging client handling
 
 """
 
-__author__ = "Heiko 'riot' Weinen"
-__license__ = "AGPLv3"
-
 from collections import namedtuple
 
 from circuits import Event

@@ -28,10 +28,6 @@ Language support for clients
 
 """
 
-
-__author__ = "Heiko 'riot' Weinen"
-__license__ = "AGPLv3"
-
 from isomer.component import handler
 
 from isomer.events.system import anonymous_event

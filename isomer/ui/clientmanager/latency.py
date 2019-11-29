@@ -28,9 +28,6 @@ Latency analysis for clients
 
 """
 
-__author__ = "Heiko 'riot' Weinen"
-__license__ = "AGPLv3"
-
 from time import time
 
 from isomer.events.system import authorized_event

@@ -18,9 +18,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-__author__ = "Heiko 'riot' Weinen"
-__license__ = "AGPLv3"
-
 """
 
 Configurable Component
@@ -245,11 +242,16 @@ class ConfigurableMeta(LoggingMeta):
             except ValidationError as e:
                 self.log("Error during configuration reading: ", e, type(e), exc=True)
 
+        if self.config.active is False:
+            self.log('Component disabled.', lvl=warn)
+            #raise ComponentDisabled
+
     def register(self, *args):
         """Register a configurable component in the configuration schema
         store"""
 
-        super(ConfigurableMeta, self).register(*args)
+        if self.config.active:
+            super(ConfigurableMeta, self).register(*args)
 
         if self.no_db:
             return
@@ -368,6 +370,10 @@ class ConfigurableMeta(LoggingMeta):
         if event.target == self.uniquename:
             self.log("Reloading configuration")
             self._read_config()
+
+
+class ComponentDisabled(Exception):
+    pass
 
 
 class LoggingComponent(LoggingMeta, Component):

@@ -2,17 +2,12 @@
 
 Web bits
 
-Package Isomer.web
+Package Isomer.ui
 ==================
 
-The backend package dealing with the web frontend interface.
-
-:copyright: (C) 2011-2019 Heiko 'riot' Weinen riot@c-base.org
-:license: AGPLv3 (See LICENSE)
+The backend package dealing with the user interface.
 
 """
-
-__author__ = "Heiko 'riot' Weinen <riot@c-base.org>"
 
 __all__ = [
     "activitymonitor",

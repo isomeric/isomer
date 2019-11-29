@@ -29,9 +29,6 @@ This module allows deploying and maintaining instances on remote systems via SSH
 
 """
 
-__author__ = "Heiko 'riot' Weinen"
-__license__ = "AGPLv3"
-
 import os
 import sys
 import spur

@@ -18,9 +18,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-__author__ = "Heiko 'riot' Weinen"
-__license__ = "AGPLv3"
-
 """
 Module: Logger
 ==============
@@ -116,7 +113,7 @@ def set_color():
     color = True
 
 
-def set_verbosity(new_lvl):
+def set_verbosity(new_lvl: int):
     """Adjust logging verbosity"""
     global verbosity
     verbosity['global'] = new_lvl
@@ -124,14 +121,27 @@ def set_verbosity(new_lvl):
     verbosity['file'] = new_lvl
 
 
-def set_logfile(path, instance):
-    """Specify logfile path"""
+def set_logfile(path: str, instance: str, filename: str = None):
+    """
+    Specify logfile path
+
+    :param path: Path to the logfile
+    :param instance: Name of the instance
+    :param filename: Exact name of logfile
+    """
 
     global logfile
-    logfile = os.path.normpath(path) + "/isomer." + instance + ".log"
+
+    if path is None:
+        path = "."
+
+    if filename is not None:
+        logfile = os.path.join(os.path.normpath(path), filename)
+    else:
+        logfile = os.path.join(os.path.normpath(path), "isomer." + instance + ".log")
 
 
-def get_logfile():
+def get_logfile() -> str:
     """Return the whole filename of the logfile"""
     return logfile
 
@@ -143,14 +153,13 @@ def clear():
     LiveLog = []
 
 
-def is_muted(what):
+def is_muted(what) -> bool:
     """
     Checks if a logged event is to be muted for debugging purposes.
 
     Also goes through the solo list - only items in there will be logged!
 
     :param what:
-    :return:
     """
 
     state = False
@@ -170,7 +179,7 @@ def is_muted(what):
     return state
 
 
-def is_marked(what):
+def is_marked(what) -> bool:
     """Check if log line qualifies for highlighting"""
 
     for item in mark:
@@ -180,12 +189,12 @@ def is_marked(what):
     return False
 
 
-def setup_root(newroot):
+def setup_root(newroot: 'isomer.components.Component'):
     """
     Sets up the root component, so the logger knows where to send logging
     signals.
 
-    :param newroot:
+    :param isomer.components.Component newroot:
     """
     global root
 
@@ -194,15 +203,21 @@ def setup_root(newroot):
 
 # noinspection PyUnboundLocalVariable
 def isolog(*what, **kwargs):
-    """Logs all *what arguments.
+    """Logs all non keyword arguments.
 
-    :param *what: Loggable objects (i.e. they have a string representation)
-    :param lvl: Debug message level
-    :param exc: Switch to better handle exceptions, use if logging in an
-                except clause
-    :param emitter: Optional log source, where this can't be determined
-                    automatically
-    :param sourceloc: Give specific source code location hints, used internally
+    :param tuple what: Loggable objects (i.e. they have a string
+        representation)
+    :param int lvl: Debug message level
+    :param str emitter: Optional log source, where this can't be determined
+        automatically
+    :param str sourceloc: Give specific source code location hints, used
+        internally
+    :param int frameref: Specify a non default frame for tracebacks
+    :param bool tb: Include a traceback
+    :param bool nc: Do not use color
+    :param bool exc: Switch to better handle exceptions, use if logging in an
+        except clause
+
     """
 
     global count
@@ -213,7 +228,7 @@ def isolog(*what, **kwargs):
     if lvl < verbosity["global"]:
         return
 
-    def assemble_things(things):
+    def assemble_things(things) -> str:
         content = ""
 
         for thing in things:
@@ -225,7 +240,7 @@ def isolog(*what, **kwargs):
 
         return content
 
-    def write_to_log(message):
+    def write_to_log(message: str):
         try:
             f = open(logfile, "a")
             f.write(message + "\n")
@@ -235,7 +250,7 @@ def isolog(*what, **kwargs):
             print("Can't open logfile %s for writing!" % logfile)
             # sys.exit(23)
 
-    def write_to_console(message):
+    def write_to_console(message: str):
         try:
             print(message)
         except UnicodeEncodeError as e:

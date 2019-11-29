@@ -27,9 +27,6 @@ Miscellaneous functionality for the management tool.
 
 """
 
-__author__ = "Heiko 'riot' Weinen"
-__license__ = "AGPLv3"
-
 import os
 import click
 from click_repl import repl

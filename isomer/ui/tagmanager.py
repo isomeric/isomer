@@ -19,9 +19,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 from isomer.events.system import authorized_event
 
-__author__ = "Heiko 'riot' Weinen"
-__license__ = "AGPLv3"
-
 """
 
 Module: TagManager

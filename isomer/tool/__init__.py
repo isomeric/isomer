@@ -57,9 +57,6 @@ tool
 
 """
 
-__author__ = "Heiko 'riot' Weinen"
-__license__ = "AGPLv3"
-
 import spur
 import getpass
 import sys
@@ -148,7 +145,8 @@ def run_process(cwd, args, shell=None, sudo=None, show=False):
             log("Executing:", command)
         process = shell.run(command, cwd=cwd)
 
-        log(process.output, lvl=verbose)
+        decoded = str(process.output, encoding='utf-8')
+        log(decoded.replace("\\n", "\n"), lvl=verbose)
 
         return True, process
     except spur.RunProcessError as e:

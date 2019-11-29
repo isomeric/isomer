@@ -28,13 +28,7 @@ The backend package.
 
 This is a namespace package.
 
-:copyright: (C) 2011-2019 Heiko 'riot' Weinen riot@c-base.org
-:license: AGPLv3 (See LICENSE)
-
 """
-
-__author__ = "Heiko 'riot' Weinen"
-__license__ = "AGPLv3"
 __all__ = [
     "events",
     "provisions",
