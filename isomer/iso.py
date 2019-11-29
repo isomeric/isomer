@@ -32,6 +32,8 @@ __author__ = "Heiko 'riot' Weinen"
 __license__ = "AGPLv3"
 
 import sys
+import warnings
+
 from isomer.error import abort
 
 if sys.version_info.major < 3:
@@ -40,6 +42,16 @@ if sys.version_info.major < 3:
         "Please restart the iso tool in a valid environment."
     )
     abort(50053)
+
+if not sys.warnoptions:
+
+    def warn(*args, **kwargs):
+        pass
+
+
+    warnings.warn = warn
+
+    warnings.simplefilter("ignore")
 
 try:
     from isomer.tool import install_isomer, ask
@@ -85,7 +97,7 @@ def main():
         print("Please restart the tool")
         sys.exit()
 
-    isotool(obj={})
+    isotool(obj={}, auto_envvar_prefix='ISOMER')
 
 
 if __name__ == "__main__":
