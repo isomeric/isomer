@@ -99,19 +99,27 @@ def populate_user_events():
     # AuthorizedEvents.update(NormalEvents)
 
 
-class isomer_ui_event(Event):
+class isomer_basic_event(Event):
     """Basic Isomer event class"""
+
+    def __init__(self, *args, **kwargs):
+        """Initializes a basic Isomer event.
+
+        For further details, check out the circuits documentation.
+        """
+        super(isomer_basic_event, self).__init__(*args, **kwargs)
+
+
+class isomer_ui_event(isomer_basic_event):
+    """Isomer user interface event class"""
 
     pass
 
 
-class reload_configuration(isomer_ui_event):
-    """Instructs a component to reload its configuration"""
+class isomer_event(isomer_basic_event):
+    """Isomer internal event class"""
 
-    def __init__(self, target, *args, **kwargs):
-        super(reload_configuration, self).__init__(*args, **kwargs)
-        self.target = target
-        isolog("Reload of configuration triggered", lvl=events)
+    pass
 
 
 class anonymous_event(isomer_ui_event):
@@ -119,7 +127,7 @@ class anonymous_event(isomer_ui_event):
 
     def __init__(self, action, data, client, *args):
         """
-        Sets up an authorized event.
+        Initializes an Isomer anonymous user interface event.
 
         :param action:
         :param data:
@@ -150,7 +158,7 @@ class authorized_event(isomer_ui_event):
 
     def __init__(self, user, action, data, client, *args):
         """
-        Sets up an authorized event.
+        Initializes an Isomer authorized user interface event.
 
         :param user: User object from :py:class:isomer.web.clientmanager.User
         :param action:
@@ -176,6 +184,18 @@ class authorized_event(isomer_ui_event):
 
         # For circuits manager to enable module/event namespaces
         return cls.__module__ + "." + cls.__name__
+
+
+# Configuration reload event
+
+# TODO: This should probably not be an ui-event
+class reload_configuration(isomer_ui_event):
+    """Instructs a component to reload its configuration"""
+
+    def __init__(self, target, *args, **kwargs):
+        super(reload_configuration, self).__init__(*args, **kwargs)
+        self.target = target
+        isolog("Reload of configuration triggered", lvl=events)
 
 
 # Authenticator Events
