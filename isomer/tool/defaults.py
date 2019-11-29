@@ -102,13 +102,8 @@ platforms = {
             "python3-pymongo-ext",
             "python3-bson-ext",
             "python3-cffi",
-            "libffi-dev",
-            "enchant",
-            # TODO: Kick out module dependencies (mostly gdal, grib and serial)
-            "python3-grib",
-            "python3-serial",
-            "gdal-bin",
-            "python-gdal",
+            #"libffi-dev",
+            "enchant"
         ],
     },
     "Debian GNU/Linux": {
@@ -167,11 +162,6 @@ platforms = {
             "python3-certbot",
             "python3-certbot-nginx",
             "enchant",
-            # TODO: Kick out module dependencies (mostly gdal, grib and serial)
-            "python3-grib",
-            "python3-serial",
-            "gdal-bin",
-            "python-gdal",
         ],
     },
     "Ubuntu": "Debian GNU/Linux",
