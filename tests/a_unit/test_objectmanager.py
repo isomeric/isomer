@@ -17,10 +17,6 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-from random import randint
-
-__author__ = "Heiko 'riot' Weinen"
-__license__ = "AGPLv3"
 
 """
 Hackerfleet Operating System - Backend
@@ -32,9 +28,11 @@ Test Isomer Launcher
 
 """
 
-from circuits import Manager
 import pytest
+
+from circuits import Manager
 from uuid import uuid4
+from random import randint
 
 from isomer.database import objectmodels
 from isomer.ui.clientobjects import User, Client

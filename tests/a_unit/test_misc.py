@@ -17,10 +17,6 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-import isomer.tool.templates
-
-__author__ = "Heiko 'riot' Weinen"
-__license__ = "AGPLv3"
 
 """
 Hackerfleet Operating System - Backend
@@ -35,11 +31,12 @@ Test Isomer Tools
 # import os
 import re
 import pytest
+import dateutil.parser
 from tempfile import NamedTemporaryFile
 from copy import copy
 # from datetime import datetime
-import dateutil.parser
 
+import isomer.tool.templates
 from isomer import misc
 from isomer.misc import path
 from collections import namedtuple

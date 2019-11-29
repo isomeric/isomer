@@ -20,9 +20,6 @@
 
 """Testsuite for Isomer"""
 
-__author__ = "Heiko 'riot' Weinen"
-__license__ = "AGPLv3"
-
 from isomer.database import initialize
 
 initialize(database_name='isomer-test')
