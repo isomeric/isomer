@@ -26,7 +26,9 @@ ENV LC_ALL=C.UTF-8
 ENV LANG=C.UTF-8
 
 RUN apt-get update
-RUN apt-get -y install build-essential python3-dev libffi-dev libssl-dev python3 python3-setuptools ca-certificates git
+RUN apt-get -y install build-essential python3-dev libffi-dev \
+    python3 python3-pip python3-setuptools python3-enchant ca-certificates \
+    git python3-pil python3-nacl python3-spur
 
 WORKDIR /home/isomer
 
@@ -37,6 +39,7 @@ WORKDIR isomer
 
 # Install Isomer
 
+RUN pip3 install -r requirements-prod.txt
 RUN python3 setup.py develop
 
 RUN ./iso system -l -p Docker all
