@@ -1,6 +1,7 @@
 # Basics
 -r requirements.txt
 -r requirements-test.txt
+-r requirements-doc.txt
 
 # Linting, QA
 pyflakes
@@ -17,27 +18,6 @@ objgraph
 # Packaging
 wheel
 
-# Generating Documentation
-MarkupSafe
-funcparserlib
-webcolors
-
-Sphinx
-sphinx-intl
-sphinx_rtd_theme
-#sphinx_bootstrap_theme
-releases
+# Documentation and translation
 #Sphinx-PyPI-upload
-sphinx-issues
-sphinxcontrib-actdiag
-sphinxcontrib-nwdiag
-sphinxcontrib-seqdiag
-sphinxcontrib-blockdiag
-sphinxcontrib-spelling
-sphinx-click
-# BEHOLD:
-sphinxcontrib-bibtex
-#sphinxcontrib-autojs
-pyenchant
-sphinx-git
 transifex-client

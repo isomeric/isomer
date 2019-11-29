@@ -1,0 +1,7 @@
+# Basics
+-r requirements.txt
+-r requirements-doc.txt
+
+# Packaging
+wheel
+

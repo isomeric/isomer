@@ -1,0 +1,21 @@
+
+# Generating Documentation
+MarkupSafe
+funcparserlib
+webcolors
+Sphinx
+sphinx-intl
+sphinx-autodoc-annotation
+sphinx_rtd_theme
+releases
+sphinx-issues
+sphinxcontrib-actdiag
+sphinxcontrib-nwdiag
+sphinxcontrib-seqdiag
+sphinxcontrib-blockdiag
+sphinxcontrib-spelling
+sphinx-click
+sphinxcontrib-bibtex
+#sphinxcontrib-autojs
+pyenchant
+sphinx-git
