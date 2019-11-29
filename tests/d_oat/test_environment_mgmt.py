@@ -69,9 +69,9 @@ def test_install():
         """Return current username"""
         return pwd.getpwuid(os.getuid())[0]
 
-    _ = run_cli(isotool, ['instance', 'create'])
-    _ = run_cli(isotool, ['instance', 'set', 'user', get_username()])
-    _ = run_cli(isotool, ['environment', 'clear', '--no-archive'])
+    _ = run_cli(isotool, ['instance', 'create'], full_log=True)
+    _ = run_cli(isotool, ['instance', 'set', 'user', get_username()], full_log=True)
+    _ = run_cli(isotool, ['environment', 'clear', '--no-archive'], full_log=True)
 
     assert os.path.exists('/tmp/isomer-test/etc/isomer/instances/default.conf')
     assert os.path.exists('/tmp/isomer-test/var/lib/isomer/default/green')

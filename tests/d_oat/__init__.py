@@ -41,6 +41,7 @@ __license__ = "AGPLv3"
 
 import os
 import shutil
+import time
 from pprint import pprint
 
 from click.testing import CliRunner
@@ -68,8 +69,9 @@ def run_cli(cmd, args, full_log=False):
         args.insert(0, '-nc')
 
     if full_log:
-        log_args = ['--clog', '5', '--flog', '5', '--log-path', '/tmp/isomer-test',
-                    '--do-log']
+        timestamp = time.strftime("%Y%m%d-%H%M%S")
+
+        log_args = ['--clog', '5', '--flog', '5', '--log-file', '/tmp/isomer-test_%s' % timestamp]
         args = log_args + args
 
     args = ['--config-dir', '/tmp/isomer-test/etc/isomer'] + args
