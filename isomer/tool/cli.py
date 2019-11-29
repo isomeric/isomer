@@ -86,8 +86,9 @@ from isomer.version import version_info
     help="Log level to use (0-100)",
     metavar="<level>",
 )
-@click.option("--do-log", default=False, is_flag=True, help="Log to file")
+@click.option("--no-log", default=False, is_flag=True, help="Do not log to file")
 @click.option("--log-path", default=None, help="Logfile path")
+@click.option("--log-file", default=None, help="Logfile name")
 @click.option("--dbhost", default=None, help=db_host_help, metavar=db_host_metavar)
 @click.option("--dbname", default=None, help=db_help, metavar=db_metavar)
 @click.option("--prefix", default=None, help="Use different system prefix")
@@ -102,8 +103,9 @@ def cli(
     no_colors,
     console_level,
     file_level,
-    do_log,
+    no_log,
     log_path,
+    log_file,
     dbhost,
     dbname,
     prefix,
@@ -138,16 +140,16 @@ def cli(
                 console_level if console_level is not None else 20
             )
 
-        if do_log:
-            verbosity["file"] = int(file_level if file_level is not None else 20)
-        else:
+        if no_log:
             verbosity["file"] = 100
+        else:
+            verbosity["file"] = int(file_level if file_level is not None else 20)
 
         verbosity["global"] = min(verbosity["console"], verbosity["file"])
 
     def set_logger():
-        if log_path is not None:
-            set_logfile(log_path, instance)
+        if log_path is not None or log_file is not None:
+            set_logfile(log_path, instance, log_file)
 
         if no_colors is False:
             set_color()
@@ -245,10 +247,10 @@ def cli(
 
     set_instance(instance, env, prefix)
 
-    if log_path is None:
+    if log_path is None and log_file is None:
         log_path = get_log_path()
 
-        set_logfile(log_path, instance)
+        set_logfile(log_path, instance, log_file)
 
 
 @with_plugins(iter_entry_points("isomer.management"))
@@ -263,4 +265,4 @@ def plugin(ctx):
     ctx.obj["db"] = database
 
 
-cli.add_command(plugin)
+cli.add_command(module)
