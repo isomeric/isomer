@@ -29,9 +29,6 @@ Basic management tool functionality and plugin support.
 
 """
 
-__author__ = "Heiko 'riot' Weinen"
-__license__ = "AGPLv3"
-
 import sys
 import click
 
@@ -256,8 +253,8 @@ def cli(
 @with_plugins(iter_entry_points("isomer.management"))
 @cli.group(cls=DYMGroup)
 @click.pass_context
-def plugin(ctx):
-    """[GROUP] Plugin commands"""
+def module(ctx):
+    """[GROUP] Module commands"""
 
     from isomer import database
 
