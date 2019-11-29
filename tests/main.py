@@ -18,9 +18,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-__author__ = "Heiko 'riot' Weinen"
-__license__ = "AGPLv3"
-
 """Testsuite runner"""
 
 import sys
@@ -28,6 +25,13 @@ import sys
 from types import ModuleType
 from os.path import abspath, dirname
 from subprocess import Popen, STDOUT
+
+if not sys.warnoptions:
+    import os
+    import warnings
+
+    warnings.simplefilter("default")  # Change the filter in this process
+    os.environ["PYTHONWARNINGS"] = "default"  # Also affect subprocesses
 
 
 def importable(module_name):
