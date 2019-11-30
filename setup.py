@@ -31,19 +31,12 @@ except ImportError:
     )
     sys.exit(50050)
 
-
-# TODO:
-# Classifiers
-# Keywords
-# download_url
-# platform
-
 ignore = [
-    '/frontend/node_modules',
-    '/frontend/build',
-    '/frontend/src/components',
-    '/docs/build',
-    '__pycache__'
+    "/frontend/node_modules",
+    "/frontend/build",
+    "/frontend/src/components",
+    "/docs/build",
+    "__pycache__"
 ]
 datafiles = []
 manifestfiles = []
@@ -51,17 +44,17 @@ manifestfiles = []
 
 def prune(thing):
     for part in ignore:
-        part = part[1:] if part.startswith('/') else part
+        part = part[1:] if part.startswith("/") else part
         if part in thing:
             return True
     return False
 
 
 def add_datafiles(*paths):
-    with open('MANIFEST.in', 'w') as manifest:
+    with open("MANIFEST.in", "w") as manifest:
         for path in paths:
             files = []
-            manifest.write('recursive-include ' + path + ' *\n')
+            manifest.write("recursive-include " + path + " *\n")
 
             for root, dirnames, filenames in os.walk(path):
                 for filename in filenames:
@@ -74,83 +67,94 @@ def add_datafiles(*paths):
             datafiles.append((path, files))
 
         for part in ignore:
-            if part.startswith('/'):
-                manifest.write('prune ' + part[1:] + '\n')
+            if part.startswith("/"):
+                manifest.write("prune " + part[1:] + "\n")
             else:
-                manifest.write('global-exclude ' + part + '/*\n')
+                manifest.write("global-exclude " + part + "/*\n")
 
 
-add_datafiles('frontend', 'docs', 'locale')
+add_datafiles("frontend", "docs", "locale")
 
-with open('README.rst', 'r') as f:
+with open("README.rst", "r") as f:
     readme = f.read()
 
 setup(
     name="isomer",
-    description="isomer",
+    description="A decentralized application framework for humans and machines",
     author="Isomer Community",
     author_email="riot@c-base.org",
     maintainer="Isomer Community",
     maintainer_email="riot@c-base.org",
     url="https://isomeric.github.io",
+    project_urls={
+        "Documentation": "https://isomer.readthedocs.org/",
+        "Funding": "https://isomeric.eu/donate",
+        "Download": "https://isomeric.eu/download",
+        "Source": "https://github.com/isomeric/isomer",
+        "Tracker": "https://github.com/isomeric/isomer/issues",
+    },
     license="GNU Affero General Public License v3",
+    keywords="decentralized application framework",
     classifiers=[
-        'Development Status :: 4 - Beta',  # Hmm.
-        'Environment :: Web Environment',
-        'Environment :: Other Environment',
-        'Environment :: No Input/Output (Daemon)',
-        # 'Framework :: Isomer :: 1',
-        'Intended Audience :: Developers',
-        'License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)',
-        'Operating System :: POSIX :: Linux',
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3 :: Only',
-        'Programming Language :: Python :: 3.5',
-        'Programming Language :: Python :: 3.6',
-        'Programming Language :: Python :: 3.7',
-        'Programming Language :: Python :: 3.8',
-        'Programming Language :: Python :: Implementation :: PyPy',
-        'Programming Language :: Python :: Implementation :: CPython',
-        'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
-        'Topic :: Office/Business :: Groupware',
-        'Topic :: Software Development :: Libraries :: Application Frameworks',
-        'Topic :: Software Development :: Embedded Systems',
-        'Topic :: Software Development :: User Interfaces',
-        'Topic :: System :: Distributed Computing'
+        "Development Status :: 4 - Beta",  # Hmm.
+        "Environment :: Web Environment",
+        "Environment :: Other Environment",
+        "Environment :: No Input/Output (Daemon)",
+        # "Framework :: Isomer :: 1",
+        "Intended Audience :: Developers",
+        "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
+        "Operating System :: POSIX :: Linux",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3 :: Only",
+        "Programming Language :: Python :: 3.5",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: Implementation :: PyPy",
+        "Programming Language :: Python :: Implementation :: CPython",
+        "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
+        "Topic :: Office/Business :: Groupware",
+        "Topic :: Software Development :: Libraries :: Application Frameworks",
+        "Topic :: Software Development :: Embedded Systems",
+        "Topic :: Software Development :: User Interfaces",
+        "Topic :: System :: Distributed Computing"
     ],
     packages=[
-        'isomer',
-        'isomer.events',
-        'isomer.tool',
-        'isomer.misc',
-        'isomer.ui',
-        'isomer.schemata',
-        'isomer.provisions'
+        "isomer",
+        "isomer.database",
+        "isomer.events",
+        "isomer.misc",
+        "isomer.provisions",
+        "isomer.schemata",
+        "isomer.tool",
+        "isomer.ui"
     ],
-    namespace_packages=['isomer'],
+    namespace_packages=["isomer"],
     long_description=readme,
+    long_description_content_type='text/x-rst',
     dependency_links=[
-        'https://github.com/ri0t/click-repl/archive/master.zip#egg=click-repl-0.1.3-ri0t',
+        "https://github.com/ri0t/click-repl/archive/master.zip#egg=click-repl-0.1.3-ri0t",
     ],
     install_requires=[
-        'click-didyoumean>=0.0.3',
-        'click-plugins>=1.0.3',
-        'click-repl>=0.1.3-ri0t',
-        'click>=6.7.0',
-        'circuits',
-        'distro>=1.3',
-        'dpath>=1.4.0',
-        'formal>=0.6.3',
-        'gitpython>=2.1.1',
-        'jsonschema>=3.0.1',
-        'networkx',
-        'prompt-toolkit>=2.0',
-        'pycountry>=18.2',
-        'pyinotify>=0.9.6',
-        'pystache>=0.5.4',
-        'pytz>=2019.1',
-        'tomlkit>=0.4.6',
-        'spur>=0.3.20'
+        "click-didyoumean>=0.0.3",
+        "click-plugins>=1.0.3",
+        "click-repl>=0.1.3-ri0t",
+        "click>=6.7.0",
+        "circuits",
+        "distro>=1.3",
+        "dpath>=1.4.0",
+        "formal>=0.6.3",
+        "gitpython>=2.1.1",
+        "jsonschema>=3.0.1",
+        "networkx",
+        "prompt-toolkit>=2.0",
+        "pycountry>=18.2",
+        "pyinotify>=0.9.6",
+        "pystache>=0.5.4",
+        "pytz>=2019.1",
+        "tomlkit>=0.4.6",
+        "spur>=0.3.20",
+        "SecretColors>=1.1.0"
     ],
     data_files=datafiles,
     entry_points="""[console_scripts]
