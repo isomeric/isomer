@@ -147,7 +147,7 @@ setup(
         "gitpython>=2.1.1",
         "jsonschema>=3.0.1",
         "networkx",
-        "prompt-toolkit>=2.0",
+        "prompt-toolkit>=2.0,<3",
         "pycountry>=18.2",
         "pyinotify>=0.9.6",
         "pystache>=0.5.4",
