@@ -348,7 +348,7 @@ class CLI(ConfigurableComponent):
     To enable the command line interface, use either the Configuration frontend
     or the iso tool:
 
-    .. code-block::
+    .. code-block:: sh
 
         iso config enable CLI
 

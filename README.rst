@@ -44,12 +44,11 @@ Installation
 Docker: Yes, please!
 ^^^^^^^^^^^^^^^^^^^^
 
-If you just want to try it out or generally are happy with using docker:
-
-No need to clone the repo, just download the docker compose file and get
+If you just want to try it out or generally are happy with using docker, there
+is no need to clone the repo, just download the docker compose file and get
 everything from docker hub:
 
-.. code-block::
+.. code-block:: sh
 
     wget https://github.com/isomeric/isomer/raw/master/docker/docker-compose-hub.yml
     docker-compose -f docker-compose-hub.yml up

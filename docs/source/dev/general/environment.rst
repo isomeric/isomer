@@ -41,7 +41,7 @@ Get the sourcecode
 
 After forking the repository, clone it to your local machine:
 
-.. code-block:: bash
+.. code-block:: sh
 
     git clone git@github.com:yourgithubaccount/isomer.git ~/src/isomer
 

@@ -148,7 +148,7 @@ Documentation
 Before building any documentation, you'll need to install the
 ``requirements-doc.txt`` (located in the Isomer repository root):
 
-.. code-block::
+.. code-block:: sh
 
     pip install -r requirements-doc.txt
 

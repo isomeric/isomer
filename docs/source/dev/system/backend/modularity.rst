@@ -64,12 +64,12 @@ Tool handlers
 To allow maintenance, modules can register tool commands. These are available
 via the module section:
 
-.. code-block::
+.. code-block:: sh
 
     iso module <command>
 
 To get a list of all modules' commands, just do:
 
-.. code-block::
+.. code-block:: sh
 
     iso module

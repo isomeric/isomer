@@ -13,7 +13,7 @@ Setup
 The simplest way to get Isomer and a suitable database running is to run the
 docker compose file:
 
-.. code-block::
+.. code-block:: sh
 
     docker-compose -f docker/docker-compose.yml up
 
@@ -27,20 +27,20 @@ Running the iso tool
 
 To run the command via Docker compose:
 
-.. code-block::
+.. code-block:: sh
 
     docker-compose -f docker/docker-compose.yml run isomer iso db user
 
 To run the iso tool inside your docker container without database access,
 just use Docker's run command, e.g:
 
-.. code-block::
+.. code-block:: sh
 
     docker -i -t isomeric/isomer:latest run iso system status
 
 To work with the database, you need to provide it an accessible server address:
 
-.. code-block::
+.. code-block:: sh
 
     docker -i -t isomeric/isomer:latest run iso --dbhost mydatabasehost:27017
 
