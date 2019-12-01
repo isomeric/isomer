@@ -1,0 +1,15 @@
+strict digraph {
+    "isotool" -> "cmdmap" [weight=1.0];
+    "isotool" -> "config" [weight=1.0];
+    "isotool" -> "db" [weight=1.0];
+    "isotool" -> "dev" [weight=1.0];
+    "isotool" -> "environment" [weight=1.0];
+    "isotool" -> "install" [weight=1.0];
+    "isotool" -> "instance" [weight=1.0];
+    "isotool" -> "launch" [weight=1.0];
+    "isotool" -> "module" [weight=1.0];
+    "isotool" -> "remote" [weight=1.0];
+    "isotool" -> "shell" [weight=1.0];
+    "isotool" -> "system" [weight=1.0];
+    "isotool" -> "version" [weight=1.0];
+}
