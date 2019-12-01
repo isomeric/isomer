@@ -154,6 +154,7 @@ setup(
         "pytz>=2019.1",
         "tomlkit>=0.4.6",
         "spur>=0.3.20",
+        "six>=1.11.0",
         "SecretColors>=1.1.0"
     ],
     data_files=datafiles,
