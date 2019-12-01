@@ -538,7 +538,11 @@ def print_commands(command, output, groups=[], level=0):
 
 def write_command_map():
     """Write the iso-tool command map to the source folder"""
-    with open('source/manual/Administration/iso.dot', 'w') as f:
+    filename = os.path.join(
+        os.path.dirname(__file__),
+        'source/manual/Administration/iso.dot'
+    )
+    with open(filename, 'w') as f:
         f.write('strict digraph {\n')
         output = []
         print_commands(isotool, output)
