@@ -14,12 +14,7 @@
 
 import sys
 import os
-import shlex
 import types
-
-from copy import copy
-
-from isomer.tool.tool import isotool
 
 # import sphinx_bootstrap_theme
 
@@ -511,47 +506,7 @@ def skip(app, what, name, obj, would_skip, options):
     return would_skip
 
 
-# TODO: This shouldn't be in the configuration.
-#   There must be proper hooks somewhere within sphinx' process.
-#   Maybe the Makefile could be abused.
-def print_commands(command, output, groups=[], level=0):
-    """Recursively generate a dot-graph of the iso-tool"""
-    if level >= 2:
-        return
-    if 'commands' in command.__dict__:
-        if len(groups) > 0:
-            line = '    "%s" -> "%s" [weight=1.0];\n' % \
-                   (groups[-1], command.name)
-            line = line.replace('"cli"', '"isotool"')
-            output.append(line)
-
-        for item in command.commands.values():
-            subgroups = copy(groups)
-            subgroups.append(command.name)
-            print_commands(item, output, subgroups, level + 1)
-    else:
-        line = '    "%s" -> "%s" [weight=%1.1f];\n' % \
-               (groups[-1], command.name, len(groups))
-        line = line.replace('"cli"', '"isotool"')
-        output.append(line)
-
-
-def write_command_map():
-    """Write the iso-tool command map to the source folder"""
-    filename = os.path.join(
-        os.path.dirname(__file__),
-        'source/manual/Administration/iso.dot'
-    )
-    with open(filename, 'w') as f:
-        f.write('strict digraph {\n')
-        output = []
-        print_commands(isotool, output)
-        f.writelines(output)
-        f.write('}')
-
-
 def setup(app):
     """Set up the sphinx process"""
     app.add_config_value('devel', '', devel)
     app.connect("autodoc-skip-member", skip)
-    write_command_map()
