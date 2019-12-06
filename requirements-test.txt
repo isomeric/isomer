@@ -4,3 +4,4 @@ tox
 pytest==5.1.1
 coveralls
 pytest-cov
+safety>=1.8.5
