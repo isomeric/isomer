@@ -1,0 +1,30 @@
+Errorcode: 50020
+===================
+
+.. only:: non-rtd
+
+    Please refer to
+    https://isomer.readthedocs.io/en/latest/manual/Administration/Errors/50020.html
+    for latest information about this problem.
+
+Message
+-------
+
+**50020**: ``No database is available``
+
+Symptoms
+--------
+
+* Isomer takes a few seconds to launch, then exits with this error message
+* Not much other log output is visible
+* Some management tool commands may fail in similar ways
+
+Remedies
+--------
+
+* Check if the database is actually running
+* Check if you supplied the correct hostname and port via
+  ``iso instance info | grep database``
+* Check if the correct hostname and port are picked up by isomer via
+  ``iso launch --no-run`` - they should be listed on one of the first lines in
+  the commands output
