@@ -35,7 +35,7 @@ from click_didyoumean import DYMGroup
 
 from isomer.logger import warn
 from isomer.misc import std_now
-from isomer.tool import _get_credentials, log, ask
+from isomer.tool import _get_credentials, log, ask, finish
 from isomer.tool.database import db
 
 
@@ -83,7 +83,7 @@ def create_user(ctx):
         new_user = _create_user(ctx)
 
         new_user.save()
-        log("Done")
+        finish(ctx)
     except KeyError:
         log("User already exists", lvl=warn)
 
@@ -98,7 +98,7 @@ def create_admin(ctx):
         admin.roles.append("admin")
 
         admin.save()
-        log("Done")
+        finish(ctx)
     except KeyError:
         log("User already exists", lvl=warn)
 
@@ -120,7 +120,7 @@ def delete_user(ctx, yes):
     if yes or ask("Confirm deletion", default=False, data_type="bool"):
         try:
             del_user.delete()
-            log("Done")
+            finish(ctx)
         except AttributeError:
             log("User not found", lvl=warn)
     else:
@@ -144,7 +144,7 @@ def change_password(ctx):
     change_user.passhash = passhash
     change_user.save()
 
-    log("Done")
+    finish(ctx)
 
 
 @user.command(short_help="list local users")
@@ -172,7 +172,7 @@ def list_users(ctx, search, uuid, active):
             if active:
                 print(found_user.active)
 
-    log("Done")
+    finish(ctx)
 
 
 @user.command(short_help="disable a user")
@@ -190,7 +190,7 @@ def disable(ctx):
 
     change_user.active = False
     change_user.save()
-    log("Done")
+    finish(ctx)
 
 
 @user.command(short_help="disable a user")
@@ -208,7 +208,7 @@ def enable(ctx):
 
     change_user.active = True
     change_user.save()
-    log("Done")
+    finish(ctx)
 
 
 @user.command(short_help="add role to user")
@@ -230,6 +230,6 @@ def add_role(ctx, role):
     if role not in change_user.roles:
         change_user.roles.append(role)
         change_user.save()
-        log("Done")
+        finish(ctx)
     else:
         log("User already has that role!", lvl=warn)

@@ -241,12 +241,13 @@ def initialize(
         db = client[dbname]
         db_log("Database: ", db.command("buildinfo"), lvl=debug)
     except Exception as e:
+        log_level = warn if ignore_fail else critical
         db_log(
             "No database available! Check if you have mongodb > 2.2 "
             "installed and running as well as listening on port %i "
             "of %s and check if you specified the correct "
             "instance and environment. (Error: %s) -> EXIT" % (dbport, dbhost, e),
-            lvl=critical,
+            lvl=log_level,
         )
         if not ignore_fail:
             abort(EXIT_NO_DATABASE)

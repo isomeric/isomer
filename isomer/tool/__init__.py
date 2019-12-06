@@ -87,6 +87,16 @@ def log(*args, **kwargs):
     isolog(*args, **kwargs)
 
 
+def finish(ctx):
+    parent = ctx.parent
+    commands = ctx.info_name
+    while parent is not None:
+        commands = parent.info_name + " " + commands
+        parent = parent.parent
+    log("Done:", commands)
+    sys.exit(0)
+
+
 def check_root():
     """Check if current user has root permissions"""
 

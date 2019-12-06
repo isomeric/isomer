@@ -36,7 +36,7 @@ from click_didyoumean import DYMGroup
 
 from isomer.logger import warn, error
 from isomer.migration import make_migrations
-from isomer.tool import log, ask
+from isomer.tool import log, ask, finish
 from isomer.error import abort
 
 
@@ -48,7 +48,9 @@ def db(ctx):
     # log(ctx.obj, pretty=True)
     from isomer import database
 
-    database.initialize(ctx.obj["dbhost"], ctx.obj["dbname"])
+    ignore_fail = ctx.invoked_subcommand in ("list-all", "rename", "delete")
+
+    database.initialize(ctx.obj["dbhost"], ctx.obj["dbname"], ignore_fail=ignore_fail)
     ctx.obj["db"] = database
 
 
@@ -60,7 +62,8 @@ def list_all(ctx):
 
     client = MongoClient(ctx.obj["dbhost"])
     log(client.list_database_names())
-    log("Done")
+
+    finish(ctx)
 
 
 @db.command(short_help="Rename database")
@@ -100,7 +103,7 @@ def rename(ctx, source, destination, keep, clear_target):
         log("Deleting old database")
         client.drop_database(source)
 
-    log("Done")
+    finish(ctx)
 
 
 @db.command(short_help="Irrevocably remove collection content")
@@ -126,7 +129,7 @@ def clear(ctx, schema):
             log("Could not drop collection:", lvl=error)
             log(result, pretty=True, lvl=error)
         else:
-            log("Done")
+            finish(ctx)
 
 
 @db.command(short_help="Irrevocably remove database")
@@ -143,6 +146,8 @@ def delete(ctx, force):
 
     delete_database(ctx.obj["dbhost"], ctx.obj["dbname"], force)
 
+    finish(ctx)
+
 
 def delete_database(db_host, db_name, force):
     """Actually delete a database"""
@@ -157,12 +162,13 @@ def delete_database(db_host, db_name, force):
         )
     if response is True:
         host, port = db_host.split(":")
-        log("Dropping database", db_name, lvl=warn)
 
         client = pymongo.MongoClient(host=host, port=int(port))
-        client.drop_database(db_name)
-
-        log("Done")
+        if db_name in client.list_database_names():
+            log("Dropping database", db_name, lvl=warn)
+            client.drop_database(db_name)
+        else:
+            log("Database does not exist")
 
 
 @db.group(cls=DYMGroup)
@@ -180,3 +186,5 @@ def make(ctx):
     """Makes new migrations for all or the specified schema"""
 
     make_migrations(ctx.obj["schema"])
+
+    finish(ctx)

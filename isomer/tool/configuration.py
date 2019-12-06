@@ -35,7 +35,7 @@ from ast import literal_eval
 from click_didyoumean import DYMGroup
 
 from formal import model_factory
-from isomer.tool import log
+from isomer.tool import log, finish
 
 
 @click.group(cls=DYMGroup)
@@ -78,7 +78,7 @@ def modify(ctx, component, field, value):
     configuration.validate()
     log("Changed configuration validated")
     configuration.save()
-    log("Done")
+    finish(ctx)
 
 
 @config.command(short_help="Enable a component")
@@ -101,7 +101,7 @@ def enable(ctx, component):
 
     configuration.validate()
     configuration.save()
-    log("Done")
+    finish(ctx)
 
 
 @config.command(short_help="Disable a component")
@@ -124,7 +124,7 @@ def disable(ctx, component):
 
     configuration.validate()
     configuration.save()
-    log("Done")
+    finish(ctx)
 
 
 @config.command(short_help="Delete component configuration")
@@ -144,7 +144,7 @@ def delete(ctx, component):
         return
 
     configuration.delete()
-    log("Done")
+    finish(ctx)
 
 
 @config.command(short_help="Show component configurations")

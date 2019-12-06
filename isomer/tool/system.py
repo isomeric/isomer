@@ -40,7 +40,7 @@ from click_didyoumean import DYMGroup
 
 from isomer.logger import error
 from isomer.misc.path import locations, get_path, get_log_path
-from isomer.tool import platforms, install_isomer, log, run_process, ask
+from isomer.tool import platforms, install_isomer, log, run_process, ask, finish
 
 
 @click.group(cls=DYMGroup)
@@ -79,7 +79,8 @@ def system_all(ctx):
     )
     _add_system_user(use_sudo)
     _create_system_folders(use_sudo)
-    log("Done: Setup system - all")
+
+    finish(ctx)
 
 
 @system.command(short_help="Install system dependencies")
@@ -96,7 +97,7 @@ def dependencies(ctx):
         omit_common=True,
     )
 
-    log("Done: Install dependencies")
+    finish(ctx)
 
 
 @system.command(name="user", short_help="create system user")
@@ -105,7 +106,7 @@ def system_user(ctx):
     """instance Isomer system user (isomer.isomer)"""
 
     _add_system_user(ctx.obj["use_sudo"])
-    log("Done: Add User")
+    finish(ctx)
 
 
 def _add_system_user(use_sudo=False):
@@ -148,7 +149,7 @@ def system_paths(ctx):
     """instance Isomer system paths (/var/[local,lib,cache]/isomer)"""
 
     _create_system_folders(ctx.obj["use_sudo"])
-    log("Done: Create system paths")
+    finish(ctx)
 
 
 def _create_system_folders(use_sudo=False):

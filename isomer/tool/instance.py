@@ -45,6 +45,7 @@ import sys
 import tomlkit
 import click
 import os
+import webbrowser
 from click_didyoumean import DYMGroup
 
 from isomer.misc.path import set_instance
@@ -52,6 +53,7 @@ from isomer.logger import warn, critical
 from isomer.tool import (
     _get_system_configuration,
     ask,
+    finish,
     run_process,
     format_result,
     log,
@@ -80,8 +82,9 @@ from isomer.error import abort, EXIT_INVALID_CONFIGURATION, EXIT_INSTALLATION_FA
     EXIT_USER_BAILED_OUT, EXIT_INVALID_PARAMETER
 from isomer.tool.environment import (
     _install_environment,
-    install_environment_module,
+    install_environment_modules,
     _clear_environment,
+    _check_environment,
 )
 
 
@@ -115,6 +118,67 @@ def info_instance(ctx):
     log("Instance configuration:", instance_configuration, pretty=True)
     log("Active environment (%s):" % environment_name, environment_config, pretty=True)
 
+    finish(ctx)
+
+
+@instance.command(
+    name="check",
+    short_help="check instance configuration and environments"
+)
+@click.pass_context
+def check_instance(ctx):
+    """Check health of the selected instance"""
+
+    instance_name = ctx.obj["instance"]
+    instances = ctx.obj["instances"]
+    instance_configuration = instances[instance_name]
+
+    environment_name = instance_configuration["environment"]
+    environment_config = instance_configuration["environments"][environment_name]
+
+    if instance_name not in instances:
+        log("Instance %s unknown!" % instance_name, lvl=warn)
+        abort(EXIT_INSTANCE_UNKNOWN)
+
+    # TODO: Validate instance config
+
+    _check_environment(ctx, 'blue')
+    _check_environment(ctx, 'green')
+
+    finish(ctx)
+
+
+@instance.command(name="browser", short_help="try to point a browser to this instance")
+@click.pass_context
+def browser(ctx):
+    """Tries to start or point a browser towards this instance's frontend"""
+    instance_configuration = ctx.obj["instance_configuration"]
+
+    server = instance_configuration.get('webserver', 'internal')
+    protocol = "http"
+
+    if server != 'internal':
+        protocol += "s"
+
+    host = instance_configuration.get(
+        'web_hostname',
+        instance_configuration.get('web_address', '127.0.0.1')
+    )
+    port = instance_configuration.get('web_port', None)
+
+    if port is None:
+        url = "%s://%s" % (protocol, host)
+    else:
+        url = "%s://%s:%i" % (protocol, host, port)
+
+    log("Opening browser to:", url)
+    log("If this is empty or unreachable, check your instance with:\n"
+        "   iso instance info\n"
+        "Also try the health checks:\n"
+        "   iso instance check")
+
+    webbrowser.open(url)
+
 
 @instance.command(name="list", short_help="List all instances")
 @click.pass_context
@@ -123,6 +187,7 @@ def list_instances(ctx):
 
     for instance_name in ctx.obj["instances"]:
         log(instance_name, pretty=True)
+    finish(ctx)
 
 
 @instance.command(name="set", short_help="Set a parameter of an instance")
@@ -148,9 +213,8 @@ def set_parameter(ctx, parameter, value):
             converted_value = value
     except KeyError:
         log(
-            "Invalid parameter specified. Available parameters:",
-            sorted(list(defaults.keys())),
-            lvl=warn,
+            "Available parameters:",
+            sorted(list(defaults.keys()))
         )
         abort(EXIT_INVALID_PARAMETER)
 
@@ -161,17 +225,21 @@ def set_parameter(ctx, parameter, value):
 
     if valid_configuration(ctx):
         write_instance(instance_configuration)
-        log('Done')
+        finish(ctx)
     else:
         log("New configuration would not be valid", lvl=critical)
         abort(EXIT_INVALID_CONFIGURATION)
 
 
 @instance.command(short_help="Create a new instance")
+@click.argument('instance_name', default=None)
 @click.pass_context
-def create(ctx):
+def create(ctx, instance_name):
     """Create a new instance"""
-    instance_name = ctx.obj["instance"]
+
+    if instance_name is None:
+        instance_name = ctx.obj["instance"]
+
     if instance_name in ctx.obj["instances"]:
         log("Instance exists!", lvl=warn)
         abort(EXIT_INSTANCE_EXISTS)
@@ -182,6 +250,7 @@ def create(ctx):
     ctx.obj["instances"][instance_name] = instance_configuration
 
     write_instance(instance_configuration)
+    finish(ctx)
 
 
 @instance.command(name="install", short_help="Install a fresh instance")
@@ -232,6 +301,7 @@ def install(ctx, **kwargs):
     write_instance(ctx.obj["instance_configuration"])
 
     _turnover(ctx, force=kwargs["force"])
+    finish(ctx)
 
 
 @instance.command(name="clear", short_help="Clear the whole instance (CAUTION)")
@@ -239,7 +309,7 @@ def install(ctx, **kwargs):
 @click.option("--no-archive", "-n", is_flag=True, default=False)
 @click.pass_context
 def clear_instance(ctx, force, no_archive):
-    """Clear all environments of an instance"""
+    """Irrevocably clear all environments of an instance"""
 
     _clear_instance(ctx, force, False, no_archive)
 
@@ -250,6 +320,7 @@ def _clear_instance(ctx, force, clear, no_archive):
     _clear_environment(ctx, force, "blue", clear, no_archive)
     log("Clearing green environment.", lvl=debug)
     _clear_environment(ctx, force, "green", clear, no_archive)
+    finish(ctx)
 
 
 @instance.command(short_help="Remove a whole instance (CAUTION)")
@@ -259,7 +330,7 @@ def _clear_instance(ctx, force, clear, no_archive):
 @click.option("--no-archive", "-n", is_flag=True, default=False)
 @click.pass_context
 def remove(ctx, clear, no_archive):
-    """Remove a whole instance"""
+    """Irrevocably remove a whole instance"""
 
     if clear:
         log("Destructively removing instance:", ctx.obj["instance"], lvl=warn)
@@ -271,16 +342,18 @@ def remove(ctx, clear, no_archive):
         _clear_instance(ctx, force=True, clear=clear, no_archive=no_archive)
 
     remove_instance(ctx.obj["instance"])
+    finish(ctx)
 
 
 @instance.command(
-    "install-module", short_help="Add (and install) a module to an instance"
+    "install-modules", short_help="Add (and install) modules to an instance"
 )
 @click.option(
     "--source",
     "-s",
     default="git",
     type=click.Choice(["link", "copy", "git", "develop"]),
+    help="Specify installation source/method"
 )
 @click.option(
     "--install-env",
@@ -288,7 +361,7 @@ def remove(ctx, clear, no_archive):
     "-i",
     is_flag=True,
     default=False,
-    help="Install module on active environment",
+    help="Install modules on active environment",
 )
 @click.option(
     "--force",
@@ -297,27 +370,33 @@ def remove(ctx, clear, no_archive):
     is_flag=True,
     help="Force installation (overwrites old modules)",
 )
-@click.argument("url")
+@click.argument("urls", nargs=-1)
 @click.pass_context
-def install_instance_module(ctx, source, url, install_env, force):
-    """Add and install a module"""
+def install_instance_modules(ctx, source, urls, install_env, force):
+    """Add (and optionally immediately install) modules for an instance.
+
+    This will add them to the instance's configuration, so they will be upgraded as well
+    as reinstalled on other environment changes.
+    """
 
     instance_name = ctx.obj["instance"]
     instance_configuration = ctx.obj["instances"][instance_name]
 
-    descriptor = [source, url]
-    if descriptor not in instance_configuration["modules"]:
-        instance_configuration["modules"].append(descriptor)
-        write_instance(instance_configuration)
-    elif not force:
-        log("Module is already installed. Use --force to install anyway.")
-        abort(50000)
+    for url in urls:
+        descriptor = [source, url]
+        if descriptor not in instance_configuration["modules"]:
+            instance_configuration["modules"].append(descriptor)
+        elif not force:
+            log("Module %s is already installed. Use --force to install anyway." % url)
+            abort(50000)
+
+    write_instance(instance_configuration)
 
     if install_env is True:
         del ctx.params["install_env"]
-        ctx.forward(install_environment_module)
+        ctx.forward(install_environment_modules)
 
-    log("Done: Install instance module")
+    finish(ctx)
 
 
 @instance.command(short_help="Activates the other environment")
@@ -368,7 +447,8 @@ def _turnover(ctx, force):
     #  - if not, switch back to the other instance, maybe indicate a broken state for next_environment
     #  - if yes, Store instance configuration and terminate, we're done
 
-    log("Done: Turnover to", next_environment)
+    log("Turned instance over to", next_environment)
+    finish(ctx)
 
 
 @instance.command(short_help="Upgrades the other environment")
@@ -454,7 +534,7 @@ def _launch_service(ctx):
         log("Error activating service:", format_result(result), pretty=True, lvl=error)
         abort(5000)
 
-    log("Done: Launch Service")
+    return True
 
 
 def validate_services(ctx):
@@ -548,6 +628,7 @@ def snakeoil(ctx):
     """instance a local snakeoil SSL certificate"""
 
     _instance_snakeoil(ctx)
+    finish(ctx)
 
 
 def _instance_snakeoil(ctx):
@@ -623,8 +704,6 @@ def _instance_snakeoil(ctx):
 
     create_self_signed_cert()
 
-    log('Done: instance snakeoil cert')
-
 
 @instance.command(short_help="install systemd service")
 @click.pass_context
@@ -632,7 +711,7 @@ def service(ctx):
     """instance systemd service configuration"""
 
     update_service(ctx, ctx.obj["instance_configuration"]["environment"])
-    log("Done: Update init service")
+    finish(ctx)
 
 
 @instance.command(short_help="instance nginx configuration")
@@ -648,7 +727,7 @@ def update_nginx(ctx, hostname):
     ctx.obj["hostname"] = hostname
 
     _create_nginx_config(ctx)
-    log("Done: Update nginx config")
+    finish(ctx)
 
 
 def _create_nginx_config(ctx):
@@ -723,7 +802,5 @@ Using 'localhost' for now""",
 
     log("Restarting nginx service")
     run_process("/", ["systemctl", "restart", "nginx.service"], sudo="root")
-
-    log("Done: instance nginx configuration")
 
 # TODO: Add instance user

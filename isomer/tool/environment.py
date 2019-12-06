@@ -61,6 +61,7 @@ from isomer.misc.path import (
 )
 from isomer.tool import (
     log,
+    finish,
     run_process,
     format_result,
     get_isomer,
@@ -81,10 +82,13 @@ def environment(ctx):
     _get_configuration(ctx)
 
 
-def _test_environment(ctx):
+def _check_environment(ctx, env=None):
     """General fitness tests of the built environment"""
     # TODO: Implement environment testing
-    log("Would now test the environment (Not implemented, yet)")
+
+    if env is None:
+        env = get_next_environment(ctx)
+    log("Would now health check the environment '%s' (Not implemented, yet)" % env)
     return True
 
 
@@ -128,7 +132,7 @@ def _clear_environment(ctx, force=False, clear_env=None, clear=False, no_archive
         try:
             shutil.rmtree(path)
         except FileNotFoundError:
-            log("Path not found:", path, lvl=warn)
+            log("Path not found:", path, lvl=debug)
         except PermissionError:
             log("No permission to clear environment", lvl=error)
             return False
@@ -193,7 +197,7 @@ def _create_folders(ctx):
     else:
         log("No root access - could not change ownership", lvl=warn)
 
-    log("Done: Create instance folders")
+    finish(ctx)
 
 
 @environment.command(short_help="Archive an environment")
@@ -212,7 +216,7 @@ def archive(ctx, force, dynamic):
     result = _archive(ctx, force, dynamic)
     if result:
         log("Archived to '%s'" % result)
-        abort(0)
+        finish(ctx)
     else:
         log("Could not archive.", lvl=error)
         abort(50060)
@@ -291,6 +295,7 @@ def install_frontend(ctx):
 
     set_instance(ctx.obj["instance"], next_environment)
     _install_frontend(ctx)
+    finish(ctx)
 
 
 def _install_frontend(ctx):
@@ -331,7 +336,7 @@ def _install_frontend(ctx):
 
 
 @environment.command(
-    "install-module", short_help="Install a module into an environment"
+    "install-env-modules", short_help="Install a module into an environment"
 )
 @click.option(
     "--source", "-s", default="git", type=click.Choice(["link", "copy", "git"])
@@ -343,10 +348,14 @@ def _install_frontend(ctx):
     is_flag=True,
     help="Force installation (overwrites old modules)",
 )
-@click.argument("url")
+@click.argument("urls", nargs=-1)
 @click.pass_context
-def install_environment_module(ctx, source, force, url):
-    """Add and install a module"""
+def install_environment_modules(ctx, source, force, urls):
+    """Add and install a module only to a single environment
+
+    Note: This does not modify the instance configuration, so this will not
+    be permanent during upgrades etc.
+    """
 
     instance_name = ctx.obj["instance"]
     instance_configuration = ctx.obj["instances"][instance_name]
@@ -361,22 +370,23 @@ def install_environment_module(ctx, source, force, url):
 
     set_instance(instance_name, next_environment)
 
-    result = _install_module(source, url, force, user)
+    for url in urls:
+        result = _install_module(source, url, force, user)
 
-    if result is False:
-        log("Installation failed!", lvl=error)
-        abort(50000)
+        if result is False:
+            log("Installation failed!", lvl=error)
+            abort(50000)
 
-    package_name, package_version = result
+        package_name, package_version = result
 
-    descriptor = {"version": package_version, "source": source, "url": url}
-    instance_configuration["environments"][next_environment]["modules"][
-        package_name
-    ] = descriptor
+        descriptor = {"version": package_version, "source": source, "url": url}
+        instance_configuration["environments"][next_environment]["modules"][
+            package_name
+        ] = descriptor
 
     write_instance(instance_configuration)
 
-    log("Done: Install environment module")
+    finish(ctx)
 
 
 def _install_module(source, url, force=False, user=None):
@@ -502,9 +512,18 @@ def _install_module(source, url, force=False, user=None):
 @environment.command()
 @click.pass_context
 def install_modules(ctx):
-    """Installs all instance configured modules"""
+    """Installs all instance configured modules
+
+    To configure (and install) modules for an instance, use
+
+        iso instance install-modules -s <SOURCE> [URLS]
+
+    To immediately install them, add --install
+    """
 
     _install_modules(ctx)
+
+    finish(ctx)
 
 
 def _install_modules(ctx):
@@ -547,6 +566,8 @@ def _install_modules(ctx):
 def install_provisions(ctx, import_file, skip_provisions):
     """Install provisions and/or a database dump"""
     _install_provisions(ctx, import_file, skip_provisions)
+
+    finish(ctx)
 
 
 def _install_provisions(ctx, import_file=None, skip_provisions=False):
@@ -623,6 +644,8 @@ def install_environment(ctx, **kwargs):
     """Install an environment"""
 
     _install_environment(ctx, **kwargs)
+
+    finish(ctx)
 
 
 def _install_environment(
@@ -723,7 +746,7 @@ def _install_environment(
         if not skip_frontend and _install_frontend(ctx):
             log("Frontend installed")
             env["frontend"] = True
-        if not skip_test and _test_environment(ctx):
+        if not skip_test and _check_environment(ctx):
             log("Environment tested")
             env["tested"] = True
     except Exception:

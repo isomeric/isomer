@@ -37,7 +37,7 @@ import click
 from click_didyoumean import DYMGroup
 
 from isomer.logger import error, debug, warn, verbose
-from isomer.tool import log, ask
+from isomer.tool import log, ask, finish
 from isomer.tool.database import db
 
 
@@ -84,7 +84,7 @@ def modify(ctx, schema, uuid, object_filter, field, value):
     obj.validate()
     log("Changed object validated", lvl=debug)
     obj.save()
-    log("Done")
+    finish(ctx)
 
 
 @objects.command(short_help="view objects")
@@ -112,6 +112,8 @@ def view(ctx, schema, uuid, object_filter):
 
     for item in obj:
         pprint(item._fields)
+
+    finish(ctx)
 
 
 @objects.command(short_help="view objects")
@@ -158,7 +160,7 @@ def delete(ctx, schema, uuid, object_filter, yes):
     for item in obj:
         item.delete()
 
-    log("Done")
+    finish(ctx)
 
 
 @objects.command(short_help="drop a whole collection of objects")
@@ -187,6 +189,8 @@ def drop(ctx, schema, yes):
     model = database.objectmodels[schema]
     collection = model.collection()
     collection.drop()
+
+    finish(ctx)
 
 
 @objects.command(short_help="Validates stored objects")
@@ -232,7 +236,7 @@ def validate(ctx, schema, all_schemata):
                 lvl=error,
             )
 
-    log("Done")
+    finish(ctx)
 
 
 @objects.command(short_help="find in object model fields")
@@ -317,6 +321,8 @@ def find_field(ctx, search, by_type, obj):
                 # log(model, result)
                 print(result)
 
+    finish(ctx)
+
 
 @objects.command(short_help="Find illegal _id fields")
 @click.option(
@@ -369,6 +375,7 @@ def illegalcheck(ctx, schema, delete_duplicates, fix, test):
                     assert isinstance(item._fields["_id"], bson.objectid.ObjectId)
                     item.save()
                     database.objectmodels[thing].find_one({"_id": _id}).delete()
+    finish(ctx)
 
 
 @objects.command(short_help="Find duplicates by UUID")
@@ -553,4 +560,5 @@ def dupcheck(ctx, delete_duplicates, do_merge, schema):
     for thing in schemata:
         handle_schema(thing)
 
-    log("Done")
+    finish(ctx)
+

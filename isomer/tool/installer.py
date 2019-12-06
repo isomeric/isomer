@@ -41,7 +41,7 @@ from click_didyoumean import DYMGroup
 
 from isomer.tool.etc import NonExistentKey, instance_template
 from isomer.logger import error, warn
-from isomer.tool import check_root, log
+from isomer.tool import check_root, log, finish
 from isomer.ui.builder import install_frontend
 from isomer.provisions.base import provision
 
@@ -54,6 +54,8 @@ from isomer.version import version
 @click.pass_context
 def install(ctx, port):
     """[GROUP] Install various aspects of Isomer"""
+
+    # TODO: Make this a shortcut for a full instance install
 
     # set_instance(ctx.obj['instance'], "blue")  # Initially start with a blue instance
 
@@ -110,6 +112,8 @@ def install(ctx, port):
 def frontend(ctx, dev, rebuild, no_install, build_type):
     """Build and install frontend"""
 
+    # TODO: Move this to the environment handling and deprecate it here
+
     install_frontend(
         instance=ctx.obj["instance"],
         forcerebuild=rebuild,
@@ -131,7 +135,10 @@ def frontend(ctx, dev, rebuild, no_install, build_type):
 def docs(ctx, clear_target):
     """Build and install documentation"""
 
+    # TODO: Move this to the environment handling and deprecate it here
+
     install_docs(str(ctx.obj["instance"]), clear_target)
+    finish(ctx)
 
 
 def install_docs(instance, clear_target):
@@ -183,7 +190,6 @@ def install_docs(instance, clear_target):
 
     log("Copying docs to " + target)
     copy_tree(source, target)
-    log("Done: Install Docs")
 
 
 @install.command(short_help="install provisions")
@@ -219,7 +225,10 @@ def install_docs(instance, clear_target):
 def provisions(ctx, package, clear_existing, overwrite, list_provisions):
     """Install default provisioning data"""
 
+    # TODO: Move this to the environment handling and deprecate it here
+
     install_provisions(ctx, package, clear_existing, overwrite, list_provisions)
+    finish(ctx)
 
 
 def install_provisions(
@@ -238,10 +247,9 @@ def install_provisions(
     database.initialize(ctx.obj["dbhost"], ctx.obj["dbname"])
 
     provision(list_provisions, overwrite, clear_provisions, package)
-    log("Done: Install Provisions")
 
 
-@install.command(short_help="install modules")
+@install.command(short_help="install modules (DEPRECATED)", deprecated=True)
 @click.option(
     "--wip",
     help="Install Work-In-Progress (alpha/beta-state) modules as well",
@@ -250,7 +258,10 @@ def install_provisions(
 def modules(wip):
     """Install the plugin modules"""
 
+    # TODO: Remove altogether, this should be done via instance/environment only
+
     install_modules(wip)
+    log("Done: Install Modules")
 
 
 def install_modules(wip):
@@ -352,4 +363,4 @@ def install_modules(wip):
     log("Installed modules: ", success)
     if len(failed) > 0:
         log("Failed modules: ", failed)
-    log("Done: Install Modules")
+

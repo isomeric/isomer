@@ -33,7 +33,7 @@ import sys
 import click
 
 from isomer.logger import warn, error
-from isomer.tool import log
+from isomer.tool import log, finish
 from isomer.tool.database import db
 
 
@@ -111,7 +111,7 @@ def add_action_role(ctx):
             item.perms[action].append(role)
             item.save()
 
-    log("Done")
+    finish(ctx)
 
 
 @rbac.command(short_help="Delete an action role")
@@ -135,7 +135,7 @@ def del_action_role(ctx):
             item.perms[action].remove(role)
             item.save()
 
-    log("Done")
+    finish(ctx)
 
 
 @rbac.command(short_help="Change owner")
@@ -162,4 +162,4 @@ def change_owner(ctx, owner, uuid):
         item.owner = owner.uuid
         item.save()
 
-    log("Done")
+    finish(ctx)
