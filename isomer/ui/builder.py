@@ -147,7 +147,8 @@ def install_frontend(
     log("Updating frontend components")
     components = {}
 
-    if development:
+    if development is True:
+        log('Using development frontend location')
         frontend_root = os.path.realpath(
             os.path.dirname(os.path.realpath(__file__)) + "/../../frontend"
         )
@@ -162,6 +163,7 @@ def install_frontend(
                 )
                 return
     else:
+        log('Using production frontend location')
         frontend_root = get_path("lib", "repository/frontend")
         frontend_target = get_path("lib", "frontend")
 

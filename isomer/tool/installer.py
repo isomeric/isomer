@@ -92,7 +92,7 @@ def install(ctx, port):
 
 @install.command(short_help="build and install frontend")
 @click.option(
-    "--dev", help="Use frontend development location", default=True, is_flag=True
+    "--dev", help="Use frontend development location", default=False, is_flag=True
 )
 @click.option(
     "--rebuild",
@@ -112,6 +112,7 @@ def install(ctx, port):
 def frontend(ctx, dev, rebuild, no_install, build_type):
     """Build and install frontend"""
 
+    log('DEV: ', dev, lvl=warn)
     # TODO: Move this to the environment handling and deprecate it here
 
     install_frontend(
