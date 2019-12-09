@@ -323,7 +323,7 @@ def _install_frontend(ctx):
             "-e",
             env,
             "--clog",
-            "10"
+            "10",
             "install",
             "frontend",
             "--rebuild",
