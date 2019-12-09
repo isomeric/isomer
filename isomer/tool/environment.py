@@ -322,6 +322,8 @@ def _install_frontend(ctx):
             instance_configuration["name"],
             "-e",
             env,
+            "--clog",
+            "10"
             "install",
             "frontend",
             "--rebuild",
