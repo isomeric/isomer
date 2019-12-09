@@ -94,7 +94,6 @@ def finish(ctx):
         commands = parent.info_name + " " + commands
         parent = parent.parent
     log("Done:", commands)
-    sys.exit(0)
 
 
 def check_root():
