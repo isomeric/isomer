@@ -232,16 +232,15 @@ def set_parameter(ctx, parameter, value):
 
 
 @instance.command(short_help="Create a new instance")
-@click.argument('instance_name', default=None)
+@click.argument('instance_name', default="")
 @click.pass_context
 def create(ctx, instance_name):
     """Create a new instance"""
 
-    if instance_name is None:
+    if instance_name is "":
         instance_name = ctx.obj["instance"]
 
     if instance_name in ctx.obj["instances"]:
-        log("Instance exists!", lvl=warn)
         abort(EXIT_INSTANCE_EXISTS)
 
     log("Creating instance:", instance_name)

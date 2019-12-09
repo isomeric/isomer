@@ -436,7 +436,6 @@ def _install_module(source, url, force=False, user=None):
     module_path = get_path("lib", "modules", ensure=True)
 
     if source not in ("git", "link", "copy"):
-        log("Only installing from github or local is currently supported", lvl=error)
         abort(EXIT_INVALID_SOURCE)
 
     uuid = std_uuid()

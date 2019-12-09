@@ -45,11 +45,14 @@ def log(*args, **kwargs):
 
 EXIT_INVALID_ENVIRONMENT = {'code': 1, 'message': ''}
 EXIT_INVALID_CONFIGURATION = {'code': 2, 'message': ''}
-EXIT_INVALID_SOURCE = {'code': 3, 'message': ''}
+EXIT_INVALID_SOURCE = {
+    'code': 3,
+    'message': "Only installing from github or local is currently supported"
+}
 EXIT_NO_PERMISSION = {'code': 5, 'message': ''}
 EXIT_INSTALLATION_FAILED = {'code': 11, 'message': ''}
 EXIT_PROVISIONING_FAILED = {'code': 12, 'message': ''}
-EXIT_INSTANCE_EXISTS = {'code': 21, 'message': ''}
+EXIT_INSTANCE_EXISTS = {'code': 21, 'message': 'Instance already exists'}
 EXIT_INSTANCE_UNKNOWN = {'code': 22, 'message': ''}
 EXIT_SERVICE_INVALID = {'code': 31, 'message': ''}
 EXIT_USER_BAILED_OUT = {'code': 41, 'message': ''}
