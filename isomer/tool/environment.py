@@ -444,6 +444,11 @@ def _install_module(source, url, force=False, user=None):
 
     log("Installing module: %s [%s]" % (url, source))
 
+    if source in ('link', 'copy') and url.startswith('/'):
+        absolute_path = url
+    else:
+        absolute_path = os.path.abspath(os.path.join(os.path.dirname(__file__), url))
+
     if source == "git":
         log("Cloning repository from", url)
         success, output = run_process(
@@ -452,16 +457,16 @@ def _install_module(source, url, force=False, user=None):
         if not success:
             log("Error:", output, lvl=error)
     elif source == "link":
-        log("Linking repository from", url)
+        log("Linking repository from", absolute_path)
         success, output = run_process(
-            module_path, ["ln", "-s", url, temporary_path], sudo=user
+            module_path, ["ln", "-s", absolute_path, temporary_path], sudo=user
         )
         if not success:
             log("Error:", output, lvl=error)
     elif source == "copy":
-        log("Copying repository from", url)
+        log("Copying repository from", absolute_path)
         success, output = run_process(
-            module_path, ["cp", "-a", url, temporary_path], sudo=user
+            module_path, ["cp", "-a", absolute_path, temporary_path], sudo=user
         )
         if not success:
             log("Error:", output, lvl=error)
