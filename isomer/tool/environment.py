@@ -446,7 +446,7 @@ def _install_module(source, url, force=False, user=None):
     if source in ('link', 'copy') and url.startswith('/'):
         absolute_path = url
     else:
-        absolute_path = os.path.abspath(os.path.join(os.path.dirname(__file__), url))
+        absolute_path = os.path.abspath(url)
 
     if source == "git":
         log("Cloning repository from", url)
