@@ -173,7 +173,11 @@ def install_frontend(
     else:
         log("Clearing components folder")
         for thing in os.listdir(component_folder):
-            shutil.rmtree(os.path.join(component_folder, thing))
+            try:
+                shutil.rmtree(os.path.join(component_folder, thing))
+            except PermissionError:
+                log("Cannot remove data in old components folder, check permissions in",
+                    component_folder, thing, lvl=warn)
 
     if install:
         cmdline = ["npm", "install", "--no-save"]
