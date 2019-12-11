@@ -33,4 +33,5 @@ from isomer.ui.objectmanager.subscriptions import SubscriptionOperations
 
 class ObjectManager(SubscriptionOperations):
     """Combined functionality object management component"""
+
     pass

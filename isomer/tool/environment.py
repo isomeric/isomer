@@ -445,7 +445,7 @@ def _install_module(source, url, force=False, user=None):
 
     log("Installing module: %s [%s]" % (url, source))
 
-    if source in ('link', 'copy') and url.startswith('/'):
+    if source in ("link", "copy") and url.startswith("/"):
         absolute_path = url
     else:
         absolute_path = os.path.abspath(url)
@@ -665,7 +665,7 @@ def _install_environment(
     skip_data,
     skip_frontend,
     skip_test,
-    skip_provisions
+    skip_provisions,
 ):
     """Internal function to perform environment installation"""
 

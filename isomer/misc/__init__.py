@@ -137,7 +137,7 @@ def nested_map_find(d, keys):
     """Looks up a nested dictionary by traversing a list of keys"""
 
     if isinstance(keys, str):
-        keys = keys.split('.')
+        keys = keys.split(".")
     rv = d
     for key in keys:
         rv = rv[key]
@@ -174,7 +174,7 @@ def std_hash(word, salt):
     return hex_hash
 
 
-def std_now(delta=None, format="iso", tz='UTC'):
+def std_now(delta=None, format="iso", tz="UTC"):
     """Return current timestamp in ISO format"""
 
     now = datetime.now(tz=pytz.timezone(tz))
@@ -833,7 +833,7 @@ attributes = [
 
 def std_color(palette_name=None):
     if palette_name is None:
-        palette_name = 'ibm'
+        palette_name = "ibm"
 
     color = SecretColors.Palette(palette_name, show_warning=False).random()
     return color

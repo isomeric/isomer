@@ -45,7 +45,6 @@ if not sys.warnoptions:
     def warn(*args, **kwargs):
         pass
 
-
     warnings.warn = warn
 
     warnings.simplefilter("ignore")
@@ -94,7 +93,7 @@ def main():
         print("Please restart the tool")
         sys.exit()
 
-    isotool(obj={}, auto_envvar_prefix='ISOMER')
+    isotool(obj={}, auto_envvar_prefix="ISOMER")
 
 
 if __name__ == "__main__":

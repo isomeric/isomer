@@ -206,7 +206,7 @@ class ConfigurableMeta(LoggingMeta):
 
         if no_db is True:
             self.no_db = True
-            self.log('Not using database!')
+            self.log("Not using database!")
             return
         else:
             self.no_db = False
@@ -243,8 +243,8 @@ class ConfigurableMeta(LoggingMeta):
                 self.log("Error during configuration reading: ", e, type(e), exc=True)
 
         if self.config.active is False:
-            self.log('Component disabled.', lvl=warn)
-            #raise ComponentDisabled
+            self.log("Component disabled.", lvl=warn)
+            # raise ComponentDisabled
 
     def register(self, *args):
         """Register a configurable component in the configuration schema

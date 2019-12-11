@@ -86,13 +86,13 @@ def clear_all():
 
 class IsomerBaseModel(formal.formalModel):
     def save(self, *args, **kwargs):
-        if self._fields.get('color', None) is None:
-            self._fields['color'] = std_color()
+        if self._fields.get("color", None) is None:
+            self._fields["color"] = std_color()
         super(IsomerBaseModel, self).save(*args, **kwargs)
 
     @classmethod
     def by_uuid(cls, uuid):
-        return cls.find_one({'uuid': uuid})
+        return cls.find_one({"uuid": uuid})
 
 
 def _build_model_factories(store):

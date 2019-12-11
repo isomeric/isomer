@@ -154,6 +154,7 @@ class cli_mem_heap(Event):
 
 class TestException(BaseException):
     """Generic exception to test exception monitoring"""
+
     pass
 
 
@@ -208,7 +209,7 @@ class IsomerDebugger(ConfigurableComponent):
         try:
             self.tracker = tracker.SummaryTracker()
         except AttributeError:
-            self.log('No pympler library for memory analysis installed.', lvl=warn)
+            self.log("No pympler library for memory analysis installed.", lvl=warn)
 
         self.log("Started. Notification users: ", self.config.notificationusers)
 
@@ -289,18 +290,14 @@ class IsomerDebugger(ConfigurableComponent):
         # TODO: Does this actually work? Is this useful? Necessary?
         self.log("Storing received object to /tmp", lvl=critical)
         fp = open(
-            "/tmp/isomer_debugger_"
-            + str(event.user.useruuid)
-            + "_"
-            + str(uuid4()),
-            "w",
+            "/tmp/isomer_debugger_" + str(event.user.useruuid) + "_" + str(uuid4()), "w"
         )
         json.dump(event.data, fp, indent=True)
         fp.close()
 
     @handler(logtailrequest)
     def logtailrequest(self, event):
-        self.log('Log requested')
+        self.log("Log requested")
 
     @handler("exception", channel="*", priority=100.0)
     def _on_exception(self, error_type, value, traceback, handler=None, fevent=None):
@@ -379,7 +376,8 @@ class CLI(ConfigurableComponent):
         def show_error():
             self.log(
                 "Unknown Command: '%s'. Use /help to get a list of enabled "
-                "cli hooks" % data, lvl=warn
+                "cli hooks" % data,
+                lvl=warn,
             )
 
         if len(data) == 0:

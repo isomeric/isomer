@@ -59,9 +59,7 @@ deb-src https://deb.nodesource.com/node_11.x sid main
 platforms = {
     "Docker": {
         "pre_install": [
-            [
-                "apt-get", "update"
-            ],
+            ["apt-get", "update"],
             [
                 "apt-get",
                 "-y",
@@ -73,7 +71,7 @@ platforms = {
                 "python3",
                 "python3-pip",
                 "python3-spur",
-                "virtualenv"
+                "virtualenv",
             ],
             [
                 "sh",
@@ -83,7 +81,7 @@ platforms = {
             {
                 "action": "create_file",
                 "filename": "/etc/apt/sources.list.d/nodesource.list",
-                "content": node_source_list_docker
+                "content": node_source_list_docker,
             },
             ["apt-get", "update"],
         ],
@@ -99,8 +97,8 @@ platforms = {
             "python3-pymongo-ext",
             "python3-bson-ext",
             "python3-cffi",
-            #"libffi-dev",
-            "enchant"
+            # "libffi-dev",
+            "enchant",
         ],
     },
     "Debian GNU/Linux": {
@@ -117,7 +115,7 @@ platforms = {
                 "python3",
                 "python3-pip",
                 "python3-spur",
-                "virtualenv"
+                "virtualenv",
             ],
             [
                 "sh",

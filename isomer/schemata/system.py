@@ -96,25 +96,21 @@ SystemconfigSchema["properties"].update(
                 "type": "object",
                 "properties": {
                     "name": {"type": "string"},
-                    "version": {"type": "string"}
-                }
-            }
+                    "version": {"type": "string"},
+                },
+            },
         },
         "provisions": {
             "type": "object",
-            "default": {
-                "packages": []
-            },
+            "default": {"packages": []},
             "properties": {
                 "packages": {
                     "type": "array",
                     "default": [],
-                    "items": {
-                        "type": "string"
-                    }
+                    "items": {"type": "string"},
                 }
-            }
-        }
+            },
+        },
     }
 )
 

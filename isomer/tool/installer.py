@@ -112,7 +112,6 @@ def install(ctx, port):
 def frontend(ctx, dev, rebuild, no_install, build_type):
     """Build and install frontend"""
 
-    log('DEV: ', dev, lvl=warn)
     # TODO: Move this to the environment handling and deprecate it here
 
     install_frontend(
@@ -364,4 +363,3 @@ def install_modules(wip):
     log("Installed modules: ", success)
     if len(failed) > 0:
         log("Failed modules: ", failed)
-

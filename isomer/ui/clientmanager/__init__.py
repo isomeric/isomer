@@ -44,4 +44,5 @@ class ClientManager(LatencyManager):
     Handles client connections and requests as well as client-outbound
     communication.
     """
+
     pass

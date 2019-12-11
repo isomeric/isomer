@@ -196,7 +196,8 @@ class Authenticator(ConfigurableComponent):
         # They're also required in the Enrol module..!
 
         if (len(event.username) < minimum_username_length) or (
-            len(event.password) < minimum_password_length):
+            len(event.password) < minimum_password_length
+        ):
             self.log("Illegal username or password received, login cancelled", lvl=warn)
             self._fail(event, "Password or username too short")
             return

@@ -154,7 +154,7 @@ def run_process(cwd, args, shell=None, sudo=None, show=False):
             log("Executing:", command)
         process = shell.run(command, cwd=cwd)
 
-        decoded = str(process.output, encoding='utf-8')
+        decoded = str(process.output, encoding="utf-8")
         log(decoded.replace("\\n", "\n"), lvl=verbose)
 
         return True, process
@@ -421,9 +421,9 @@ def install_isomer(
         abort(50000)
 
     def handle_command(command):
-        if command.get('action', None) == 'create_file':
-            with open(command['filename'], 'w') as f:
-                f.write(command['content'])
+        if command.get("action", None) == "create_file":
+            with open(command["filename"], "w") as f:
+                f.write(command["content"])
 
     def platform():
         """In a platform specific way, install all dependencies"""

@@ -78,7 +78,7 @@ def lookup_field(
     html_class="div",
     select_type="strapselect",
     mapping="uuid",
-    search_filter=None
+    search_filter=None,
 ):
     """Generates a lookup field for form definitions"""
 
@@ -135,7 +135,7 @@ def lookup_field_multiple(
                     "asyncCallback": "$ctrl.getFormData",
                     "map": {"valueProperty": mapping, "nameProperty": "name"},
                 },
-            },
+            }
         ],
     }
 
@@ -147,7 +147,7 @@ def lookup_object(key, lookup_type=None, actions=None):
         lookup_type = key
 
     if actions is None:
-        actions = ['edit', 'create']
+        actions = ["edit", "create"]
 
     template = ""
 
@@ -155,41 +155,38 @@ def lookup_object(key, lookup_type=None, actions=None):
         uuid_key = "{{model.%s}}" % key
         condition = 'ng-show="model.%s != null"' % key
 
-        if action == 'edit':
-            icon = 'pencil'
-            button_class = 'success'
-        elif action == 'view':
-            icon = 'search'
-            button_class = 'info'
-        elif action == 'create':
-            icon = 'plus'
-            condition = ''
-            button_class = 'info'
-            uuid_key = ""
-        elif action == 'unset':
-            # TODO: This needs to change the link to unset the model attribute
-            icon = 'plus'
+        if action == "edit":
+            icon = "pencil"
+            button_class = "success"
+        elif action == "view":
+            icon = "search"
+            button_class = "info"
+        elif action == "create":
+            icon = "plus"
             condition = ""
-            button_class = 'info'
-        elif action == 'delete':
-            icon = 'trash'
-            button_class = 'danger'
+            button_class = "info"
+            uuid_key = ""
+        elif action == "unset":
+            # TODO: This needs to change the link to unset the model attribute
+            icon = "plus"
+            condition = ""
+            button_class = "info"
+        elif action == "delete":
+            icon = "trash"
+            button_class = "danger"
         else:
-            icon = 'question'
-            condition = ''
-            button_class = 'info'
+            icon = "question"
+            condition = ""
+            button_class = "info"
 
-        template += '<a %s class="btn btn-%s btn-sm"' \
-                    'href="/#!/editor/%s/%s/%s">' \
-                    '<span class="fa fa-%s"></span>' \
-                    '</a>' % (
-                    condition, button_class, lookup_type, uuid_key, action, icon)
+        template += (
+            '<a %s class="btn btn-%s btn-sm"'
+            'href="/#!/editor/%s/%s/%s">'
+            '<span class="fa fa-%s"></span>'
+            "</a>" % (condition, button_class, lookup_type, uuid_key, action, icon)
+        )
 
-    result = {
-        "key": "lookup_" + key,
-        "type": "template",
-        "template": template
-    }
+    result = {"key": "lookup_" + key, "type": "template", "template": template}
 
     return result
 
@@ -249,7 +246,7 @@ def section(rows, columns, items, label=None, condition=None):
     result = {"type": "section", "htmlClass": "row", "items": sections}
 
     if condition is not None:
-        result['condition'] = condition
+        result["condition"] = condition
 
     return result
 
@@ -288,12 +285,12 @@ def rating_widget(key="rating", maximum=10):
         "key": "rating",
         "type": "template",
         "template": '<div class="rating">'
-                    '   <span class="fa fa-star-o" ng-repeat="rating in []|range: {1} - model.{0}"'
-                    '         ng-click="model.{0} = {1} - rating"></span>'
-                    '   <span class="fa fa-star" ng-repeat="rating in []|range: model.{0}"'
-                    '         ng-click="model.{0} = model.{0} - rating"></span>'
-                    "</div>"
-                    "<span>{{model.{0}}} out of 10</span>".format(key, maximum),
+        '   <span class="fa fa-star-o" ng-repeat="rating in []|range: {1} - model.{0}"'
+        '         ng-click="model.{0} = {1} - rating"></span>'
+        '   <span class="fa fa-star" ng-repeat="rating in []|range: model.{0}"'
+        '         ng-click="model.{0} = model.{0} - rating"></span>'
+        "</div>"
+        "<span>{{model.{0}}} out of 10</span>".format(key, maximum),
     }
 
     return widget
@@ -324,10 +321,10 @@ def event_button(key, title, target, action, data=None):
         data = "model"
 
     widget = {
-        'key': key,
-        'type': 'button',
-        'onClick': '$ctrl.formAction("%s", "%s", "%s")' % (target, action, data),
-        'title': title
+        "key": key,
+        "type": "button",
+        "onClick": '$ctrl.formAction("%s", "%s", "%s")' % (target, action, data),
+        "title": title,
     }
 
     return widget
@@ -362,10 +359,7 @@ def area_field(key="area"):
 def horizontal_divider():
     """Inserts a horizontal ruler/divider"""
 
-    widget = {
-        "type": "help",
-        "helpvalue": "<hr />"
-    }
+    widget = {"type": "help", "helpvalue": "<hr />"}
     return widget
 
 

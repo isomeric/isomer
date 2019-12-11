@@ -561,4 +561,3 @@ def dupcheck(ctx, delete_duplicates, do_merge, schema):
         handle_schema(thing)
 
     finish(ctx)
-

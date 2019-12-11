@@ -128,13 +128,13 @@ def db_import(schema, uuid, object_filter, import_format, filename, all_schemata
 @click.argument("filename")
 @click.pass_context
 def load(ctx, filename):
-    host, port = ctx.obj.get('dbhost').split(':')
-    _load(host, port, ctx.obj.get('dbname'), filename)
+    host, port = ctx.obj.get("dbhost").split(":")
+    _load(host, port, ctx.obj.get("dbname"), filename)
 
 
 @db.command("dump", short_help="Create a full database dump")
 @click.argument("filename")
 @click.pass_context
 def load(ctx, filename):
-    host, port = ctx.obj.get('dbhost').split(':')
-    _dump(host, port, ctx.obj.get('dbname'), filename)
+    host, port = ctx.obj.get("dbhost").split(":")
+    _dump(host, port, ctx.obj.get("dbname"), filename)

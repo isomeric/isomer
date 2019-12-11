@@ -152,12 +152,12 @@ class CrudOperations(CliManager):
                 if isinstance(request_search, dict):
                     search_filter = request_search
                 elif isinstance(request_search, str) and len(request_search) > 0:
-                    if request_search != '*':
+                    if request_search != "*":
                         self.log(request_search, lvl=warn)
-                        request_search = request_search.replace(r'\\\\', r'')
+                        request_search = request_search.replace(r"\\\\", r"")
                         search_filter = literal_eval(request_search)
 
-            self.log('Final filter:', search_filter, lvl=debug)
+            self.log("Final filter:", search_filter, lvl=debug)
 
             return search_filter
 
@@ -418,26 +418,29 @@ class CrudOperations(CliManager):
             try:
                 validated = model(client_data)
             except ValidationError as e:
-                self.log('Validation Error:', e, e.__dict__, pretty=True)
+                self.log("Validation Error:", e, e.__dict__, pretty=True)
                 give_up -= 1
-                if e.validator == 'type':
-                    schema_data = schemastore[schema_name]['schema']
-                    if e.validator_value == 'number':
-                        definition = nested_map_find(schema_data,
-                                                     list(e.schema_path)[:-1])
+                if e.validator == "type":
+                    schema_data = schemastore[schema_name]["schema"]
+                    if e.validator_value == "number":
+                        definition = nested_map_find(
+                            schema_data, list(e.schema_path)[:-1]
+                        )
 
-                        if 'default' in definition:
+                        if "default" in definition:
                             client_data = nested_map_update(
-                                client_data, definition['default'], list(e.path)
+                                client_data, definition["default"], list(e.path)
                             )
                         else:
                             client_data = nested_map_update(
                                 client_data, None, list(e.path)
                             )
-                if e.validator == 'pattern' and \
-                        'uuid' == e.path[0] and \
-                        client_data['uuid'] == 'create':
-                    client_data['uuid'] = std_uuid()
+                if (
+                    e.validator == "pattern"
+                    and "uuid" == e.path[0]
+                    and client_data["uuid"] == "create"
+                ):
+                    client_data["uuid"] = std_uuid()
 
         if validated is False:
             raise ValidationError
@@ -468,7 +471,7 @@ class CrudOperations(CliManager):
             try:
                 client_object = self._validate(schema, model, client_object)
             except ValidationError:
-                self._cancel_by_error(event, 'Invalid data')
+                self._cancel_by_error(event, "Invalid data")
                 return
 
             if uuid != "create":
@@ -502,8 +505,9 @@ class CrudOperations(CliManager):
                 try:
                     storage_object.validate()
                 except ValidationError:
-                    self.log("Validation of new object failed!", client_object,
-                             lvl=warn)
+                    self.log(
+                        "Validation of new object failed!", client_object, lvl=warn
+                    )
 
             storage_object.save()
 

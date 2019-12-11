@@ -148,7 +148,7 @@ def install_frontend(
     components = {}
 
     if development is True:
-        log('Using development frontend location')
+        log("Using development frontend location")
         frontend_root = os.path.realpath(
             os.path.dirname(os.path.realpath(__file__)) + "/../../frontend"
         )
@@ -163,7 +163,7 @@ def install_frontend(
                 )
                 return
     else:
-        log('Using production frontend location')
+        log("Using production frontend location")
         frontend_root = get_path("lib", "repository/frontend")
         frontend_target = get_path("lib", "frontend")
 
@@ -178,8 +178,12 @@ def install_frontend(
             try:
                 shutil.rmtree(os.path.join(component_folder, thing))
             except PermissionError:
-                log("Cannot remove data in old components folder, check permissions in",
-                    component_folder, thing, lvl=warn)
+                log(
+                    "Cannot remove data in old components folder, check permissions in",
+                    component_folder,
+                    thing,
+                    lvl=warn,
+                )
 
     if install:
         cmdline = ["npm", "install", "--no-save"]

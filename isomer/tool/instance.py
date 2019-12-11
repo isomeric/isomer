@@ -77,9 +77,16 @@ from isomer.tool.defaults import (
     combined_file,
     distribution,
 )
-from isomer.error import abort, EXIT_INVALID_CONFIGURATION, EXIT_INSTALLATION_FAILED, \
-    EXIT_INSTANCE_EXISTS, EXIT_INSTANCE_UNKNOWN, EXIT_SERVICE_INVALID, \
-    EXIT_USER_BAILED_OUT, EXIT_INVALID_PARAMETER
+from isomer.error import (
+    abort,
+    EXIT_INVALID_CONFIGURATION,
+    EXIT_INSTALLATION_FAILED,
+    EXIT_INSTANCE_EXISTS,
+    EXIT_INSTANCE_UNKNOWN,
+    EXIT_SERVICE_INVALID,
+    EXIT_USER_BAILED_OUT,
+    EXIT_INVALID_PARAMETER,
+)
 from isomer.tool.environment import (
     _install_environment,
     install_environment_modules,
@@ -122,8 +129,7 @@ def info_instance(ctx):
 
 
 @instance.command(
-    name="check",
-    short_help="check instance configuration and environments"
+    name="check", short_help="check instance configuration and environments"
 )
 @click.pass_context
 def check_instance(ctx):
@@ -142,8 +148,8 @@ def check_instance(ctx):
 
     # TODO: Validate instance config
 
-    _check_environment(ctx, 'blue')
-    _check_environment(ctx, 'green')
+    _check_environment(ctx, "blue")
+    _check_environment(ctx, "green")
 
     finish(ctx)
 
@@ -154,17 +160,16 @@ def browser(ctx):
     """Tries to start or point a browser towards this instance's frontend"""
     instance_configuration = ctx.obj["instance_configuration"]
 
-    server = instance_configuration.get('webserver', 'internal')
+    server = instance_configuration.get("webserver", "internal")
     protocol = "http"
 
-    if server != 'internal':
+    if server != "internal":
         protocol += "s"
 
     host = instance_configuration.get(
-        'web_hostname',
-        instance_configuration.get('web_address', '127.0.0.1')
+        "web_hostname", instance_configuration.get("web_address", "127.0.0.1")
     )
-    port = instance_configuration.get('web_port', None)
+    port = instance_configuration.get("web_port", None)
 
     if port is None:
         url = "%s://%s" % (protocol, host)
@@ -172,10 +177,12 @@ def browser(ctx):
         url = "%s://%s:%i" % (protocol, host, port)
 
     log("Opening browser to:", url)
-    log("If this is empty or unreachable, check your instance with:\n"
+    log(
+        "If this is empty or unreachable, check your instance with:\n"
         "   iso instance info\n"
         "Also try the health checks:\n"
-        "   iso instance check")
+        "   iso instance check"
+    )
 
     webbrowser.open(url)
 
@@ -212,10 +219,7 @@ def set_parameter(ctx, parameter, value):
         else:
             converted_value = value
     except KeyError:
-        log(
-            "Available parameters:",
-            sorted(list(defaults.keys()))
-        )
+        log("Available parameters:", sorted(list(defaults.keys())))
         abort(EXIT_INVALID_PARAMETER)
 
     instance_configuration[parameter] = converted_value
@@ -232,7 +236,7 @@ def set_parameter(ctx, parameter, value):
 
 
 @instance.command(short_help="Create a new instance")
-@click.argument('instance_name', default="")
+@click.argument("instance_name", default="")
 @click.pass_context
 def create(ctx, instance_name):
     """Create a new instance"""
@@ -352,7 +356,7 @@ def remove(ctx, clear, no_archive):
     "-s",
     default="git",
     type=click.Choice(["link", "copy", "git", "develop"]),
-    help="Specify installation source/method"
+    help="Specify installation source/method",
 )
 @click.option(
     "--install-env",
@@ -633,10 +637,10 @@ def snakeoil(ctx):
 def _instance_snakeoil(ctx):
     """Generates a snakeoil certificate that has only been self signed"""
 
-    log('Generating self signed (insecure) certificate/key combination')
+    log("Generating self signed (insecure) certificate/key combination")
 
     try:
-        os.mkdir('/etc/ssl/certs/isomer')
+        os.mkdir("/etc/ssl/certs/isomer")
     except FileExistsError:
         pass
     except PermissionError:
@@ -661,12 +665,16 @@ def _instance_snakeoil(ctx):
         if os.path.exists(cert_file):
             try:
                 certificate = open(cert_file, "rb").read()
-                old_cert = crypto.load_certificate(crypto.FILETYPE_PEM,
-                                                   certificate)
+                old_cert = crypto.load_certificate(crypto.FILETYPE_PEM, certificate)
                 serial = old_cert.get_serial_number() + 1
             except (crypto.Error, OSError) as e:
-                log('Could not read old certificate to increment '
-                    'serial:', type(e), e, exc=True, lvl=warn)
+                log(
+                    "Could not read old certificate to increment serial:",
+                    type(e),
+                    e,
+                    exc=True,
+                    lvl=warn,
+                )
                 serial = 1
         else:
             serial = 1
@@ -685,21 +693,26 @@ def _instance_snakeoil(ctx):
         certificate.gmtime_adj_notAfter(10 * 365 * 24 * 60 * 60)
         certificate.set_issuer(certificate.get_subject())
         certificate.set_pubkey(k)
-        certificate.sign(k, 'sha512')
+        certificate.sign(k, "sha512")
 
-        open(key_file, "wt").write(str(
-            crypto.dump_privatekey(crypto.FILETYPE_PEM, k),
-            encoding="ASCII"))
+        open(key_file, "wt").write(
+            str(crypto.dump_privatekey(crypto.FILETYPE_PEM, k), encoding="ASCII")
+        )
 
-        open(cert_file, "wt").write(str(
-            crypto.dump_certificate(crypto.FILETYPE_PEM, certificate),
-            encoding="ASCII"))
+        open(cert_file, "wt").write(
+            str(
+                crypto.dump_certificate(crypto.FILETYPE_PEM, certificate),
+                encoding="ASCII",
+            )
+        )
 
-        open(combined_file, "wt").write(str(
-            crypto.dump_certificate(crypto.FILETYPE_PEM, certificate),
-            encoding="ASCII") + str(
-            crypto.dump_privatekey(crypto.FILETYPE_PEM, k),
-            encoding="ASCII"))
+        open(combined_file, "wt").write(
+            str(
+                crypto.dump_certificate(crypto.FILETYPE_PEM, certificate),
+                encoding="ASCII",
+            )
+            + str(crypto.dump_privatekey(crypto.FILETYPE_PEM, k), encoding="ASCII")
+        )
 
     create_self_signed_cert()
 
@@ -801,5 +814,6 @@ Using 'localhost' for now""",
 
     log("Restarting nginx service")
     run_process("/", ["systemctl", "restart", "nginx.service"], sudo="root")
+
 
 # TODO: Add instance user

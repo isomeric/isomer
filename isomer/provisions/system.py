@@ -41,9 +41,7 @@ SystemConfiguration = {
     "name": "Default System Configuration",
     "description": "Default System description",
     "hostname": "localhost",
-    "provisions": {
-        "packages": ["user"]
-    }
+    "provisions": {"packages": ["user"]},
 }
 
 

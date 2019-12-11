@@ -151,8 +151,13 @@ def provisionList(
     log("Provisioned %i out of %i items successfully." % (counter, len(items)))
 
 
-def provision(list_provisions=False, overwrite=False, clear_provisions=False,
-              package=None, installed=None):
+def provision(
+    list_provisions=False,
+    overwrite=False,
+    clear_provisions=False,
+    package=None,
+    installed=None,
+):
     from isomer.provisions import build_provision_store
     from isomer.database import objectmodels
 
@@ -194,14 +199,14 @@ def provision(list_provisions=False, overwrite=False, clear_provisions=False,
     sorted_provisions = sort_dependencies(provision_store.items())
 
     # These need to be installed first in that order:
-    if 'system' in sorted_provisions:
-        sorted_provisions.remove('system')
-    if 'user' in sorted_provisions:
-        sorted_provisions.remove('user')
-    if 'system' not in installed:
-        sorted_provisions.insert(0, 'system')
-    if 'user' not in installed:
-        sorted_provisions.insert(0, 'user')
+    if "system" in sorted_provisions:
+        sorted_provisions.remove("system")
+    if "user" in sorted_provisions:
+        sorted_provisions.remove("user")
+    if "system" not in installed:
+        sorted_provisions.insert(0, "system")
+    if "user" not in installed:
+        sorted_provisions.insert(0, "user")
 
     if list_provisions:
         log(sorted_provisions, pretty=True)
@@ -221,12 +226,12 @@ def provision(list_provisions=False, overwrite=False, clear_provisions=False,
         confirm_provision(provision_name)
 
     def confirm_provision(provision_name):
-        if provision_name == 'user':
-            log('Not confirming system user provision')
+        if provision_name == "user":
+            log("Not confirming system user provision")
             return
-        systemconfig = objectmodels['systemconfig'].find_one({'active': True})
-        if provision_name not in systemconfig.provisions['packages']:
-            systemconfig.provisions['packages'].append(provision_name)
+        systemconfig = objectmodels["systemconfig"].find_one({"active": True})
+        if provision_name not in systemconfig.provisions["packages"]:
+            systemconfig.provisions["packages"].append(provision_name)
             systemconfig.save()
 
     if package is not None:

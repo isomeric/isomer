@@ -124,6 +124,7 @@ class cli_drop_privileges(Event):
 
     pass
 
+
 class cli_check_provisions(Event):
     """Check current provisioning state and trigger new provisioning"""
 
@@ -393,16 +394,18 @@ class Core(ConfigurableComponent):
     def cli_info(self, event):
         """Provides information about the running instance"""
 
-        self.log("Instance: %s Dev: %s Host: %s Port: %s Insecure: %s Frontend: %s\nModules:" % (
+        self.log(
+            "Instance: %s Dev: %s Host: %s Port: %s Insecure: %s Frontend: %s\nModules:"
+            % (
                 self.instance,
                 self.development,
                 self.host,
                 self.port,
                 self.insecure,
-                self.frontend_target
+                self.frontend_target,
             ),
             self.modules_loaded,
-            pretty=True
+            pretty=True,
         )
 
     def _start_server(self, *args):
@@ -511,7 +514,9 @@ class Core(ConfigurableComponent):
                         components[name] = comp
                         self.loadable_components[name] = loaded
 
-                        packages.setdefault(package, {'version': version, 'name': package})
+                        packages.setdefault(
+                            package, {"version": version, "name": package}
+                        )
 
                         self.log("Loaded component:", comp, lvl=verbose)
 
@@ -550,9 +555,10 @@ class Core(ConfigurableComponent):
             return
 
         from isomer.database import objectmodels
-        systemconfig = objectmodels['systemconfig'].find_one({'active': True})
 
-        systemconfig.packages = sorted(list(packages.values()), key=lambda x: x['name'])
+        systemconfig = objectmodels["systemconfig"].find_one({"active": True})
+
+        systemconfig.packages = sorted(list(packages.values()), key=lambda x: x["name"])
         systemconfig.save()
 
         self.log(list(packages.values()), lvl=critical)
@@ -599,19 +605,20 @@ class Core(ConfigurableComponent):
 
     def _check_provisions(self):
         from isomer.database import objectmodels
-        systemconfig = objectmodels['systemconfig'].find_one({'active': True})
+
+        systemconfig = objectmodels["systemconfig"].find_one({"active": True})
 
         if systemconfig is None:
-            self.log('No system configuration found, trying tp provision', lvl=warn)
+            self.log("No system configuration found, trying tp provision", lvl=warn)
             provision()
         else:
-            provisioned_packages = set(systemconfig.provisions['packages'])
+            provisioned_packages = set(systemconfig.provisions["packages"])
             provision_store = set(build_provision_store().keys())
             missing_provisions = provision_store - provisioned_packages
-            self.log('Provisioned packages:', provisioned_packages, lvl=debug)
-            self.log('Available provisions:', provision_store, lvl=debug)
+            self.log("Provisioned packages:", provisioned_packages, lvl=debug)
+            self.log("Available provisions:", provision_store, lvl=debug)
             if len(missing_provisions) > 0:
-                self.log('Installing missing provisions:', missing_provisions)
+                self.log("Installing missing provisions:", missing_provisions)
                 provision(installed=provisioned_packages)
 
     def _instantiate_components(self, clear=True):
@@ -663,7 +670,7 @@ class Core(ConfigurableComponent):
                     try:
                         runningcomponent = componentdata()
                     except ComponentDisabled:
-                        self.log('Not registering disabled component', lvl=debug)
+                        self.log("Not registering disabled component", lvl=debug)
                         continue
 
                     runningcomponent.register(self)

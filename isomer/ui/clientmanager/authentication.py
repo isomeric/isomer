@@ -35,8 +35,12 @@ from circuits.net.events import write
 
 from isomer.component import handler
 
-from isomer.events.client import clientdisconnect, send, authenticationrequest, \
-    userlogin
+from isomer.events.client import (
+    clientdisconnect,
+    send,
+    authenticationrequest,
+    userlogin,
+)
 from isomer.events.system import get_user_events, get_anonymous_events
 from isomer.logger import debug, critical, verbose, error, warn, network, info
 from isomer.misc import i18n as _
@@ -263,11 +267,7 @@ class AuthenticationManager(ClientBaseManager):
                 self.fireEvent(send(event.client.uuid, result))
                 return
 
-            self.log(
-                "Firing authorized event: ",
-                event,
-                lvl=debug,
-            )
+            self.log("Firing authorized event: ", event, lvl=debug)
             # self.log("", (user, action, data, client), lvl=critical)
             self.fireEvent(event)
         except Exception as e:

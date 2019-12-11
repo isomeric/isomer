@@ -116,9 +116,9 @@ def set_color():
 def set_verbosity(new_lvl: int):
     """Adjust logging verbosity"""
     global verbosity
-    verbosity['global'] = new_lvl
-    verbosity['console'] = new_lvl
-    verbosity['file'] = new_lvl
+    verbosity["global"] = new_lvl
+    verbosity["console"] = new_lvl
+    verbosity["file"] = new_lvl
 
 
 def set_logfile(path: str, instance: str, filename: str = None):
@@ -189,7 +189,7 @@ def is_marked(what) -> bool:
     return False
 
 
-def setup_root(newroot: 'isomer.components.Component'):
+def setup_root(newroot: "isomer.components.Component"):
     """
     Sets up the root component, so the logger knows where to send logging
     signals.

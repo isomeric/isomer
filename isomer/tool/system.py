@@ -129,11 +129,7 @@ def _add_system_user(use_sudo=False):
         log("Error adding system user:", lvl=error)
         log(output, lvl=error)
 
-    command = [
-        "/usr/sbin/adduser",
-        "isomer",
-        "dialout",
-    ]
+    command = ["/usr/sbin/adduser", "isomer", "dialout"]
 
     success, output = run_process("/", command, sudo=use_sudo)
     if success is False:
