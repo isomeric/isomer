@@ -64,6 +64,8 @@ import distro
 
 import hashlib
 import os
+import time
+import signal
 
 from tomlkit.exceptions import NonExistentKey
 
@@ -109,8 +111,8 @@ def check_root():
 
         abort.exit(50001)
 
-
-def run_process(cwd, args, shell=None, sudo=None, show=False):
+def run_process(cwd, args, shell=None, sudo=None, show=False, stdout=None,
+                stdin=None, timeout=5):
     """Executes an external process via subprocess.check_output"""
 
     log("Running:", cwd, args, lvl=verbose)
@@ -152,7 +154,32 @@ def run_process(cwd, args, shell=None, sudo=None, show=False):
     try:
         if show:
             log("Executing:", command)
-        process = shell.run(command, cwd=cwd)
+
+        if stdin is not None:
+            process = shell.spawn(command, cwd=cwd, store_pid=True, stdout=stdout)
+            process.stdin_write(stdin)
+
+            try:
+                process._process_stdin.close()  # Local
+            except AttributeError:
+                process._stdin.close()  # SSH
+
+            begin = time.time()
+            waiting = 0
+            while waiting < timeout and process.is_running():
+                waiting = time.time() - begin
+            if waiting >= timeout:
+                log("Sending SIGHUP", lvl=warn)
+                process.send_signal(signal.SIGHUP)
+
+                time.sleep(0.5)
+                if process.is_running():
+                    log("Sending SIGKILL", lvl=error)
+                    process.send_signal(signal.SIGKILL)
+
+            process = process.wait_for_result()
+        else:
+            process = shell.run(command, cwd=cwd, stdout=stdout)
 
         decoded = str(process.output, encoding="utf-8")
         log(decoded.replace("\\n", "\n"), lvl=verbose)
