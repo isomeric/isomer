@@ -28,9 +28,6 @@ Isomer instances.
 
 """
 
-__author__ = "Heiko 'riot' Weinen"
-__license__ = "AGPLv3"
-
 import sys
 from isomer.error import abort
 
