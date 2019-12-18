@@ -1,20 +1,30 @@
-# Docker Image for Isomer with single machine for Isomer and database
+# Docker Image for Isomer
 #
-# This image essentially packages up Isomer along with mongodb into one single
-# Docker Image/Container.
-# If you want to run both seperately, please have a look at docker-compose.yml
+# This image essentially packages up Isomer and instantiates a default
+# blank instance. This can be used to add further modules and customize.
+#
+# Since it doesn't make sense to run two services in one container, to run
+# an additional compliant database, have a look at docker-compose.yml
 #
 # Usage Examples::
 #
 # To run your instance and see if the backend starts:
-#     $ docker run -i -t isomeric/isomer /bin/bash -c "/etc/init.d/mongodb start && iso launch"
+#     $ docker run -i -t isomeric/isomer iso --dbhost MYDATABASEHOST:27017 launch
+#
+# If everything built fine, point your browser to http://localhost:8000 to
+# interact with the frontend.
 #
 # To investigate problems on the docker container, i.e. get a shell:
-#     $ docker run -i -t --name isomer-test-live -t isomeric/isomer
+#     $ docker run -i -t isomeric/isomer iso instance info
+#     $ docker run -i -t isomeric/isomer /bin/bash
 #
-# VERSION: 1.2.0
+# See
+# https://isomer.readthedocs.io/en/latest/dev/system/docker.html#isotool-docker
+# for more details.
 #
-# Last Updated: 20191014
+# VERSION: 1.3.0
+#
+# Last Updated: 20191209
 
 FROM debian:experimental
 MAINTAINER Heiko 'riot' Weinen <riot@c-base.org>
@@ -25,21 +35,28 @@ RUN echo "C.UTF-8" > /etc/locale.gen
 ENV LC_ALL=C.UTF-8
 ENV LANG=C.UTF-8
 
-RUN apt-get update
-RUN apt-get -y install build-essential python3-dev libffi-dev \
+RUN apt-get update && \
+  apt-get install -y --no-install-recommends \
+    build-essential python3-dev libffi-dev \
     python3 python3-pip python3-setuptools python3-enchant ca-certificates \
-    git python3-pil python3-nacl python3-spur
+    git python3-pil python3-nacl python3-spur \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /home/isomer
 
-# Copy repository
+# Copy requirements
+
+COPY requirements-prod.txt requirements-doc.txt requirements.txt ./
+
+# Install requirements
+
+RUN pip3 install -r requirements-prod.txt
+
+# Copy Isomer
 
 COPY . isomer
 WORKDIR isomer
 
-# Install Isomer
-
-RUN pip3 install -r requirements-prod.txt
 RUN python3 setup.py develop
 
 RUN ./iso system -l -p Docker all
