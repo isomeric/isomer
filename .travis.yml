@@ -22,7 +22,7 @@ script:
   - pytest tests/b_integration
   - pytest tests/c_system
   - travis_wait 5 pytest tests/d_oat
-  - safety check --full-report
+#  - safety check -r requirements-prod.txt --full-report
 # -  docker run -i -t isomeric/isomer /etc/init.d/mongodb start && py.test tests
 after_success:
   - coveralls
