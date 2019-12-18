@@ -42,7 +42,7 @@ Installation
 ============
 
 Docker: Yes, please!
-^^^^^^^^^^^^^^^^^^^^
+--------------------
 
 If you just want to try it out or generally are happy with using docker, there
 is no need to clone the repo, just download the docker compose file and get
@@ -59,7 +59,7 @@ for more information.
 
 
 Docker: No, thanks..
-^^^^^^^^^^^^^^^^^^^^
+--------------------
 
 There is more than one way of installing Isomer, `see the detailed instructions
 for those <https://isomer.readthedocs.io/en/latest/start/quick.html>`__.
