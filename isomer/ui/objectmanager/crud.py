@@ -355,9 +355,9 @@ class CrudOperations(CliManager):
 
         try:
             uuid = data["uuid"]
-            change = data["change"]
-            field = change["field"]
-            new_data = change["value"]
+            object_change = data["change"]
+            field = object_change["field"]
+            new_data = object_change["value"]
         except KeyError as e:
             self.log("Update request with missing arguments!", data, e, lvl=critical)
             self._cancel_by_error(event, "missing_args")
@@ -368,7 +368,7 @@ class CrudOperations(CliManager):
         try:
             storage_object = objectmodels[schema].find_one({"uuid": uuid})
         except Exception as e:
-            self.log("Change for unknown object requested:", schema, data, lvl=warn)
+            self.log("Change for unknown object requested:", e, schema, data, lvl=warn)
 
         if storage_object is None:
             self._cancel_by_error(event, "not_found")

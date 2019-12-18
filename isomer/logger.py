@@ -201,11 +201,11 @@ def setup_root(newroot: "isomer.components.Component"):
     root = newroot
 
 
-# noinspection PyUnboundLocalVariable
+# noinspection PyUnboundLocalVariable,PyIncorrectDocstring
 def isolog(*what, **kwargs):
     """Logs all non keyword arguments.
 
-    :param tuple what: Loggable objects (i.e. they have a string
+    :param tuple/str what: Loggable objects (i.e. they have a string
         representation)
     :param int lvl: Debug message level
     :param str emitter: Optional log source, where this can't be determined
@@ -229,16 +229,16 @@ def isolog(*what, **kwargs):
         return
 
     def assemble_things(things) -> str:
-        content = ""
+        result = ""
 
         for thing in things:
-            content += " "
+            result += " "
             if kwargs.get("pretty", False) and not isinstance(thing, str):
-                content += "\n" + pprint.pformat(thing)
+                result += "\n" + pprint.pformat(thing)
             else:
-                content += str(thing)
+                result += str(thing)
 
-        return content
+        return result
 
     def write_to_log(message: str):
         try:

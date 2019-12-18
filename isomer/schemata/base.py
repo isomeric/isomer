@@ -43,7 +43,8 @@ def uuid_object(
     """Generates a regular expression controlled UUID field"""
 
     uuid = {
-        "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$",
+        "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]"
+                   "{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$",
         "type": "string",
         "title": title,
         "description": description,

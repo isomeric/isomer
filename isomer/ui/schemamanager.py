@@ -129,24 +129,24 @@ class SchemaManager(ConfigurableComponent):
         else:
             store = schemastore
 
-        def output(schema):
-            self.log("%s :" % schema)
+        def output(schema_name):
+            self.log("%s :" % schema_name)
             if key == "props":
-                self.log(store[schema]["schema"]["properties"], pretty=True)
+                self.log(store[schema_name]["schema"]["properties"], pretty=True)
             elif key == "perms":
                 try:
-                    self.log(store[schema]["schema"]["roles_create"], pretty=True)
+                    self.log(store[schema_name]["schema"]["roles_create"], pretty=True)
                 except KeyError:
-                    self.log("Schema", schema, "has no role for creation", lvl=warn)
+                    self.log("Schema", schema_name, "has no role for creation", lvl=warn)
                 try:
                     self.log(
-                        store[schema]["schema"]["properties"]["perms"]["properties"],
+                        store[schema_name]["schema"]["properties"]["perms"]["properties"],
                         pretty=True,
                     )
                 except KeyError:
-                    self.log("Schema", schema, "has no permissions", lvl=warn)
+                    self.log("Schema", schema_name, "has no permissions", lvl=warn)
             else:
-                self.log(store[schema]["schema"], pretty=True)
+                self.log(store[schema_name]["schema"], pretty=True)
 
         if "*" in args:
             for schema in store:

@@ -28,7 +28,6 @@ A collection of developer support tools.
 
 """
 
-import sys
 import time
 import pkg_resources
 import click
@@ -277,8 +276,8 @@ def entrypoints(base, sails, frontend_only, frontend_list, directory):
                         pkg = pkg_resources.Requirement.parse(package)
                         frontend = pkg_resources.resource_listdir(pkg, "frontend")
                         log("Frontend resources found:", frontend, lvl=debug)
-                    except:
-                        log("Exception during frontend resource lookup:", exc=True)
+                    except Exception as e:
+                        log("Exception during frontend resource lookup:", e, exc=True)
                         frontend = None
 
                     if frontend not in (None, []):

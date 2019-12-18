@@ -344,7 +344,8 @@ def find_field(ctx, search, by_type, obj):
 @click.option("--schema", default=None, help="Work on specified schema only")
 @click.pass_context
 def illegalcheck(ctx, schema, delete_duplicates, fix, test):
-    """Tool to find erroneous objects created with old legacy bugs. Should be obsolete!"""
+    """Tool to find erroneous objects created with old legacy bugs. Should be
+    obsolete!"""
 
     database = ctx.obj["db"]
 

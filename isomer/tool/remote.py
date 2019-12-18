@@ -49,7 +49,7 @@ from isomer.tool import (
 )  # , ask_password
 from isomer.misc.path import get_etc_remote_keys_path
 from isomer.tool.defaults import platforms, key_defaults
-from isomer.error import abort, EXIT_INVALID_PARAMETER
+from isomer.error import abort, EXIT_INVALID_PARAMETER, EXIT_INVALID_VALUE
 from isomer.tool.cli import cli
 from isomer.tool.etc import load_remotes, remote_template, write_remote
 
@@ -221,7 +221,7 @@ def add(
             % (
                 key_bits,
                 ":".join(
-                    [str(key_hash)[i : 2 + i] for i in range(0, len(key_hash), 2)]
+                    [str(key_hash)[i: 2 + i] for i in range(0, len(key_hash), 2)]
                 ),
                 key_file,
                 key_type.upper(),
@@ -341,6 +341,8 @@ def set_parameter(ctx, login, parameter, value):
     remote_config = ctx.obj["host_config"]
     defaults = remote_template
 
+    converted_value = None
+
     try:
         if login:
             parameter_type = type(defaults["login"][parameter])
@@ -360,6 +362,9 @@ def set_parameter(ctx, login, parameter, value):
             lvl=warn,
         )
         abort(EXIT_INVALID_PARAMETER)
+
+    if converted_value is None:
+        abort(EXIT_INVALID_VALUE)
 
     if login:
         remote_config["login"][parameter] = converted_value

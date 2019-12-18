@@ -26,8 +26,8 @@ Module: Defaults
 
 Isomer distribution default settings.
 
-Contains database setup, certificate locations, platform details, service templates and a table of exit codes for
-the management tool.
+Contains database setup, certificate locations, platform details, service
+templates and a table of exit codes for the management tool.
 
 """
 
@@ -55,6 +55,7 @@ node_source_list_docker = """
 deb https://deb.nodesource.com/node_11.x sid main
 deb-src https://deb.nodesource.com/node_11.x sid main
 """
+
 
 platforms = {
     "Docker": {
@@ -181,6 +182,7 @@ KillSignal=SIGINT
 [Install]
 WantedBy=multi-user.target"""
 
+# noinspection PyPep8
 nginx_template = """# DO NOT MODIFY THIS FILE BY HAND
 # isomer manage tool maintains it automatically.
 # Any changes you make here will probably be overwritten.

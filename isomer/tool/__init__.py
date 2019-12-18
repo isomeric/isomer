@@ -57,18 +57,20 @@ tool
 
 """
 
-import spur
 import getpass
-import sys
-import distro
-
 import hashlib
 import os
 import time
 import signal
 
-from tomlkit.exceptions import NonExistentKey
-
+import distro
+import spur
+from isomer.error import (
+    abort,
+    EXIT_INVALID_CONFIGURATION,
+    EXIT_INSTANCE_UNKNOWN,
+    EXIT_ROOT_REQUIRED
+)
 from isomer.logger import isolog, verbose, debug, error, warn
 from isomer.tool.defaults import (
     db_host_default,
@@ -79,7 +81,7 @@ from isomer.tool.defaults import (
     db_metavar,
     platforms,
 )
-from isomer.error import abort, EXIT_INVALID_CONFIGURATION, EXIT_INSTANCE_UNKNOWN
+from tomlkit.exceptions import NonExistentKey
 
 
 def log(*args, **kwargs):
@@ -102,14 +104,13 @@ def check_root():
     """Check if current user has root permissions"""
 
     if os.geteuid() != 0:
-        log("Need root access to install. Use sudo!", lvl=error)
         log(
             "If you installed into a virtual environment, don't forget to "
             "specify the interpreter binary for sudo, e.g:\n"
             "$ sudo /home/user/.virtualenv/isomer/bin/python3 iso"
         )
+        abort(EXIT_ROOT_REQUIRED)
 
-        abort.exit(50001)
 
 def run_process(cwd, args, shell=None, sudo=None, show=False, stdout=None,
                 stdin=None, timeout=5):
@@ -362,7 +363,8 @@ def get_isomer(source, url, destination, upgrade=False, shell=None, sudo=None):
     elif source == "link":
         if shell is not None:
             log(
-                "Remote Linking? Are you sure? Links will be local, they cannot span over any network.",
+                "Remote Linking? Are you sure? Links will be local, "
+                "they cannot span over any network.",
                 lvl=warn,
             )
 

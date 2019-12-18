@@ -28,8 +28,6 @@ Database management functionality.
 
 """
 
-import sys
-
 import click
 import pymongo
 from click_didyoumean import DYMGroup

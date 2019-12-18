@@ -53,7 +53,8 @@ def provisionList(
     :param database_name:
     :param overwrite: Causes existing items to be overwritten
     :param clear: Clears the collection first (Danger!)
-    :param skip_user_check: Skips checking if a system user is existing already (for user provisioning)
+    :param skip_user_check: Skips checking if a system user is existing already
+           (for user provisioning)
     :return:
     """
 

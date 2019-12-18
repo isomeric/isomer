@@ -44,8 +44,8 @@ class ObjectBaseManager(ConfigurableComponent):
 
     configprops = {}
 
-    def __init__(self, *args):
-        super(ObjectBaseManager, self).__init__("OM", *args)
+    def __init__(self, *args, **kwargs):
+        super(ObjectBaseManager, self).__init__("OM", *args, **kwargs)
 
         self.subscriptions = {}
 

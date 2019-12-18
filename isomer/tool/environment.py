@@ -39,7 +39,6 @@ import grp
 import os
 import pwd
 import shutil
-import sys
 import tarfile
 import click
 
@@ -602,7 +601,9 @@ def _install_provisions(ctx, import_file=None, skip_provisions=False):
                 env,
                 "install",
                 "provisions",
-            ],  # Note: no sudo necessary as long as we do not enforce authentication on databases
+            ],
+            # Note: no sudo necessary as long as we do not enforce
+            # authentication on databases
         )
         if not success:
             log("Could not provision data:", lvl=error)
@@ -786,7 +787,8 @@ def _install_backend(ctx):
 
         if "was unable to detect version" in output:
             log(
-                "Installing from dirty repository. This might result in dependency version problems!",
+                "Installing from dirty repository. This might result in dependency "
+                "version problems!",
                 lvl=hilight,
             )
         else:
@@ -796,8 +798,10 @@ def _install_backend(ctx):
                 lvl=hilight,
             )
 
-        # TODO: Another fault might be an unclean package path. But i forgot the log message to check for.
-        # log('This might be a problem due to unclean installations of Python libraries. Please check your path.')
+        # TODO: Another fault might be an unclean package path.
+        #  But i forgot the log message to check for.
+        # log('This might be a problem due to unclean installations of Python'
+        #     ' libraries. Please check your path.')
 
     log("Installing requirements")
     success, result = run_process(

@@ -74,13 +74,13 @@ except ImportError as e:
 
 
 def main():
-    """Try to load the tool and launch it. If it can't be loaded, try to install all required
-    things first."""
+    """Try to load the tool and launch it. If it can't be loaded, try to install
+    all required things first."""
 
     try:
         from isomer.tool.tool import isotool
-    except ImportError as e:
-        print(e)
+    except ImportError as import_exception:
+        print(type(import_exception), ":", import_exception)
         if not ask(
             "Dependencies not installed, do you want to try to install them",
             default=False,

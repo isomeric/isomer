@@ -417,7 +417,8 @@ class Core(ConfigurableComponent):
             self.log("Running SSL server with cert:", self.certificate)
         else:
             self.log(
-                "Running insecure server without SSL. Do not use without SSL proxy in production!",
+                "Running insecure server without SSL. Do not use without SSL "
+                "proxy in production!",
                 lvl=warn,
             )
 

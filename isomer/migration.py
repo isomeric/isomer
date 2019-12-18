@@ -161,7 +161,7 @@ def make_migrations(schema=None):
         """Write out complete migration data"""
 
         filename = "%s_%04i.json" % (schema, counter)
-        migration = DeepDiff(previous, current, verbose_level=2).json
+        migration = DeepDiff(previous, current, verbose_level=2).to_json_pickle()
         if migration == "{}":
             isolog("Nothing changed - no new migration data.", lvl=warn)
             return
@@ -196,7 +196,7 @@ def make_migrations(schema=None):
                     fullpath = os.path.join(path, file)
                     isolog("Importing migration", fullpath)
                     with open(fullpath, "r") as f:
-                        migration = DeepDiff.from_json(f.read())
+                        migration = DeepDiff.from_json_pickle(f.read())
                     migrations.append(migration)
                     isolog("Successfully imported")
 

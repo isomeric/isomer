@@ -44,7 +44,7 @@ from isomer.events.system import (
     logtailrequest,
     debugrequest,
 )
-from isomer.logger import isolog, critical, error, warn, debug, verbose, verbosity
+from isomer.logger import critical, error, warn, debug, verbose, verbosity
 
 try:
     import objgraph

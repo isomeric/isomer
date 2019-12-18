@@ -101,7 +101,8 @@ def add_action_role(ctx):
 
     if action is None or role is None:
         log(
-            "You need to specify an action or role to the RBAC command group for this to work.",
+            "You need to specify an action or role to the RBAC command group for "
+            "this to work.",
             lvl=warn,
         )
         return
@@ -125,7 +126,8 @@ def del_action_role(ctx):
 
     if action is None or role is None:
         log(
-            "You need to specify an action or role to the RBAC command group for this to work.",
+            "You need to specify an action or role to the RBAC command group "
+            "for this to work.",
             lvl=warn,
         )
         return

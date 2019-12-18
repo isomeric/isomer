@@ -26,9 +26,11 @@ Module: Backup
 
 Contains functionality for exporting and importing objects.
 
-These do not fully backup or restore databases, as only validated and well-known (by schemata) objects will be handled.
+These do not fully backup or restore databases, as only validated and well-known
+(by schemata) objects will be handled.
 
-See isomer.database.dump and isomer.database.load for functionality without any schema awareness.
+See isomer.database.dump and isomer.database.load for functionality without any
+schema awareness.
 
 """
 
@@ -79,8 +81,8 @@ def db_export(
 ):
     """Export stored objects
 
-    Warning! This functionality is work in progress and you may destroy live data by using it!
-    Be very careful when using the export/import functionality!"""
+    Warning! This functionality is work in progress and you may destroy live data
+    by using it! Be very careful when using the export/import functionality!"""
 
     internal_backup(
         schema, uuid, object_filter, export_format, filename, pretty, all_schemata, omit
@@ -116,8 +118,8 @@ def db_export(
 def db_import(schema, uuid, object_filter, import_format, filename, all_schemata, dry):
     """Import objects from file
 
-    Warning! This functionality is work in progress and you may destroy live data by using it!
-    Be very careful when using the export/import functionality!"""
+    Warning! This functionality is work in progress and you may destroy live data
+    by using it! Be very careful when using the export/import functionality!"""
 
     internal_restore(
         schema, uuid, object_filter, import_format, filename, all_schemata, dry

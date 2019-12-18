@@ -50,7 +50,8 @@ class Maintenance(ConfigurableComponent):
                     "properties": {
                         "minimum": {
                             "type": "integer",
-                            "description": "Minimum free local file storage space to alert on",
+                            "description": "Minimum free local file storage "
+                                           "space to alert on",
                             "title": "Minimum local storage space",
                             "default": 50 * 1024 * 1024,
                         }

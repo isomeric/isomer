@@ -28,7 +28,8 @@ This is non-model schema for integration into other schemata.
 Contains
 --------
 
-geometry: Any valid GeoJSON geometry (Points, Multipoints, Linestrings, Multilinestrings, Polygons and Multipolygons)
+geometry: Any valid GeoJSON geometry (Points, Multipoints, Linestrings,
+Multilinestrings, Polygons and Multipolygons)
 
 
 """

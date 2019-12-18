@@ -107,7 +107,8 @@ def cmdmap(xdot):
     from copy import copy
 
     def generate_command_graph(command, map_output, groups=None, depth=0):
-        """Generate a strict digraph (as indented representation) of all known subgroups and commands"""
+        """Generate a strict digraph (as indented representation) of all known
+        subgroups and commands"""
 
         if groups is None:
             groups = []

@@ -303,17 +303,30 @@ def rating_widget(key="rating", maximum=10):
 #         label = key
 #
 #     result = {
-#         'type': 'template',
-#         'template': '<h3 ng-click="form.'+key+'_collapsed = !form.'+key+'_collapsed">' +
-#                     label +
-#                     '<span ng-class="{\'fa-chevron-up\': form.'+key+'_collapsed,'
-#                     '                 \'fa-chevron-down\': !form.'+key+'_collapsed}" class="fa">'
-#                     '</span>'
-#                     '</h3>',
+#         "type": "template",
+#         "template": '<h3 ng-click="form.'
+#         + key
+#         + "_collapsed = !form."
+#         + key
+#         + '_collapsed">'
+#         + label
+#         + "<span ng-class=\"{'fa-chevron-up': form."
+#         + key
+#         + "_collapsed,"
+#         "                 'fa-chevron-down': !form." + key + '_collapsed}" class="fa">'
+#         "</span>"
+#         "</h3>",
 #     }
 #
-#     return result, {'type': 'section', 'condition': 'form.'+key+'_collapsed', 'items': elements}
-
+#     return (
+#         result,
+#         {
+#             "type": "section",
+#             "condition": "form." + key + "_collapsed",
+#             "items": elements,
+#         },
+#     )
+#
 
 def event_button(key, title, target, action, data=None):
     """Template for an event emitting button"""

@@ -28,7 +28,6 @@ Instance, environment and remote configuration bits.
 """
 
 import os
-import sys
 
 from tomlkit import loads, dumps
 from tomlkit.exceptions import NonExistentKey

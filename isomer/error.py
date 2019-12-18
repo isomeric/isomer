@@ -43,11 +43,20 @@ def log(*args, **kwargs):
     isolog(*args, **kwargs)
 
 
+# TODO:
+#  * Categorize error codes into groups
+#  * Enumerate codes
+#  * Find all calls to abort and fix them up
+
 EXIT_INVALID_ENVIRONMENT = {"code": 1, "message": ""}
 EXIT_INVALID_CONFIGURATION = {"code": 2, "message": ""}
 EXIT_INVALID_SOURCE = {
     "code": 3,
     "message": "Only installing from github or local is currently supported",
+}
+EXIT_ROOT_REQUIRED = {
+    "code": 4,
+    "message": "Need root access to install. Use sudo!"
 }
 EXIT_NO_PERMISSION = {"code": 5, "message": ""}
 EXIT_INSTALLATION_FAILED = {"code": 11, "message": ""}
@@ -61,6 +70,10 @@ EXIT_NO_CONFIGURATION = {"code": 61, "message": ""}
 EXIT_INVALID_PARAMETER = {
     "code": 62,
     "message": "Invalid instance configuration parameter specified",
+}
+EXIT_INVALID_VALUE = {
+    "code": 64,
+    "message": "Invalid instance configuration value specified",
 }
 EXIT_NO_CERTIFICATE = {"code": 63, "message": ""}
 EXIT_NO_DATABASE = {"code": 50020, "message": "No database is available"}

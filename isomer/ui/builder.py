@@ -287,7 +287,7 @@ def install_frontend(
 
     log("Components after lookup:", sorted(list(components.keys())))
 
-    def _update_frontends(install=True):
+    def _update_frontends(install_frontend=True):
         log("Checking unique frontend locations: ", components, lvl=debug)
 
         imports = []
@@ -297,16 +297,16 @@ def install_frontend(
 
         log(components, pretty=True)
 
-        for package_name, component in components.items():
-            if "frontend" in component:
-                origin = component["frontend"]
-                method = component["method"]
-                package = component.get("package", None)
+        for package_name, package_component in components.items():
+            if "frontend" in package_component:
+                origin = package_component["frontend"]
+                method = package_component["method"]
+                package_object = package_component.get("package", None)
 
                 target = os.path.join(frontend_root, "src", "components", package_name)
                 target = os.path.normpath(target)
 
-                if install:
+                if install_frontend:
                     if method == "folder":
                         requirements_file = os.path.join(origin, "requirements.txt")
 
@@ -320,8 +320,8 @@ def install_frontend(
                                 for line in f.readlines():
                                     installation_packages.append(line.replace("\n", ""))
                     elif method == "resources":
-                        log("Getting resources:", package)
-                        resource = pkg_resources.Requirement.parse(package)
+                        log("Getting resources:", package_object)
+                        resource = pkg_resources.Requirement.parse(package_object)
                         if pkg_resources.resource_exists(
                             resource, "frontend/requirements.txt"
                         ):
@@ -329,7 +329,8 @@ def install_frontend(
                                 resource, "frontend/requirements.txt"
                             )
 
-                            # TODO: Not sure if decoding to ascii is a smart idea for npm package names.
+                            # TODO: Not sure if decoding to ascii is a smart
+                            #  idea for npm package names.
                             for line in (
                                 resource_string.decode("ascii").rstrip("\n").split("\n")
                             ):
@@ -340,23 +341,24 @@ def install_frontend(
                 if method == "folder":
                     copy_directory_tree(origin, target)
                 elif method == "resources":
-                    copy_resource_tree(package, "frontend", target)
+                    copy_resource_tree(package_object, "frontend", target)
 
                 for module_filename in glob(target + "/*.module.js"):
                     module_name = os.path.basename(module_filename).split(".module.js")[
                         0
                     ]
-                    line = u"import {s} from './components/{p}/{s}.module';\nmodules.push({s});\n".format(
-                        s=module_name, p=package_name
+                    line = (
+                        u"import {s} from './components/{p}/{s}.module';\n"
+                        u"modules.push({s});\n".format(s=module_name, p=package_name)
                     )
 
                     if module_name not in modules:
                         imports += line
                         modules.append(module_name)
             else:
-                log("Module without frontend:", package_name, component, lvl=debug)
+                log("Module without frontend:", package_name, package_component, lvl=debug)
 
-        if install:
+        if install_frontend:
             command_line = ["npm", "install", "--no-save"] + installation_packages
             log("Running", command_line, lvl=verbose)
 
@@ -389,10 +391,10 @@ def install_frontend(
                     f.write(line)
                 f.write("/* COMPONENT SECTION:END */\n")
                 f.write(parts[2])
-        except Exception as e:
+        except Exception as write_exception:
             log(
                 "Error during frontend package info writing. Check " "permissions! ",
-                e,
+                write_exception,
                 lvl=error,
             )
 
@@ -404,8 +406,14 @@ def install_frontend(
         builder_output, builder_error = builder.communicate()
         try:
             builder.wait()
-        except Exception as e:
-            log("Error during frontend build", e, type(e), exc=True, lvl=error)
+        except Exception as build_exception:
+            log(
+                "Error during frontend build",
+                build_exception,
+                type(build_exception),
+                exc=True,
+                lvl=error
+            )
             return
 
         log("Frontend build done: ", builder_output, builder_error, lvl=debug)
@@ -426,7 +434,7 @@ def install_frontend(
 
     log("Checking component frontend bits in ", frontend_root, lvl=verbose)
 
-    _update_frontends(install=install)
+    _update_frontends(install_frontend=install)
     if forcerebuild:
         _rebuild_frontend()
 

@@ -22,6 +22,7 @@
 """
 
 import os.path
+
 from isomer.tool import log, warn, debug
 
 ETC_BASE_PATH = "/etc/isomer"
@@ -107,8 +108,13 @@ def set_instance(instance, environment, prefix=None):
     log("Setting Instance: %s and Environment: %s" % (INSTANCE, ENVIRONMENT), lvl=debug)
 
 
-def get_path(location, subfolder, ensure=False):
-    """Return a normalized path for the running instance and environment"""
+def get_path(location: str, subfolder: str, ensure: bool = False):
+    """Return a normalized path for the running instance and environment
+
+    :param location str Either cache, local or lib - all reside in /var
+    :param subfolder str Subfolder inside location
+    :param ensure bool Create folder, if it doesn't exist and this parameter is True
+    """
 
     if PREFIX not in (None, ""):
         path = os.path.join(PREFIX, locations[location].lstrip("/") % INSTANCE)

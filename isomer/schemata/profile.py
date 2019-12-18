@@ -159,7 +159,8 @@ ProfileSchema["properties"].update(
                         "delete": {
                             "type": "boolean",
                             "title": "Delete " "confirmation",
-                            "description": "Enable confirmation warning on object deletion.",
+                            "description": "Enable confirmation warning on object "
+                                           "deletion.",
                             "default": True,
                         }
                     },

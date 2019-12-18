@@ -40,8 +40,6 @@ Instance management functionality.
 
 """
 
-import sys
-
 import tomlkit
 import click
 import os
@@ -444,11 +442,12 @@ def _turnover(ctx, force):
     write_instance(ctx.obj["instance_configuration"])
 
     # TODO: Effect reload of service
-    # * Systemctl reload
-    # * (Re)start service
-    # * confirm correct operation
-    #  - if not, switch back to the other instance, maybe indicate a broken state for next_environment
-    #  - if yes, Store instance configuration and terminate, we're done
+    #  * Systemctl reload
+    #  * (Re)start service
+    #  * confirm correct operation
+    #   - if not, switch back to the other instance, maybe indicate a broken
+    #     state for next_environment
+    #   - if yes, Store instance configuration and terminate, we're done
 
     log("Turned instance over to", next_environment)
     finish(ctx)
@@ -745,7 +744,8 @@ def update_nginx(ctx, hostname):
 def _create_nginx_config(ctx):
     """instance nginx configuration"""
 
-    # TODO: Specify template url very precisely. Currently one needs to be in the repository root
+    # TODO: Specify template url very precisely. Currently one needs to be in
+    #  the repository root
 
     instance_name = ctx.obj["instance"]
     config = ctx.obj["instance_configuration"]
