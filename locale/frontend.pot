@@ -288,7 +288,7 @@ msgid "Mail Address"
 msgstr ""
 
 #: src/about/missing/missing.tpl.html:24
-msgid "Maybe this functionality has not been developed, yet."
+msgid "Maybe this functionality has not been installed, yet."
 msgstr ""
 
 #: src/objects/editor/editor.tpl.html:57
