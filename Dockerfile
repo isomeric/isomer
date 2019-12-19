@@ -26,7 +26,7 @@
 #
 # Last Updated: 20191209
 
-FROM debian:experimental
+FROM debian:sid
 MAINTAINER Heiko 'riot' Weinen <riot@c-base.org>
 
 # Install dependencies
@@ -37,10 +37,17 @@ ENV LANG=C.UTF-8
 
 RUN apt-get update && \
   apt-get install -y --no-install-recommends \
-    build-essential python3-dev libffi-dev \
-    python3 python3-pip python3-setuptools python3-enchant ca-certificates \
-    git python3-pil python3-nacl python3-spur \
+    mongodb-server ca-certificates build-essential libffi-dev libpng-dev \
+    python3 python3-dev python3-pip python3-setuptools python3-enchant \
+    python3-pil python3-nacl python3-spur python3-bson python3-pymongo \
+    python3-cffi \
+    enchant git apt-transport-https wget sudo gnupg virtualenv \
     && rm -rf /var/lib/apt/lists/*
+
+RUN apt-get update && \
+  apt-get install -y --no-install-recommends --ignore-missing \
+    python3-pymongo-ext python3-bson-ext \
+    && rm -rf /var/lib/apt/lists/* || :
 
 WORKDIR /home/isomer
 
