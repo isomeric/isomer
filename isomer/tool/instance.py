@@ -259,7 +259,7 @@ def create(ctx, instance_name):
 @click.option(
     "--source", "-s", default="git", type=click.Choice(["link", "copy", "git"])
 )
-@click.option("--url", "-u", default="")
+@click.option("--url", "-u", default="", type=click.Path())
 @click.option(
     "--import-file", "--import", default=None, help="Import the specified backup"
 )
@@ -407,6 +407,7 @@ def turnover(ctx, **kwargs):
     """Activates the other environment """
 
     _turnover(ctx, **kwargs)
+    finish(ctx)
 
 
 def _turnover(ctx, force):
@@ -450,7 +451,6 @@ def _turnover(ctx, force):
     #   - if yes, Store instance configuration and terminate, we're done
 
     log("Turned instance over to", next_environment)
-    finish(ctx)
 
 
 @instance.command(short_help="Upgrades the other environment")

@@ -33,21 +33,19 @@ Environment management functionality.
     environment install
 
 """
-import pymongo
-
 import grp
 import os
 import pwd
 import shutil
 import tarfile
-import click
-
 from tempfile import mkdtemp
+
+import click
+import pymongo
 from click_didyoumean import DYMGroup
 from git import Repo, exc
-
-from isomer.scm_version import version
 from isomer.database.backup import dump, load
+from isomer.error import abort, EXIT_INVALID_SOURCE
 from isomer.logger import error, verbose, warn, critical, debug, hilight
 from isomer.misc import std_uuid, std_now
 from isomer.misc.path import (
@@ -58,6 +56,7 @@ from isomer.misc.path import (
     get_log_path,
     get_etc_instance_path,
 )
+from isomer.scm_version import version
 from isomer.tool import (
     log,
     finish,
@@ -69,7 +68,6 @@ from isomer.tool import (
 )
 from isomer.tool.database import delete_database
 from isomer.tool.defaults import source_url
-from isomer.error import abort, EXIT_INVALID_SOURCE
 from isomer.tool.etc import write_instance, environment_template
 
 
@@ -228,8 +226,10 @@ def _archive(ctx, force=False, dynamic=False):
 
     env = instance_configuration["environments"][next_environment]
 
-    log(instance_configuration, next_environment, pretty=True)
-    log(env["installed"], env["tested"])
+    log("Instance info:", instance_configuration, next_environment, pretty=True,
+        lvl=debug)
+    log("Installed:", env["installed"], "Tested:", env["tested"], lvl=debug)
+
     if (not env["installed"] or not env["tested"]) and not force:
         log("Environment has not been installed - not archiving.", lvl=warn)
         return False
