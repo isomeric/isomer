@@ -139,7 +139,7 @@ class FrontendHandler(pyinotify.ProcessEvent):
 
     def process_IN_CLOSE_WRITE(self, event):
         print("CHANGE EVENT:", event)
-        install_frontend(self.launcher.instance, install=False, development=True)
+        install_frontend(install=False, development=True)
 
 
 def drop_privileges(uid_name="isomer", gid_name="isomer"):
@@ -331,11 +331,8 @@ class Core(ConfigurableComponent):
     def trigger_frontend_build(self, event):
         """Event hook to trigger a new frontend build"""
 
-        from isomer.database import instance
-
         install_frontend(
-            instance=instance,
-            forcerebuild=event.force,
+            force_rebuild=event.force,
             install=event.install,
             development=self.development,
         )
@@ -792,7 +789,7 @@ def construct_graph(name, instance, args):
 )
 @click.option("--live-log", help="Log to in-memory structure as well", is_flag=True)
 @click.option("--debug", help="Run circuits debugger", is_flag=True)
-@click.option("--dev", help="Run development server", is_flag=True, default=True)
+@click.option("--dev", help="Run development server", is_flag=True, default=False)
 @click.option("--insecure", help="Keep privileges - INSECURE", is_flag=True)
 @click.option("--no-run", "-n", help="Only assemble system, do not run", is_flag=True)
 @click.option(

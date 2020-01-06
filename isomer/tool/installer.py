@@ -40,7 +40,7 @@ from subprocess import Popen
 from click_didyoumean import DYMGroup
 
 from isomer.tool.etc import NonExistentKey, instance_template
-from isomer.logger import error, warn
+from isomer.logger import error, warn, debug
 from isomer.tool import check_root, log, finish
 from isomer.ui.builder import install_frontend
 from isomer.provisions.base import provision
@@ -115,8 +115,7 @@ def frontend(ctx, dev, rebuild, no_install, build_type):
     # TODO: Move this to the environment handling and deprecate it here
 
     install_frontend(
-        instance=ctx.obj["instance"],
-        forcerebuild=rebuild,
+        force_rebuild=rebuild,
         development=dev,
         install=not no_install,
         build_type=build_type,
@@ -243,7 +242,7 @@ def install_provisions(
 
     from isomer import database
 
-    log("DATABASE SETTINGS:", ctx.obj, pretty=True)
+    log("Instance settings:", ctx.obj, pretty=True, lvl=debug)
     database.initialize(ctx.obj["dbhost"], ctx.obj["dbname"])
 
     provision(list_provisions, overwrite, clear_provisions, package)
