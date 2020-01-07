@@ -37,22 +37,25 @@ Provisions
 
 
 """
+
 import inspect
+import os
 import traceback
+from copy import deepcopy
+from random import randint
 from sys import exc_info
 from uuid import uuid4
 
 from circuits import Component
 from circuits.web.controllers import Controller
-from copy import deepcopy
-from jsonschema import ValidationError
-from pymongo.errors import ServerSelectionTimeoutError
-from random import randint
 from formal import model_factory
 
 from isomer.events.system import isomer_ui_event, authorized_event, anonymous_event
 from isomer.logger import isolog, warn, critical, error, verbose
 from isomer.schemata.component import ComponentBaseConfigSchema
+from isomer.misc import nested_map_update
+from jsonschema import ValidationError
+from pymongo.errors import ServerSelectionTimeoutError
 
 
 # from pprint import pprint
@@ -146,7 +149,7 @@ def handler(*names, **kwargs):
 
 
 class LoggingMeta(object):
-    """Baseclass for all components that adds naming and logging
+    """Base class for all components that adds naming and logging
     functionality"""
 
     names = []
@@ -241,6 +244,19 @@ class ConfigurableMeta(LoggingMeta):
                 self._write_config()
             except ValidationError as e:
                 self.log("Error during configuration reading: ", e, type(e), exc=True)
+
+        environment_identifier = 'ISOMER_COMPONENT_' + self.uniquename
+
+        overrides = [key for key, item in
+                     os.environ.items() if key.startswith(environment_identifier)]
+
+        if len(overrides) > 0:
+            self.log('Environment overrides found:', overrides)
+            for item in overrides:
+                path = item.lstrip(environment_identifier).lower().split("_")
+                nested_map_update(self.config._fields, os.environ[item], path)
+
+            self.config.save()
 
         if self.config.active is False:
             self.log("Component disabled.", lvl=warn)
