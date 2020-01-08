@@ -22,19 +22,19 @@
 Miscellaneous utility functions for Isomer
 """
 
-import SecretColors
 import copy
 import gettext
 import json
+import operator
 import os
-import pytz
-
 from datetime import datetime
-from uuid import uuid4
-
+from functools import reduce
 from hashlib import sha512
 from random import choice
+from uuid import uuid4
 
+import SecretColors
+import pytz
 from isomer.logger import isolog, verbose, warn
 
 localedir = os.path.abspath(
@@ -134,29 +134,41 @@ def i18n(msg, event=None, lang="en", domain="backend"):
     return domain.get(language, msg)
 
 
-def nested_map_find(d, keys):
+# def nested_map_find(d, keys):
+#     """Looks up a nested dictionary by traversing a list of keys"""
+#
+#     if isinstance(keys, str):
+#         keys = keys.split(".")
+#     rv = d
+#     for key in keys:
+#         rv = rv[key]
+#     return rv
+#
+#
+# def nested_map_update(d, u, *keys):
+#     """Modifies a nested dictionary by traversing a list of keys"""
+#     d = copy.deepcopy(d)
+#     keys = keys[0]
+#     if len(keys) > 1:
+#         d[keys[0]] = nested_map_update(d[keys[0]], u, keys[1:])
+#     else:
+#         if u is not None:
+#             d[keys[0]] = u
+#         else:
+#             del d[keys[0]]
+#     return d
+
+
+def nested_map_find(dataDict, mapList):
     """Looks up a nested dictionary by traversing a list of keys"""
 
-    if isinstance(keys, str):
-        keys = keys.split(".")
-    rv = d
-    for key in keys:
-        rv = rv[key]
-    return rv
+    return reduce(operator.getitem, mapList, dataDict)
 
 
-def nested_map_update(d, u, *keys):
+def nested_map_update(dataDict, value, mapList):
     """Modifies a nested dictionary by traversing a list of keys"""
-    d = copy.deepcopy(d)
-    keys = keys[0]
-    if len(keys) > 1:
-        d[keys[0]] = nested_map_update(d[keys[0]], u, keys[1:])
-    else:
-        if u is not None:
-            d[keys[0]] = u
-        else:
-            del d[keys[0]]
-    return d
+
+    nested_map_find(dataDict, mapList[:-1])[mapList[-1]] = value
 
 
 def std_hash(word, salt):
