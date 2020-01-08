@@ -86,6 +86,7 @@ class Configurator(ConfigurableComponent):
                             "uuid": comp.uuid,
                             "class": comp.componentclass,
                             "active": comp.active,
+                            "present": comp.name in self.names
                         }
                     )
                 except AttributeError:
