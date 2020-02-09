@@ -658,7 +658,14 @@ def _migrate(ctx):
 @click.option(
     "--source", "-s", default="git", type=click.Choice(["link", "copy", "git"])
 )
-@click.option("--url", "-u", default=None)
+@click.option(
+    "--url", "-u", default=None,
+    type=click.Path(
+        exists=True,
+        file_okay=False,
+        resolve_path=True
+    )
+)
 @click.option(
     "--import-file", "--import", default=None, help="Import the specified backup"
 )
@@ -699,6 +706,11 @@ def _install_environment(
 
     if url is None:
         url = source_url
+    elif url[0] == '.':
+        url = url.replace(".", os.getcwd(), 1)
+
+    if url[0] == '/':
+        url = os.path.abspath(url)
 
     instance_name = ctx.obj["instance"]
     instance_configuration = ctx.obj["instance_configuration"]
