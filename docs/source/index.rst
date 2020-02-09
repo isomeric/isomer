@@ -46,6 +46,7 @@ Developer Documentation
     changes
     roadmap
     contributors
+    security
     faq
 
 .. toctree::
