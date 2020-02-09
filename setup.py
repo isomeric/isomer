@@ -131,7 +131,7 @@ setup(
     ],
     namespace_packages=["isomer"],
     long_description=readme,
-    long_description_content_type='text/x-rst',
+    long_description_content_type="text/x-rst",
     dependency_links=[
         "https://github.com/ri0t/click-repl/archive/master.zip#egg=click-repl-0.1.3-ri0t",
     ],
