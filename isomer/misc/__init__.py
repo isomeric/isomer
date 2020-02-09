@@ -22,13 +22,11 @@
 Miscellaneous utility functions for Isomer
 """
 
-import copy
 import gettext
 import json
-import operator
 import os
+import copy
 from datetime import datetime
-from functools import reduce
 from hashlib import sha512
 from random import choice
 from uuid import uuid4
@@ -134,41 +132,55 @@ def i18n(msg, event=None, lang="en", domain="backend"):
     return domain.get(language, msg)
 
 
-# def nested_map_find(d, keys):
-#     """Looks up a nested dictionary by traversing a list of keys"""
-#
-#     if isinstance(keys, str):
-#         keys = keys.split(".")
-#     rv = d
-#     for key in keys:
-#         rv = rv[key]
-#     return rv
-#
-#
-# def nested_map_update(d, u, *keys):
-#     """Modifies a nested dictionary by traversing a list of keys"""
-#     d = copy.deepcopy(d)
-#     keys = keys[0]
-#     if len(keys) > 1:
-#         d[keys[0]] = nested_map_update(d[keys[0]], u, keys[1:])
-#     else:
-#         if u is not None:
-#             d[keys[0]] = u
-#         else:
-#             del d[keys[0]]
-#     return d
-
-
-def nested_map_find(dataDict, mapList):
+def nested_map_find(d, keys):
     """Looks up a nested dictionary by traversing a list of keys"""
 
-    return reduce(operator.getitem, mapList, dataDict)
+    if isinstance(keys, str):
+        keys = keys.split(".")
+    rv = d
+    for key in keys:
+        rv = rv[key]
+    return rv
 
 
-def nested_map_update(dataDict, value, mapList):
+def nested_map_update(d, u, *keys):
     """Modifies a nested dictionary by traversing a list of keys"""
+    d = copy.deepcopy(d)
+    keys = keys[0]
+    if len(keys) > 1:
+        d[keys[0]] = nested_map_update(d[keys[0]], u, keys[1:])
+    else:
+        if u is not None:
+            d[keys[0]] = u
+        else:
+            del d[keys[0]]
+    return d
 
-    nested_map_find(dataDict, mapList[:-1])[mapList[-1]] = value
+
+# TODO: Somehow these two fail the tests, although they seem to work fine
+#   in non-test situations.
+
+# def nested_map_find(data_dict, map_list):
+#     """Looks up a nested dictionary by traversing a list of keys
+#
+#     :param dict data_dict: Nested dictionary to traverse
+#     :param list map_list: List of keys to traverse along
+#     :return object: The resulting value or None if not found
+#     """
+#
+#     return reduce(operator.getitem, map_list, data_dict)
+#
+#
+# def nested_map_update(data_dict, value, map_list):
+#     """Modifies a nested dictionary by traversing a list of keys
+#
+#     :param dict data_dict: Nested dictionary to traverse
+#     :param object value: New value to set at found key
+#     :param list map_list: List of keys to traverse along
+#     :return object: The resulting value or None if not found
+#     """
+#
+#     nested_map_find(data_dict, map_list[:-1])[map_list[-1]] = value
 
 
 def std_hash(word, salt):
@@ -924,18 +936,18 @@ def std_salt(length=16, lowercase=True):
     return "".join(chars)
 
 
-logo = """                                             
-                   .'::'.                    
-                .':cccccc:'.                 
-             .':cccccccccccc:'.              
-          .':ccccccc;..;ccccccc:'.           
-       .':ccccccc;.      .;ccccccc:'.        
-    .':ccccccc;.            .;ccccccc:'.     
-   ;cccccccc:.                .:cccccccc;    
-     .:ccccccc;.            .;ccccccc:'      
-        .:ccccccc;.      .;ccccccc:.         
-           .:ccccccc;..;ccccccc:.            
-              .;cccccccccccc:.               
-                 .;cccccc:.                  
-                    .;;.                     
+logo = """
+                   .'::'.
+                .':cccccc:'.
+             .':cccccccccccc:'.
+          .':ccccccc;..;ccccccc:'.
+       .':ccccccc;.      .;ccccccc:'.
+    .':ccccccc;.            .;ccccccc:'.
+   ;cccccccc:.                .:cccccccc;
+     .:ccccccc;.            .;ccccccc:'
+        .:ccccccc;.      .;ccccccc:.
+           .:ccccccc;..;ccccccc:.
+              .;cccccccccccc:.
+                 .;cccccc:.
+                    .;;.
                                              """
