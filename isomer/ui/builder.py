@@ -35,18 +35,14 @@ from shutil import copy
 import pkg_resources
 from isomer.logger import isolog, debug, verbose, warn, error, critical
 from isomer.misc.path import get_path
-
-try:
-    from subprocess import Popen
-except ImportError:
-    # noinspection PyUnresolvedReferences,PyUnresolvedReferences
-    from subprocess32 import Popen  # NOQA
+from isomer.tool import run_process
 
 
 def log(*args, **kwargs):
     """Log as builder emitter"""
     kwargs.update({"emitter": "BUILDER", "frame_ref": 2})
     isolog(*args, **kwargs)
+
 
 # TODO: Move the copy resource/directory tree operations to a utility lib
 
@@ -113,8 +109,6 @@ def copy_resource_tree(package: str, source: str, target: str):
     :param source: Source folder inside package resources
     :param target: Filesystem destination
     """
-
-    log("COPY_RESOURCE_TREE:", type(package), lvl=critical)
 
     pkg = pkg_resources.Requirement.parse(package)
 
@@ -200,12 +194,16 @@ def generate_component_folders(folder):
 
     if not os.path.isdir(folder):
         log("Creating new components folder")
-        os.mkdir(folder)
+        os.makedirs(folder)
     else:
         log("Clearing components folder")
         for thing in os.listdir(folder):
+            target = os.path.join(folder, thing)
+
             try:
-                shutil.rmtree(os.path.join(folder, thing))
+                shutil.rmtree(target)
+            except NotADirectoryError:
+                os.unlink(target)
             except PermissionError:
                 log(
                     "Cannot remove data in old components folder! "
@@ -446,7 +444,7 @@ def update_frontends(frontend_components: dict, frontend_root: str, install: boo
     for package_name, package_component in frontend_components.items():
         if "frontend" in package_component:
             for dependencies, import_line, module in install_frontend_data(
-                    package_component, package_name):
+                package_component, package_name):
                 if module not in modules:
                     modules += module
                     if len(dependencies) > 0:
@@ -497,18 +495,13 @@ def install_dependencies(dependency_list: list, frontend_root: str):
     log("Installing dependencies:", dependency_list, lvl=debug)
     command_line = ["npm", "install", "--no-save"] + dependency_list
 
-    # TODO: Switch to i.t.run_process
-    installer = Popen(command_line, cwd=frontend_root)
-    installer_output, installer_error = installer.communicate()
+    log("Using npm in:", frontend_root, lvl=debug)
+    success, installer = run_process(frontend_root, command_line)
 
-    installer.wait()
-
-    log(
-        "Frontend installing done.",
-        "StdOut:", installer_output,
-        "StdErr:", installer_error,
-        lvl=debug,
-    )
+    if success:
+        log("Frontend installing done.", lvl=debug)
+    else:
+        log("Could not install dependencies:", installer)
 
 
 def write_main(importable_modules: list, root: str):
@@ -557,21 +550,15 @@ def rebuild_frontend(root: str, target: str, build_type: str):
     log("Starting frontend build.", lvl=warn)
 
     # TODO: Switch to i.t.run_process
-    builder = Popen(["npm", "run", build_type], cwd=root)
-    builder_output, builder_error = builder.communicate()
-    try:
-        builder.wait()
-    except Exception as build_exception:
-        log(
-            "Error during frontend build",
-            build_exception,
-            type(build_exception),
-            exc=True,
-            lvl=error
-        )
+    log("Using npm in:", root, lvl=debug)
+    command = ["npm", "run", build_type]
+    success, builder_output = run_process(root, command)
+
+    if success is False:
+        log("Error during frontend build:", builder_output, lvl=error)
         return
 
-    log("Frontend build done: ", builder_output, builder_error, lvl=debug)
+    log("Frontend build done: ", builder_output, lvl=debug)
 
     try:
         copy_directory_tree(
