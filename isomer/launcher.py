@@ -374,9 +374,9 @@ class Core(ConfigurableComponent):
         self.update_components(forcereload=True)
         initialize()
 
-        from isomer.debugger import cli_compgraph
+        from isomer.debugger import cli_comp_graph
 
-        self.fireEvent(cli_compgraph())
+        self.fireEvent(cli_comp_graph())
 
     @handler("cli_quit")
     def cli_quit(self, event):
