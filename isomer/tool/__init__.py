@@ -60,13 +60,14 @@ tool
 import getpass
 import hashlib
 import os
-import time
 import signal
 
+import time
 import distro
 import spur
 from isomer.error import (
     abort,
+    EXIT_ISOMER_URL_REQUIRED,
     EXIT_INVALID_CONFIGURATION,
     EXIT_INSTANCE_UNKNOWN,
     EXIT_ROOT_REQUIRED
@@ -92,6 +93,9 @@ def log(*args, **kwargs):
 
 
 def finish(ctx):
+    """
+    Signalize the successful conclusion of an operation.
+    """
     parent = ctx.parent
     commands = ctx.info_name
     while parent is not None:
@@ -112,9 +116,23 @@ def check_root():
         abort(EXIT_ROOT_REQUIRED)
 
 
-def run_process(cwd, args, shell=None, sudo=None, show=False, stdout=None,
-                stdin=None, timeout=5):
-    """Executes an external process via subprocess.check_output"""
+def run_process(cwd: str, args: list, shell=None, sudo: [bool, str] = None,
+                show: bool = False, stdout: str = None, stdin: str = None,
+                timeout: int = 5) -> (bool, str):
+    """
+    Executes an external process via subprocess.check_output
+    :param cwd: Working directory
+    :param args: List of command plus its arguments
+    :param shell: Either a spur.LocalShell or a spur.SshShell
+    :param sudo: Username (or True for root) to use with sudo, False for no sudo
+    :param show: Log executed command at info priority before executing
+    :param stdout: String to fill with std_out data
+    :param stdin: String to supply as std_in data
+    :param timeout: Timeout for the process in seconds
+    :return: A boolean success flag and the whole output
+    :rtype:
+
+    """
 
     log("Running:", cwd, args, lvl=verbose)
 
@@ -134,7 +152,7 @@ def run_process(cwd, args, shell=None, sudo=None, show=False, stdout=None,
                 return
 
             log("Using sudo with user:", user, lvl=verbose)
-            cmd = ["sudo", "-u", user] + list(things)
+            cmd = ["sudo", "-H", "-u", user] + list(things)
         else:
             log("Not using sudo", lvl=verbose)
             cmd = []
@@ -313,6 +331,9 @@ def format_result(result):
 def get_isomer(source, url, destination, upgrade=False, shell=None, sudo=None):
     """Grab a copy of Isomer somehow"""
     success = False
+
+    if url in ("", None) and source == "git" and not upgrade:
+        abort(EXIT_ISOMER_URL_REQUIRED)
 
     if source == "git":
         if not upgrade:

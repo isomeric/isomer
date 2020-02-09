@@ -77,13 +77,18 @@ EXIT_INVALID_VALUE = {
 }
 EXIT_NO_CERTIFICATE = {"code": 63, "message": ""}
 EXIT_NO_DATABASE = {"code": 50020, "message": "No database is available"}
+EXIT_ISOMER_URL_REQUIRED = {
+    "code": 50100,
+    "message": "You need to specify a source url via --url/-u for isomer"
+}
 
 
 def abort(error_object):
     url = "https://isomer.readthedocs.io/en/latest/manual/Administration/Errors/%i.html"
     if isinstance(error_object, int):
         log("Unknown error code.")
-        log("You might be able to find more information here:", url % error_object)
+        log("You might be able to find more information above or here:",
+            url % error_object)
         sys.exit(error_object)
     else:
         log(
