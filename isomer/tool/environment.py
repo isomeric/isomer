@@ -33,13 +33,14 @@ Environment management functionality.
     environment install
 
 """
-import grp
 import os
-import pwd
+import glob
 import shutil
 import tarfile
 from tempfile import mkdtemp
 
+import grp
+import pwd
 import click
 import pymongo
 from click_didyoumean import DYMGroup
@@ -69,6 +70,7 @@ from isomer.tool import (
 from isomer.tool.database import delete_database
 from isomer.tool.defaults import source_url
 from isomer.tool.etc import write_instance, environment_template
+from isomer.ui.builder import get_frontend_locations
 
 
 @click.group(cls=DYMGroup)
@@ -81,12 +83,37 @@ def environment(ctx):
 
 def _check_environment(ctx, env=None):
     """General fitness tests of the built environment"""
-    # TODO: Implement environment testing
 
     if env is None:
         env = get_next_environment(ctx)
-    log("Would now health check the environment '%s' (Not implemented, yet)" % env)
-    return True
+
+    log("Health checking the environment '%s'" % env)
+
+    not_enough_files = False
+    loader_missing = False
+    size_too_small = False
+
+    _, frontend_target = get_frontend_locations(False)
+
+    if not os.path.exists(os.path.join(frontend_target, 'index.html')):
+        log("A compiled frontend seems to be missing!", lvl=warn)
+        loader_missing = True
+
+    size_sum = 0
+    amount_files = 0
+    for file in glob.glob(frontend_target, '*.gz'):
+        size_sum += os.statvfs(file).f_bsize
+        amount_files += 1
+
+    if amount_files < 4:
+        log("The frontend probably did not compile completely.", lvl=warn)
+        not_enough_files = True
+    if size_sum < 2*1024*1024:
+        log("The compiled frontend seems exceptionally small. (That could be good!)",
+            lvl=warn)
+        size_too_small = True
+
+    return not_enough_files and loader_missing and size_too_small
 
 
 @environment.command(name="clear", short_help="Clear an environment")
