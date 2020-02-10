@@ -68,7 +68,7 @@ def test_get_frontend_locations_development():
     frontend_root, frontend_target = get_frontend_locations(True)
 
     assert frontend_root == os.path.join(
-        Path(__file__).parents[2], 'frontend'
+        str(Path(__file__).parents[2]), 'frontend'
     )
     assert frontend_target == \
            '/tmp/isomer-test/var/lib/isomer/test-instance/test/frontend-dev'
