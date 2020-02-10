@@ -55,7 +55,7 @@ def test_view_no_objects():
     ], full_log=True)
 
     assert result.exit_code == 0
-    assert "Done: iso db objects view." in result.output
+    assert "Done: cli db objects view" in result.output
 
 
 
