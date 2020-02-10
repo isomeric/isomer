@@ -40,11 +40,11 @@ from isomer.ui.builder import copy_directory_tree, copy_resource_tree, \
 
 try:
     import isomer.test as test
-except (ModuleNotFoundError, ImportError):
+except ImportError:
     test = None
 
 has_test_module = pytest.mark.skipif(
-    test is not None,
+    test is None,
     reason="isomer-test-module not installed. See "
            "https://isomer.readthedocs.io/en/latest/dev/system/backend/modularity.html"
            "#modules"
@@ -124,29 +124,29 @@ def test_get_components():
 
 @has_test_module
 def test_update_frontends():
-    assert True
+    assert False
 
 
 @has_test_module
 def test_get_sails_dependencies():
-    assert True
+    assert False
 
 
 @has_test_module
 def test_install_dependencies():
-    assert True
+    assert False
 
 
 @has_test_module
 def test_write_main():
-    assert True
+    assert False
 
 
 @has_test_module
 def test_rebuild_frontend():
-    assert True
+    assert False
 
 
 @has_test_module
 def test_install_frontend():
-    assert True
+    assert False
