@@ -34,20 +34,18 @@ import pytest
 from isomer.tool.etc import load_instance
 from isomer.tool.tool import isotool
 
-from . import reset_base, run_cli
-
 
 def test_instance_clear():
     """Creates a new default instances and clears it without archiving"""
-    reset_base()
+    pytest.reset_base()
 
-    _ = run_cli(isotool, ['instance', 'create'], full_log=True)
+    _ = pytest.run_cli(isotool, ['instance', 'create'], full_log=True)
     # pytest.exit('LOL')
 
     assert os.path.exists('/tmp/isomer-test/etc/isomer/instances/default.conf')
     assert not os.path.exists('/tmp/isomer-test/var/lib/isomer/default/green')
 
-    result = run_cli(isotool, ['environment', 'clear', '--no-archive'])
+    result = pytest.run_cli(isotool, ['environment', 'clear', '--no-archive'])
     print(result.output)
 
     assert os.path.exists('/tmp/isomer-test/var/lib/isomer/default/green')
@@ -58,7 +56,7 @@ def test_instance_clear():
 
 def test_install():
     """Creates a new default instances and clears it without archiving"""
-    reset_base()
+    pytest.reset_base()
     import os
     import pwd
 
@@ -66,16 +64,16 @@ def test_install():
         """Return current username"""
         return pwd.getpwuid(os.getuid())[0]
 
-    _ = run_cli(isotool, ['instance', 'create'], full_log=True)
-    _ = run_cli(isotool, ['instance', 'set', 'user', get_username()], full_log=True)
-    _ = run_cli(isotool, ['environment', 'clear', '--no-archive'], full_log=True)
+    _ = pytest.run_cli(isotool, ['instance', 'create'], full_log=True)
+    _ = pytest.run_cli(isotool, ['instance', 'set', 'user', get_username()], full_log=True)
+    _ = pytest.run_cli(isotool, ['environment', 'clear', '--no-archive'], full_log=True)
 
     assert os.path.exists('/tmp/isomer-test/etc/isomer/instances/default.conf')
     assert os.path.exists('/tmp/isomer-test/var/lib/isomer/default/green')
 
     repo_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../..'))
 
-    result = run_cli(
+    result = pytest.run_cli(
         isotool,
         ['--clog', '10', 'environment', 'install', '--no-sudo', '--source', 'copy',
          '--url', repo_path],

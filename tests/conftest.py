@@ -18,22 +18,34 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import pytest
-
+import os
 import sys
+import shutil
 import threading
 import collections
-from time import sleep
+
+import pytest
+import pymongo
+from time import sleep, strftime
 from collections import deque
+from click.testing import CliRunner
 
 from circuits.core.manager import TIMEOUT
 from circuits import handler, BaseComponent, Debugger, Manager
 
-from isomer.component import ConfigurableComponent
-from isomer.schemata.component import ComponentConfigSchemaTemplate
 from formal import model_factory
 
+from isomer.database import initialize
+from isomer.component import ConfigurableComponent
+from isomer.misc.path import set_etc_path, set_instance
+from isomer.schemata.component import ComponentConfigSchemaTemplate
+
 """Basic Test suite bits and pieces"""
+
+DEFAULT_DATABASE_NAME = "isomer-test-internal"
+DEFAULT_DATABASE_HOST = "localhost"
+DEFAULT_DATABASE_PORT = "27017"
+COLORS = False
 
 
 class TestComponent(ConfigurableComponent):
@@ -192,6 +204,44 @@ def watcher(request, manager):
     return watcher
 
 
+def run_cli(cmd, args, full_log=False):
+    """Runs a command"""
+
+    if COLORS is False:
+        args.insert(0, '-nc')
+
+    if full_log:
+        timestamp = strftime("%Y%m%d-%H%M%S")
+
+        log_args = [
+            '--clog', '5', '--flog', '5',
+            '--log-file', '/tmp/isomer-test_%s' % timestamp
+        ]
+        args = log_args + args
+
+    args = ['--config-dir', '/tmp/isomer-test/etc/isomer'] + args
+
+    # pprint(args)
+
+    runner = CliRunner()
+    result = runner.invoke(cmd, args, catch_exceptions=False, obj={})
+    with open('/tmp/logfile_runner', 'a') as f:
+        f.write(result.output)
+    return result
+
+
+def reset_base():
+    """Prepares a testing folder and sets Isomer's base to that"""
+    if os.path.exists('/tmp/isomer-test'):
+        shutil.rmtree('/tmp/isomer-test')
+
+    os.makedirs('/tmp/isomer-test/etc/isomer/instances')
+    os.makedirs('/tmp/isomer-test/var/log/isomer')
+
+    set_etc_path('/tmp/isomer-test/etc/isomer')
+    set_instance('foobar', 'green', '/tmp/isomer-test/')
+
+
 def clean_test_components():
     """Removes test-generated component data"""
 
@@ -202,14 +252,46 @@ def clean_test_components():
         item.delete()
 
 
+def clean_test_database(config):
+    """Removes all of the test-generated database content"""
+
+    db_name = config.getoption("--dbname", default=DEFAULT_DATABASE_NAME)
+    host = config.getoption("--dbhost", default=DEFAULT_DATABASE_HOST)
+    port = config.getoption("--dbport", default=DEFAULT_DATABASE_PORT)
+
+    client = pymongo.MongoClient(host=host, port=int(port))
+    if db_name in client.list_database_names():
+        print("Dropping test database", db_name)
+        client.drop_database(db_name)
+    else:
+        print("Test database does not exist")
+
+
 @pytest.hookimpl()
 def pytest_unconfigure(config):
     """Clear test generated data after test completion"""
-    clean_test_components()
+
+    clean_test_database(config)
 
 
-def pytest_configure():
+def pytest_addoption(parser):
+    parser.addoption(
+        "--dbname", action="store", default=DEFAULT_DATABASE_NAME, help="test db name"
+    )
+    parser.addoption(
+        "--dbhost", action="store", default=DEFAULT_DATABASE_HOST, help="test db hostname"
+    )
+    parser.addoption(
+        "--dbport", action="store", default=DEFAULT_DATABASE_PORT, help="test db port"
+    )
+
+
+def pytest_configure(config):
     """Setup the testing namespace"""
+
+    dbname = config.getoption("--dbname", default=DEFAULT_DATABASE_NAME)
+    dbhost = config.getoption("--dbhost", default=DEFAULT_DATABASE_HOST)
+    dbport = config.getoption("--dbport", default=DEFAULT_DATABASE_PORT)
 
     pytest.TestComponent = TestComponent
     pytest.clean_test_components = clean_test_components
@@ -218,4 +300,13 @@ def pytest_configure():
     pytest.call_event = call_event
     pytest.PLATFORM = sys.platform
     pytest.PYVER = sys.version_info[:3]
+    pytest.DBNAME = dbname
+    pytest.DBHOST = dbhost
+    pytest.DBPORT = dbport
     pytest.call_event_from_name = call_event_from_name
+    pytest.run_cli = run_cli
+    pytest.reset_base = reset_base
+
+    clean_test_database(config)
+
+    initialize(database_name=dbname)

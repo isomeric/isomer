@@ -20,6 +20,3 @@
 
 """Testsuite for Isomer"""
 
-from isomer.database import initialize
-
-initialize(database_name='isomer-test')
