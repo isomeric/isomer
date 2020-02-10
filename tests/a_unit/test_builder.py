@@ -30,13 +30,12 @@ Test Isomer Tools
 
 import os
 
+from pathlib import Path
+
 import pytest
 from isomer.misc.path import set_instance
-
 from isomer.ui.builder import copy_directory_tree, copy_resource_tree, \
-    get_frontend_locations, generate_component_folders, get_components, \
-    update_frontends, get_sails_dependencies, install_dependencies,write_main, \
-    rebuild_frontend
+    get_frontend_locations, generate_component_folders, get_components
 
 try:
     import isomer.test as test
@@ -67,15 +66,21 @@ def test_copy_directory_tree():
 def test_get_frontend_locations_development():
     set_instance("test-instance", "test", "/tmp/isomer-test")
     frontend_root, frontend_target = get_frontend_locations(True)
-    assert frontend_root == '/home/riot/src/isomer/isomer_master/frontend'
-    assert frontend_target == '/tmp/isomer-test/var/lib/isomer/test-instance/test/frontend-dev'
+
+    assert frontend_root == os.path.join(
+        Path(__file__).parents[2], 'frontend'
+    )
+    assert frontend_target == \
+           '/tmp/isomer-test/var/lib/isomer/test-instance/test/frontend-dev'
 
 
 def test_get_frontend_locations():
     set_instance("test-instance", "test", "/tmp/isomer-test")
     frontend_root, frontend_target = get_frontend_locations(False)
-    assert frontend_root == "/tmp/isomer-test/var/lib/isomer/test-instance/test/repository/frontend"
-    assert frontend_target == "/tmp/isomer-test/var/lib/isomer/test-instance/test/frontend"
+    assert frontend_root == \
+           "/tmp/isomer-test/var/lib/isomer/test-instance/test/repository/frontend"
+    assert frontend_target == \
+           "/tmp/isomer-test/var/lib/isomer/test-instance/test/frontend"
 
 
 def test_generate_component_folders():
