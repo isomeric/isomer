@@ -40,7 +40,7 @@ from isomer.ui.builder import copy_directory_tree, copy_resource_tree, \
 
 try:
     import isomer.test as test
-except ImportError:
+except (ModuleNotFoundError, ImportError):
     test = None
 
 has_test_module = pytest.mark.skipif(
