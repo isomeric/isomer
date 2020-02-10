@@ -296,8 +296,7 @@ def get_components(frontend_root):
                     inspectable_package = entry_point.dist.project_name
 
                     if inspectable_package == "isomer":
-                        log("Not inspecting base isomer package",
-                            entry_point.dist.__dict__, pretty=True)
+                        log("Not inspecting base isomer package", pretty=True)
                         continue
 
                     inspected_name, inspected_component = inspect_entry_point(
