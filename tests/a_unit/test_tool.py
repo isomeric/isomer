@@ -28,13 +28,10 @@ Test Isomer Auth
 
 """
 
-from circuits import Manager, Event
+import os
 import pytest
-from isomer.ui.auth import Authenticator
-from isomer.events.client import authenticationrequest, authentication
-from isomer.misc import std_uuid, std_now, std_hash
-from isomer.database import objectmodels
-import isomer.logger as logger
+
+from isomer.tool.tool import isotool
 
 
 def test_tool_main():
@@ -45,4 +42,20 @@ def test_tool_main():
     cli = isomer.tool.tool.isotool
 
     assert cli is not None
+
+
+def test_view_no_objects():
+    """"""
+
+    result = pytest.run_cli(isotool, [
+        "--dbhost", pytest.DBHOST + ":" + pytest.DBPORT,
+        "--dbname", pytest.DBNAME,
+        'db', 'objects', 'view',
+        "--schema", "systemconfig"
+    ], full_log=True)
+
+    assert result.exit_code == 0
+    assert "Done: iso db objects view." in result.output
+
+
 
