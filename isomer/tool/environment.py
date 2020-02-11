@@ -101,7 +101,7 @@ def _check_environment(ctx, env=None):
 
     size_sum = 0
     amount_files = 0
-    for file in glob.glob(frontend_target, '*.gz'):
+    for file in glob.glob(os.path.join(frontend_target, '*.gz')):
         size_sum += os.statvfs(file).f_bsize
         amount_files += 1
 
