@@ -83,8 +83,9 @@ def install(ctx, port):
         ctx.obj["repository"] = repository
         log("Repo:", repository)
         environment["version"] = repository.git.describe()
-    except exc.InvalidGitRepositoryError:
-        log("Not running from a git repository; Using isomer.version", lvl=warn)
+    except exc.GitError:
+        log("Not running from a git repository or there is a problem with it; "
+            "Using isomer.version", lvl=warn)
         environment["version"] = version
 
     ctx.obj["environment"] = environment
