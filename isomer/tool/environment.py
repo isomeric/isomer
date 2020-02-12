@@ -89,31 +89,73 @@ def _check_environment(ctx, env=None):
 
     log("Health checking the environment '%s'" % env)
 
+    # Frontend
+
     not_enough_files = False
+    html_missing = False
     loader_missing = False
     size_too_small = False
+
+    # Backend
+
+    repository_missing = False
+    modules_missing = False
+    venv_missing = False
+    local_missing = False
+    cache_missing = False
+
+    # Backend
+
+    if not os.path.exists(os.path.join(get_path('lib', 'repository'))):
+        log("Repository is missing", lvl=warn)
+        repository_missing = True
+
+    if not os.path.exists(os.path.join(get_path('lib', 'modules'))):
+        log("Modules folder is missing", lvl=warn)
+        modules_missing = True
+
+    if not os.path.exists(os.path.join(get_path('lib', 'venv'))):
+        log("Virtual environment is missing", lvl=warn)
+        venv_missing = True
+
+    if not os.path.exists(os.path.join(get_path('local', ''))):
+        log("Local data folder is missing", lvl=warn)
+        local_missing = True
+
+    if not os.path.exists(os.path.join(get_path('cache', ''))):
+        log("Cache folder is missing", lvl=warn)
+        cache_missing = True
+
+    # Frontend
 
     _, frontend_target = get_frontend_locations(False)
 
     if not os.path.exists(os.path.join(frontend_target, 'index.html')):
-        log("A compiled frontend seems to be missing!", lvl=warn)
+        log("A compiled frontend html seems to be missing", lvl=warn)
+        html_missing = True
+
+    if not glob.glob(frontend_target + '/main.*.js'):
+        log("A compiled frontend loader seems to be missing", lvl=warn)
         loader_missing = True
 
     size_sum = 0
     amount_files = 0
     for file in glob.glob(os.path.join(frontend_target, '*.gz')):
-        size_sum += os.statvfs(file).f_bsize
+        size_sum += os.stat(file).st_size
         amount_files += 1
 
     if amount_files < 4:
-        log("The frontend probably did not compile completely.", lvl=warn)
+        log("The frontend probably did not compile completely", lvl=warn)
         not_enough_files = True
     if size_sum < 2*1024*1024:
-        log("The compiled frontend seems exceptionally small. (That could be good!)",
+        log("The compiled frontend seems exceptionally small",
             lvl=warn)
         size_too_small = True
 
-    return not_enough_files and loader_missing and size_too_small
+    return (not_enough_files and loader_missing and size_too_small and
+            html_missing) and \
+           (repository_missing and modules_missing and venv_missing and
+            local_missing and cache_missing)
 
 
 @environment.command(name="clear", short_help="Clear an environment")
