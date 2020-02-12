@@ -81,7 +81,20 @@ def environment(ctx):
     _get_configuration(ctx)
 
 
-def _check_environment(ctx, env=None):
+@environment.command(name="check", short_help="Health check an environment")
+@click.option("--dev", "-d", is_flag=True, default=False,
+              help="Use development locations")
+@click.pass_context
+def check_environment(ctx, dev):
+    """General fitness tests of the built environment"""
+
+    if _check_environment(ctx, dev=dev):
+        log("Environment seems healthy")
+
+    finish(ctx)
+
+
+def _check_environment(ctx, env=None, dev=False):
     """General fitness tests of the built environment"""
 
     if env is None:
@@ -128,7 +141,7 @@ def _check_environment(ctx, env=None):
 
     # Frontend
 
-    _, frontend_target = get_frontend_locations(False)
+    _, frontend_target = get_frontend_locations(dev)
 
     if not os.path.exists(os.path.join(frontend_target, 'index.html')):
         log("A compiled frontend html seems to be missing", lvl=warn)
@@ -147,15 +160,22 @@ def _check_environment(ctx, env=None):
     if amount_files < 4:
         log("The frontend probably did not compile completely", lvl=warn)
         not_enough_files = True
-    if size_sum < 2*1024*1024:
+    if size_sum < 2 * 1024 * 1024:
         log("The compiled frontend seems exceptionally small",
             lvl=warn)
         size_too_small = True
 
-    return (not_enough_files and loader_missing and size_too_small and
-            html_missing) and \
-           (repository_missing and modules_missing and venv_missing and
-            local_missing and cache_missing)
+    frontend = (repository_missing or modules_missing or venv_missing or
+                local_missing or cache_missing)
+    backend = (not_enough_files or loader_missing or size_too_small or
+               html_missing)
+
+    result = not (frontend or backend)
+
+    if result is False:
+        log("Health check failed", lvl=error)
+
+    return result
 
 
 @environment.command(name="clear", short_help="Clear an environment")
