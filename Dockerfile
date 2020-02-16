@@ -79,7 +79,7 @@ RUN ./iso instance update-nginx
 
 #  Services
 
-EXPOSE 80,443
+EXPOSE 80 443
 
 # There is a frontend development server with hot reloading which can be started with
 #   $ isomer/frontend/npm run start
