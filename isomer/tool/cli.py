@@ -88,8 +88,9 @@ from isomer.version import version_info
 @click.option("--log-file", default=None, help="Logfile name")
 @click.option("--dbhost", default=None, help=db_host_help, metavar=db_host_metavar)
 @click.option("--dbname", default=None, help=db_help, metavar=db_metavar)
-@click.option("--prefix", default=None, help="Use different system prefix")
-@click.option("--config-dir", "-c", default="/etc/isomer")
+@click.option("--prefix-path", "-p", default=None, help="Use different system prefix")
+@click.option("--config-path", "-c", default="/etc/isomer",
+              help="System configuration path")
 @click.option("--fat-logo", "--fat", hidden=True, is_flag=True, default=False)
 @click.pass_context
 def cli(
@@ -105,8 +106,8 @@ def cli(
     log_file,
     dbhost,
     dbname,
-    prefix,
-    config_dir,
+    prefix_path,
+    config_path,
     fat_logo,
 ):
     """Isomer Management Tool
@@ -159,7 +160,7 @@ def cli(
     log("Running with Python", sys.version.replace("\n", ""), sys.platform, lvl=verbose)
     log("Interpreter executable:", sys.executable, lvl=verbose)
 
-    set_etc_path(config_dir)
+    set_etc_path(config_path)
     configuration = load_configuration()
 
     if configuration is None:
@@ -242,7 +243,7 @@ def cli(
     ctx.obj["dbhost"] = dbhost
     ctx.obj["dbname"] = dbname
 
-    set_instance(instance, env, prefix)
+    set_instance(instance, env, prefix_path)
 
     if log_path is None and log_file is None:
         log_path = get_log_path()
