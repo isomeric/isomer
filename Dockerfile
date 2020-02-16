@@ -41,7 +41,7 @@ RUN apt-get update && \
     mongodb-server ca-certificates build-essential libffi-dev libpng-dev \
     python3 python3-dev python3-pip python3-setuptools python3-enchant \
     python3-pil python3-nacl python3-spur python3-bson python3-pymongo \
-    python3-cffi \
+    python3-cffi python3-openssl nginx \
     && rm -rf /var/lib/apt/lists/*
 
 RUN apt-get update && \
@@ -74,10 +74,12 @@ RUN ./iso instance create
 RUN ./iso instance install -s copy -u /home/isomer/isomer --skip-provisions
 
 RUN ./iso instance set web_port 8000
+RUN ./iso instance selfsigned
+RUN ./iso instance update-nginx
 
 #  Services
 
-EXPOSE 8000
+EXPOSE 80,443
 
 # There is a frontend development server with hot reloading which can be started with
 #   $ isomer/frontend/npm run start
