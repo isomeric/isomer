@@ -29,13 +29,14 @@ Test Isomer Tools
 """
 
 import os
-
+import shutil
 from pathlib import Path
 
 import pytest
 from isomer.misc.path import set_instance
 from isomer.ui.builder import copy_directory_tree, copy_resource_tree, \
-    get_frontend_locations, generate_component_folders, get_components
+    get_frontend_locations, generate_component_folders, get_components, \
+    update_frontends, get_sails_dependencies, write_main
 
 try:
     import isomer.test as test
@@ -107,10 +108,15 @@ def test_copy_resource_tree():
     dest = "/tmp/isomer-test/copy_resource_test"
     os.makedirs(dest, exist_ok=True)
 
-    package_object = pkg_object.get("package", None)
-    copy_resource_tree(package_object, "iso", dest)
+    from pkg_resources import get_entry_info
 
-    assert os.path.exists(os.path.join(dest, "iso"))
+    pkg_object = get_entry_info("isomer-test-module", "isomer.components", "testmanager")
+
+    # pytest.exit(crap)
+
+    copy_resource_tree("isomer-test-module", "frontend", dest)
+
+    assert os.path.exists(os.path.join(dest, "test.module.js"))
 
 
 @has_test_module
@@ -129,29 +135,52 @@ def test_get_components():
 
 @has_test_module
 def test_update_frontends():
-    assert False
+    set_instance("test-instance", "test", "/tmp/isomer-test")
+    frontend_root, frontend_target = get_frontend_locations(False)
+
+    component_folder = os.path.join(frontend_root, "src", "components")
+    generate_component_folders(component_folder)
+
+    components = get_components(frontend_root)
+
+    installation_packages, imports = update_frontends(
+        components, frontend_root, True
+    )
+
+    assert "test-npm-update" in installation_packages
+    assert "import test from './components/test/test.module';\n" \
+           "modules.push(test);\n" in imports
 
 
 @has_test_module
 def test_get_sails_dependencies():
-    assert False
+    frontend_root, _ = get_frontend_locations(True)
+    installation_packages = get_sails_dependencies(frontend_root)
 
-
-@has_test_module
-def test_install_dependencies():
-    assert False
+    assert "angular" in ";".join(installation_packages)
 
 
 @has_test_module
 def test_write_main():
-    assert False
+    imports = ["IMPORTTEST"]
+    root, _ = get_frontend_locations(True)
+    source_file = os.path.join(root, "src/main.tpl.js")
+    target = os.path.join("/tmp/isomer-test/", "src")
+    target_file = os.path.join(target, "main.tpl.js")
 
+    os.makedirs(target, exist_ok=True)
+    try:
+        os.unlink(target_file)
+    except FileNotFoundError:
+        pass
+    except OSError:
+        pytest.fail("Could not delete existing frontend loader")
 
-@has_test_module
-def test_rebuild_frontend():
-    assert False
+    shutil.copy(source_file, target_file)
 
+    write_main(imports, "/tmp/isomer-test")
 
-@has_test_module
-def test_install_frontend():
-    assert False
+    with open(os.path.join(target, "main.js")) as f:
+        content = f.read()
+
+    assert "IMPORTTEST" in content
