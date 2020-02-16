@@ -577,19 +577,19 @@ def instance_cert(ctx, selfsigned):
 
     instance_argument = "" if instance_name == "default" else "-i %s " % instance_name
 
-    if not hostnames or hostnames == "localhost":
-        log(
-            "Please configure the public fully qualified domain names of this instance.\n"
-            "Use 'iso %sinstance set web_hostnames your.hostname.tld' to do that.\n"
-            "You can add multiple names by separating them with commas."
-            % instance_argument,
-            lvl=error,
-        )
-        abort(50031)
-
     set_instance(instance_name, next_environment)
 
     if not selfsigned:
+        if not hostnames or hostnames == "localhost":
+            log(
+                "Please configure the public fully qualified domain names of this instance.\n"
+                "Use 'iso %sinstance set web_hostnames your.hostname.tld' to do that.\n"
+                "You can add multiple names by separating them with commas."
+                % instance_argument,
+                lvl=error,
+            )
+            abort(50031)
+
         contact = instance_configuration.get("contact", False)
         if not contact:
             log(
@@ -624,19 +624,19 @@ def instance_cert(ctx, selfsigned):
             abort(50033)
 
 
-@instance.command(short_help="instance snakeoil certificate")
+@instance.command(short_help="instance self-signed certificate")
 @click.pass_context
-def snakeoil(ctx):
-    """instance a local snakeoil SSL certificate"""
+def selfsigned(ctx):
+    """instance a local self-signed (snakeoil) SSL certificate"""
 
-    _instance_snakeoil(ctx)
+    _instance_selfsigned(ctx)
     finish(ctx)
 
 
-def _instance_snakeoil(ctx):
+def _instance_selfsigned(ctx):
     """Generates a snakeoil certificate that has only been self signed"""
 
-    log("Generating self signed (insecure) certificate/key combination")
+    log("Generating self signed certificate/key combination")
 
     try:
         os.mkdir("/etc/ssl/certs/isomer")
@@ -649,7 +649,7 @@ def _instance_snakeoil(ctx):
     try:
         from OpenSSL import crypto
     except ImportError:
-        log("Need python3-crypto to do this.")
+        log("Need python3-openssl to do this.")
         abort(1)
 
     from socket import gethostname
@@ -659,7 +659,7 @@ def _instance_snakeoil(ctx):
 
         # create a key pair
         k = crypto.PKey()
-        k.generate_key(crypto.TYPE_RSA, 1024)
+        k.generate_key(crypto.TYPE_RSA, 2048)
 
         if os.path.exists(cert_file):
             try:
@@ -678,6 +678,7 @@ def _instance_snakeoil(ctx):
         else:
             serial = 1
 
+        # TODO: Grab that data from instance configuration
         # create a self-signed certificate
         certificate = crypto.X509()
         certificate.get_subject().C = "DE"
@@ -692,7 +693,7 @@ def _instance_snakeoil(ctx):
         certificate.gmtime_adj_notAfter(10 * 365 * 24 * 60 * 60)
         certificate.set_issuer(certificate.get_subject())
         certificate.set_pubkey(k)
-        certificate.sign(k, "sha512")
+        certificate.sign(k, b"sha512")
 
         open(key_file, "wt").write(
             str(crypto.dump_privatekey(crypto.FILETYPE_PEM, k), encoding="ASCII")
