@@ -219,7 +219,7 @@ def run_cli(cmd, args, full_log=False):
         ]
         args = log_args + args
 
-    args = ['--config-dir', '/tmp/isomer-test/etc/isomer'] + args
+    args = ['--config-path', '/tmp/isomer-test/etc/isomer'] + args
 
     # pprint(args)
 
