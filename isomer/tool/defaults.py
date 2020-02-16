@@ -33,7 +33,7 @@ templates and a table of exit codes for the management tool.
 
 import distro
 
-distribution = "DEBIAN"
+distribution = distro.id().upper()
 
 db_host_default = "127.0.0.1:27017"
 db_host_help = "Define hostname for database server (default: " + db_host_default + ")"
