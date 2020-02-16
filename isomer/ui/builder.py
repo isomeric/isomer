@@ -158,7 +158,7 @@ def get_frontend_locations(development):
     log("Checking frontend location", lvl=debug)
 
     if development is True:
-        log("Using development frontend location")
+        log("Using development frontend location", lvl=warn)
         root = os.path.realpath(
             os.path.dirname(os.path.realpath(__file__)) + "/../../frontend"
         )
@@ -175,7 +175,7 @@ def get_frontend_locations(development):
                 )
                 return None, None
     else:
-        log("Using production frontend location")
+        log("Using production frontend location", lvl=debug)
         root = get_path("lib", "repository/frontend")
         target = get_path("lib", "frontend")
 
