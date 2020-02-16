@@ -9,6 +9,10 @@ services:
     environment:
       ISOMER_DBHOST: db:27017
       ISOMER_LAUNCH_WEB_ADDRESS: 0.0.0.0
+    stdin_open: true
+    tty: true
+    depends_on:
+      - db
     ports:
       - 0.0.0.0:443:443
       - 0.0.0.0:80:80
