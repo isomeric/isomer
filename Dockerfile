@@ -41,7 +41,7 @@ RUN apt-get update && \
     mongodb-server ca-certificates build-essential libffi-dev libpng-dev \
     python3 python3-dev python3-pip python3-setuptools python3-enchant \
     python3-pil python3-nacl python3-spur python3-bson python3-pymongo \
-    python3-cffi python3-openssl nginx \
+    python3-cffi python3-openssl python3-wheel nginx \
     && rm -rf /var/lib/apt/lists/*
 
 RUN apt-get update && \
