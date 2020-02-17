@@ -657,6 +657,12 @@ def _instance_selfsigned(ctx):
     def create_self_signed_cert():
         """Create a simple self signed SSL certificate"""
 
+        config = ctx.obj['instance_configuration']
+
+        hostname = config.get("web_hostnames", gethostname())
+        if isinstance(hostname, list):
+            hostname = hostname[0]
+
         # create a key pair
         k = crypto.PKey()
         k.generate_key(crypto.TYPE_RSA, 2048)
@@ -678,22 +684,21 @@ def _instance_selfsigned(ctx):
         else:
             serial = 1
 
-        # TODO: Grab that data from instance configuration
         # create a self-signed certificate
         certificate = crypto.X509()
-        certificate.get_subject().C = "DE"
-        certificate.get_subject().ST = "Berlin"
-        certificate.get_subject().L = "Berlin"
+        certificate.get_subject().C = config.get("web_certificate_country", "Milkyway")
+        certificate.get_subject().ST = config.get("web_certificate_state", "Sol")
+        certificate.get_subject().L = config.get("web_certificate_location", "Earth")
         # noinspection PyPep8
-        certificate.get_subject().O = "Hackerfleet"
-        certificate.get_subject().OU = "Hackerfleet"
-        certificate.get_subject().CN = gethostname()
+        certificate.get_subject().O = config.get("web_certificate_issuer", "Unknown")
+        certificate.get_subject().OU = config.get("web_certificate_unit", "Unknown")
+        certificate.get_subject().CN = hostname
         certificate.set_serial_number(serial)
         certificate.gmtime_adj_notBefore(0)
         certificate.gmtime_adj_notAfter(10 * 365 * 24 * 60 * 60)
         certificate.set_issuer(certificate.get_subject())
         certificate.set_pubkey(k)
-        certificate.sign(k, b"sha512")
+        certificate.sign(k, "sha512")
 
         open(key_file, "wt").write(
             str(crypto.dump_privatekey(crypto.FILETYPE_PEM, k), encoding="ASCII")
