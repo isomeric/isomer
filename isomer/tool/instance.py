@@ -40,13 +40,15 @@ Instance management functionality.
 
 """
 
-import tomlkit
-import click
 import os
 import webbrowser
-from click_didyoumean import DYMGroup
+import tomlkit
+import click
 
-from isomer.misc.path import set_instance
+from click_didyoumean import DYMGroup
+from socket import gethostname
+
+from isomer.misc.path import set_instance, get_etc_instance_path
 from isomer.logger import warn, critical
 from isomer.tool import (
     _get_system_configuration,
@@ -70,9 +72,6 @@ from isomer.tool.templates import write_template
 from isomer.tool.defaults import (
     service_template,
     nginx_template,
-    cert_file,
-    key_file,
-    combined_file,
     distribution,
 )
 from isomer.error import (
@@ -557,83 +556,75 @@ def validate_services(ctx):
     help="Use a self-signed certificate",
     default=False,
     is_flag=True,
-    hidden=True,
 )
 @click.pass_context
 def cert(ctx, selfsigned):
     """instance a local SSL certificate"""
 
-    instance_cert(ctx, selfsigned)
-
-
-def instance_cert(ctx, selfsigned):
-    """instance a local SSL certificate"""
-
     instance_configuration = ctx.obj["instance_configuration"]
     instance_name = ctx.obj["instance"]
     next_environment = get_next_environment(ctx)
-    hostnames = instance_configuration.get("web_hostnames", False)
-    hostnames = hostnames.replace(" ", "")
-
-    instance_argument = "" if instance_name == "default" else "-i %s " % instance_name
 
     set_instance(instance_name, next_environment)
 
-    if not selfsigned:
-        if not hostnames or hostnames == "localhost":
-            log(
-                "Please configure the public fully qualified domain names of this instance.\n"
-                "Use 'iso %sinstance set web_hostnames your.hostname.tld' to do that.\n"
-                "You can add multiple names by separating them with commas."
-                % instance_argument,
-                lvl=error,
-            )
-            abort(50031)
+    if selfsigned:
+        _instance_selfsigned(instance_configuration)
+    else:
+        log("This is work in progress")
+        abort(55555)
 
-        contact = instance_configuration.get("contact", False)
-        if not contact:
-            log(
-                "You need to specify a contact mail address for this instance to generate certificates.\n"
-                "Use 'iso %sinstance set contact your@address.com' to do that."
-                % instance_argument,
-                lvl=error,
-            )
-            abort(50032)
+        _instance_letsencrypt(instance_configuration)
 
-        success, result = run_process(
-            "/",
-            [
-                "certbot",
-                "--nginx",
-                "certonly",
-                "-m",
-                contact,
-                "-d",
-                hostnames,
-                "--agree-tos",
-                "-n",
-            ],
-        )
-        if not success:
-            log(
-                "Error getting certificate:",
-                format_result(result),
-                pretty=True,
-                lvl=error,
-            )
-            abort(50033)
-
-
-@instance.command(short_help="instance self-signed certificate")
-@click.pass_context
-def selfsigned(ctx):
-    """instance a local self-signed (snakeoil) SSL certificate"""
-
-    _instance_selfsigned(ctx)
     finish(ctx)
 
 
-def _instance_selfsigned(ctx):
+def _instance_letsencrypt(instance_configuration):
+    hostnames = instance_configuration.get("web_hostnames", False)
+    hostnames = hostnames.replace(" ", "")
+
+    if not hostnames or hostnames == "localhost":
+        log(
+            "Please configure the public fully qualified domain names of this instance.\n"
+            "Use 'iso instance set web_hostnames your.hostname.tld' to do that.\n"
+            "You can add multiple names by separating them with commas.",
+            lvl=error,
+        )
+        abort(50031)
+
+    contact = instance_configuration.get("contact", False)
+    if not contact:
+        log(
+            "You need to specify a contact mail address for this instance to generate certificates.\n"
+            "Use 'iso instance set contact your@address.com' to do that.",
+            lvl=error,
+        )
+        abort(50032)
+
+    success, result = run_process(
+        "/",
+        [
+            "certbot",
+            "--nginx",
+            "certonly",
+            "-m",
+            contact,
+            "-d",
+            hostnames,
+            "--agree-tos",
+            "-n",
+        ],
+    )
+    if not success:
+        log(
+            "Error getting certificate:",
+            format_result(result),
+            pretty=True,
+            lvl=error,
+        )
+        abort(50033)
+
+
+def _instance_selfsigned(instance_configuration):
     """Generates a snakeoil certificate that has only been self signed"""
 
     log("Generating self signed certificate/key combination")
@@ -652,14 +643,19 @@ def _instance_selfsigned(ctx):
         log("Need python3-openssl to do this.")
         abort(1)
 
-    from socket import gethostname
-
-    def create_self_signed_cert():
+    def create_self_signed_cert(target):
         """Create a simple self signed SSL certificate"""
 
-        config = ctx.obj['instance_configuration']
+        key_file = os.path.join(target, "selfsigned.key")
+        cert_file = os.path.join(target, "selfsigned.crt")
+        combined_file = os.path.join(target, "selfsigned.pem")
 
-        hostname = config.get("web_hostnames", gethostname())
+        cert_conf = {k: v for k, v in instance_configuration.items() if
+                     not k.startswith("web_certificate")}
+
+        log("Certificate data:", cert_conf, pretty=True)
+
+        hostname = instance_configuration.get("web_hostnames", gethostname())
         if isinstance(hostname, list):
             hostname = hostname[0]
 
@@ -686,12 +682,13 @@ def _instance_selfsigned(ctx):
 
         # create a self-signed certificate
         certificate = crypto.X509()
-        certificate.get_subject().C = config.get("web_certificate_country", "Milkyway")
-        certificate.get_subject().ST = config.get("web_certificate_state", "Sol")
-        certificate.get_subject().L = config.get("web_certificate_location", "Earth")
+        certificate.get_subject().C = cert_conf.get("web_certificate_country",
+                                                    "Milkyway")
+        certificate.get_subject().ST = cert_conf.get("web_certificate_state", "Sol")
+        certificate.get_subject().L = cert_conf.get("web_certificate_location", "Earth")
         # noinspection PyPep8
-        certificate.get_subject().O = config.get("web_certificate_issuer", "Unknown")
-        certificate.get_subject().OU = config.get("web_certificate_unit", "Unknown")
+        certificate.get_subject().O = cert_conf.get("web_certificate_issuer", "Unknown")
+        certificate.get_subject().OU = cert_conf.get("web_certificate_unit", "Unknown")
         certificate.get_subject().CN = hostname
         certificate.set_serial_number(serial)
         certificate.gmtime_adj_notBefore(0)
@@ -719,7 +716,14 @@ def _instance_selfsigned(ctx):
             + str(crypto.dump_privatekey(crypto.FILETYPE_PEM, k), encoding="ASCII")
         )
 
-    create_self_signed_cert()
+    location = instance_configuration.get(
+        "web_certificate",
+        os.path.join(get_etc_instance_path(), instance_configuration.get("name"))
+    )
+    create_self_signed_cert(location)
+
+    instance_configuration["web_key"] = location
+    write_instance(instance_configuration)
 
 
 @instance.command(short_help="install systemd service")
@@ -790,8 +794,8 @@ Using 'localhost' for now""",
 
     definitions = {
         "server_public_name": hostnames.replace(",", " "),
-        "ssl_certificate": cert_file,
-        "ssl_key": key_file,
+        "ssl_certificate": config["web_certificate"],
+        "ssl_key": config["web_key"],
         "host_url": "http://%s:%i/" % (address, port),
         "instance": instance_name,
         "environment": current_env,
@@ -820,6 +824,5 @@ Using 'localhost' for now""",
 
     log("Restarting nginx service")
     run_process("/", ["systemctl", "restart", "nginx.service"], sudo="root")
-
 
 # TODO: Add instance user
