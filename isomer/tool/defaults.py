@@ -43,10 +43,6 @@ db_default = "isomer"
 db_help = "Define name of database (default: " + db_default + ")"
 db_metavar = "<name>"
 
-key_file = "/etc/ssl/certs/isomer/selfsigned.key"
-cert_file = "/etc/ssl/certs/isomer/selfsigned.crt"
-combined_file = "/etc/ssl/certs/isomer/selfsigned.pem"
-
 source_url = "https://github.com/isomeric/isomer"
 
 distribution_name = distro.codename()
