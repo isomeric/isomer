@@ -28,6 +28,7 @@ Instance, environment and remote configuration bits.
 """
 
 import os
+import glob
 
 from tomlkit import loads, dumps
 from tomlkit.exceptions import NonExistentKey
@@ -129,7 +130,7 @@ def load_instance(instance):
     file = os.path.join(get_etc_instance_path(), instance + ".conf")
     with open(file) as f:
         config = loads(f.read())
-        log("Instance configuration loaded.", lvl=debug)
+        log("Instance configuration'", instance, "'loaded.", lvl=debug)
 
     return config
 
@@ -139,13 +140,15 @@ def load_instances():
 
     config = {}
 
-    for root, _, files in os.walk(get_etc_instance_path()):
-        for file in files:
-            name = os.path.join(root, file)
+    pattern = get_etc_instance_path() + "/*.conf"
+    log("Loading all instance configuration files:", pattern, lvl=debug)
 
-            with open(name) as f:
-                config[file.split(".")[0]] = loads(f.read())
-                log("Instance configuration loaded.", lvl=debug)
+    for name in glob.glob(pattern):
+
+        with open(name) as f:
+            instance_name = os.path.basename(name).split(".")[0]
+            config[instance_name] = loads(f.read())
+            log("Instance configuration '", instance_name, "'loaded.", lvl=debug)
 
     return config
 
@@ -256,7 +259,7 @@ instance_template.comment("These certificate details are only for selfsigned "
                           "certificates:")
 instance_template.add("web_certificate_issuer", "Isomeric Community")
 instance_template.add("web_certificate_unit", "Unknown")
-instance_template.add("web_certificate_country", "Unknown")
+instance_template.add("web_certificate_country", "EU")
 instance_template.add("web_certificate_state", "Unknown")
 instance_template.add("web_certificate_location", "Unknown")
 instance_template.add("source", "")

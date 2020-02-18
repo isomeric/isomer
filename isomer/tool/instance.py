@@ -651,7 +651,7 @@ def _instance_selfsigned(instance_configuration):
         combined_file = os.path.join(target, "selfsigned.pem")
 
         cert_conf = {k: v for k, v in instance_configuration.items() if
-                     not k.startswith("web_certificate")}
+                     k.startswith("web_certificate")}
 
         log("Certificate data:", cert_conf, pretty=True)
 
@@ -683,7 +683,7 @@ def _instance_selfsigned(instance_configuration):
         # create a self-signed certificate
         certificate = crypto.X509()
         certificate.get_subject().C = cert_conf.get("web_certificate_country",
-                                                    "Milkyway")
+                                                    "EU")
         certificate.get_subject().ST = cert_conf.get("web_certificate_state", "Sol")
         certificate.get_subject().L = cert_conf.get("web_certificate_location", "Earth")
         # noinspection PyPep8
@@ -716,13 +716,16 @@ def _instance_selfsigned(instance_configuration):
             + str(crypto.dump_privatekey(crypto.FILETYPE_PEM, k), encoding="ASCII")
         )
 
-    location = instance_configuration.get(
-        "web_certificate",
-        os.path.join(get_etc_instance_path(), instance_configuration.get("name"))
+    location = os.path.join(
+        get_etc_instance_path(),
+        instance_configuration.get("name")
     )
+
     create_self_signed_cert(location)
 
-    instance_configuration["web_key"] = location
+    instance_configuration["web_key"] = os.path.join(location, "selfsigned.key")
+    instance_configuration["web_certificate"] = os.path.join(location, "selfsigned.crt")
+
     write_instance(instance_configuration)
 
 
