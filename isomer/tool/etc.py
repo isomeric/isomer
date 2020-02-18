@@ -153,16 +153,24 @@ def load_instances():
 def write_instance(instance_configuration):
     """Write a new or updated instance"""
 
-    filename = os.path.join(
-        get_etc_instance_path(), instance_configuration["name"] + ".conf"
+    instance_name = instance_configuration["name"]
+
+    instance_file = os.path.join(
+        get_etc_instance_path(), instance_name + ".conf"
     )
+    instance_directory = os.path.join(get_etc_instance_path(), instance_name)
     try:
-        with open(filename, "w") as f:
+        with open(instance_file, "w") as f:
             f.write(dumps(instance_configuration))
         log("Instance configuration stored.", lvl=debug)
+
+        if not os.path.exists(instance_directory):
+            os.mkdir(instance_directory)
+            log("Instance configuration directory created.", lvl=debug)
     except PermissionError:
         log(
-            "PermissionError: Could not write instance management configuration file",
+            "PermissionError: Could not write instance management configuration "
+            "file or create instance configuration directory.",
             lvl=error,
         )
         abort(EXIT_NO_PERMISSION)
@@ -243,6 +251,9 @@ instance_template["web_hostnames"].comment("Comma separated list of FQDN hostnam
                                            "selfsigned certificates.")
 instance_template.add("web_port", 8055)
 instance_template.add("web_certificate", "")
+instance_template.add("web_key", "")
+instance_template.comment("These certificate details are only for selfsigned "
+                          "certificates:")
 instance_template.add("web_certificate_issuer", "Isomeric Community")
 instance_template.add("web_certificate_unit", "Unknown")
 instance_template.add("web_certificate_country", "Unknown")
