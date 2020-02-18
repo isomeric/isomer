@@ -73,9 +73,16 @@ RUN ./iso system -l -p Docker all
 RUN ./iso instance create
 RUN ./iso instance install -s copy -u /home/isomer/isomer --skip-provisions
 
+RUN ./iso instance info
+
 RUN ./iso instance set web_port 8000
-RUN ./iso instance selfsigned
+RUN ./iso instance cert --selfsigned
+
+RUN ./iso instance info
+
 RUN ./iso instance update-nginx
+
+RUN cat /etc/nginx/sites-enabled/*
 
 #  Services
 
