@@ -81,9 +81,16 @@ EXIT_ISOMER_URL_REQUIRED = {
     "code": 50100,
     "message": "You need to specify a source url via --url/-u for isomer"
 }
+EXIT_WORK_IN_PROGRESS = {
+    "code": 55555,
+    "message": "This is work in progress"
+}
 
 
 def abort(error_object):
+    """Abort with a nice error message and if possible an error description
+    url leading to the online documentation."""
+
     url = "https://isomer.readthedocs.io/en/latest/manual/Administration/Errors/%i.html"
     if isinstance(error_object, int):
         log("Unknown error code.")
