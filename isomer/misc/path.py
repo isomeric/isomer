@@ -62,7 +62,8 @@ def get_etc_path():
 
 
 def get_etc_instance_path():
-    """Get currently set instance configurations base path"""
+    """Get currently set instance configurations base path, e.g.
+    `/etc/isomer/instances/`"""
     return ETC_INSTANCE_PATH
 
 
