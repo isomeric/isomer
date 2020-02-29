@@ -2,6 +2,10 @@
     :target: https://travis-ci.org/isomeric/isomer
     :alt: Build Status
 
+.. image:: https://bestpractices.coreinfrastructure.org/projects/3650/badge
+    :target: https://bestpractices.coreinfrastructure.org/projects/3650
+    :alt: CII Best Practices
+
 .. image:: https://coveralls.io/repos/isomeric/isomer/badge.svg
     :target: https://coveralls.io/r/isomeric/isomer
     :alt: Coverage
