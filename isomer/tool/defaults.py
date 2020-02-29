@@ -44,6 +44,9 @@ db_help = "Define name of database (default: " + db_default + ")"
 db_metavar = "<name>"
 
 source_url = "https://github.com/isomeric/isomer"
+source_api_url = "https://api.github.com/repos/isomeric/isomer"
+
+pypi_api_url = "https://pypi.org/pypi/isomer/json"
 
 distribution_name = distro.codename()
 

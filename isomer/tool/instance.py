@@ -42,16 +42,31 @@ Instance management functionality.
 
 import os
 import webbrowser
-import tomlkit
-import click
-
-from click_didyoumean import DYMGroup
 from socket import gethostname
 
-from isomer.misc.path import set_instance, get_etc_instance_path
+import tomlkit
+import click
+from click_didyoumean import DYMGroup
+from shutil import rmtree
+
+from isomer.error import (
+    abort,
+    EXIT_INVALID_CONFIGURATION,
+    EXIT_INSTALLATION_FAILED,
+    EXIT_INSTANCE_EXISTS,
+    EXIT_INSTANCE_UNKNOWN,
+    EXIT_SERVICE_INVALID,
+    EXIT_USER_BAILED_OUT,
+    EXIT_INVALID_PARAMETER,
+)
+from isomer.migration import apply_migrations
+from isomer.misc import sorted_alphanumerical
+from isomer.misc.path import set_instance, get_etc_instance_path, get_path
 from isomer.logger import warn, critical
 from isomer.tool import (
     _get_system_configuration,
+    _get_configuration,
+    get_next_environment,
     ask,
     finish,
     run_process,
@@ -59,8 +74,6 @@ from isomer.tool import (
     log,
     error,
     debug,
-    get_next_environment,
-    _get_configuration,
 )
 from isomer.tool.etc import (
     write_instance,
@@ -74,22 +87,15 @@ from isomer.tool.defaults import (
     nginx_template,
     distribution,
 )
-from isomer.error import (
-    abort,
-    EXIT_INVALID_CONFIGURATION,
-    EXIT_INSTALLATION_FAILED,
-    EXIT_INSTANCE_EXISTS,
-    EXIT_INSTANCE_UNKNOWN,
-    EXIT_SERVICE_INVALID,
-    EXIT_USER_BAILED_OUT,
-    EXIT_INVALID_PARAMETER,
-)
 from isomer.tool.environment import (
     _install_environment,
     install_environment_modules,
     _clear_environment,
     _check_environment,
 )
+from isomer.tool.database import copy_database
+from isomer.tool.version import _get_versions
+from isomer.ui.builder import copy_directory_tree
 
 
 @click.group(cls=DYMGroup)
@@ -204,6 +210,7 @@ def set_parameter(ctx, parameter, value):
     log("Setting %s to %s" % (parameter, value))
     instance_configuration = ctx.obj["instance_configuration"]
     defaults = instance_template
+    converted_value = None
 
     try:
         parameter_type = type(defaults[parameter])
@@ -218,6 +225,9 @@ def set_parameter(ctx, parameter, value):
     except KeyError:
         log("Available parameters:", sorted(list(defaults.keys())))
         abort(EXIT_INVALID_PARAMETER)
+
+    if converted_value is None:
+        log("Converted value was None! Recheck the new config!", lvl=warn)
 
     instance_configuration[parameter] = converted_value
     log("New config:", instance_configuration, pretty=True, lvl=debug)
@@ -256,7 +266,8 @@ def create(ctx, instance_name):
 @instance.command(name="install", short_help="Install a fresh instance")
 @click.option("--force", "-f", is_flag=True, default=False)
 @click.option(
-    "--source", "-s", default="git", type=click.Choice(["link", "copy", "git"])
+    "--source", "-s", default="git",
+    type=click.Choice(["link", "copy", "git", "github"])
 )
 @click.option("--url", "-u", default="", type=click.Path())
 @click.option(
@@ -267,6 +278,9 @@ def create(ctx, instance_name):
     is_flag=True,
     default=False,
     help="Do not use sudo to install (Mostly for tests)",
+)
+@click.option(
+    "--release", "-r", default=None, help="Override installed release version"
 )
 @click.option("--skip-modules", is_flag=True, default=False)
 @click.option("--skip-data", is_flag=True, default=False)
@@ -293,6 +307,7 @@ def install(ctx, **kwargs):
         abort(50081)
 
     _clear_instance(ctx, force=kwargs["force"], clear=False, no_archive=True)
+
     _install_environment(ctx, **kwargs)
 
     ctx.obj["instance_configuration"]["source"] = kwargs["source"]
@@ -301,6 +316,7 @@ def install(ctx, **kwargs):
     write_instance(ctx.obj["instance_configuration"])
 
     _turnover(ctx, force=kwargs["force"])
+
     finish(ctx)
 
 
@@ -453,11 +469,117 @@ def _turnover(ctx, force):
 
 
 @instance.command(short_help="Upgrades the other environment")
-# @click.option('--force', '-f', is_flag=True, default=False, help='Force turnover')
+@click.option("--release", "-r", default=None, help="Specify release to upgrade to")
+@click.option("--upgrade-modules", default=False, is_flag=True,
+              help="Also, upgrade modules if possible")
+@click.option("--restart", default=False, is_flag=True,
+              help="Restart systemd service via systemctl on success")
+@click.option("--handle-cache", "-c",
+              type=click.Choice(["ignore", "move", "copy"], case_sensitive=False),
+              default="ignore", help="Handle cached data as well (ignore, move, copy)")
+@click.option(
+    "--source",
+    "-s",
+    default="git",
+    type=click.Choice(["link", "copy", "git", "develop", "github", "pypi"]),
+    help="Specify installation source/method",
+)
+@click.option("--url", "-u", default="", type=click.Path())
 @click.pass_context
-def upgrade(ctx):
-    """Upgrades an instance on its other environment and turns over on success"""
-    log("Work in progress!")
+def upgrade(ctx, release, upgrade_modules, restart, handle_cache, source, url):
+    """Upgrades an instance on its other environment and turns over on success.
+
+    \b
+    1. Test if other environment is empty
+    1.1. No - archive and clear it
+    2. Copy current environment to other environment
+    3. Clear old bits (venv, frontend)
+    4. Fetch updates in other environment repository
+    5. Select a release
+    6. Checkout that release and its submodules
+    7. Install release
+    8. Copy database
+    9. Migrate data (WiP)
+    10. Turnover
+
+    """
+
+    instance_config = ctx.obj["instance_configuration"]
+    repository = get_path("lib", "repository")
+
+    installation_source = source if source is not None else instance_config['source']
+    installation_url = url if url is not None else instance_config['url']
+
+    environments = instance_config["environments"]
+
+    active = instance_config["environment"]
+
+    next_environment = get_next_environment(ctx)
+    if environments[next_environment]["installed"] is True:
+        _clear_environment(ctx, clear_env=next_environment)
+
+    source_paths = [
+        get_path("lib", "", environment=active),
+        get_path("local", "", environment=active)
+    ]
+
+    destination_paths = [
+        get_path("lib", "", environment=next_environment),
+        get_path("local", "", environment=next_environment)
+    ]
+
+    log(source_paths, destination_paths, pretty=True)
+
+    for source, destination in zip(source_paths, destination_paths):
+        log("Copying to new environment:", source, destination)
+        copy_directory_tree(source, destination)
+
+    if handle_cache != "ignore":
+        log("Handling cache")
+        move = handle_cache == "move"
+        copy_directory_tree(
+            get_path("cache", "", environment=active),
+            get_path("cache", "", environment=next_environment),
+            move=move
+        )
+
+    rmtree(get_path("lib", "venv"), ignore_errors=True)
+    # TODO: This potentially leaves frontend-dev:
+    rmtree(get_path("lib", "frontend"), ignore_errors=True)
+
+    releases = _get_versions(
+        ctx,
+        source=installation_source,
+        url=installation_url,
+        fetch=True
+    )
+
+    releases_keys = sorted_alphanumerical(releases.keys())
+
+    if release is None:
+        release = releases_keys[-1]
+    else:
+        if release not in releases_keys:
+            log("Unknown release. Maybe try a different release or source.")
+            abort(50100)
+
+    log("Choosing release", release)
+
+    _install_environment(
+        ctx, installation_source, installation_url, upgrade=True, release=release
+    )
+
+    new_database_name = instance_config["name"] + "_" + next_environment
+
+    copy_database(
+        ctx.obj["dbhost"],
+        active['database'],
+        new_database_name
+    )
+
+    apply_migrations(ctx)
+
+    finish(ctx)
 
 
 def update_service(ctx, next_environment):

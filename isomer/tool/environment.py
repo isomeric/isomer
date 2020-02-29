@@ -37,6 +37,7 @@ import os
 import glob
 import shutil
 import tarfile
+from copy import copy
 from tempfile import mkdtemp
 
 import grp
@@ -189,7 +190,14 @@ def clear_environment(ctx, force, no_archive):
 
 
 def _clear_environment(ctx, force=False, clear_env=None, clear=False, no_archive=False):
-    """Tests an environment for usage, then clears it"""
+    """Tests an environment for usage, then clears it
+
+    :param ctx: Click Context
+    :param force: Irrefutably destroy environment content
+    :param clear_env: Environment to clear (Green/Blue)
+    :param clear: Also destroy generated folders
+    :param no_archive: Don't attempt to archive instance
+    """
 
     instance_name = ctx.obj["instance"]
 
@@ -737,6 +745,9 @@ def _migrate(ctx):
     default=False,
     help="Do not use sudo to install (Mostly for tests)",
 )
+@click.option(
+    "--release", "-r", default=None, help="Override installed release version"
+)
 @click.option("--skip-modules", is_flag=True, default=False)
 @click.option("--skip-data", is_flag=True, default=False)
 @click.option("--skip-frontend", is_flag=True, default=False)
@@ -753,16 +764,18 @@ def install_environment(ctx, **kwargs):
 
 def _install_environment(
     ctx,
-    source,
-    url,
-    import_file,
-    no_sudo,
-    force,
-    skip_modules,
-    skip_data,
-    skip_frontend,
-    skip_test,
-    skip_provisions,
+    source=None,
+    url=None,
+    import_file=None,
+    no_sudo=False,
+    force=False,
+    release=None,
+    upgrade=False,
+    skip_modules=False,
+    skip_data=False,
+    skip_frontend=False,
+    skip_test=False,
+    skip_provisions=False,
 ):
     """Internal function to perform environment installation"""
 
@@ -781,7 +794,7 @@ def _install_environment(
 
     set_instance(instance_name, next_environment)
 
-    env = instance_configuration["environments"][next_environment]
+    env = copy(instance_configuration["environments"][next_environment])
 
     env["database"] = instance_name + "_" + next_environment
 
@@ -798,7 +811,9 @@ def _install_environment(
     )
 
     try:
-        result = get_isomer(source, url, env_path, sudo=user)
+        result = get_isomer(
+            source, url, env_path, upgrade=upgrade, sudo=user, release=release
+        )
         if result is False:
             log("Getting Isomer failed", lvl=critical)
             abort(50011)
@@ -817,7 +832,7 @@ def _install_environment(
         repository = Repo(os.path.join(env_path, "repository"))
 
         log("Repo:", repository, lvl=debug)
-        env["version"] = repository.git.describe()
+        env["version"] = str(repository.git.describe())
     except (exc.InvalidGitRepositoryError, exc.NoSuchPathError, exc.GitCommandError):
         env["version"] = version
         log(
@@ -826,8 +841,10 @@ def _install_environment(
             lvl=warn,
         )
 
-    instance_configuration["environments"][next_environment] = env
-    write_instance(instance_configuration)
+    ctx.obj["instance_configuration"]["environments"][next_environment] = env
+
+    # TODO: Does it make sense to early-write the configuration and then again later?
+    write_instance(ctx.obj["instance_configuration"])
 
     log("Creating virtual environment")
     success, result = run_process(
@@ -871,13 +888,15 @@ def _install_backend(ctx):
     """Installs the backend into an environment"""
 
     instance_name = ctx.obj["instance"]
+    env = get_next_environment(ctx)
 
-    set_instance(instance_name, get_next_environment(ctx))
+    set_instance(instance_name, env)
+
+    log("Installing backend on", env, lvl=debug)
 
     env_path = get_path("lib", "")
     user = ctx.obj["instance_configuration"]["user"]
 
-    log("Installing backend")
     success, result = run_process(
         os.path.join(env_path, "repository"),
         [os.path.join(env_path, "venv", "bin", "python3"), "setup.py", "develop"],

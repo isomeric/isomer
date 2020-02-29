@@ -328,15 +328,18 @@ def format_result(result):
     return str(result.output, encoding="ascii").replace("\\n", "\n")
 
 
-def get_isomer(source, url, destination, upgrade=False, shell=None, sudo=None):
+def get_isomer(source, url, destination, upgrade=False, release=None,
+               shell=None, sudo=None):
     """Grab a copy of Isomer somehow"""
     success = False
+    log("Beginning get_isomer:",
+        source, url, destination, upgrade, release, shell, sudo, lvl=debug)
 
     if url in ("", None) and source == "git" and not upgrade:
         abort(EXIT_ISOMER_URL_REQUIRED)
 
-    if source == "git":
-        if not upgrade:
+    if source in ("git", "github"):
+        if not upgrade or not os.path.exists(os.path.join(destination, "repository")):
             log("Cloning repository from", url)
             success, result = run_process(
                 destination, ["git", "clone", url, "repository"], shell, sudo
@@ -344,17 +347,32 @@ def get_isomer(source, url, destination, upgrade=False, shell=None, sudo=None):
             if not success:
                 log(result, lvl=error)
                 abort(50000)
-        else:
+
+        if upgrade:
             log("Updating repository from", url)
-            success, result = run_process(
-                os.path.join(destination, "repository"),
-                ["git", "pull", "origin", "master"],
-                shell,
-                sudo,
-            )
-            if not success:
-                log(result, lvl=error)
-                abort(50000)
+
+            if release is not None:
+                log("Checking out release:", release)
+                success, result = run_process(
+                    os.path.join(destination, "repository"),
+                    ["git", "checkout", "tags/" + release],
+                    shell,
+                    sudo,
+                )
+                if not success:
+                    log(result, lvl=error)
+                    abort(50000)
+            else:
+                log("Pulling latest")
+                success, result = run_process(
+                    os.path.join(destination, "repository"),
+                    ["git", "pull", "origin", "master"],
+                    shell,
+                    sudo,
+                )
+                if not success:
+                    log(result, lvl=error)
+                    abort(50000)
 
         repository = os.path.join(destination, "repository")
         log("Initializing submodules")
@@ -364,19 +382,21 @@ def get_isomer(source, url, destination, upgrade=False, shell=None, sudo=None):
         if not success:
             log(result, lvl=error)
             abort(50000)
+
+        #log("Pulling frontend")
+        #success, result = run_process(
+        #    os.path.join(repository, "frontend"),
+        #    ["git", "pull", "origin", "master"],
+        #    shell,
+        #    sudo,
+        #)
+        #if not success:
+        #    log(result, lvl=error)
+        #    abort(50000)
+
+        log("Updating frontend")
         success, result = run_process(
             repository, ["git", "submodule", "update"], shell, sudo
-        )
-        if not success:
-            log(result, lvl=error)
-            abort(50000)
-
-        log("Pulling frontend")
-        success, result = run_process(
-            os.path.join(repository, "frontend"),
-            ["git", "pull", "origin", "master"],
-            shell,
-            sudo,
         )
         if not success:
             log(result, lvl=error)
@@ -438,6 +458,9 @@ def get_isomer(source, url, destination, upgrade=False, shell=None, sudo=None):
                 log("Could not change ownership to", sudo, lvl=warn)
                 abort(50000)
         return True
+    else:
+        log("Invalid source selected. "
+            "Currently, only git, github, copy, link are supported ")
 
     return success
 
@@ -564,5 +587,7 @@ def get_next_environment(ctx):
     else:
         current_environment = ctx.obj["instance_configuration"]["environment"]
         next_environment = "blue" if current_environment == "green" else "green"
+
+    log("Acting on environment:", next_environment, lvl=debug)
 
     return next_environment
