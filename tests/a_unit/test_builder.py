@@ -64,6 +64,29 @@ def test_copy_directory_tree():
     assert os.path.exists("/tmp/isomer-test/copy_directory_tree_test/foo/bar/ham")
 
 
+def test_move_directory_tree():
+    source = "/tmp/isomer-test/copy_directory_tree"
+    target = "/tmp/isomer-test/copy_directory_tree_test"
+
+    source_file = os.path.join(source, "foo/bar/ham")
+    target_file = os.path.join(target, "foo/bar/ham")
+
+    os.makedirs(os.path.join(source, "foo/bar"), exist_ok=True)
+    with open(source_file, "w") as f:
+        f.write("spam!")
+
+    shutil.rmtree(target, ignore_errors=True)
+
+    copy_directory_tree(
+        source,
+        target,
+        move=True
+    )
+
+    assert os.path.exists(target_file)
+    assert not os.path.exists(source_file)
+
+
 def test_get_frontend_locations_development():
     set_instance("test-instance", "test", "/tmp/isomer-test")
     frontend_root, frontend_target = get_frontend_locations(True)

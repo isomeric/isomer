@@ -46,13 +46,14 @@ def log(*args, **kwargs):
 
 # TODO: Move the copy resource/directory tree operations to a utility lib
 
-
-def copy_directory_tree(root_src_dir: str, root_dst_dir: str, hardlink: bool = True):
-    """Copies a whole directory tree
+def copy_directory_tree(root_src_dir: str, root_dst_dir: str, hardlink: bool = False,
+                        move: bool = False):
+    """Copies/links/moves a whole directory tree
 
     :param root_src_dir: Source filesystem location
     :param root_dst_dir: Target filesystem location
     :param hardlink: Create hardlinks instead of copying (experimental)
+    :param move: Move whole directory
     """
 
     for src_dir, dirs, files in os.walk(root_src_dir):
@@ -65,41 +66,38 @@ def copy_directory_tree(root_src_dir: str, root_dst_dir: str, hardlink: bool = T
             try:
                 if os.path.exists(dst_file):
                     if hardlink:
-                        log("Removing frontend link:", dst_file, lvl=verbose)
+                        log("Removing destination:", dst_file, lvl=verbose)
                         os.remove(dst_file)
                     else:
-                        log("Overwriting frontend file:", dst_file, lvl=verbose)
+                        log("Overwriting destination:", dst_file, lvl=verbose)
                 else:
-                    log("Target not existing:", dst_file, lvl=verbose)
+                    log("Destination not existing:", dst_file, lvl=verbose)
             except PermissionError as e:
-                log("No permission to remove target:", e, lvl=error)
+                log("No permission to remove destination:", e, lvl=error)
 
             try:
                 if hardlink:
                     log("Hardlinking ", src_file, dst_dir, lvl=verbose)
                     os.link(src_file, dst_file)
+                elif move:
+                    log("Moving", src_file, dst_dir)
+                    shutil.move(src_file, dst_dir)
                 else:
                     log("Copying ", src_file, dst_dir, lvl=verbose)
                     copy(src_file, dst_dir)
             except PermissionError as e:
                 log(
-                    " No permission to create target %s for frontend:"
-                    % ("link" if hardlink else "copy"),
+                    " No permission to create destination %s for directory:"
+                    % ("link" if hardlink else "copy/move"),
                     dst_dir,
                     e,
                     lvl=error,
                 )
             except Exception as e:
-                log(
-                    "Error during",
-                    "link" if hardlink else "copy",
-                    "creation:",
-                    type(e),
-                    e,
-                    lvl=error,
-                )
+                log("Error during copy_directory_tree operation:",
+                    type(e), e, lvl=error)
 
-            log("Done linking", root_dst_dir, lvl=verbose)
+            log("Done with tree:", root_dst_dir, lvl=verbose)
 
 
 def copy_resource_tree(package: str, source: str, target: str):
