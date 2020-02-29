@@ -163,6 +163,7 @@ def write_instance(instance_configuration):
     )
     instance_directory = os.path.join(get_etc_instance_path(), instance_name)
     try:
+        log("Configuration:", instance_configuration, pretty=True, lvl=debug)
         with open(instance_file, "w") as f:
             f.write(dumps(instance_configuration))
         log("Instance configuration stored.", lvl=debug)
@@ -227,9 +228,9 @@ configuration_template.add(nl())
 
 meta = table()
 meta.add("distribution", "debian")
-meta["distribution"].comment("Currently only debian supported")
+meta["distribution"].comment("Currently, only debian supported")
 meta.add("init", "systemd")
-meta["init"].comment("Currently only systemd supported")
+meta["init"].comment("Currently, only systemd supported")
 meta.add("prefix", "")
 
 configuration_template.add("meta", meta)
@@ -255,6 +256,7 @@ instance_template["web_hostnames"].comment("Comma separated list of FQDN hostnam
 instance_template.add("web_port", 8055)
 instance_template.add("web_certificate", "")
 instance_template.add("web_key", "")
+# TODO: Fix this comment and make the web_certificate stuff a table
 instance_template.comment("These certificate details are only for selfsigned "
                           "certificates:")
 instance_template.add("web_certificate_issuer", "Isomeric Community")
@@ -266,13 +268,14 @@ instance_template.add("source", "")
 instance_template["source"].comment("git, link or copy")
 instance_template.add("url", "")
 instance_template.add("modules", [])
+instance_template["modules"].comment("Modules added as [method, url] items")
 
-instance_template["database_type"].comment("Currently only mongodb supported")
+instance_template["database_type"].comment("Currently, only mongodb supported")
 instance_template.add("webserver", "nginx")
-instance_template["webserver"].comment("Currently only nginx supported")
+instance_template["webserver"].comment("Currently, only nginx supported")
 instance_template.add("service_template", "builtin")
 instance_template["service_template"].comment(
-    "Currently only a builtin one is supported"
+    "Currently, only a builtin one supported"
 )
 
 environment_template = table()
