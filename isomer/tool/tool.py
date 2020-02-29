@@ -40,6 +40,7 @@ from isomer.tool.rbac import rbac
 from isomer.tool.user import user
 from isomer.tool.remote import remote
 from isomer.tool.misc import cmdmap, shell
+from isomer.tool.version import versions, version
 from isomer.tool.dev import dev
 from isomer.tool.cli import cli
 from isomer.launcher import launch
@@ -51,6 +52,8 @@ cli.add_command(config)
 cli.add_command(install)
 cli.add_command(cmdmap)
 cli.add_command(shell)
+cli.add_command(version)
+cli.add_command(versions)
 cli.add_command(remote)
 cli.add_command(dev)
 

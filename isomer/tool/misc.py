@@ -27,7 +27,6 @@ Miscellaneous functionality for the management tool.
 
 """
 
-import os
 import click
 from click_repl import repl
 from prompt_toolkit.history import FileHistory
@@ -35,15 +34,7 @@ from prompt_toolkit.styles import Style
 
 from isomer.tool import run_process
 from isomer.tool.cli import cli
-from isomer.tool import log
 from isomer.version import version_info
-
-
-@cli.command(short_help="Show running isomer tool version")
-def version():
-    """Log the version information"""
-
-    log("Tool version info:", version_info, os.path.dirname(__file__))
 
 
 @cli.command(short_help="Start interactive management shell")
