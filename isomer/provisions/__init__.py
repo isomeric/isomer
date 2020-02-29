@@ -32,8 +32,6 @@ from isomer.logger import isolog, debug, warn  # , verbose, error, warn
 from pkg_resources import iter_entry_points
 
 
-# TODO: This probably has to be moved somewhere else (due to clashes with
-#  namespace-architecture)
 def build_provision_store():
     available = {}
 
@@ -55,6 +53,3 @@ def build_provision_store():
     # pprint(available)
 
     return available
-
-
-__import__("pkg_resources").declare_namespace(__name__)
