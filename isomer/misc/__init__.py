@@ -26,6 +26,8 @@ import gettext
 import json
 import os
 import copy
+import re
+
 from datetime import datetime
 from hashlib import sha512
 from random import choice
@@ -181,6 +183,16 @@ def nested_map_update(d, u, *keys):
 #     """
 #
 #     nested_map_find(data_dict, map_list[:-1])[map_list[-1]] = value
+
+
+def sorted_alphanumerical(l, reverse=False):
+    """ Sort the given iterable in the way that humans expect."""
+
+    # From: http://stackoverflow.com/questions/2669059/ddg#2669120
+
+    converted = lambda text: int(text) if text.isdigit() else text
+    alphanumerical_key = lambda key: [converted(c) for c in re.split('([0-9]+)', key)]
+    return sorted(l, key=alphanumerical_key, reverse=reverse)
 
 
 def std_hash(word, salt):
