@@ -33,7 +33,7 @@ import pymongo
 from click_didyoumean import DYMGroup
 
 from isomer.logger import warn, error
-from isomer.migration import make_migrations
+from isomer.migration import make_migrations, apply_migrations
 from isomer.tool import log, ask, finish
 from isomer.error import abort
 
@@ -214,3 +214,14 @@ def make(ctx):
     make_migrations(ctx.obj["schema"])
 
     finish(ctx)
+
+
+@migrations.command(short_help="Apply migrations to a database (WiP)")
+@click.pass_context
+def apply(ctx):
+    """Applies migrations for all or the specified schema"""
+
+    apply_migrations(ctx)
+
+    finish(ctx)
+

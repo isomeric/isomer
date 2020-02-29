@@ -43,6 +43,14 @@ MIGRATION_TEMPLATE = """#!/usr/bin/env python
 """
 
 
+def log(*args, **kwargs):
+    """Log as previous emitter"""
+    kwargs.update({"frame_ref": 2})
+    if "emitter" not in kwargs:
+        kwargs["emitter"] = "MIGRATIONS"
+    isolog(*args, **kwargs)
+
+
 def make_migrations(schema=None):
     """Create migration data for a specified schema"""
 
@@ -230,3 +238,10 @@ def make_migrations(schema=None):
 
     def make_single_migration(old, new):
         pass
+
+
+def apply_migrations(ctx):
+    """Apply migrations to a database"""
+    log("Applying migrations is not implemented, yet.", lvl=warn)
+
+    _ = ctx
