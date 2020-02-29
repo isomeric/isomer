@@ -37,7 +37,7 @@ from click_plugins import with_plugins
 
 from pkg_resources import iter_entry_points
 
-from isomer.logger import set_logfile, set_color, verbosity, warn, verbose
+from isomer.logger import set_logfile, set_color, set_verbosity, warn, verbose
 from isomer.misc.path import get_log_path, set_etc_path, set_instance
 from isomer.tool import log, db_host_help, db_host_metavar, db_help, db_metavar
 from isomer.tool.etc import (
@@ -119,7 +119,7 @@ def cli(
 
     iso [group]
 
-    To display details of a command or its sub groups, try
+    To display details of a command or its subgroups, try
 
     iso [group] [subgroup] [..] [command] --help
 
@@ -130,30 +130,31 @@ def cli(
 
     ctx.obj["quiet"] = quiet
 
-    def set_verbosity():
+    def _set_verbosity():
         if quiet:
-            verbosity["console"] = 100
+            console_setting = 100
         else:
-            verbosity["console"] = int(
+            console_setting = int(
                 console_level if console_level is not None else 20
             )
 
         if no_log:
-            verbosity["file"] = 100
+            file_setting = 100
         else:
-            verbosity["file"] = int(file_level if file_level is not None else 20)
+            file_setting = int(file_level if file_level is not None else 20)
 
-        verbosity["global"] = min(verbosity["console"], verbosity["file"])
+        global_setting = min(console_setting, file_setting)
+        set_verbosity(global_setting, console_setting, file_setting)
 
-    def set_logger():
+    def _set_logger():
         if log_path is not None or log_file is not None:
             set_logfile(log_path, instance, log_file)
 
         if no_colors is False:
             set_color()
 
-    set_verbosity()
-    set_logger()
+    _set_verbosity()
+    _set_logger()
 
     ctx.obj["instance"] = instance
 
@@ -185,10 +186,10 @@ def cli(
         instance_configuration = instances[instance]
 
     if file_level is None and console_level is None:
-        # TODO: There is a bug here preventing the log-level to be set correctly.
-        verbosity["file_level"] = int(instance_configuration["loglevel"])
-        verbosity["global"] = int(instance_configuration["loglevel"])
-        log("Log level set to", verbosity["global"], lvl=verbose)
+        instance_log_level = int(instance_configuration["loglevel"])
+
+        set_verbosity(instance_log_level, file_level=instance_log_level)
+        log("Instance log level set to", instance_log_level, lvl=verbose)
 
     ctx.obj["instance_configuration"] = instance_configuration
 
