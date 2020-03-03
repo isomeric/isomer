@@ -24,10 +24,10 @@
 #
 # VERSION: 1.3.0
 #
-# Last Updated: 20191209
+# Last Updated: 20200303
 
-FROM debian:sid
-MAINTAINER Heiko 'riot' Weinen <riot@c-base.org>
+FROM debian:testing
+MAINTAINER Heiko 'riot' Weinen <riot@isomer.eu>
 
 # Install dependencies
 
