@@ -69,19 +69,23 @@ class send(Event):
 class broadcast(Event):
     """Send a packet to a known client by UUID"""
 
-    def __init__(self, broadcasttype, content, *args):
+    def __init__(self, broadcasttype, content, group=None, *args):
         """
 
-        :param uuid: Unique User ID of known connection
-        :param packet: Data packet to transmit to client
+        :param broadcasttype: One of [users|clients|usergroup|clientgroup|socks]
+        :param content: Data packet to transmit to client
+        :param group: Used for group broadcasting (a list of either client or
+                      user uuids)
         :param args: Further Args
         """
         super(broadcast, self).__init__(*args)
         self.broadcasttype = broadcasttype
         self.content = content
+        self.group = group
 
         isolog(
-            "[CM-EVENT] Broadcast event generated:", broadcasttype, content, lvl=events
+            "[CM-EVENT] Broadcast event generated:", broadcasttype, content, group,
+            lvl=events
         )
 
 

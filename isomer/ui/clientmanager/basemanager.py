@@ -226,8 +226,8 @@ class ClientBaseManager(ConfigurableComponent):
             )
 
     def broadcast(self, event):
-        """Broadcasts an event either to all users or clients, depending on
-        event flag"""
+        """Broadcasts an event either to all users or clients or a given group,
+        depending on event flag"""
         try:
             if event.broadcasttype == "users":
                 if len(self._users) > 0:
@@ -249,6 +249,21 @@ class ClientBaseManager(ConfigurableComponent):
                         #    self.log("Not broadcasting, no clients
                         # connected.",
                         #            lvl=debug)
+            elif event.broadcasttype in ("usergroup", "clientgroup"):
+                if len(event.group) > 0:
+                    self.log(
+                        "Broadcasting to group: ", event.content, event.group,
+                        lvl=network
+                    )
+                    for participant in set(event.group):
+                        if event.broadcasttype == 'usergroup':
+                            broadcast_type = "user"
+                        else:
+                            broadcast_type = "client"
+
+                        broadcast = send(participant, event.content,
+                                         sendtype=broadcast_type)
+                        self.fireEvent(broadcast)
             elif event.broadcasttype == "socks":
                 if len(self._sockets) > 0:
                     self.log("Emergency?! Broadcasting to all sockets: ", event.content)
