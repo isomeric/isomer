@@ -30,7 +30,6 @@ Major Isomer event declarations
 """
 
 from circuits.core import Event
-
 from isomer.logger import isolog, events
 
 # from isomer.ui.clientobjects import User
@@ -69,20 +68,19 @@ def populate_user_events():
                 if child not in subclasses_set:
                     # pprint(child.__dict__)
                     name = child.__module__ + "." + child.__name__
-                    if name.startswith("iso"):
 
-                        subclasses_set.add(child)
-                        event = {
-                            "event": child,
-                            "name": name,
-                            "doc": child.__doc__,
-                            "args": [],
-                        }
+                    subclasses_set.add(child)
+                    event = {
+                        "event": child,
+                        "name": name,
+                        "doc": child.__doc__,
+                        "args": [],
+                    }
 
-                        if child.__module__ in subclasses:
-                            subclasses[child.__module__][child.__name__] = event
-                        else:
-                            subclasses[child.__module__] = {child.__name__: event}
+                    if child.__module__ in subclasses:
+                        subclasses[child.__module__][child.__name__] = event
+                    else:
+                        subclasses[child.__module__] = {child.__name__: event}
                     work.append(child)
         return subclasses
 
@@ -181,6 +179,17 @@ class authorized_event(isomer_ui_event):
 
         # For circuits manager to enable module/event namespaces
         return cls.__module__ + "." + cls.__name__
+
+    @classmethod
+    def source(cls):
+        """Return real name of an object class"""
+
+        # For circuits manager to enable module/event namespaces
+        return cls.__module__
+
+
+class system_stop(isomer_event):
+    """Stop everything, save persistent state and cease operations"""
 
 
 # Configuration reload event
