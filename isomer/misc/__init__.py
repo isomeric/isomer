@@ -29,10 +29,10 @@ import copy
 import re
 
 from datetime import datetime
-from hashlib import sha512
 from random import choice
 from uuid import uuid4
 
+import bcrypt
 import SecretColors
 import pytz
 from isomer.logger import isolog, verbose, warn
@@ -195,20 +195,30 @@ def sorted_alphanumerical(l, reverse=False):
     return sorted(l, key=alphanumerical_key, reverse=reverse)
 
 
-def std_hash(word, salt):
-    """Generates a cryptographically strong (sha512) hash with this nodes
+def std_salt() -> str:
+    """Generates a cryptographical salt
+    """
+
+    return bcrypt.gensalt().decode("utf-8")
+
+
+def std_hash(word: AnyStr, salt: AnyStr):
+    """Generates a cryptographically strong (bcrypt) hash with a given
     salt added."""
 
     try:
-        password = word.encode("utf-8")
+        password: bytes = word.encode("utf-8")
     except UnicodeDecodeError:
         password = word
 
-    word_hash = sha512(password)
-    word_hash.update(salt)
-    hex_hash = word_hash.hexdigest()
+    if isinstance(salt, str):
+        salt_bytes = salt.encode("utf-8")
+    else:
+        salt_bytes = salt
 
-    return hex_hash
+    password_hash = bcrypt.hashpw(password, salt_bytes).decode("ascii")
+
+    return password_hash
 
 
 def std_now(delta=None, date_format="iso", tz="UTC"):
@@ -930,22 +940,6 @@ def std_table(rows):
             result += "%*s = %s" % (hwidth, row._fields[i], row[i]) + "\n"
 
     return result
-
-
-def std_salt(length=16, lowercase=True):
-    """Generates a cryptographically sane salt of 'length' (default: 16) alphanumeric
-    characters
-    """
-
-    alphanumeric = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-    if lowercase is True:
-        alphanumeric += "abcdefghijklmnopqrstuvwxyz"
-
-    chars = []
-    for i in range(length):
-        chars.append(choice(alphanumeric))
-
-    return "".join(chars)
 
 
 logo = """
