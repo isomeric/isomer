@@ -60,7 +60,7 @@ class send(Event):
         isolog(
             "[CM-EVENT] Send event generated:",
             uuid,
-            str(packet)[:50],
+            str(packet)[:80],
             sendtype,
             lvl=events,
         )
