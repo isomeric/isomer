@@ -30,7 +30,6 @@ This module allows deploying and maintaining instances on remote systems via SSH
 """
 
 import os
-import sys
 import spur
 import tomlkit
 import click
