@@ -775,6 +775,7 @@ def _instance_selfsigned(instance_configuration):
     except ImportError:
         log("Need python3-openssl to do this.")
         abort(1)
+        return
 
     def create_self_signed_cert(target):
         """Create a simple self signed SSL certificate"""

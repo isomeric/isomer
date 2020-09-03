@@ -258,6 +258,7 @@ def _get_credentials(username=None, password=None, dbhost=None):
             "iso install provisions -p system"
         )
         abort(3)
+        return
 
     if username is None:
         username = ask("Please enter username: ")
@@ -575,6 +576,7 @@ def _get_configuration(ctx):
     except NonExistentKey:
         log("Instance %s does not exist" % ctx.obj["instance"], lvl=warn)
         abort(EXIT_INSTANCE_UNKNOWN)
+        return
 
     environment_name = instance_configuration["environment"]
     environment_config = instance_configuration["environments"][environment_name]
