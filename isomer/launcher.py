@@ -44,8 +44,7 @@ import sys
 import pyinotify
 
 import click
-import os
-from circuits import Event
+from circuits import Event, Timer
 from circuits.web import Server, Static
 from circuits.web.websockets.dispatcher import WebSocketsDispatcher
 
@@ -57,7 +56,7 @@ from isomer.component import handler, ConfigurableComponent, ComponentDisabled
 
 # from isomer.schemata.component import ComponentBaseConfigSchema
 from isomer.database import initialize  # , schemastore
-from isomer.events.system import populate_user_events, frontendbuildrequest
+from isomer.events.system import populate_user_events, system_stop
 from isomer.logger import (
     isolog,
     verbose,
@@ -75,6 +74,10 @@ from isomer.error import abort, EXIT_NO_CERTIFICATE
 from isomer.tool.etc import load_instance
 from isomer.provisions import build_provision_store
 from isomer.provisions.base import provision
+
+
+# from circuits.web.errors import redirect
+# from circuits.app.daemon import Daemon
 
 
 # from pprint import pprint
@@ -359,11 +362,33 @@ class Core(ConfigurableComponent):
 
     @handler("cli_quit")
     def cli_quit(self, event):
-        """Stop the instance immediately"""
+        """Stop the instance on cli request"""
 
         self.log("Quitting on CLI request.")
         if self.frontend_watcher is not None:
             self.frontend_watcher.stop()
+            self.frontend_watcher = None
+
+        if self.context.params["dev"] is False:
+            self.fireEvent(system_stop())
+        else:
+            self.log("Stopping immediately due to --dev flag", lvl=warn)
+            self.stop_core(None)
+
+    @handler("system_stop")
+    def system_stop(self):
+        """Stop instance after settling stop events"""
+
+        self.log("Initiating stop")
+        Timer(5, Event.create("stop_core")).register(self)
+
+    @handler("stop_core")
+    def stop_core(self, event):
+        """Stop execution and exit"""
+
+        self.log("Stopping execution")
+
+        self.stop()
         sys.exit()
 
     @handler("cli_info")
