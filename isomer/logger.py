@@ -202,16 +202,16 @@ def is_marked(what) -> bool:
     return False
 
 
-def setup_root(newroot: "isomer.components.Component"):
+def setup_root(new_root: "isomer.components.Component"):
     """
     Sets up the root component, so the logger knows where to send logging
     signals.
 
-    :param isomer.components.Component newroot:
+    :param isomer.components.Component new_root:
     """
     global root
 
-    root = newroot
+    root = new_root
 
 
 # noinspection PyUnboundLocalVariable,PyIncorrectDocstring
