@@ -31,5 +31,6 @@ try:
     version_info = version
 except ImportError as e:
     isolog("Could not import scm version:", e, lvl=error)
-    version_info = (1, 2, 1, "dev")  # (major, minor, patch, dev?)
-    version = ".".join(map(str, version_info)) if version_info[-1] != "dev" else "dev"
+    raise ImportError
+    #version_info = (1, 2, 1, "dev")  # (major, minor, patch, dev?)
+    #version = ".".join(map(str, version_info)) if version_info[-1] != "dev" else "dev"
