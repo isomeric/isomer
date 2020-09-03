@@ -29,8 +29,8 @@ Client: Clientprofile to store client specific settings
 
 
 """
-from isomer.schemata.defaultform import savebutton, lookup_field
-from isomer.schemata.base import base_object, uuid_object, language_field
+from isomer.schemata.defaultform import savebutton
+from isomer.schemata.base import base_object, language_field
 from isomer.misc import i18n as _
 
 ScreenRotationSchema = {
