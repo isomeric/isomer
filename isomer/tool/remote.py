@@ -36,6 +36,7 @@ import tomlkit
 import click
 import getpass
 
+from typing import Optional
 from binascii import hexlify
 
 from isomer.logger import warn, error, debug, verbose
@@ -53,12 +54,16 @@ from isomer.error import abort, EXIT_INVALID_PARAMETER, EXIT_INVALID_VALUE
 from isomer.tool.cli import cli
 from isomer.tool.etc import load_remotes, remote_template, write_remote
 
+key_dispatch_table: Optional[dict]
+
 try:
+    # noinspection PyPackageRequirements
     from paramiko import DSSKey, RSAKey
 
     key_dispatch_table = {"dsa": DSSKey, "rsa": RSAKey}
 except ImportError:
-    key_dispatch_table = None
+    key_dispatch_table = DSSKey = RSAKey = None
+    log("Could not load paramiko. Remote operations disabled.", lvl=warn)
 
 
 def get_remote_home(username):
@@ -171,8 +176,9 @@ def remote(ctx, name, install, platform, source, url, existing):
 @click.option(
     "--key-bits",
     "-b",
-    default=key_defaults["bits"],
-    help="Key bits (%i)" % key_defaults["bits"],
+    type=int,
+    default=int(key_defaults["bits"]),
+    help="Key bits (%i)" % int(key_defaults["bits"]),
 )
 @click.pass_context
 def add(
