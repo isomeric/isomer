@@ -112,7 +112,7 @@ def copy_resource_tree(package: str, source: str, target: str):
 
     log(
         "Copying component frontend tree for %s to %s (%s)" % (package, target, source),
-        lvl=debug,
+        lvl=verbose,
     )
 
     if not os.path.exists(target):
@@ -130,16 +130,16 @@ def copy_resource_tree(package: str, source: str, target: str):
         log("Would copy to:", target_name, lvl=verbose)
 
         if pkg_resources.resource_isdir(pkg, source + "/" + item):
-            log("Creating subdirectory:", target_name, lvl=debug)
+            log("Creating subdirectory:", target_name, lvl=verbose)
             try:
                 os.mkdir(target_name)
             except FileExistsError:
-                log("Subdirectory already exists, ignoring", lvl=debug)
+                log("Subdirectory already exists, ignoring", lvl=verbose)
 
-            log("Recursing resource subdirectory:", source + "/" + item, lvl=debug)
+            log("Recursing resource subdirectory:", source + "/" + item, lvl=verbose)
             copy_resource_tree(package, source + "/" + item, target)
         else:
-            log("Copying resource file:", source + "/" + item, lvl=debug)
+            log("Copying resource file:", source + "/" + item, lvl=verbose)
             with open(target_name, "wb") as f:
                 f.write(pkg_resources.resource_string(pkg, source + "/" + item))
 
@@ -294,7 +294,7 @@ def get_components(frontend_root):
                     inspectable_package = entry_point.dist.project_name
 
                     if inspectable_package == "isomer":
-                        log("Not inspecting base isomer package", pretty=True)
+                        log("Not inspecting base isomer package", lvl=debug)
                         continue
 
                     inspected_name, inspected_component = inspect_entry_point(
@@ -370,7 +370,7 @@ def update_frontends(frontend_components: dict, frontend_root: str, install: boo
                     for requirements_line in f.readlines():
                         packages.append(requirements_line.replace("\n", ""))
         elif pkg_method == "resources":
-            log("Getting resources:", pkg_object)
+            log("Getting resources:", pkg_object, lvl=debug)
             resource = pkg_resources.Requirement.parse(pkg_object)
             if pkg_resources.resource_exists(
                 resource, "frontend/requirements.txt"
@@ -384,7 +384,7 @@ def update_frontends(frontend_components: dict, frontend_root: str, install: boo
                 for resource_line in (
                     resource_string.decode("ascii").rstrip("\n").split("\n")
                 ):
-                    log("Resource string:", resource_line)
+                    log("Resource string:", resource_line, lvl=debug)
                     packages.append(resource_line.replace("\n", ""))
 
         return packages
@@ -397,8 +397,6 @@ def update_frontends(frontend_components: dict, frontend_root: str, install: boo
         :param pkg_object: Setuptools entrypoint descriptor
         :param pkg_name: Name of the entrypoint
         """
-
-        log(type(pkg_object), lvl=critical)
 
         origin = pkg_object["frontend"]
         method = pkg_object["method"]
