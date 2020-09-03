@@ -52,7 +52,7 @@ from circuits.web.websockets.dispatcher import WebSocketsDispatcher
 # from circuits.app.daemon import Daemon
 
 from isomer.misc.path import set_instance, get_path
-from isomer.component import handler, ConfigurableComponent, ComponentDisabled
+from isomer.component import handler, ConfigurableComponent, ComponentDisabled, BaseMeta
 
 # from isomer.schemata.component import ComponentBaseConfigSchema
 from isomer.database import initialize  # , schemastore
@@ -715,10 +715,13 @@ class Core(ConfigurableComponent):
         self.fire(ready(), "isomer-web")
 
 
-def construct_graph(name, instance, args):
+def construct_graph(ctx, name, instance, args):
     """Preliminary Isomer application Launcher"""
 
     app = Core(name, instance, **args)
+
+    # TODO: This should probably be read-only
+    BaseMeta.context = ctx
 
     setup_root(app)
 
@@ -842,7 +845,7 @@ def launch(ctx, run=True, **args):
     isolog("Setting instance paths", emitter="CORE", lvl=debug)
     set_instance(instance_name, environment_name)
 
-    server = construct_graph(instance_name, instance, args)
+    server = construct_graph(ctx, instance_name, instance, args)
     if run and not args["no_run"]:
         server.run()
 
