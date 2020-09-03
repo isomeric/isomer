@@ -63,10 +63,10 @@ def make_migrations(schema=None):
         def get_path(raw_path):
             """Get local path of schema definition"""
 
-            print("RAW PATH:", raw_path, type(raw_path))
+            log("RAW PATH:", raw_path, type(raw_path))
             path = []
             for item in raw_path.split("["):
-                print(item)
+                log(item)
                 item = item.rstrip("]")
                 item = item.replace('"', "")
                 item = item.replace("'", "")
@@ -76,7 +76,7 @@ def make_migrations(schema=None):
                     pass
                 path.append(item)
             path.remove("root")
-            print("PATH:", path)
+            log("PATH:", path)
             return path
 
         def apply_entry(changetype, change, result):
@@ -174,8 +174,8 @@ def make_migrations(schema=None):
             log("Nothing changed - no new migration data.", lvl=warn)
             return
 
-        print("Writing migration: ", os.path.join(path, filename))
-        pprint(migration)
+        log("Writing migration: ", os.path.join(path, filename))
+        log(migration, pretty=True)
 
         with open(os.path.join(path, filename), "w") as f:
             f.write(migration)
