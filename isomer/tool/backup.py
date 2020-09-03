@@ -137,6 +137,6 @@ def load(ctx, filename):
 @db.command("dump", short_help="Create a full database dump")
 @click.argument("filename")
 @click.pass_context
-def load(ctx, filename):
+def dump(ctx, filename):
     host, port = ctx.obj.get("dbhost").split(":")
     _dump(host, port, ctx.obj.get("dbname"), filename)
