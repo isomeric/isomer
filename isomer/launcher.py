@@ -107,7 +107,7 @@ class cli_reload(Event):
 class cli_info(Event):
     """Provide information about the running instance"""
 
-    pass
+    verbose = False
 
 
 class cli_quit(Event):
@@ -138,7 +138,7 @@ class FrontendHandler(pyinotify.ProcessEvent):
         self.launcher = launcher
 
     def process_IN_CLOSE_WRITE(self, event):
-        print("CHANGE EVENT:", event)
+        isolog("Frontend change:", event, emitter="FRONTENDHANDLER")
         install_frontend(install=False, development=True)
 
 
@@ -313,6 +313,7 @@ class Core(ConfigurableComponent):
             install=event.install,
             development=self.development,
         )
+        self.log("Frontend install done")
 
     @handler("cli_drop_privileges")
     def cli_drop_privileges(self, event):
@@ -366,13 +367,17 @@ class Core(ConfigurableComponent):
         sys.exit()
 
     @handler("cli_info")
-    def cli_info(self, event):
+    def cli_info(self, *args):
         """Provides information about the running instance"""
 
+        from isomer.database import dbname, dbhost, dbport
+
         self.log(
-            "Instance: %s Dev: %s Host: %s Port: %s Insecure: %s Frontend: %s\nModules:"
+            "Instance: %s DB: %s Dev: %s Host: %s Port: %s Insecure: %s Frontend: %s\n"
+            "Modules:"
             % (
                 self.instance,
+                "%s@%s:%i" % (dbname, dbhost, dbport),
                 self.development,
                 self.host,
                 self.port,
@@ -383,10 +388,13 @@ class Core(ConfigurableComponent):
             pretty=True,
         )
 
-    def _start_server(self, *args):
+        if "-v" in args:
+            self.log("Context:", self.context.obj, pretty=True)
+
+    def _start_server(self):
         """Run the node local server"""
 
-        self.log("Starting server", args)
+        self.log("Starting server")
         secure = self.certificate is not None
         if secure:
             self.log("Running SSL server with cert:", self.certificate)
@@ -537,7 +545,7 @@ class Core(ConfigurableComponent):
         systemconfig.packages = sorted(list(packages.values()), key=lambda x: x["name"])
         systemconfig.save()
 
-        self.log(list(packages.values()), lvl=critical)
+        # self.log(list(packages.values()), lvl=critical)
 
         self.log(
             "Checking component frontend bits in ", self.frontend_root, lvl=verbose
@@ -606,7 +614,7 @@ class Core(ConfigurableComponent):
             from circuits.tools import kill
             from circuits import Component
 
-            for comp in self.running_components.values():
+            for comp in self.loaded_components.values():
                 self.log(comp, type(comp), isinstance(comp, Component), pretty=True)
                 kill(comp)
             # removables = deepcopy(list(self.runningcomponents.keys()))
@@ -625,7 +633,7 @@ class Core(ConfigurableComponent):
             #                            filename='backref-graph_%s.png' % comp.uniquename)
             #     del comp
             # del removables
-            self.running_components = {}
+            self.loaded_components = {}
 
         self.log(
             "Not running blacklisted components: ", self.component_blacklist, lvl=debug
@@ -638,9 +646,9 @@ class Core(ConfigurableComponent):
         for name, componentdata in self.loadable_components.items():
             if name in self.component_blacklist:
                 continue
-            self.log("Running component: ", name, lvl=verbose)
+            self.log("Running component: ", name, lvl=debug)
             try:
-                if name in self.running_components:
+                if name in self.loaded_components:
                     self.log("Component already running: ", name, lvl=warn)
                 else:
                     try:
@@ -650,7 +658,7 @@ class Core(ConfigurableComponent):
                         continue
 
                     runningcomponent.register(self)
-                    self.running_components[name] = runningcomponent
+                    self.loaded_components[name] = runningcomponent
             except Exception as e:
                 self.log(
                     "Could not register component: ",
@@ -719,6 +727,8 @@ def construct_graph(name, instance, args):
                 "task_success",
                 "task_done",  # Thread completion
                 "keepalive",  # IRC Gateway
+                "peek",  # AVIO and others
+                "joystickchange",  # AVIO
             ]
         )
 
