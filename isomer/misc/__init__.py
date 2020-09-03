@@ -115,7 +115,7 @@ def print_messages(domain, msg):
 
     domain = Domain(domain)
     for lang in all_languages():
-        print(lang, ":", domain.get(lang, msg))
+        l10n_log(lang, ":", domain.get(lang, msg))
 
 
 def i18n(msg, event=None, lang="en", domain="backend"):
