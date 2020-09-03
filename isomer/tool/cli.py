@@ -96,21 +96,21 @@ RPI_GPIO_CHANNEL = 5
 @click.option("--fat-logo", "--fat", hidden=True, is_flag=True, default=False)
 @click.pass_context
 def cli(
-    ctx,
-    instance,
-    env,
-    quiet,
-    no_colors,
-    console_level,
-    file_level,
-    no_log,
-    log_path,
-    log_file,
-    dbhost,
-    dbname,
-    prefix_path,
-    config_path,
-    fat_logo,
+        ctx,
+        instance,
+        env,
+        quiet,
+        no_colors,
+        console_level,
+        file_level,
+        no_log,
+        log_path,
+        log_file,
+        dbhost,
+        dbname,
+        prefix_path,
+        config_path,
+        fat_logo,
 ):
     """Isomer Management Tool
 
@@ -168,6 +168,7 @@ def cli(
 
     if configuration is None:
         ctx = create_configuration(ctx)
+        configuration = ctx.obj["config"]
     else:
         ctx.obj["config"] = configuration
 
@@ -298,10 +299,10 @@ def cli(
     if dbname is None:
         dbname = instance_configuration["environments"][env]["database"]
         if dbname in ("", None) and ctx.invoked_subcommand in (
-            "config",
-            "db",
-            "environment",
-            "plugin",
+                "config",
+                "db",
+                "environment",
+                "plugin",
         ):
             log(
                 "Database for this instance environment is unset, "
