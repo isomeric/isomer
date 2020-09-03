@@ -37,6 +37,7 @@ import shutil
 from pprint import pprint
 from click_didyoumean import DYMGroup
 from collections import OrderedDict, namedtuple
+from operator import attrgetter
 
 from isomer.tool import log, ask, debug, verbose, warn
 from isomer.misc import std_table
@@ -219,30 +220,40 @@ def create_module(clear_target, target):
 @click.option(
     "--directory", "-d", is_flag=True, default=False, help="Show directory of module"
 )
-def entrypoints(base, sails, frontend_only, frontend_list, directory):
+@click.option(
+    "--sort-key", "-k", default="package",
+    type=click.Choice(["name", "package", "classname", "location", "frontend"])
+)
+@click.option(
+    "--long", is_flag=True, default=False, help="Show full table"
+)
+def entrypoints(base, sails, frontend_only, frontend_list, directory, sort_key, long):
     """Display list of entrypoints and diagnose module loading problems."""
 
     log("Showing entrypoints:")
 
+    full_component = namedtuple(
+        "Component", ["name", "package", "classname", "location", "frontend", "group"]
+    )
     component = namedtuple(
-        "Component", ["name", "package", "classname", "location", "frontend"]
+        "Component", ["name", "package", "frontend"]
     )
     results = []
 
     from pkg_resources import iter_entry_points
 
-    entry_points = [iter_entry_points(group="isomer.components", name=None)]
+    entry_points = {'components': iter_entry_points(group="isomer.components", name=None)}
 
     if sails:
-        entry_points.insert(0, iter_entry_points(group="isomer.sails", name=None))
+        entry_points['sails'] = iter_entry_points(group="isomer.sails", name=None)
     if base:
-        entry_points.insert(0, iter_entry_points(group="isomer.base", name=None))
+        entry_points['base'] = iter_entry_points(group="isomer.base", name=None)
 
     log("Entrypoints:", entry_points, pretty=True, lvl=verbose)
     try:
-        for iterator in entry_points:
+        for key, iterator in entry_points.items():
             for entry_point in iterator:
-                log("Entrypoint:", entry_point, pretty=True, lvl=debug)
+                log("Entrypoint Group:", key, entry_point, pretty=True, lvl=debug)
 
                 try:
                     name = entry_point.name
@@ -277,7 +288,8 @@ def entrypoints(base, sails, frontend_only, frontend_list, directory):
                         frontend = pkg_resources.resource_listdir(pkg, "frontend")
                         log("Frontend resources found:", frontend, lvl=debug)
                     except Exception as e:
-                        log("Exception during frontend resource lookup:", e, exc=True)
+                        log("Exception during frontend resource lookup:", e, lvl=debug,
+                            exc=True)
                         frontend = None
 
                     if frontend not in (None, []):
@@ -286,14 +298,21 @@ def entrypoints(base, sails, frontend_only, frontend_list, directory):
                             frontend = "[X]"
                     else:
                         frontend = "[ ]"
-
-                    result = component(
-                        frontend=frontend,
-                        name=name,
-                        package=package,
-                        classname=repr(loaded).lstrip("<class '").rstrip("'>"),
-                        location=location if directory else "use -d",
-                    )
+                    if long:
+                        result = full_component(
+                            frontend=frontend,
+                            name=name,
+                            package=package,
+                            classname=repr(loaded).lstrip("<class '").rstrip("'>"),
+                            location=location if directory else "use -d",
+                            group=key
+                        )
+                    else:
+                        result = component(
+                            frontend=frontend,
+                            name=name,
+                            package=package
+                        )
 
                     if not frontend_only or frontend:
                         results.append(result)
@@ -301,6 +320,8 @@ def entrypoints(base, sails, frontend_only, frontend_list, directory):
                     log("Exception while iterating entrypoints:", e, type(e), exc=True)
     except ModuleNotFoundError as e:
         log("Module could not be loaded:", e, exc=True)
+
+    results = sorted(results, key=attrgetter(sort_key))
 
     table = std_table(results)
     log("Found components:\n%s" % table)
