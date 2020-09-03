@@ -63,8 +63,13 @@ import os
 import signal
 
 import time
+
+import bcrypt
 import distro
 import spur
+
+from typing import Tuple, Union
+from hmac import compare_digest
 from isomer.error import (
     abort,
     EXIT_ISOMER_URL_REQUIRED,
@@ -225,13 +230,14 @@ def run_process(cwd: str, args: list, shell=None, sudo: [bool, str] = None,
 def ask_password():
     """Securely and interactively ask for a password"""
 
+    # noinspection HardcodedPassword
     password = "Foo"
     password_trial = ""
 
-    while password != password_trial:
+    while not compare_digest(password, password_trial):
         password = getpass.getpass()
         password_trial = getpass.getpass(prompt="Repeat:")
-        if password != password_trial:
+        if not compare_digest(password, password_trial):
             print("\nPasswords do not match!")
 
     return password
@@ -264,10 +270,9 @@ def _get_credentials(username=None, password=None, dbhost=None):
     except UnicodeDecodeError:
         password = password
 
-    passhash = hashlib.sha512(password)
-    passhash.update(salt)
+    password_hash = bcrypt.hashpw(password, salt).decode('ascii')
 
-    return username, passhash.hexdigest()
+    return username, password_hash
 
 
 def _get_system_configuration(dbhost, dbname):
