@@ -32,7 +32,7 @@ User:
 
 """
 
-from isomer.misc import std_human_uid
+from isomer.misc.std import std_human_uid
 
 
 class Socket(object):

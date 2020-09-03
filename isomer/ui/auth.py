@@ -36,7 +36,7 @@ from isomer.events.client import authentication, send
 from isomer.component import ConfigurableComponent
 from isomer.database import objectmodels
 from isomer.logger import error, warn, debug
-from isomer.misc import std_hash, std_salt, std_uuid, std_now, std_human_uid
+from isomer.misc.std import std_salt, std_hash, std_now, std_uuid, std_human_uid
 
 minimum_password_length = 5
 minimum_username_length = 1

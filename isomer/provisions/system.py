@@ -30,7 +30,7 @@ System: Global systemwide settings
 
 """
 
-from isomer.misc import std_salt
+from isomer.misc.std import std_salt
 from isomer.logger import isolog, warn
 from uuid import uuid4
 
