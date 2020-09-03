@@ -202,7 +202,7 @@ class ClientBaseManager(ConfigurableComponent):
             else:  # only to client
                 self.log(
                     "Sending to user's client: '%s': '%s'"
-                    % (event.uuid, jsonpacket[:20]),
+                    % (event.uuid, jsonpacket[:50]),
                     lvl=network,
                 )
                 if event.uuid not in self._clients:
@@ -386,7 +386,7 @@ class ClientBaseManager(ConfigurableComponent):
             except KeyError:
                 if not (
                     request_action == "ping"
-                    and request_component == "isomer.ui.clientmanager"
+                    and request_component == "isomer.ui.clientmanager.latency"
                 ):
                     self.log("User not logged in.", lvl=warn)
 
