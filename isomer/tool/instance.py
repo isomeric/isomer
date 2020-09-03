@@ -420,6 +420,14 @@ def install_instance_modules(ctx, source, urls, install_env, force, store_url):
     write_instance(instance_configuration)
 
     if install_env is True:
+        next_environment = get_next_environment(ctx)
+        environments = instance_configuration['environments']
+
+        if environments[next_environment]["installed"] is False:
+            log("Environment %s is not installed, cannot install modules."
+                % next_environment, lvl=warn)
+            abort(50600)
+            return
         del ctx.params["install_env"]
         ctx.forward(install_environment_modules)
 
