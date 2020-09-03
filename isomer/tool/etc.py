@@ -286,11 +286,13 @@ environment_template.add("version", "")
 environment_template.add("old_version", "")
 environment_template.add("database", "")
 environment_template.add("modules", {})
+environment_template.add("blacklist", [])
 environment_template.add("installed", False)
 environment_template.add("provisioned", False)
 environment_template.add("migrated", False)
 environment_template.add("frontend", False)
 environment_template.add("tested", False)
+environment_template.add("approved", False)
 
 environments = table()
 blue = environment_template

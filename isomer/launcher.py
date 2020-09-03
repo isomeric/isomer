@@ -267,34 +267,11 @@ class Core(ConfigurableComponent):
         self.static = None
         self.websocket = None
 
-        # TODO: Cleanup
-        self.component_blacklist = [
-            # 'camera',
-            # 'logger',
-            # 'debugger',
-            "recorder",
-            "playback",
-            # 'sensors',
-            # 'navdatasim'
-            # 'ldap',
-            # 'navdata',
-            # 'nmeaparser',
-            # 'objectmanager',
-            # 'wiki',
-            # 'clientmanager',
-            # 'library',
-            # 'nmeaplayback',
-            # 'alert',
-            # 'tilecache',
-            # 'schemamanager',
-            # 'chat',
-            # 'debugger',
-            # 'rcmanager',
-            # 'auth',
-            # 'machineroom'
+        self.component_blacklist = instance["environments"][instance["environment"]][
+            "blacklist"
         ]
 
-        self.component_blacklist += kwargs["blacklist"]
+        self.component_blacklist += list(kwargs.get("blacklist", []))
 
         self._check_provisions()
         self.update_components()
