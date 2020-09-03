@@ -471,8 +471,8 @@ class Core(ConfigurableComponent):
         manage configuration updates"""
 
         # TODO: See if we can pull out major parts of the component handling.
-        # They are also used in the manage tool to instantiate the
-        # component frontend bits.
+        #  They are also used in the manage-tool to instantiate the
+        #  component frontend bits.
 
         self.log("Updating components")
         components = {}
