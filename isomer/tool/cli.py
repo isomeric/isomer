@@ -29,6 +29,7 @@ Basic management tool functionality and plugin support.
 
 """
 
+import os
 import sys
 import click
 
@@ -36,8 +37,8 @@ from click_didyoumean import DYMGroup
 from click_plugins import with_plugins
 
 from pkg_resources import iter_entry_points
-
-from isomer.logger import set_logfile, set_color, set_verbosity, warn, verbose
+from isomer.logger import set_logfile, set_color, set_verbosity, warn, verbose, \
+    critical, debug
 from isomer.misc.path import get_log_path, set_etc_path, set_instance
 from isomer.tool import log, db_host_help, db_host_metavar, db_help, db_metavar
 from isomer.tool.etc import (
@@ -48,6 +49,7 @@ from isomer.tool.etc import (
 )
 from isomer.version import version_info
 
+RPI_GPIO_CHANNEL = 5
 
 @click.group(context_settings={"help_option_names": ["-h", "--help"]}, cls=DYMGroup)
 @click.option(
@@ -208,6 +210,78 @@ def cli(
     else:
         env = instance_configuration["environment"]
         ctx.obj["acting_environment"] = None
+
+    def get_environment_toggle(platform, toggles):
+        """Checks well known methods to determine if the other environment should be
+        booted instead of the default environment."""
+
+        def temp_file_toggle():
+            """Check by looking for a state file in /tmp"""
+
+            state_filename = "/tmp/isomer_toggle_%s" % instance_configuration["name"]
+            log("Checking for override state file ", state_filename, lvl=debug)
+
+            if os.path.exists(state_filename):
+                log("Environment override state file found!", lvl=warn)
+                return True
+            else:
+                log("Environment override state file not found", lvl=debug)
+                return False
+
+        def gpio_switch_toggle():
+            """Check by inspection of a GPIO pin for a closed switch"""
+
+            log("Checking for override GPIO switch on channel ", RPI_GPIO_CHANNEL,
+                lvl=debug)
+
+            if platform != "rpi":
+                log(
+                    "Environment toggle: "
+                    "GPIO switch can only be handled on Raspberry Pi!",
+                    lvl=critical
+                )
+                return False
+            else:
+                try:
+                    import RPi.GPIO as GPIO
+                except ImportError:
+                    log("RPi Python module not found. "
+                        "This only works on a Raspberry Pi!", lvl=critical)
+                    return False
+                GPIO.setup(RPI_GPIO_CHANNEL, GPIO.IN)
+
+                state = GPIO.input(RPI_GPIO_CHANNEL) is True
+
+                if state:
+                    log("Environment override switch active!", lvl=warn)
+                else:
+                    log("Environment override switch not active", lvl=debug)
+
+                return state
+
+        toggle = False
+        if "temp_file" in toggles:
+            toggle = toggle or temp_file_toggle()
+        if "gpio_switch" in toggles:
+            toggle = toggle or gpio_switch_toggle()
+
+        if toggle:
+            log("Booting other Environment per user request.")
+        else:
+            log("Booting active environment", lvl=debug)
+
+        return toggle
+
+    #log(configuration['meta'], pretty=True)
+    #log(instance_configuration, pretty=True)
+
+    if get_environment_toggle(configuration["meta"]["platform"],
+                              instance_configuration['environment_toggles']
+                              ):
+        if env == 'blue':
+            env = 'green'
+        else:
+            env = 'blue'
 
     ctx.obj["environment"] = env
 
