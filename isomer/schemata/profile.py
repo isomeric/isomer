@@ -33,8 +33,8 @@ Profile: Userprofile with general flags and fields
 from isomer.schemata.defaultform import (
     savebutton,
     lookup_field,
-    country_field,
-    area_field,
+    # country_field,
+    # area_field,
 )
 from isomer.schemata.base import base_object, uuid_object, language_field
 
