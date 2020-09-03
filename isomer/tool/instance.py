@@ -837,7 +837,7 @@ def _instance_selfsigned(instance_configuration):
         certificate.gmtime_adj_notAfter(10 * 365 * 24 * 60 * 60)
         certificate.set_issuer(certificate.get_subject())
         certificate.set_pubkey(k)
-        certificate.sign(k, "sha512")
+        certificate.sign(k, b"sha512")
 
         open(key_file, "wt").write(
             str(crypto.dump_privatekey(crypto.FILETYPE_PEM, k), encoding="ASCII")
