@@ -22,6 +22,7 @@
 """
 
 import os.path
+from typing import Union
 
 from isomer.tool import log, warn, debug
 
@@ -31,9 +32,9 @@ ETC_INSTANCE_PATH = os.path.join(ETC_BASE_PATH, "instances")
 ETC_REMOTE_PATH = os.path.join(ETC_BASE_PATH, "remotes")
 ETC_REMOTE_KEYS_PATH = os.path.join(ETC_BASE_PATH, "keys")
 
-INSTANCE = ""
-ENVIRONMENT = None
-PREFIX = ""
+INSTANCE: str = ""
+ENVIRONMENT: Union[str, None] = None
+PREFIX: str = ""
 
 locations = {
     "cache": "/var/cache/isomer/%s",
@@ -113,10 +114,12 @@ def get_path(location: str, subfolder: str, ensure: bool = False, instance: str 
              environment: str = ""):
     """Return a normalized path for the running instance and environment
 
+
     :param location: Either cache, local or lib - all reside in /var
     :param subfolder: Subfolder inside location
     :param ensure: Create the folder, if it doesn't exist and this parameter is True
     :param instance: Temporarily override to get at another instance's folder
+    :param environment: Temporarily override to pick a specific environment
     """
 
     if instance != "":
