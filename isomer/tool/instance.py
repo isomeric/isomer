@@ -967,7 +967,10 @@ Using 'localhost' for now""",
         if not os.path.exists(configuration_link):
             os.symlink(configuration_file, configuration_link)
 
-    log("Restarting nginx service")
-    run_process("/", ["systemctl", "restart", "nginx.service"], sudo="root")
+    if os.path.exists("/bin/systemctl"):
+        log("Restarting nginx service")
+        run_process("/", ["systemctl", "restart", "nginx.service"], sudo="root")
+    else:
+        log("No systemctl found, not restarting nginx")
 
 # TODO: Add instance user
