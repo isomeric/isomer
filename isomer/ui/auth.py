@@ -27,7 +27,7 @@ Authentication (and later Authorization) system
 
 
 """
-
+from hmac import compare_digest
 from uuid import uuid4
 from circuits import Event, Timer
 
@@ -196,7 +196,7 @@ class Authenticator(ConfigurableComponent):
         # They're also required in the Enrol module..!
 
         if (len(event.username) < minimum_username_length) or (
-            len(event.password) < minimum_password_length
+                len(event.password) < minimum_password_length
         ):
             self.log("Illegal username or password received, login cancelled", lvl=warn)
             self._fail(event, "Password or username too short")
@@ -221,7 +221,8 @@ class Authenticator(ConfigurableComponent):
             self._fail(event, "Account deactivated.")
             return
 
-        if not std_hash(event.password, self.salt) == user_account.passhash:
+        if compare_digest(std_hash(event.password, self.salt), user_account.passhash) \
+                is False:
             self.log("Password was wrong!", lvl=warn)
             self._fail(event)
             return
@@ -259,7 +260,7 @@ class Authenticator(ConfigurableComponent):
             client_config.name = std_human_uid(kind="place")
 
             client_config.description = (
-                "New client configuration from " + user_account.name
+                    "New client configuration from " + user_account.name
             )
             client_config.owner = user_account.uuid
 
