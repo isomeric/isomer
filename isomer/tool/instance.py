@@ -96,6 +96,7 @@ from isomer.tool.environment import (
 from isomer.tool.database import copy_database
 from isomer.tool.version import _get_versions
 from isomer.ui.builder import copy_directory_tree
+from isomer.ui.store import DEFAULT_STORE_URL
 
 
 @click.group(cls=DYMGroup)
@@ -368,8 +369,13 @@ def remove(ctx, clear, no_archive):
     "--source",
     "-s",
     default="git",
-    type=click.Choice(["link", "copy", "git", "develop"]),
+    type=click.Choice(["link", "copy", "git", "develop", "store"]),
     help="Specify installation source/method",
+)
+@click.option(
+    "--store-url",
+    default=DEFAULT_STORE_URL,
+    help="Specify alternative store url (Default: %s)" % DEFAULT_STORE_URL,
 )
 @click.option(
     "--install-env",
@@ -388,11 +394,14 @@ def remove(ctx, clear, no_archive):
 )
 @click.argument("urls", nargs=-1)
 @click.pass_context
-def install_instance_modules(ctx, source, urls, install_env, force):
+def install_instance_modules(ctx, source, urls, install_env, force, store_url):
     """Add (and optionally immediately install) modules for an instance.
 
     This will add them to the instance's configuration, so they will be upgraded as well
     as reinstalled on other environment changes.
+
+    If you're installing from a store, you can specify a custom store URL with the
+    --store-url argument.
     """
 
     instance_name = ctx.obj["instance"]
@@ -400,6 +409,8 @@ def install_instance_modules(ctx, source, urls, install_env, force):
 
     for url in urls:
         descriptor = [source, url]
+        if store_url != DEFAULT_STORE_URL:
+            descriptor.append(store_url)
         if descriptor not in instance_configuration["modules"]:
             instance_configuration["modules"].append(descriptor)
         elif not force:
@@ -444,9 +455,9 @@ def _turnover(ctx, force):
             abort(EXIT_INSTALLATION_FAILED)
 
         if (
-            not env.get("installed", False)
-            or not env.get("tested", False)
-            or not env.get("migrated", False)
+                not env.get("installed", False)
+                or not env.get("tested", False)
+                or not env.get("migrated", False)
         ):
             log("Installation failed, cannot activate!", lvl=critical)
             abort(EXIT_INSTALLATION_FAILED)

@@ -81,6 +81,10 @@ EXIT_ISOMER_URL_REQUIRED = {
     "code": 50100,
     "message": "You need to specify a source url via --url/-u for isomer"
 }
+EXIT_STORE_PACKAGE_NOT_FOUND = {
+    "code": 50404,
+    "message": "The requested package is not available in the store"
+}
 EXIT_WORK_IN_PROGRESS = {
     "code": 55555,
     "message": "This is work in progress"

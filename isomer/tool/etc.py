@@ -254,7 +254,7 @@ instance_template.add("web_address", "127.0.0.1")
 instance_template["web_address"].comment("Local listening address of backend")
 instance_template.add("web_hostnames", "localhost")
 instance_template["web_hostnames"].comment("Comma separated list of FQDN hostnames."
-                                           "Only the first one will be used for "
+    "Only the first one will be used for "
                                            "selfsigned certificates.")
 instance_template.add("web_port", 8055)
 instance_template.add("web_certificate", "")

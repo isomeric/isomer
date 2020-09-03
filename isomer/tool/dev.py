@@ -43,6 +43,7 @@ from isomer.tool import log, ask, debug, verbose, warn
 from isomer.misc import std_table
 from isomer.tool.templates import write_template_file
 from isomer.error import abort
+from isomer.ui.store.inventory import populate_store, get_inventory
 
 paths = [
     "isomer",
@@ -325,3 +326,28 @@ def entrypoints(base, sails, frontend_only, frontend_list, directory, sort_key, 
 
     table = std_table(results)
     log("Found components:\n%s" % table)
+
+
+@dev.command(short_help="Grab and show software store inventory")
+@click.option(
+    "--source",
+    help="Specify a different source than official Isomer",
+    default="https://store.isomer.eu/simple",
+    metavar="<url>",
+)
+def store_inventory(source):
+    """List available pacakages"""
+
+    store = populate_store(source)
+
+    log(store, pretty=True)
+
+
+@dev.command(short_help="Show local inventory")
+@click.pass_context
+def local_inventory(ctx):
+    """List installed pacakages"""
+
+    inventory = get_inventory(ctx)
+
+    log(inventory, pretty=True)

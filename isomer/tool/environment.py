@@ -47,7 +47,7 @@ import pymongo
 from click_didyoumean import DYMGroup
 from git import Repo, exc
 from isomer.database.backup import dump, load
-from isomer.error import abort, EXIT_INVALID_SOURCE
+from isomer.error import abort, EXIT_INVALID_SOURCE, EXIT_STORE_PACKAGE_NOT_FOUND
 from isomer.logger import error, verbose, warn, critical, debug, hilight
 from isomer.misc import std_uuid, std_now
 from isomer.misc.path import (
@@ -72,6 +72,8 @@ from isomer.tool.database import delete_database
 from isomer.tool.defaults import source_url
 from isomer.tool.etc import write_instance, environment_template
 from isomer.ui.builder import get_frontend_locations
+from isomer.ui.store.inventory import get_store
+from isomer.ui.store import DEFAULT_STORE_URL
 
 
 @click.group(cls=DYMGroup)
@@ -340,10 +342,10 @@ def _archive(ctx, force=False, dynamic=False):
 
     log("Archiving database")
     if not dump(
-        instance_configuration["database_host"],
-        instance_configuration["database_port"],
-        env["database"],
-        os.path.join(temp_path, "db_" + timestamp + ".json"),
+            instance_configuration["database_host"],
+            instance_configuration["database_port"],
+            env["database"],
+            os.path.join(temp_path, "db_" + timestamp + ".json"),
     ):
         if not force:
             log("Could not archive database.")
@@ -437,7 +439,12 @@ def _install_frontend(ctx):
     "install-env-modules", short_help="Install a module into an environment"
 )
 @click.option(
-    "--source", "-s", default="git", type=click.Choice(["link", "copy", "git"])
+    "--source", "-s", default="git", type=click.Choice(["link", "copy", "git", "store"])
+)
+@click.option(
+    "--store-url",
+    default=DEFAULT_STORE_URL,
+    help="Specify alternative store url",
 )
 @click.option(
     "--force",
@@ -448,7 +455,7 @@ def _install_frontend(ctx):
 )
 @click.argument("urls", nargs=-1)
 @click.pass_context
-def install_environment_modules(ctx, source, force, urls):
+def install_environment_modules(ctx, source, force, urls, store_url):
     """Add and install a module only to a single environment
 
     Note: This does not modify the instance configuration, so this will not
@@ -469,7 +476,9 @@ def install_environment_modules(ctx, source, force, urls):
     set_instance(instance_name, next_environment)
 
     for url in urls:
-        result = _install_module(source, url, force, user)
+        result = _install_module(
+            source, url, force=force, user=user, store_url=store_url
+        )
 
         if result is False:
             log("Installation failed!", lvl=error)
@@ -478,6 +487,8 @@ def install_environment_modules(ctx, source, force, urls):
         package_name, package_version = result
 
         descriptor = {"version": package_version, "source": source, "url": url}
+        if store_url != DEFAULT_STORE_URL:
+            descriptor["store_url"] = store_url
         instance_configuration["environments"][next_environment]["modules"][
             package_name
         ] = descriptor
@@ -487,8 +498,11 @@ def install_environment_modules(ctx, source, force, urls):
     finish(ctx)
 
 
-def _install_module(source, url, force=False, user=None):
+def _install_module(source, url, store_url=DEFAULT_STORE_URL, auth=None, force=False,
+                    user=None):
     """Actually installs a module into an environment"""
+
+    package_name = package_version = success = output = ""
 
     def get_module_info(directory):
         log("Getting name")
@@ -532,8 +546,9 @@ def _install_module(source, url, force=False, user=None):
             return get_module_info(url)
 
     module_path = get_path("lib", "modules", ensure=True)
+    module_info = False
 
-    if source not in ("git", "link", "copy"):
+    if source not in ("git", "link", "copy", "store"):
         abort(EXIT_INVALID_SOURCE)
 
     uuid = std_uuid()
@@ -567,43 +582,65 @@ def _install_module(source, url, force=False, user=None):
         )
         if not success:
             log("Error:", output, lvl=error)
+    elif source == "store":
+        log("Installing wheel from store", absolute_path)
 
-    module_info = get_module_info(temporary_path)
-    if module_info is False:
-        log("Could not get name and version information from module.", lvl=error)
-        return False
+        log(store_url, auth)
+        store = get_store(store_url, auth)
 
-    package_name, package_version = module_info
+        if url not in store["packages"]:
+            abort(EXIT_STORE_PACKAGE_NOT_FOUND)
 
-    final_path = os.path.join(module_path, package_name)
+        meta = store["packages"][url]
 
-    if os.path.exists(final_path):
-        log("Module exists.", lvl=warn)
-        if force:
-            log("Removing previous version.")
-            success, result = run_process(
-                module_path, ["rm", "-rf", final_path], sudo=user
-            )
-            if not success:
-                log("Could not remove previous version!", lvl=error)
+        package_name = meta['name']
+        package_version = meta['version']
+
+        venv_path = os.path.join(get_path("lib", "venv"), "bin")
+
+        success, output = run_process(venv_path, [
+            "pip3", "install", "--extra-index-url", store_url, package_name
+        ])
+
+    if source != "store":
+        module_info = get_module_info(temporary_path)
+
+        if module_info is False:
+            log("Could not get name and version information from module.", lvl=error)
+            return False
+
+        package_name, package_version = module_info
+
+        final_path = os.path.join(module_path, package_name)
+
+        if os.path.exists(final_path):
+            log("Module exists.", lvl=warn)
+            if force:
+                log("Removing previous version.")
+                success, result = run_process(
+                    module_path, ["rm", "-rf", final_path], sudo=user
+                )
+                if not success:
+                    log("Could not remove previous version!", lvl=error)
+                    abort(50000)
+            else:
+                log("Not overwriting previous version without --force", lvl=error)
                 abort(50000)
-        else:
-            log("Not overwriting previous version without --force", lvl=error)
-            abort(50000)
 
-    log("Renaming to", final_path)
-    os.rename(temporary_path, final_path)
+        log("Renaming to", final_path)
+        os.rename(temporary_path, final_path)
 
-    log("Installing module")
-    success, output = run_process(
-        final_path,
-        [
-            os.path.join(get_path("lib", "venv"), "bin", "python3"),
-            "setup.py",
-            "develop",
-        ],
-        sudo=user,
-    )
+        log("Installing module")
+        success, output = run_process(
+            final_path,
+            [
+                os.path.join(get_path("lib", "venv"), "bin", "python3"),
+                "setup.py",
+                "develop",
+            ],
+            sudo=user,
+        )
+
     if not success:
         log(output, lvl=verbose)
         return False
@@ -645,12 +682,15 @@ def _install_modules(ctx):
 
     for module in modules:
         log("Installing:", module, pretty=True)
-        result = _install_module(module[0], module[1], user=user)
+        store_url = module[2] if module[0] == "store" else DEFAULT_STORE_URL
+        result = _install_module(module[0], module[1], user=user, store_url=store_url)
         if result is False:
             log("Installation of module failed!", lvl=warn)
         else:
             module_name, module_version = result
             descriptor = {"name": module_name, "source": module[0], "url": module[1]}
+            if store_url != DEFAULT_STORE_URL:
+                descriptor["store_url"] = store_url
             instance_configuration["environments"][env]["modules"][
                 module_name
             ] = descriptor
@@ -763,19 +803,19 @@ def install_environment(ctx, **kwargs):
 
 
 def _install_environment(
-    ctx,
-    source=None,
-    url=None,
-    import_file=None,
-    no_sudo=False,
-    force=False,
-    release=None,
-    upgrade=False,
-    skip_modules=False,
-    skip_data=False,
-    skip_frontend=False,
-    skip_test=False,
-    skip_provisions=False,
+        ctx,
+        source=None,
+        url=None,
+        import_file=None,
+        no_sudo=False,
+        force=False,
+        release=None,
+        upgrade=False,
+        skip_modules=False,
+        skip_data=False,
+        skip_frontend=False,
+        skip_test=False,
+        skip_provisions=False,
 ):
     """Internal function to perform environment installation"""
 
