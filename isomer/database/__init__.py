@@ -43,7 +43,7 @@ import pymongo
 from isomer import schemastore
 from isomer.error import abort, EXIT_NO_DATABASE
 from isomer.logger import isolog, warn, critical, debug, verbose, error
-from isomer.misc import std_color
+from isomer.misc.std import std_color
 
 
 def db_log(*args, **kwargs):

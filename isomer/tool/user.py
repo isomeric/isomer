@@ -34,7 +34,7 @@ import click
 from click_didyoumean import DYMGroup
 
 from isomer.logger import warn
-from isomer.misc import std_now
+from isomer.misc.std import std_now
 from isomer.tool import _get_credentials, log, ask, finish
 from isomer.tool.database import db
 

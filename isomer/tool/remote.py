@@ -39,7 +39,7 @@ from typing import Optional
 from binascii import hexlify
 
 from isomer.logger import warn, error, debug, verbose
-from isomer.misc import std_now
+from isomer.misc.std import std_now
 from isomer.tool import (
     log,
     run_process,

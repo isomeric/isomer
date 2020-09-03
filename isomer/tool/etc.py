@@ -34,7 +34,7 @@ from tomlkit import loads, dumps
 from tomlkit.exceptions import NonExistentKey
 from tomlkit import document, table, nl, comment
 
-from isomer.misc import std_now
+from isomer.misc.std import std_now
 from isomer.tool import log, error, debug, verbose, warn
 from isomer.error import abort, EXIT_NO_PERMISSION
 from isomer.misc.path import (

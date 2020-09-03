@@ -40,7 +40,7 @@ from collections import OrderedDict, namedtuple
 from operator import attrgetter
 
 from isomer.tool import log, ask, debug, verbose, warn
-from isomer.misc import std_table
+from isomer.misc.std import std_table
 from isomer.tool.templates import write_template_file
 from isomer.error import abort
 from isomer.ui.store.inventory import populate_store, get_inventory

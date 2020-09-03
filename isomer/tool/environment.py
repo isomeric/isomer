@@ -49,7 +49,7 @@ from git import Repo, exc
 from isomer.database.backup import dump, load
 from isomer.error import abort, EXIT_INVALID_SOURCE, EXIT_STORE_PACKAGE_NOT_FOUND
 from isomer.logger import error, verbose, warn, critical, debug, hilight
-from isomer.misc import std_uuid, std_now
+from isomer.misc.std import std_now, std_uuid
 from isomer.misc.path import (
     set_instance,
     get_path,
