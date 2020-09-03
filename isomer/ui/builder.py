@@ -280,6 +280,7 @@ def get_components(frontend_root):
     log("Updating frontend components")
 
     inspected_components = {}
+    inspected_locations = []
     try:
         from pkg_resources import iter_entry_points
 
@@ -301,8 +302,11 @@ def get_components(frontend_root):
                         entry_point)
 
                     if inspected_name is not None and \
-                        inspected_component is not None:
-                        inspected_components[inspected_name] = inspected_component
+                            inspected_component is not None:
+                        location = inspected_component['location']
+                        if location not in inspected_locations:
+                            inspected_locations.append(location)
+                            inspected_components[inspected_name] = inspected_component
                 except Exception as e:
                     log(
                         "Could not inspect entrypoint: ",
