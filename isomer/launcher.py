@@ -258,7 +258,7 @@ class Core(ConfigurableComponent):
 
         self.modules_loaded = {}
         self.loadable_components = {}
-        self.running_components = {}
+        self.loaded_components = {}
 
         self.frontend_running = False
         self.frontend_watcher = None
@@ -330,9 +330,10 @@ class Core(ConfigurableComponent):
 
     @handler("cli_components")
     def cli_components(self, event):
-        """List all running components"""
+        """List all loaded and running unique components"""
 
-        self.log("Running components: ", sorted(self.running_components.keys()))
+        self.log("Loaded components: ", sorted(self.loaded_components.keys()))
+        self.log("Running unique components: ", sorted(self.names))
 
     @handler("cli_reload_db")
     def cli_reload_db(self, event):
