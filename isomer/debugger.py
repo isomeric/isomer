@@ -299,7 +299,7 @@ class IsomerDebugger(ConfigurableComponent):
     def logtailrequest(self, event):
         self.log("Log requested")
 
-    @handler("exception", channel="*", priority=100.0)
+    @handler("exception", channel="*", priority=1.0)
     def _on_exception(self, error_type, value, traceback, handler=None, fevent=None):
 
         try:
