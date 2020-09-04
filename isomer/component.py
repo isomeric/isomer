@@ -54,6 +54,7 @@ from formal import model_factory
 #
 # noinspection PyUnresolvedReferences
 from isomer.events.system import isomer_ui_event, authorized_event, anonymous_event
+from isomer.events.client import send
 from isomer.logger import isolog, warn, critical, error, verbose
 from isomer.schemata.component import ComponentBaseConfigSchema
 from isomer.misc import nested_map_update
