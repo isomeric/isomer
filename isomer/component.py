@@ -148,7 +148,13 @@ def handler(*names, **kwargs):
     return wrapper
 
 
-class LoggingMeta(object):
+class BaseMeta(object):
+    """Isomer Base Component Class"""
+
+    context = None
+
+
+class LoggingMeta(BaseMeta):
     """Base class for all components that adds naming and logging
     functionality"""
 
@@ -202,10 +208,10 @@ class ConfigurableMeta(LoggingMeta):
     configprops = {}
     configform = []
 
-    def __init__(self, *args, no_db=False, **kwargs):
+    def __init__(self, uniquename, no_db=False, *args, **kwargs):
         """Check for configuration issues and instantiate a component"""
 
-        super(ConfigurableMeta, self).__init__(*args, **kwargs)
+        LoggingMeta.__init__(self, uniquename, *args, **kwargs)
 
         if no_db is True:
             self.no_db = True
@@ -278,10 +284,11 @@ class ConfigurableMeta(LoggingMeta):
         # pprint(self.configschema)
         configschemastore[self.name] = self.configschema
 
-    def unregister(self):
+    def unregister(self, *args):
         """Removes the unique name from the systems unique name list"""
+        super(ConfigurableMeta, self).unregister(*args)
+
         self.names.remove(self.uniquename)
-        super(ConfigurableMeta, self).unregister()
 
     def _read_config(self):
         """Read this component's configuration from the database"""
@@ -395,25 +402,44 @@ class ComponentDisabled(Exception):
 class LoggingComponent(LoggingMeta, Component):
     """Logging capable component for simple Isomer components"""
 
-    def __init__(self, uniquename=None, *args, **kwargs):
-        LoggingMeta.__init__(self, uniquename)
+    def __init__(self, uniquename, *args, **kwargs):
         Component.__init__(self, *args, **kwargs)
+        LoggingMeta.__init__(self, uniquename=uniquename, *args, **kwargs)
 
 
 class ConfigurableController(ConfigurableMeta, Controller):
     """Configurable controller for direct web access"""
 
-    def __init__(self, uniquename=None, *args, **kwargs):
-        ConfigurableMeta.__init__(self, uniquename, **kwargs)
+    def __init__(self, uniquename, *args, **kwargs):
         Controller.__init__(self, *args, **kwargs)
+        ConfigurableMeta.__init__(self, uniquename=uniquename, *args, **kwargs)
 
 
 class ConfigurableComponent(ConfigurableMeta, Component):
     """Configurable component for default Isomer modules"""
 
-    def __init__(self, uniquename=None, *args, **kwargs):
-        ConfigurableMeta.__init__(self, uniquename)
+    def __init__(self, uniquename, *args, **kwargs):
         Component.__init__(self, *args, **kwargs)
+        ConfigurableMeta.__init__(self, uniquename=uniquename, *args, **kwargs)
+
+    # TODO: Move to its own meta somehow
+    def _respond(self, event, data):
+        self.log(event.source(), event.realname(), event.channels[0], pretty=True)
+        response = {"component": event.source(), "action": event.action, "data": data}
+
+        self.fireEvent(send(event.client.uuid, response), event.channels[0])
+
+
+class FrontendMeta(LoggingMeta):
+    """Meta component for frontend-only modules
+
+    There is nothing to configure here.
+    """
+
+    def register(self, *_):
+        """Mock command, does not do anything except log invocation"""
+
+        self.log("Frontend meta component loaded:", self.uniquename)
 
 
 class ExampleComponent(ConfigurableComponent):
