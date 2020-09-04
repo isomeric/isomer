@@ -36,7 +36,7 @@ from json import dumps  # , loads
 from isomer.ui.clientmanager import ClientManager
 from isomer.ui.clientobjects import Client, Socket
 from isomer.events.client import clientdisconnect
-from isomer.misc import std_uuid
+from isomer.misc.std import std_uuid
 
 from pprint import pprint
 

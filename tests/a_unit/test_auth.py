@@ -32,7 +32,7 @@ from circuits import Manager, Event
 import pytest
 from isomer.ui.auth import Authenticator
 from isomer.events.client import authenticationrequest, authentication
-from isomer.misc import std_uuid, std_now, std_hash
+from isomer.misc.std import std_hash, std_now, std_uuid
 from isomer.database import objectmodels
 import isomer.logger as logger
 
