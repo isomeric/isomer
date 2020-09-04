@@ -36,7 +36,7 @@ from isomer import logger
 # from pprint import pprint
 
 m = Manager()
-component = pytest.TestComponent()
+component = pytest.TestComponent("FOO")
 component.register(m)
 
 
