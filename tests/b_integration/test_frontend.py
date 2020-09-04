@@ -53,6 +53,7 @@ has_test_module = pytest.mark.skipif(
 
 @has_test_module
 def test_install_dependencies():
+    pytest.reset_base()
 
     frontend_root, frontend_target = get_frontend_locations(True)
 
@@ -76,6 +77,8 @@ def test_install_dependencies():
 
 @has_test_module
 def test_rebuild_frontend():
+    pytest.reset_base()
+
     frontend_root, frontend_target = get_frontend_locations(True)
 
     component_folder = os.path.join(frontend_root, "src", "components")
