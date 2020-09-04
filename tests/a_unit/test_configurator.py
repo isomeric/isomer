@@ -108,7 +108,7 @@ def test_list():
 def test_get_object():
     """Tests if a component config can be retrieved"""
 
-    test_component = pytest.TestComponent()
+    test_component = pytest.TestComponent("FOO")
     test_uuid = test_component.config.uuid
 
     packet = transmit('get', {
@@ -126,7 +126,7 @@ def test_get_object():
 def test_put():
     """Tests if storing a new component config works"""
 
-    test_component = pytest.TestComponent()
+    test_component = pytest.TestComponent("FOO")
     test_uuid = test_component.config.uuid
 
     packet = transmit('put', {
