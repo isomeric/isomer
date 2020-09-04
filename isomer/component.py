@@ -50,6 +50,9 @@ from circuits import Component
 from circuits.web.controllers import Controller
 from formal import model_factory
 
+# TODO: Part of the event-clean up efforts.
+#
+# noinspection PyUnresolvedReferences
 from isomer.events.system import isomer_ui_event, authorized_event, anonymous_event
 from isomer.logger import isolog, warn, critical, error, verbose
 from isomer.schemata.component import ComponentBaseConfigSchema
