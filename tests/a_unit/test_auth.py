@@ -22,7 +22,7 @@
 Isomer - Backend
 
 Test Isomer Auth
-==============
+================
 
 
 
@@ -35,6 +35,8 @@ from isomer.events.client import authenticationrequest, authentication
 from isomer.misc.std import std_hash, std_now, std_uuid
 from isomer.database import objectmodels
 import isomer.logger as logger
+
+from bcrypt import gensalt
 
 # from pprint import pprint
 
@@ -51,7 +53,7 @@ new_user = objectmodels['user']({
 
 new_user.name = 'TESTER'
 
-new_user.passhash = std_hash('PASSWORD', 'SALT'.encode('ascii'))
+new_user.passhash = std_hash('PASSWORD', gensalt().decode("utf-8"))
 new_user.save()
 
 system_config = objectmodels['systemconfig']({
