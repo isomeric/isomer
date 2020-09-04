@@ -162,9 +162,19 @@ class LoggingMeta(BaseMeta):
 
     def __init__(self, uniquename=None, *args, **kwargs):
         """Check for configuration issues and instantiate a component"""
+
+        def pick_unique_name():
+            while True:
+                uniquename = "%s%s" % (self.__class__.__name__, randint(0, 32768))
+                if uniquename not in self.names:
+                    self.uniquename = uniquename
+                    self.names.append(uniquename)
+
+                    break
+
         self.uniquename = ""
 
-        if uniquename:
+        if uniquename is not None:
             if uniquename not in self.names:
                 self.uniquename = uniquename
                 self.names.append(uniquename)
@@ -175,14 +185,9 @@ class LoggingMeta(BaseMeta):
                     lvl=critical,
                     emitter="CORE",
                 )
+                pick_unique_name()
         else:
-            while True:
-                uniquename = "%s%s" % (self.__class__.__name__, randint(0, 32768))
-                if uniquename not in self.names:
-                    self.uniquename = uniquename
-                    self.names.append(uniquename)
-
-                    break
+            pick_unique_name()
 
     def log(self, *args, **kwargs):
         """Log a statement from this component"""
