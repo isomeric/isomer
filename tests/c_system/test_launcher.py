@@ -19,10 +19,10 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-Hackerfleet Operating System - Backend
+Isomer - Backend
 
 Test Isomer Launcher
-==================
+====================
 
 
 
@@ -31,14 +31,14 @@ Test Isomer Launcher
 from isomer.launcher import Core
 
 args = {
-    'insecure': False,
-    'quiet': False,
-    'dev': False,
-    'web_port': 80,
-    'web_address': '127.0.0.1',
-    'web_hostnames': 'localhost',
-    'cert': None,
-    'blacklist': []
+    "insecure": False,
+    "quiet": False,
+    "dev": False,
+    "web_port": 80,
+    "web_address": "127.0.0.1",
+    "web_hostnames": "localhost",
+    "cert": None,
+    "blacklist": [],
 }
 
 
@@ -49,10 +49,12 @@ def test_launcher():
     # from Core
 
     instance_configuration = {
-        'web_address': '127.0.0.1',
-        'web_port': 80000,
-        'web_certificate': ''
+        "web_address": "127.0.0.1",
+        "web_port": 80000,
+        "web_certificate": "",
+        "environment": "blue",
+        "environments": {"blue": {"blacklist": []}},
     }
-    core = Core('testing', instance_configuration, **args)
+    core = Core("testing", instance_configuration, **args)
 
     assert type(core) == Core

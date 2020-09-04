@@ -19,22 +19,14 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-Hackerfleet Operating System - Backend
+Isomer - Backend
 
-Test Isomer Auth
-==============
+Test Basic Aspects
+==================
 
 
 
 """
-
-from circuits import Manager, Event
-import pytest
-from isomer.ui.auth import Authenticator
-from isomer.events.client import authenticationrequest, authentication
-from isomer.misc import std_uuid, std_now, std_hash
-from isomer.database import objectmodels
-import isomer.logger as logger
 
 
 def test_package():
