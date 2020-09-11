@@ -89,6 +89,11 @@ class ready(Event):
     pass
 
 
+class boot(Event):
+
+    pass
+
+
 class cli_components(Event):
     """List registered and running components"""
 
@@ -306,6 +311,8 @@ class Core(ConfigurableComponent):
         self.fireEvent(cli_register_event("reload", cli_reload))
         self.fireEvent(cli_register_event("quit", cli_quit))
         self.fireEvent(cli_register_event("info", cli_info))
+
+        self.fireEvent(boot(), "*")
 
     @handler("frontendbuildrequest", channel="setup")
     def trigger_frontend_build(self, event):
