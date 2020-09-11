@@ -57,26 +57,26 @@ deb-src https://deb.nodesource.com/node_11.x sid main
 
 
 platforms = {
-    "Docker": {
-        "pre_install": [
-            [
-                "sh",
-                "-c",
-                "wget --quiet -O - https://deb.nodesource.com/gpgkey/nodesource.gpg.key | sudo apt-key add -",
-            ],
-            {
-                "action": "create_file",
-                "filename": "/etc/apt/sources.list.d/nodesource.list",
-                "content": node_source_list_docker,
-            },
-            ["apt-get", "update"],
-        ],
-        "post_install": [],
-        "tool": ["apt-get", "install", "-y"],
-        "packages": [
-            "nodejs",
-        ],
-    },
+    # "Docker": {
+    #     "pre_install": [
+    #         [
+    #             "sh",
+    #             "-c",
+    #             "wget --quiet -O - https://deb.nodesource.com/gpgkey/nodesource.gpg.key | sudo apt-key add -",
+    #         ],
+    #         {
+    #             "action": "create_file",
+    #             "filename": "/etc/apt/sources.list.d/nodesource.list",
+    #             "content": node_source_list_docker,
+    #         },
+    #         ["apt-get", "update"],
+    #     ],
+    #     "post_install": [],
+    #     "tool": ["apt-get", "install", "-y"],
+    #     "packages": [
+    #         "nodejs",
+    #     ],
+    # },
     "Debian GNU/Linux": {
         "pre_install": [
             [
