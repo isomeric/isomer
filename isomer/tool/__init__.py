@@ -486,11 +486,7 @@ def install_isomer(
         platform_name = distro.linux_distribution()[0]
         log("Platform detected as %s" % platform_name)
 
-    if isinstance(platforms[platform_name], str):
-        platform_name = platforms[platform_name]
-        log("This platform is a link to another:", platform_name, lvl=verbose)
-
-    if platform_name not in platforms:
+    if platform_name not in platforms and not omit_platform:
         log(
             "Your platform is not yet officially supported!\n\n"
             "Please check the documentation for more information:\n"
@@ -499,6 +495,10 @@ def install_isomer(
         )
         abort(50000)
 
+    if isinstance(platforms[platform_name], str):
+        platform_name = platforms[platform_name]
+        log("This platform is a link to another:", platform_name, lvl=verbose)
+
     def handle_command(command):
         if command.get("action", None) == "create_file":
             with open(command["filename"], "w") as f:
@@ -506,6 +506,10 @@ def install_isomer(
 
     def platform():
         """In a platform specific way, install all dependencies"""
+
+        if platform_name not in platforms:
+            log("Unknown platform specified, proceeding anyway", lvl=warn)
+            return
 
         tool = platforms[platform_name]["tool"]
         packages = platforms[platform_name]["packages"]
