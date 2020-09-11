@@ -29,13 +29,15 @@ Major Isomer event declarations
 
 """
 
+from typing import Dict
+
 from circuits.core import Event
 from isomer.logger import isolog, events
 
 # from isomer.ui.clientobjects import User
 
-AuthorizedEvents = {}
-AnonymousEvents = {}
+AuthorizedEvents: Dict[str, Event] = {}
+AnonymousEvents: Dict[str, Event] = {}
 
 
 def get_user_events():

@@ -36,7 +36,7 @@ def schemata_log(*args, **kwargs):
     isolog(*args, **kwargs)
 
 
-schemastore = None
+schemastore = {}
 l10n_schemastore = {}
 configschemastore = {}
 

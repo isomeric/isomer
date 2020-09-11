@@ -61,7 +61,6 @@ import getpass
 import hashlib
 import os
 import signal
-
 import time
 
 import bcrypt
@@ -121,9 +120,9 @@ def check_root():
         abort(EXIT_ROOT_REQUIRED)
 
 
-def run_process(cwd: str, args: list, shell=None, sudo: [bool, str] = None,
+def run_process(cwd: str, args: list, shell=None, sudo: Union[bool, str] = None,
                 show: bool = False, stdout: str = None, stdin: str = None,
-                timeout: int = 5) -> (bool, str):
+                timeout: int = 5) -> Tuple[bool, str]:
     """
     Executes an external process via subprocess.check_output
     :param cwd: Working directory
@@ -189,7 +188,7 @@ def run_process(cwd: str, args: list, shell=None, sudo: [bool, str] = None,
                 process._stdin.close()  # SSH
 
             begin = time.time()
-            waiting = 0
+            waiting = 0.0
             while waiting < timeout and process.is_running():
                 waiting = time.time() - begin
             if waiting >= timeout:

@@ -162,7 +162,7 @@ class LoggingMeta(BaseMeta):
     """Base class for all components that adds naming and logging
     functionality"""
 
-    names = []
+    names: list = []
 
     def __init__(self, uniquename=None, *args, **kwargs):
         """Check for configuration issues and instantiate a component"""
@@ -214,8 +214,8 @@ class LoggingMeta(BaseMeta):
 class ConfigurableMeta(LoggingMeta):
     """Meta class to add configuration capabilities to circuits objects"""
 
-    configprops = {}
-    configform = []
+    configprops: dict = {}
+    configform: dict = []
 
     def __init__(self, uniquename, no_db=False, *args, **kwargs):
         """Check for configuration issues and instantiate a component"""
