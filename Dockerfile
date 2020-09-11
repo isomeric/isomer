@@ -26,7 +26,7 @@
 #
 # Last Updated: 20200303
 
-FROM debian:testing
+FROM debian:unstable
 MAINTAINER Heiko 'riot' Weinen <riot@isomer.eu>
 
 # Install dependencies
@@ -38,10 +38,10 @@ ENV LANG=C.UTF-8
 RUN apt-get update && \
   apt-get install -y --no-install-recommends \
     enchant git apt-transport-https wget sudo gnupg virtualenv autoconf \
-    ca-certificates build-essential libffi-dev libpng-dev \
+    ca-certificates build-essential libffi-dev libpng-dev npm nodejs \
     python3 python3-dev python3-pip python3-setuptools python3-enchant \
     python3-pil python3-nacl python3-spur python3-bson python3-pymongo \
-    python3-cffi python3-openssl python3-wheel nginx \
+    python3-cffi python3-openssl python3-bcrypt python3-wheel nginx \
     && rm -rf /var/lib/apt/lists/*
 
 RUN apt-get update && \
@@ -66,7 +66,7 @@ WORKDIR isomer
 
 RUN python3 setup.py develop
 
-RUN ./iso system -l -p Docker all
+RUN ./iso system -l --omit-platform all
 
 # Install instance
 
