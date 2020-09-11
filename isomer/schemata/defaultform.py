@@ -405,6 +405,7 @@ def horizontal_divider():
 
 def test():
     """Development function to manually test all widgets"""
+    # TODO: Get rid of this and put it into testing
     print("Hello")
     from pprint import pprint
 

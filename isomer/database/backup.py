@@ -150,6 +150,7 @@ def backup(
             data = what
 
         if not filename:
+            # Do not use logger here! This data must go immediately to stdout.
             print(data)
         else:
             f.write(data)

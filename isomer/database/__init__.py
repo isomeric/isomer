@@ -85,13 +85,17 @@ def clear_all():
 
 
 class IsomerBaseModel(formal.formalModel):
+    """Base Isomer Dataclass"""
+
     def save(self, *args, **kwargs):
+        """Set a random default color"""
         if self._fields.get("color", None) is None:
             self._fields["color"] = std_color()
         super(IsomerBaseModel, self).save(*args, **kwargs)
 
     @classmethod
     def by_uuid(cls, uuid):
+        """Find data object by uuid"""
         return cls.find_one({"uuid": uuid})
 
 
@@ -176,6 +180,7 @@ def _build_collections(store):
                 index_type = pymongo.GEOSPHERE
 
             def do_index():
+                """Ensure index on a data class"""
                 col.ensure_index(
                     [(index_name, index_type)], unique=index_unique, sparse=index_sparse
                 )
