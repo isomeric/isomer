@@ -39,9 +39,8 @@ from isomer.component import ConfigurableComponent, handler
 from isomer.database import objectmodels
 from isomer.events.client import clientdisconnect, userlogout, send
 
-from isomer.logger import debug, critical, verbose, error, warn, network, info
-from isomer.misc import i18n as _
-from isomer.ui.clientobjects import Socket, Client, User
+from isomer.logger import debug, critical, verbose, error, warn, network
+from isomer.ui.clientobjects import Socket, Client
 
 from isomer.ui.clientmanager.encoder import ComplexEncoder
 

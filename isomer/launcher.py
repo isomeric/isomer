@@ -41,16 +41,13 @@ Frontend repository: http://github.com/isomeric/isomer-frontend
 import grp
 import pwd
 import sys
-import pyinotify
+import os
 
+import pyinotify
 import click
 from circuits import Event, Timer
 from circuits.web import Server, Static
 from circuits.web.websockets.dispatcher import WebSocketsDispatcher
-
-# from circuits.web.errors import redirect
-# from circuits.app.daemon import Daemon
-
 from isomer.misc.path import set_instance, get_path
 from isomer.component import handler, ConfigurableComponent, ComponentDisabled, BaseMeta
 
@@ -65,8 +62,6 @@ from isomer.logger import (
     error,
     critical,
     setup_root,
-    verbosity,
-    set_logfile,
 )
 from isomer.debugger import cli_register_event
 from isomer.ui.builder import install_frontend

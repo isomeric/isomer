@@ -27,8 +27,6 @@ Module: TagManager
 
 """
 
-from circuits import Timer, Event
-
 from isomer.events.client import send
 from isomer.component import ConfigurableComponent
 from isomer.database import objectmodels

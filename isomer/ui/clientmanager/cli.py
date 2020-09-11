@@ -34,7 +34,8 @@ from circuits import Event
 
 from isomer.component import handler
 from isomer.debugger import cli_register_event
-from isomer.misc import i18n as _, std_table
+from isomer.misc import i18n as _
+from isomer.misc.std import std_table
 
 from isomer.ui.clientmanager.authentication import AuthenticationManager
 

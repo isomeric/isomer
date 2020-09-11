@@ -33,7 +33,7 @@ from isomer.component import handler
 from isomer.events.system import anonymous_event
 from isomer.events.client import send
 
-from isomer.misc import i18n as _, all_languages, language_token_to_name
+from isomer.misc import all_languages, language_token_to_name
 from isomer.logger import verbose, warn
 
 from isomer.ui.clientmanager.floodprotection import FloodProtectedManager

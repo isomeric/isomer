@@ -35,16 +35,14 @@ from uuid import uuid4
 from circuits.core.events import Event
 from circuits.core.handlers import reprhandler
 from circuits.io import stdin
-
+from isomer.logger import isolog, critical, error, warn, debug, verbose, verbosity
 from isomer.component import ConfigurableComponent, handler
 from isomer.events.client import send
 from isomer.events.system import (
     frontendbuildrequest,
     componentupdaterequest,
     logtailrequest,
-    debugrequest,
 )
-from isomer.logger import critical, error, warn, debug, verbose, verbosity
 
 try:
     # noinspection PyPackageRequirements
