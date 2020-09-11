@@ -272,26 +272,27 @@ def _create_folders(ctx):
         path = get_path(item, "", ensure=True)
 
         log("Created path: " + path, lvl=debug)
-        if os.geteuid() == 0 and uid is not None:
+        try:
             os.chown(path, uid, gid)
-        else:
-            log("No root access - could not change ownership:", path, lvl=warn)
+        except PermissionError:
+            log("Could not change ownership:", path, lvl=warn, exc=True)
 
     module_path = get_path("lib", "modules", ensure=True)
-    if os.geteuid() == 0 and uid is not None:
+
+    try:
         os.chown(module_path, uid, gid)
-    else:
-        log("No root access - could not change ownership:", module_path, lvl=warn)
+    except PermissionError:
+        log("Could not change ownership:", module_path, lvl=warn, exc=True)
 
     log("Module storage created:", module_path, lvl=debug)
 
     if not os.path.exists(logfile):
         open(logfile, "w").close()
 
-    if os.geteuid() == 0 and uid is not None:
+    try:
         os.chown(logfile, uid, gid)
-    else:
-        log("No root access - could not change ownership", lvl=warn)
+    except PermissionError:
+        log("Could not change ownership:", logfile, lvl=warn, exc=True)
 
     finish(ctx)
 
