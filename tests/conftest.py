@@ -45,6 +45,7 @@ from isomer.schemata.component import ComponentConfigSchemaTemplate
 DEFAULT_DATABASE_NAME = "isomer-test-internal"
 DEFAULT_DATABASE_HOST = "localhost"
 DEFAULT_DATABASE_PORT = "27017"
+DEFAULT_INSTANCE_NAME = "isomer-test-internal"
 COLORS = False
 
 
@@ -220,6 +221,8 @@ def run_cli(cmd, args, full_log=False):
         args = log_args + args
 
     args = ['--config-path', '/tmp/isomer-test/etc/isomer'] + args
+    args = ['--prefix-path', '/tmp/isomer-test'] + args
+    args = ['--instance', pytest.INSTANCENAME] + args
 
     # pprint(args)
 
@@ -230,7 +233,7 @@ def run_cli(cmd, args, full_log=False):
     return result
 
 
-def reset_base():
+def reset_base(unset_instance=False):
     """Prepares a testing folder and sets Isomer's base to that"""
     if os.path.exists('/tmp/isomer-test'):
         shutil.rmtree('/tmp/isomer-test')
@@ -239,7 +242,8 @@ def reset_base():
     os.makedirs('/tmp/isomer-test/var/log/isomer')
 
     set_etc_path('/tmp/isomer-test/etc/isomer')
-    set_instance('foobar', 'green', '/tmp/isomer-test/')
+    if unset_instance is False:
+        set_instance('foobar', 'green', '/tmp/isomer-test/')
 
 
 def clean_test_components():
@@ -292,6 +296,7 @@ def pytest_configure(config):
     dbname = config.getoption("--dbname", default=DEFAULT_DATABASE_NAME)
     dbhost = config.getoption("--dbhost", default=DEFAULT_DATABASE_HOST)
     dbport = config.getoption("--dbport", default=DEFAULT_DATABASE_PORT)
+    instance_name = config.getoption("--instance", default=DEFAULT_INSTANCE_NAME)
 
     pytest.TestComponent = TestComponent
     pytest.clean_test_components = clean_test_components
@@ -303,6 +308,7 @@ def pytest_configure(config):
     pytest.DBNAME = dbname
     pytest.DBHOST = dbhost
     pytest.DBPORT = dbport
+    pytest.INSTANCENAME = instance_name
     pytest.call_event_from_name = call_event_from_name
     pytest.run_cli = run_cli
     pytest.reset_base = reset_base

@@ -47,15 +47,15 @@ def test_path_prefix():
     default = get_path('lib', '', ensure=False)
     result &= default == '/var/lib/isomer'
 
-    set_instance('default', 'green')
+    set_instance(pytest.INSTANCENAME, 'green')
 
     unset_prefix = get_path('lib', '', ensure=False)
-    result &= unset_prefix == '/var/lib/isomer/default/green'
+    result &= unset_prefix == '/var/lib/isomer/' + pytest.INSTANCENAME+ '/green'
 
-    set_instance('default', 'green', prefix='/foo/bar/')
+    set_instance(pytest.INSTANCENAME, 'green', prefix='/foo/bar/')
 
     prefixed = get_path('lib', '', ensure=False)
-    result &= prefixed == '/foo/bar/var/lib/isomer/default/green'
+    result &= prefixed == '/foo/bar/var/lib/isomer/' + pytest.INSTANCENAME + '/green'
 
     if result is False:
         pytest.exit('Default:' + default + ' Unset:' + unset_prefix + ' Set:' +
@@ -72,11 +72,12 @@ def test_instance_create():
 
     assert result.exit_code == 0
 
-    assert os.path.exists('/tmp/isomer-test/etc/isomer/instances/default.conf')
+    assert os.path.exists('/tmp/isomer-test/etc/isomer/instances/' +
+                          pytest.INSTANCENAME + '.conf')
 
 
 def test_instance_info():
-    """Creates a new default instance and check the info command output against it"""
+    """Creates a new instance and check the info command output against it"""
     pytest.reset_base()
 
     _ = pytest.run_cli(isotool, ['instance', 'create'])
@@ -107,25 +108,25 @@ def test_instance_list():
 
 
 def test_instance_set():
-    """Creates a new default instances and checks if setting a parameter works"""
+    """Creates a new instances and checks if setting a parameter works"""
     pytest.reset_base()
 
     _ = pytest.run_cli(isotool, ['instance', 'create'])
 
-    new_config = load_instance('default')
+    new_config = load_instance(pytest.INSTANCENAME)
 
     assert new_config['quiet'] is True
 
     result = pytest.run_cli(isotool, ['instance', 'set', 'quiet', 'false'])
 
-    new_config = load_instance('default')
+    new_config = load_instance(pytest.INSTANCENAME)
 
     assert result.exit_code == 0
     assert new_config['quiet'] is False
 
 
 def test_instance_clear():
-    """Creates a new default instances and checks if clearing it works"""
+    """Creates a new instances and checks if clearing it works"""
     pytest.reset_base()
 
     _ = pytest.run_cli(isotool, ['instance', 'create'])

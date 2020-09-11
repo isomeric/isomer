@@ -40,17 +40,20 @@ def test_instance_clear():
     pytest.reset_base()
 
     _ = pytest.run_cli(isotool, ['instance', 'create'], full_log=True)
-    # pytest.exit('LOL')
 
-    assert os.path.exists('/tmp/isomer-test/etc/isomer/instances/default.conf')
-    assert not os.path.exists('/tmp/isomer-test/var/lib/isomer/default/green')
+    assert os.path.exists('/tmp/isomer-test/etc/isomer/instances/' +
+                          pytest.INSTANCENAME + '.conf')
+    assert not os.path.exists('/tmp/isomer-test/var/lib/isomer/' +
+                              pytest.INSTANCENAME + '/green')
 
     result = pytest.run_cli(isotool, ['environment', 'clear', '--no-archive'])
-    print(result.output)
 
-    assert os.path.exists('/tmp/isomer-test/var/lib/isomer/default/green')
-    assert os.path.exists('/tmp/isomer-test/var/cache/isomer/default/green')
-    assert os.path.exists('/tmp/isomer-test/var/local/isomer/default/green')
+    assert os.path.exists('/tmp/isomer-test/var/lib/isomer/' +
+                          pytest.INSTANCENAME + '/green')
+    assert os.path.exists('/tmp/isomer-test/var/cache/isomer/' +
+                          pytest.INSTANCENAME + '/green')
+    assert os.path.exists('/tmp/isomer-test/var/local/isomer/' +
+                          pytest.INSTANCENAME + '/green')
     assert result.exit_code == 0
 
 
@@ -68,8 +71,10 @@ def test_install():
     _ = pytest.run_cli(isotool, ['instance', 'set', 'user', get_username()], full_log=True)
     _ = pytest.run_cli(isotool, ['environment', 'clear', '--no-archive'], full_log=True)
 
-    assert os.path.exists('/tmp/isomer-test/etc/isomer/instances/default.conf')
-    assert os.path.exists('/tmp/isomer-test/var/lib/isomer/default/green')
+    assert os.path.exists('/tmp/isomer-test/etc/isomer/instances/' +
+                          pytest.INSTANCENAME + '.conf')
+    assert os.path.exists('/tmp/isomer-test/var/lib/isomer/' +
+                          pytest.INSTANCENAME + '/green')
 
     repo_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../..'))
 
@@ -82,17 +87,24 @@ def test_install():
 
     assert result.exit_code == 0
 
-    assert os.path.exists('/tmp/isomer-test/var/lib/isomer/default/green')
-    assert os.path.exists('/tmp/isomer-test/var/cache/isomer/default/green')
-    assert os.path.exists('/tmp/isomer-test/var/local/isomer/default/green')
+    assert os.path.exists('/tmp/isomer-test/var/lib/isomer/' +
+                          pytest.INSTANCENAME + '/green')
+    assert os.path.exists('/tmp/isomer-test/var/cache/isomer/' +
+                          pytest.INSTANCENAME + '/green')
+    assert os.path.exists('/tmp/isomer-test/var/local/isomer/' +
+                          pytest.INSTANCENAME + '/green')
     assert os.path.exists(
-        '/tmp/isomer-test/var/lib/isomer/default/green/venv/bin/python3')
-    assert os.path.exists('/tmp/isomer-test/var/lib/isomer/default/green/venv/bin/iso')
-    assert os.path.exists('/tmp/isomer-test/var/lib/isomer/default/green/repository')
+        '/tmp/isomer-test/var/lib/isomer/' +
+        pytest.INSTANCENAME + '/green/venv/bin/python3')
+    assert os.path.exists('/tmp/isomer-test/var/lib/isomer/' +
+                          pytest.INSTANCENAME + '/green/venv/bin/iso')
+    assert os.path.exists('/tmp/isomer-test/var/lib/isomer/' +
+                          pytest.INSTANCENAME + '/green/repository')
     assert os.path.exists(
-        '/tmp/isomer-test/var/lib/isomer/default/green/repository/frontend')
+        '/tmp/isomer-test/var/lib/isomer/' +
+        pytest.INSTANCENAME + '/green/repository/frontend')
 
-    instance_configuration = load_instance('default')
+    instance_configuration = load_instance(pytest.INSTANCENAME)
     environment = instance_configuration['environments']['green']
 
     assert environment['installed'] is True
@@ -103,7 +115,7 @@ def test_install():
     assert environment['migrated'] is True
     assert environment['frontend'] is True
     assert environment['tested'] is True
-    assert environment['database'] == 'default_green'
+    assert environment['database'] == pytest.INSTANCENAME + '_green'
 
     if result.exit_code != 0:
         print(result.output)
