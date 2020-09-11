@@ -442,8 +442,7 @@ def update_frontends(frontend_components: dict, frontend_root: str, install: boo
 
     for package_name, package_component in frontend_components.items():
         if "frontend" in package_component:
-            for dependencies, import_line, module in install_frontend_data(
-                package_component, package_name):
+            for dependencies, import_line, module in install_frontend_data(package_component, package_name):
                 if module not in modules:
                     modules += module
                     if len(dependencies) > 0:

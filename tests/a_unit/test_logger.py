@@ -31,6 +31,7 @@ Test Isomer Logger
 from circuits import Manager
 import pytest
 from isomer import logger
+
 # from time import sleep
 
 # from pprint import pprint
@@ -47,7 +48,7 @@ def test_component_logging():
     m.start()
 
     logger.live = True
-    component.log('FOOBAR')
+    component.log("FOOBAR")
 
     lastlog = logger.LiveLog[-1][-1]
 
@@ -57,7 +58,7 @@ def test_component_logging():
 def test_script_logging():
     logger.live = True
 
-    logger.isolog('FOOBAR')
+    logger.isolog("FOOBAR")
 
     lastlog = logger.LiveLog[-1][-1]
 

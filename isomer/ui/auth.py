@@ -29,11 +29,10 @@ Authentication (and later Authorization) system
 """
 from hmac import compare_digest
 from uuid import uuid4
-from circuits import Event, Timer
 
-from isomer.component import handler
+from circuits import Event, Timer
+from isomer.component import handler, ConfigurableComponent
 from isomer.events.client import authentication, send
-from isomer.component import ConfigurableComponent
 from isomer.database import objectmodels
 from isomer.logger import error, warn, debug
 from isomer.misc.std import std_salt, std_hash, std_now, std_uuid, std_human_uid

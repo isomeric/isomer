@@ -31,11 +31,10 @@ Basic management tool functionality and plugin support.
 
 import os
 import sys
-import click
 
+import click
 from click_didyoumean import DYMGroup
 from click_plugins import with_plugins
-
 from pkg_resources import iter_entry_points
 from isomer.logger import set_logfile, set_color, set_verbosity, warn, verbose, \
     critical, debug

@@ -48,19 +48,19 @@ user_uuid = str(uuid4())
 client_uuid = str(uuid4())
 
 
-class AccountMock():
+class AccountMock:
     """Mock object for an account"""
 
     def __init__(self):
-        self.name = 'TEST'
-        self.roles = ['admin']
+        self.name = "TEST"
+        self.roles = ["admin"]
 
 
-class ProfileMock():
+class ProfileMock:
     """Mock object for a profile"""
 
     def __init__(self):
-        self.name = 'TEST'
+        self.name = "TEST"
 
 
 def test_instantiate():
@@ -79,9 +79,9 @@ def transmit(action, data, account=AccountMock()):
     m.start()
 
     events = {
-        'put': put,
-        'get': get,
-        'getlist': getlist,
+        "put": put,
+        "get": get,
+        "getlist": getlist,
     }
 
     waiter = pytest.WaitEvent(m, "send", "isomer-web")
@@ -91,7 +91,7 @@ def transmit(action, data, account=AccountMock()):
     result = waiter.wait()
     packet = result.packet
 
-    assert packet['component'] == 'isomer.ui.configurator'
+    assert packet["component"] == "isomer.ui.configurator"
     return packet
 
 
@@ -99,10 +99,10 @@ def test_list():
     """Tests if the configurator returns a valid list of component
     configurations"""
 
-    packet = transmit('getlist', {})
+    packet = transmit("getlist", {})
 
-    assert packet['action'] == 'getlist'
-    assert len(packet['data']) >= 1
+    assert packet["action"] == "getlist"
+    assert len(packet["data"]) >= 1
 
 
 def test_get_object():
@@ -111,16 +111,14 @@ def test_get_object():
     test_component = pytest.TestComponent("FOO")
     test_uuid = test_component.config.uuid
 
-    packet = transmit('get', {
-        'uuid': test_uuid
-    })
+    packet = transmit("get", {"uuid": test_uuid})
 
-    assert packet['action'] == 'get'
-    assert 'data' in packet
+    assert packet["action"] == "get"
+    assert "data" in packet
 
-    obj = packet['data']
+    obj = packet["data"]
 
-    assert obj['uuid'] == test_uuid
+    assert obj["uuid"] == test_uuid
 
 
 def test_put():
@@ -129,10 +127,8 @@ def test_put():
     test_component = pytest.TestComponent("FOO")
     test_uuid = test_component.config.uuid
 
-    packet = transmit('put', {
+    packet = transmit(
+        "put", {"obj": test_component.config.serializablefields(), "uuid": test_uuid}
+    )
 
-        'obj': test_component.config.serializablefields(),
-        'uuid': test_uuid
-    })
-
-    assert packet['data']
+    assert packet["data"]

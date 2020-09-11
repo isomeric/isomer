@@ -43,12 +43,11 @@ Instance management functionality.
 import os
 import webbrowser
 from socket import gethostname
+from shutil import rmtree
 
 import tomlkit
 import click
 from click_didyoumean import DYMGroup
-from shutil import rmtree
-
 from isomer.error import (
     abort,
     EXIT_INVALID_CONFIGURATION,

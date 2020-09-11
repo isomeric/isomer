@@ -30,9 +30,16 @@ Test Isomer Frontend Builder
 import os
 import pytest
 
-from isomer.ui.builder import get_frontend_locations, generate_component_folders, \
-    get_components, update_frontends, get_sails_dependencies, install_dependencies, \
-    write_main, install_frontend
+from isomer.ui.builder import (
+    get_frontend_locations,
+    generate_component_folders,
+    get_components,
+    update_frontends,
+    get_sails_dependencies,
+    install_dependencies,
+    write_main,
+    install_frontend,
+)
 
 try:
     import isomer.test as test
@@ -42,8 +49,8 @@ except ImportError:
 has_test_module = pytest.mark.skipif(
     test is None,
     reason="isomer-test-module not installed. See "
-           "https://isomer.readthedocs.io/en/latest/dev/system/backend/modularity.html"
-           "#modules"
+    "https://isomer.readthedocs.io/en/latest/dev/system/backend/modularity.html"
+    "#modules",
 )
 
 # TODO: These last tests depend on working with the current copy of the source.
@@ -62,9 +69,7 @@ def test_install_dependencies():
 
     components = get_components(frontend_root)
 
-    installation_packages, imports = update_frontends(
-        components, frontend_root, True
-    )
+    installation_packages, imports = update_frontends(components, frontend_root, True)
 
     installation_packages += get_sails_dependencies(frontend_root)
     install_dependencies(installation_packages, frontend_root)
@@ -86,9 +91,7 @@ def test_rebuild_frontend():
 
     components = get_components(frontend_root)
 
-    installation_packages, imports = update_frontends(
-        components, frontend_root, True
-    )
+    installation_packages, imports = update_frontends(components, frontend_root, True)
 
     installation_packages += get_sails_dependencies(frontend_root)
     install_dependencies(installation_packages, frontend_root)
