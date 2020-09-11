@@ -87,11 +87,17 @@ def get_log_path():
     return path
 
 
-def set_prefix(prefix):
+def set_prefix_path(prefix):
     """Set a new base prefix (Caution!)"""
     global PREFIX
 
     PREFIX = prefix
+
+
+def get_prefix_path():
+    """Get the base prefix"""
+
+    return PREFIX
 
 
 def set_instance(instance, environment, prefix=None):
