@@ -32,8 +32,11 @@ except ImportError:
     sys.exit(50050)
 
 ignore = [
+    "/frontend/.idea",
+    "/frontend/.git",
     "/frontend/node_modules",
     "/frontend/build",
+    "/frontend/dist",
     "/frontend/src/components",
     "/docs/build",
     "__pycache__"
@@ -54,6 +57,10 @@ def add_datafiles(*paths):
     with open("MANIFEST.in", "w") as manifest:
         for path in paths:
             files = []
+            if os.path.isfile(path):
+                manifest.write("include " + path + "\n")
+                continue
+
             manifest.write("recursive-include " + path + " *\n")
 
             for root, dirnames, filenames in os.walk(path):
@@ -134,8 +141,10 @@ setup(
     long_description_content_type="text/x-rst",
     dependency_links=[
         "https://github.com/ri0t/click-repl/archive/master.zip#egg=click-repl-0.1.3-ri0t",
+        "https://github.com/ri0t/SecretColors/archive/master.zip#egg=SecretColors-1.2.0",
     ],
     install_requires=[
+        "bcrypt>=3.1.6",
         "click-didyoumean>=0.0.3",
         "click-plugins>=1.0.3",
         "click-repl>=0.1.3-ri0t",
@@ -155,7 +164,8 @@ setup(
         "tomlkit>=0.4.6",
         "spur>=0.3.20",
         "six>=1.11.0",
-        "SecretColors>=1.1.0"
+        "numpy>=1.16.2",
+        "SecretColors>=1.2.0"
     ],
     data_files=datafiles,
     entry_points="""[console_scripts]
@@ -176,6 +186,8 @@ setup(
     schemamanager=isomer.ui.schemamanager:SchemaManager
     tagmanager=isomer.ui.tagmanager:TagManager
     configurator=isomer.ui.configurator:Configurator
+    store=isomer.ui.store.component:Store
+    instanceinfo=isomer.ui.instance:InstanceInfo
 
     [isomer.schemata]
     systemconfig=isomer.schemata.system:Systemconfig
