@@ -29,8 +29,8 @@ Test Isomer Environment Management
 """
 
 import os
-
 import pytest
+
 from isomer.tool.etc import load_instance
 from isomer.tool.tool import isotool
 
@@ -59,7 +59,7 @@ def test_instance_clear():
 
 def test_install():
     """Creates a new default instances and clears it without archiving"""
-    pytest.reset_base()
+    pytest.reset_base(unset_instance=True)
     import os
     import pwd
 
@@ -68,7 +68,8 @@ def test_install():
         return pwd.getpwuid(os.getuid())[0]
 
     _ = pytest.run_cli(isotool, ['instance', 'create'], full_log=True)
-    _ = pytest.run_cli(isotool, ['instance', 'set', 'user', get_username()], full_log=True)
+    _ = pytest.run_cli(isotool, ['instance', 'set', 'user', get_username()],
+                       full_log=True)
     _ = pytest.run_cli(isotool, ['environment', 'clear', '--no-archive'], full_log=True)
 
     assert os.path.exists('/tmp/isomer-test/etc/isomer/instances/' +
@@ -80,8 +81,8 @@ def test_install():
 
     result = pytest.run_cli(
         isotool,
-        ['--clog', '10', 'environment', 'install', '--no-sudo', '--source', 'copy',
-         '--url', repo_path],
+        ['environment', 'install', '--no-sudo', '--source', 'copy',
+         '--url', repo_path, '--skip-provisions'],
         full_log=True
     )
 
