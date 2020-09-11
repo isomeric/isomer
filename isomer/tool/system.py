@@ -51,6 +51,7 @@ from isomer.tool import platforms, install_isomer, log, run_process, ask, finish
     default=None,
     help="Platform name, one of %s" % list(platforms.keys()),
 )
+@click.option("--omit-platform", is_flag=True, default=False)
 @click.option("--use-sudo", "-u", is_flag=True, default=False)
 @click.option(
     "--log-actions",
@@ -59,10 +60,12 @@ from isomer.tool import platforms, install_isomer, log, run_process, ask, finish
     is_flag=True,
     default=False,
 )
-def system(ctx, platform, use_sudo, log_actions):
+def system(ctx, platform, omit_platform, use_sudo, log_actions):
     """[GROUP] Various aspects of Isomer system handling"""
 
     ctx.obj["platform"] = platform
+    ctx.obj["omit_platform"] = omit_platform
+
     ctx.obj["use_sudo"] = use_sudo
     ctx.obj["log_actions"] = log_actions
 
@@ -75,7 +78,8 @@ def system_all(ctx):
     use_sudo = ctx.obj["use_sudo"]
 
     install_isomer(
-        ctx.obj["platform"], use_sudo, show=ctx.obj["log_actions"], omit_common=True
+        ctx.obj["platform"], use_sudo, show=ctx.obj["log_actions"],
+        omit_platform=ctx.obj['omit_platform'], omit_common=True
     )
     _add_system_user(use_sudo)
     _create_system_folders(use_sudo)
@@ -94,6 +98,7 @@ def dependencies(ctx):
         ctx.obj["platform"],
         ctx.obj["use_sudo"],
         show=ctx.obj["log_actions"],
+        omit_platform=ctx.obj['platform'],
         omit_common=True,
     )
 
