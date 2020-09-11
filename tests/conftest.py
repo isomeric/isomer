@@ -228,7 +228,7 @@ def run_cli(cmd, args, full_log=False):
 
     runner = CliRunner()
     result = runner.invoke(cmd, args, catch_exceptions=False, obj={})
-    with open('/tmp/logfile_runner', 'a') as f:
+    with open('/tmp/isomer_test_run_cli_logfile', 'a') as f:
         f.write(result.output)
     return result
 
