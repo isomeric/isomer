@@ -315,4 +315,8 @@ def pytest_configure(config):
 
     clean_test_database(config)
 
-    initialize(database_name=dbname)
+    initialize(
+        address="%s:%i" % (dbhost, dbport),
+        database_name=dbname,
+        instance_name=instance_name
+    )
