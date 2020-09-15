@@ -44,7 +44,7 @@ from isomer.schemata.component import ComponentConfigSchemaTemplate
 
 DEFAULT_DATABASE_NAME = "isomer-test-internal"
 DEFAULT_DATABASE_HOST = "localhost"
-DEFAULT_DATABASE_PORT = "27017"
+DEFAULT_DATABASE_PORT = 27017
 DEFAULT_INSTANCE_NAME = "isomer-test-internal"
 COLORS = False
 
@@ -280,13 +280,16 @@ def pytest_unconfigure(config):
 
 def pytest_addoption(parser):
     parser.addoption(
-        "--dbname", action="store", default=DEFAULT_DATABASE_NAME, help="test db name"
+        "--dbname", action="store", default=DEFAULT_DATABASE_NAME,
+        help="test db name"
     )
     parser.addoption(
-        "--dbhost", action="store", default=DEFAULT_DATABASE_HOST, help="test db hostname"
+        "--dbhost", action="store", default=DEFAULT_DATABASE_HOST,
+        help="test db hostname"
     )
     parser.addoption(
-        "--dbport", action="store", default=DEFAULT_DATABASE_PORT, help="test db port"
+        "--dbport", action="store", default=DEFAULT_DATABASE_PORT,
+        help="test db port", type="int"
     )
 
 
