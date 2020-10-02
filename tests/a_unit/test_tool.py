@@ -48,7 +48,7 @@ def test_view_no_objects():
     """"""
 
     result = pytest.run_cli(isotool, [
-        "--dbhost", pytest.DBHOST + ":" + pytest.DBPORT,
+        "--dbhost", pytest.DBHOST + ":" + str(pytest.DBPORT),
         "--dbname", pytest.DBNAME,
         'db', 'objects', 'view',
         "--schema", "systemconfig"
