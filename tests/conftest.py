@@ -114,7 +114,7 @@ def call_event(manager, event, *channels):
 class WaitEvent(object):
     """Simple component substitute that waits for a specified Event"""
 
-    def __init__(self, manager, name, channel=None, timeout=1.0):
+    def __init__(self, manager, name, channel=None, timeout=2):
         if channel is None:
             channel = getattr(manager, "channel", None)
 
