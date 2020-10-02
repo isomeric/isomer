@@ -23,18 +23,15 @@ import sys
 import shutil
 import threading
 import collections
+from time import sleep, strftime
+from collections import deque
 
 import pytest
 import pymongo
-from time import sleep, strftime
-from collections import deque
 from click.testing import CliRunner
-
 from circuits.core.manager import TIMEOUT
 from circuits import handler, BaseComponent, Debugger, Manager
-
 from formal import model_factory
-
 from isomer.database import initialize
 from isomer.component import ConfigurableComponent
 from isomer.misc.path import set_etc_path, set_instance
@@ -227,7 +224,7 @@ def run_cli(cmd, args, full_log=False):
     # pprint(args)
 
     runner = CliRunner()
-    result = runner.invoke(cmd, args, catch_exceptions=False, obj={})
+    result = runner.invoke(cmd, args, catch_exceptions=True, obj={})
     with open('/tmp/isomer_test_run_cli_logfile', 'a') as f:
         f.write(result.output)
     return result
