@@ -15,7 +15,7 @@ General
    Isomer is an opensource collaborative application platform.
 
 ... What platforms does Isomer support?
-   We currently test on Debian, various flavours of Python (3.3, 3.4, 3.5, 3.6,
+   We currently test on Debian, various flavours of Python (3.5, 3.6, 3.7, 3.8
    pypy)
    It'll probably run on various other platforms as well. E.g. we've made good
    experiences with Arch Linux.
