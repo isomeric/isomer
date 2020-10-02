@@ -82,7 +82,7 @@ def test_install():
     result = pytest.run_cli(
         isotool,
         ['environment', 'install', '--no-sudo', '--source', 'copy',
-         '--url', repo_path, '--skip-provisions'],
+         '--url', repo_path, '--skip-provisions', '--skip-frontend'],
         full_log=True
     )
 
@@ -111,8 +111,8 @@ def test_install():
     assert environment['installed'] is True
     assert environment['provisioned'] is False
     assert environment['migrated'] is True
-    assert environment['frontend'] is True
-    assert environment['tested'] is True
+    assert environment['frontend'] is False
+    assert environment['tested'] is False
     assert environment['database'] == pytest.INSTANCENAME + '_green'
 
     if result.exit_code != 0:
