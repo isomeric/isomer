@@ -144,28 +144,33 @@ setup(
         "https://github.com/ri0t/SecretColors/archive/master.zip#egg=SecretColors-1.2.0",
     ],
     install_requires=[
-        "bcrypt>=3.1.6",
+        "bcrypt>=3.2",
         "click-didyoumean>=0.0.3",
-        "click-plugins>=1.0.3",
+        "click-plugins>=1.1",
         "click-repl>=0.1.3-ri0t",
-        "click>=6.7.0",
+        "click>=7.1.2",
         "circuits",
-        "distro>=1.3",
-        "dpath>=1.4.0",
+        "distro>=1.5",
+        "docutils>=0.16",
+        "dpath>=2.0.1",
         "formal>=0.6.3",
-        "gitpython>=2.1.1",
-        "jsonschema>=3.0.1",
+        "gitpython>=3.1.8",
+        "jsonschema>=3.2.0",
         "networkx",
-        "prompt-toolkit>=2.0,<3",
-        "pycountry>=18.2",
-        "pyinotify>=0.9.6",
-        "pystache>=0.5.4",
-        "pytz>=2019.1",
-        "tomlkit>=0.4.6",
-        "spur>=0.3.20",
-        "six>=1.11.0",
         "numpy>=1.16.2",
-        "SecretColors>=1.2.0"
+        "prompt-toolkit>=2.0.10,<3",
+        "pycountry>=20.7",
+        "pyinotify>=0.9.6",
+        "pypi-simple>=0.6.0",
+        "pystache>=0.5.4",
+        "pytz>=2020.1",
+        "requests>=2.24.0",
+        "spur>=0.3.21",
+        "six>=1.15.0",
+        "SecretColors>=1.2.0",
+        "tomlkit>=0.7.0",
+        "typing_extensions>=3.7.4.2",
+
     ],
     data_files=datafiles,
     entry_points="""[console_scripts]
@@ -196,6 +201,7 @@ setup(
     user=isomer.schemata.user:User
     logmessage=isomer.schemata.logmessage:LogMessage
     tag=isomer.schemata.tag:Tag
+    theme=isomer.schemata.theme:Theme
 
     [isomer.provisions]
     system=isomer.provisions.system:provision
