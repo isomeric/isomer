@@ -1,7 +1,7 @@
 Exit error code directory
 =========================
 
-The `management tool <isotool>`_ provides exit error codes when operations
+The :ref:`isotool` provides exit error codes when operations
 failed. To help you understand and fix the problem at hand, here is a directory
 of all known error codes:
 
