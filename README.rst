@@ -25,24 +25,43 @@
     :target: https://www.codetriage.com/isomeric/isomer
     :alt: Help via codetriage.com
 
-.. image:: https://raw.githubusercontent.com/isomeric/isomer/master/docs/source/_static/logo.png
+.. |Contributor Covenant| image:: https://img.shields.io/badge/Contributor%20Covenant-v2.0%20adopted-ff69b4.svg
+    :target: CODE_OF_CONDUCT.rst
+
+.. image:: https://raw.githubusercontent.com/isomeric/isomer/master/docs/source/_static/logo_flat.png
     :target: https://github.com/isomeric/isomer
     :alt: Isomer Logo
 
-♦ Isomer - Be Collaborative!
+◆ Isomer - Be Collaborative!
 ============================
 
 **A collaborative and modular infrastructure for your data.**
 
+Key features
+------------
+
+Why choose Isomer? Here's a short list of features of the Isomer Application Framework:
+
+* **Modular** Expandable with integrated modules or build your own
+* **Distributed** Focus on distributed requirements and features
+* **Rapid** Develop your own applications rapidly
+* **Reusability** Stop reinventing the wheel and integrate with proven modules
+* **Cloud independent** Run nodes on your own infrastructure
+
+Examples
+--------
+
+Here are some examples of what Isomer is being used for:
+
 * **Geo Information** Use a sophisticated map to annotate and review
   geographical information
 * **Vehicle support** Attach a sailyacht, your camper or pack one in your
-  backpack
-* **Project planning** Issue tracking for collaborative teams
-* **Modular** Expandable with integrated modules or build your own
-* **Cloud independent** Run nodes on your own infrastructure
+  backpack to get spaceship-like Interfaces
+* **Project planning** Project planning and tracking for collaborative teams
+* **Multimedia mixing** AVIO is a suite for combining, mixing, controlling and
+  playback of many, many independent media/stream formats
 
-Much more incoming!
+Much more incoming! We're eager to hear, what you're doing or planning to do!
 
 ⛁ Installation
 ==============
@@ -76,11 +95,15 @@ If you intend to set up a development environment, `please follow the
 development workflow instructions
 <https://isomer.readthedocs.io/en/latest/dev/workflow.html>`__.
 
+🕮 Documentation
+================
+
+The Isomer documentation is hosted at `ReadTheDocs.org <https://isomer.readthedocs.org>`__.
 
 ⊕ Modules
 =========
 
-The system is modular, so you can install what you need and leave out other
+Isomer is modular, so you can install what you need and leave out other
 things.
 
 A lot of the included modules are still Work in Progress, so help out, if
@@ -90,8 +113,8 @@ suite.
 ♨ General modules
 -----------------
 
-These are 'official' isomer modules. If you'd like to contribute your own,
-ping riot@c-base.org, to get it added to the list.
+These are 'official' Isomer modules. If you'd like to contribute your own,
+ping community@isomer.eu, to get it added to the list.
 
 Some (marked with \*) are work in progress and probably not really usable, yet.
 
@@ -124,8 +147,9 @@ wiki           Etherpad + Wiki = awesomeness
 ⚓ Navigation (Hackerfleet) modules
 -----------------------------------
 
-We primarily focused on navigation tools, so these are currently the
-'more usable' modules.
+Originating as a Hackerfleet project, we primarily focused on navigation tools,
+early on, so these are currently the 'more usable' modules.
+
 They are far from complete, see the WiP list below.
 
 *Obligatory Warning*: **Do not use for navigational purposes!**
@@ -140,6 +164,7 @@ busrepeater    Tool to repeat navigation data bus frames to other media
 comms          Communication package
 dashboard      Dashboard information system
 equipment      Equipment management
+glasen         A "Glasenuhr", maritime clock for shift systems
 logbook        Displaying and manual logging of important (nautical) events
 maps           (Offline) moving maps with shareable views/layers
 mesh           Mesh networking
@@ -159,9 +184,11 @@ webguides      Importer for skipperguide.de wiki content into the map
 -  Dynamic Logbook
 -  GRIB data (in charts)
 -  Navigation aides, planning
+-  Virtual/Augmented/eXtended Reality navigation
 -  Datalog, automated navigational data exchange
 -  Crew management, more safety tools
 -  wireless crew network and general communications
+-  audio/media system
 
 ⚯ Other 3rd party modules
 -------------------------
@@ -184,25 +211,33 @@ Isomer <https://github.com/isomeric/isomer/issues>`__ and report them,
 if they're still unknown.
 
 If you want to discuss distributed, opensource (or maritime) technology
-in general incl. where we're heading, head over to our `Github discussion
-forum <https://github.com/hackerfleet/discussion/issues>`__
-...which is cleverly disguised as a Github issue tracker.
+in general incl. where we're heading, head over to one of our social
+locations:
 
-You can also find us here:
-
-* `github.com/Hackerfleet <https://github.com/Hackerfleet>`__
-* `reddit <https://reddit.com/r/hackerfleet>`__
-* `Hackerfleet Twitter <https://twitter.com/hackerfleet>`__
+* `github.com/isomeric <https://github.com/isomeric>`__
+* `Isomer Reddit <https://reddit.com/r/isomer>`__
 * `Isomer Twitter <https://twitter.com/isomerframework>`__
-* `Facebook <https://www.facebook.com/Hackerfleet>`__
-* `soup.io <http://hackerfleet.soup.io/>`__
-* `G+ <https://plus.google.com/105528689027070271173>`__
-* `irc #hackerfleet on freenode <http://webchat.freenode.net/?randomnick=1&channels=hackerfleet&uio=d4>`__
+* `Isomer Discord <https://discord.gg/T8MmQJd>`__
+* `Isomer Matrix Channel <https://matrix.to/#/!vsbYAJRfIwQaCVmbRe:hackerfleet.eu?via=hackerfleet.eu&via=matrix.org>`__
 
-.. note:: Please be patient when using IRC, responses might take a few hours!
+We have other channels for the more maritime inclined:
+
+* `github.com/hackerfleet <https://github.com/hackerfleet>`__
+* `Hackerfleet Reddit <https://reddit.com/r/hackerfleet>`__
+* `Hackerfleet Twitter <https://twitter.com/hackerfleet>`__
+* `Hackerfleet Discord <https://discord.gg/2yHEk6S>`__
+* `Hackerfleet Matrix Channel <https://matrix.to/#/!qQxCeUzrVeVKuEFwKT:hackerfleet.eu?via=hackerfleet.eu&via=matrix.org&via=synod.im>`__
+* `Hackerfleet Facebook <https://www.facebook.com/Hackerfleet>`__
+* `Hackerfleet G+ <https://plus.google.com/105528689027070271173>`__
+* `IRC #hackerfleet on freenode <http://webchat.freenode.net/?randomnick=1&channels=hackerfleet&uio=d4>`__
 
 ♚ Contributors
 ==============
+
+Please note that this project is released with a Contributor Code of Conduct.
+By participating in this project you agree to abide by its terms.
+Refer to `our COC <https://github.com/isomeric/isomer/CODE_OF_CONDUCT.rst>`__
+(Contributor Covenant COC) for details.
 
 Code
 ----
@@ -212,7 +247,7 @@ Code
 -  Martin Ling
 -  River 'anm' MacLeod
 -  Sascha 'c_ascha' Behrendt c_ascha@c-base.org
--  `You? <mailto:riot@c-base.org?subject=Isomer Contributor Request>`_
+-  `You? <mailto:community@isomer.eu?subject=Isomer Contributor Request>`_
 
 Assets
 ------
@@ -256,4 +291,4 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
--- ⛵🖤
+-- ⛵❤
