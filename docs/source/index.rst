@@ -24,8 +24,8 @@ About
 
     about/index
 
-User's Manual
-=============
+User's Manuals
+==============
 
 .. toctree::
     :maxdepth: 1
@@ -34,9 +34,10 @@ User's Manual
     start/index
     manual/Users/index
     manual/Administration/index
+    manual/Developers/index
 
-Developer Documentation
-=======================
+Isomer Development
+==================
 
 
 .. toctree::
