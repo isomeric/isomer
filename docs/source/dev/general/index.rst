@@ -2,7 +2,6 @@
 How to help the project?
 ========================
 
-
 Glad to see you're interested in helping out the project!
 
 Generally, you can `ping riot <mailto:riot@c-base.org>`__ if you want to help
@@ -10,6 +9,14 @@ out and don't exactly know where to start.
 
 Here, we list a few possible opportunities where you can help us and become
 part of the driving community:
+
+Code of Conduct
+---------------
+
+Please note that this project is released with a Contributor Code of Conduct.
+By participating in this project you agree to abide by its terms.
+
+Refer to the :ref:`code_of_conduct` for details.
 
 
 Communication
@@ -78,6 +85,7 @@ This is the rather dry material for new software developers:
        :maxdepth: 2
 
        introduction
+       code_of_conduct
        contributing
        environment
        processes
