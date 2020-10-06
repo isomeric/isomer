@@ -37,7 +37,7 @@ Authorized Events
 
 After clients have logged in, they have access to a broad selection of so
 called "authorized events". They have permissions and roles attached.
-See RBAC`
+See :ref:`RBAC`
 
 Internal Events
 ^^^^^^^^^^^^^^^

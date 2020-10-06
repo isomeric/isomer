@@ -1,15 +1,18 @@
-Developer Documentation
-=======================
+Developing Isomer
+=================
 
-Here you find documentation on core concepts, general mechanisms, design
-choices but also the hard facts gathered from inline documentation strings
-or (soon) the automated API doc collector.
+This section contains information and resources around developers who want to
+contribute to and thus develop the Isomer Application Framework.
+
+.. note::
+
+    You may also be interested in the :ref:`developers_manual` which explains many
+    core concepts and has a lot of other reference material like API descriptions.
+
 
 .. toctree::
     :maxdepth: 1
     :glob:
 
     general/index
-    system/index
-    api/index
-    packages/isomer/isomer
+    packages/isomer/modules
