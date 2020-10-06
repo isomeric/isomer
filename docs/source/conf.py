@@ -16,7 +16,7 @@ import sys
 import os
 import types
 
-# import sphinx_bootstrap_theme
+import sphinx_material
 
 # from imp import new_module
 
@@ -161,105 +161,44 @@ todo_include_todos = devel is not False
 
 blockdiag_fontpath = seqdiag_fontpath = nwdiag_fontpath = actdiag_fontpath = 'source/fonts/clearsans/ClearSans-Medium.ttf'
 
-# -- Options for HTML output ----------------------------------------------
+# Required theme setup
+html_theme = 'sphinx_material'
 
-# The theme to use for HTML and HTML Help pages.  See the documentation for
-# a list of builtin themes.
-html_theme = 'sphinx_rtd_theme'  # 'bootstrap'
-
-# Theme options are theme-specific and customize the look and feel of a theme
-# further.  For a list of options available for each theme, see the
-# documentation
-
+# Material theme options (see theme.conf for more information)
 html_theme_options = {
-    'canonical_url': '',
-    'logo_only': False,
-    'display_version': True,
-    'prev_next_buttons_location': 'bottom',
-    'style_external_links': True,
-    'vcs_pageview_mode': '',
-    'style_nav_header_background': '#266DAD',
-    # Toc options
-    'collapse_navigation': True,
-    'sticky_navigation': True,
-    'navigation_depth': 6,
-    'includehidden': True,
-    'titles_only': False
+
+    # Set the name of the project to appear in the navigation.
+    'nav_title': 'Isomer',
+
+    # Set you GA account ID to enable tracking
+    #'google_analytics_account': 'UA-XXXXX',
+
+    # Specify a base_url used to generate sitemap.xml. If not
+    # specified, then no sitemap will be built.
+    'base_url': 'https://isomer.readthedocs.io/',
+
+    'theme_color': '#4284bf',
+    # Set the color and the accent color
+    'color_primary': 'white',
+    'color_accent': 'teal',
+
+    # Set the repo location to get a badge with stats
+    'repo_url': 'https://github.com/isomeric/isomer/',
+    'repo_name': 'Isomer',
+
+    # Visible levels of the global TOC; -1 means unlimited
+    'globaltoc_depth': -1,
+    # If False, expand all TOC entries
+    'globaltoc_collapse': True,
+    # If True, show hidden TOC entries
+    'globaltoc_includehidden': False,
+
 }
 
-# This is old stuff:
-bootstrap_html_theme_options = {
-    # Navigation bar title. (Default: ``project`` value)
-    'navbar_title': "Documentation",
-
-    # Tab name for entire site. (Default: "Site")
-    'navbar_site_name': "All pages",
-
-    # A list of tuples containing pages or urls to link to.
-    # Valid tuples should be in the following forms:
-    #    (name, page)                 # a link to a page
-    #    (name, "/aa/bb", 1)          # a link to an arbitrary relative url
-    #    (name, "http://example.com", True) # arbitrary absolute url
-    # Note the "1" or "True" value above as the third argument to indicate
-    # an arbitrary url.
-    'navbar_links': [
-        # ("Examples", "examples"),
-        # ("Link", "http://example.com", True),
-    ],
-
-    # Render the next and previous page links in navbar. (Default: true)
-    'navbar_sidebarrel': True,
-
-    # Render the current pages TOC in the navbar. (Default: true)
-    'navbar_pagenav': True,
-
-    # Tab name for the current pages TOC. (Default: "Page")
-    'navbar_pagenav_name': "Content",
-
-    # Global TOC depth for "site" navbar tab. (Default: 1)
-    # Switching to -1 shows all levels.
-    'globaltoc_depth': 1,
-
-    # Include hidden TOCs in Site navbar?
-    #
-    # Note: If this is "false", you cannot have mixed ``:hidden:`` and
-    # non-hidden ``toctree`` directives in the same page, or else the build
-    # will break.
-    #
-    # Values: "true" (default) or "false"
-    'globaltoc_includehidden': "true",
-
-    # HTML navbar class (Default: "navbar") to attach to <div> element.
-    # For black navbar, do "navbar navbar-inverse"
-    'navbar_class': "navbar",
-
-    # Fix navigation bar to top of page?
-    # Values: "true" (default) or "false"
-    'navbar_fixed_top': "true",
-
-    # Location of link to source.
-    # Options are "nav" (default), "footer" or anything else to exclude.
-    'source_link_position': "",
-
-    # Bootswatch (http://bootswatch.com/) theme.
-    #
-    # Options are nothing (default) or the name of a valid theme
-    # such as "amelia" or "cosmo".
-    'bootswatch_theme': "",
-
-    # Choose Bootstrap version.
-    # Values: "3" (default) or "2" (in quotes)
-    'bootstrap_version': "3",
-}
-
-# Add any paths that contain custom themes here, relative to this directory.
-# html_theme_path = []
-
-# html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
-
+version_dropdown = True
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
-# html_title = None
+html_title = "Isomer"
 
 # A shorter title for the navigation bar.  Default is the same as html_title.
 # html_short_title = None
@@ -292,7 +231,9 @@ html_static_path = ['_static']
 # html_use_smartypants = True
 
 # Custom sidebar templates, maps document names to template names.
-# html_sidebars = {}
+html_sidebars = {
+    "**": ["logo-text.html", "globaltoc.html", "localtoc.html", "searchbox.html"]
+}
 
 # Additional templates that should be rendered to pages, maps page names to
 # template names.

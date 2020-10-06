@@ -6,7 +6,8 @@ webcolors
 Sphinx
 sphinx-intl
 sphinx-autodoc-annotation
-sphinx_rtd_theme
+sphinx-material
+# sphinx_rtd_theme
 releases
 sphinx-issues
 sphinxcontrib-actdiag
