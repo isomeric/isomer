@@ -8,6 +8,7 @@ This part of the documentation explains how to administrate Isomer instances.
     :maxdepth: 1
 
     tool
+    configuration
     modules
     users
     RBAC
