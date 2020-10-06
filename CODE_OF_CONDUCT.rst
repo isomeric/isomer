@@ -1,0 +1,1 @@
+docs/source/dev/general/code_of_conduct.rst
