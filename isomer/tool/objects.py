@@ -3,7 +3,7 @@
 
 # Isomer - The distributed application framework
 # ==============================================
-# Copyright (C) 2011-2019 Heiko 'riot' Weinen <riot@c-base.org> and others.
+# Copyright (C) 2011-2020 Heiko 'riot' Weinen <riot@c-base.org> and others.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
@@ -109,6 +109,9 @@ def view(ctx, schema, uuid, object_filter):
         obj = model.find(literal_eval(object_filter))
     else:
         obj = model.find()
+
+    if obj is None or model.count() == 0:
+        log("No objects found.", lvl=warn)
 
     for item in obj:
         pprint(item._fields)
@@ -242,13 +245,13 @@ def validate(ctx, schema, all_schemata):
 @objects.command(short_help="find in object model fields")
 @click.option(
     "--search",
-    help="Argument to search for in object model " "fields",
+    help="Argument to search for in object model fields",
     default=None,
     metavar="<text>",
 )
 @click.option("--by-type", help="Find all fields by type", default=False, is_flag=True)
 @click.option(
-    "--obj", default=None, help="Search in specified object " "model", metavar="<name>"
+    "--obj", default=None, help="Search in specified object model", metavar="<name>"
 )
 @click.pass_context
 def find_field(ctx, search, by_type, obj):

@@ -3,7 +3,7 @@
 
 # Isomer - The distributed application framework
 # ==============================================
-# Copyright (C) 2011-2019 Heiko 'riot' Weinen <riot@c-base.org> and others.
+# Copyright (C) 2011-2020 Heiko 'riot' Weinen <riot@c-base.org> and others.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
@@ -29,16 +29,16 @@ Basic management tool functionality and plugin support.
 
 """
 
+import os
 import sys
-import click
 
+import click
 from click_didyoumean import DYMGroup
 from click_plugins import with_plugins
-
 from pkg_resources import iter_entry_points
-
-from isomer.logger import set_logfile, set_color, verbosity, warn, verbose
-from isomer.misc.path import get_log_path, set_etc_path, set_instance
+from isomer.logger import set_logfile, set_color, set_verbosity, warn, verbose, \
+    critical, debug
+from isomer.misc.path import get_log_path, set_etc_path, set_instance, set_prefix_path
 from isomer.tool import log, db_host_help, db_host_metavar, db_help, db_metavar
 from isomer.tool.etc import (
     load_configuration,
@@ -48,6 +48,7 @@ from isomer.tool.etc import (
 )
 from isomer.version import version_info
 
+RPI_GPIO_CHANNEL = 5
 
 @click.group(context_settings={"help_option_names": ["-h", "--help"]}, cls=DYMGroup)
 @click.option(
@@ -88,26 +89,27 @@ from isomer.version import version_info
 @click.option("--log-file", default=None, help="Logfile name")
 @click.option("--dbhost", default=None, help=db_host_help, metavar=db_host_metavar)
 @click.option("--dbname", default=None, help=db_help, metavar=db_metavar)
-@click.option("--prefix", default=None, help="Use different system prefix")
-@click.option("--config-dir", "-c", default="/etc/isomer")
+@click.option("--prefix-path", "-p", default=None, help="Use different system prefix")
+@click.option("--config-path", "-c", default="/etc/isomer",
+              help="System configuration path")
 @click.option("--fat-logo", "--fat", hidden=True, is_flag=True, default=False)
 @click.pass_context
 def cli(
-    ctx,
-    instance,
-    env,
-    quiet,
-    no_colors,
-    console_level,
-    file_level,
-    no_log,
-    log_path,
-    log_file,
-    dbhost,
-    dbname,
-    prefix,
-    config_dir,
-    fat_logo,
+        ctx,
+        instance,
+        env,
+        quiet,
+        no_colors,
+        console_level,
+        file_level,
+        no_log,
+        log_path,
+        log_file,
+        dbhost,
+        dbname,
+        prefix_path,
+        config_path,
+        fat_logo,
 ):
     """Isomer Management Tool
 
@@ -118,7 +120,7 @@ def cli(
 
     iso [group]
 
-    To display details of a command or its sub groups, try
+    To display details of a command or its subgroups, try
 
     iso [group] [subgroup] [..] [command] --help
 
@@ -129,45 +131,47 @@ def cli(
 
     ctx.obj["quiet"] = quiet
 
-    def set_verbosity():
+    def _set_verbosity():
         if quiet:
-            verbosity["console"] = 100
+            console_setting = 100
         else:
-            verbosity["console"] = int(
+            console_setting = int(
                 console_level if console_level is not None else 20
             )
 
         if no_log:
-            verbosity["file"] = 100
+            file_setting = 100
         else:
-            verbosity["file"] = int(file_level if file_level is not None else 20)
+            file_setting = int(file_level if file_level is not None else 20)
 
-        verbosity["global"] = min(verbosity["console"], verbosity["file"])
+        global_setting = min(console_setting, file_setting)
+        set_verbosity(global_setting, console_setting, file_setting)
 
-    def set_logger():
+    def _set_logger():
         if log_path is not None or log_file is not None:
             set_logfile(log_path, instance, log_file)
 
         if no_colors is False:
             set_color()
 
-    set_verbosity()
-    set_logger()
+    _set_verbosity()
+    _set_logger()
 
     ctx.obj["instance"] = instance
 
     log("Running with Python", sys.version.replace("\n", ""), sys.platform, lvl=verbose)
     log("Interpreter executable:", sys.executable, lvl=verbose)
 
-    set_etc_path(config_dir)
+    set_etc_path(config_path)
     configuration = load_configuration()
 
     if configuration is None:
         ctx = create_configuration(ctx)
+        configuration = ctx.obj["config"]
     else:
         ctx.obj["config"] = configuration
 
-    # set_prefix(configuration['meta']['prefix'])
+    set_prefix_path(configuration['meta']['prefix'])
 
     instances = load_instances()
 
@@ -184,10 +188,10 @@ def cli(
         instance_configuration = instances[instance]
 
     if file_level is None and console_level is None:
-        # TODO: There is a bug here preventing the log-level to be set correctly.
-        verbosity["file_level"] = int(instance_configuration["loglevel"])
-        verbosity["global"] = int(instance_configuration["loglevel"])
-        log("Log level set to", verbosity["global"], lvl=verbose)
+        instance_log_level = int(instance_configuration["loglevel"])
+
+        set_verbosity(instance_log_level, file_level=instance_log_level)
+        log("Instance log level set to", instance_log_level, lvl=verbose)
 
     ctx.obj["instance_configuration"] = instance_configuration
 
@@ -207,6 +211,78 @@ def cli(
         env = instance_configuration["environment"]
         ctx.obj["acting_environment"] = None
 
+    def get_environment_toggle(platform, toggles):
+        """Checks well known methods to determine if the other environment should be
+        booted instead of the default environment."""
+
+        def temp_file_toggle():
+            """Check by looking for a state file in /tmp"""
+
+            state_filename = "/tmp/isomer_toggle_%s" % instance_configuration["name"]
+            log("Checking for override state file ", state_filename, lvl=debug)
+
+            if os.path.exists(state_filename):
+                log("Environment override state file found!", lvl=warn)
+                return True
+            else:
+                log("Environment override state file not found", lvl=debug)
+                return False
+
+        def gpio_switch_toggle():
+            """Check by inspection of a GPIO pin for a closed switch"""
+
+            log("Checking for override GPIO switch on channel ", RPI_GPIO_CHANNEL,
+                lvl=debug)
+
+            if platform != "rpi":
+                log(
+                    "Environment toggle: "
+                    "GPIO switch can only be handled on Raspberry Pi!",
+                    lvl=critical
+                )
+                return False
+            else:
+                try:
+                    import RPi.GPIO as GPIO
+                except ImportError:
+                    log("RPi Python module not found. "
+                        "This only works on a Raspberry Pi!", lvl=critical)
+                    return False
+                GPIO.setup(RPI_GPIO_CHANNEL, GPIO.IN)
+
+                state = GPIO.input(RPI_GPIO_CHANNEL) is True
+
+                if state:
+                    log("Environment override switch active!", lvl=warn)
+                else:
+                    log("Environment override switch not active", lvl=debug)
+
+                return state
+
+        toggle = False
+        if "temp_file" in toggles:
+            toggle = toggle or temp_file_toggle()
+        if "gpio_switch" in toggles:
+            toggle = toggle or gpio_switch_toggle()
+
+        if toggle:
+            log("Booting other Environment per user request.")
+        else:
+            log("Booting active environment", lvl=debug)
+
+        return toggle
+
+    #log(configuration['meta'], pretty=True)
+    #log(instance_configuration, pretty=True)
+
+    if get_environment_toggle(configuration["meta"]["platform"],
+                              instance_configuration['environment_toggles']
+                              ):
+        if env == 'blue':
+            env = 'green'
+        else:
+            env = 'blue'
+
     ctx.obj["environment"] = env
 
     if not fat_logo:
@@ -222,10 +298,10 @@ def cli(
     if dbname is None:
         dbname = instance_configuration["environments"][env]["database"]
         if dbname in ("", None) and ctx.invoked_subcommand in (
-            "config",
-            "db",
-            "environment",
-            "plugin",
+                "config",
+                "db",
+                "environment",
+                "plugin",
         ):
             log(
                 "Database for this instance environment is unset, "
@@ -242,7 +318,7 @@ def cli(
     ctx.obj["dbhost"] = dbhost
     ctx.obj["dbname"] = dbname
 
-    set_instance(instance, env, prefix)
+    set_instance(instance, env, prefix_path)
 
     if log_path is None and log_file is None:
         log_path = get_log_path()

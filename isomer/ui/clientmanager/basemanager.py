@@ -3,7 +3,7 @@
 
 # Isomer - The distributed application framework
 # ==============================================
-# Copyright (C) 2011-2019 Heiko 'riot' Weinen <riot@c-base.org> and others.
+# Copyright (C) 2011-2020 Heiko 'riot' Weinen <riot@c-base.org> and others.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
@@ -39,9 +39,8 @@ from isomer.component import ConfigurableComponent, handler
 from isomer.database import objectmodels
 from isomer.events.client import clientdisconnect, userlogout, send
 
-from isomer.logger import debug, critical, verbose, error, warn, network, info
-from isomer.misc import i18n as _
-from isomer.ui.clientobjects import Socket, Client, User
+from isomer.logger import debug, critical, verbose, error, warn, network
+from isomer.ui.clientobjects import Socket, Client
 
 from isomer.ui.clientmanager.encoder import ComplexEncoder
 
@@ -202,7 +201,7 @@ class ClientBaseManager(ConfigurableComponent):
             else:  # only to client
                 self.log(
                     "Sending to user's client: '%s': '%s'"
-                    % (event.uuid, jsonpacket[:20]),
+                    % (event.uuid, jsonpacket[:50]),
                     lvl=network,
                 )
                 if event.uuid not in self._clients:
@@ -226,8 +225,8 @@ class ClientBaseManager(ConfigurableComponent):
             )
 
     def broadcast(self, event):
-        """Broadcasts an event either to all users or clients, depending on
-        event flag"""
+        """Broadcasts an event either to all users or clients or a given group,
+        depending on event flag"""
         try:
             if event.broadcasttype == "users":
                 if len(self._users) > 0:
@@ -249,6 +248,21 @@ class ClientBaseManager(ConfigurableComponent):
                         #    self.log("Not broadcasting, no clients
                         # connected.",
                         #            lvl=debug)
+            elif event.broadcasttype in ("usergroup", "clientgroup"):
+                if len(event.group) > 0:
+                    self.log(
+                        "Broadcasting to group: ", event.content, event.group,
+                        lvl=network
+                    )
+                    for participant in set(event.group):
+                        if event.broadcasttype == 'usergroup':
+                            broadcast_type = "user"
+                        else:
+                            broadcast_type = "client"
+
+                        broadcast = send(participant, event.content,
+                                         sendtype=broadcast_type)
+                        self.fireEvent(broadcast)
             elif event.broadcasttype == "socks":
                 if len(self._sockets) > 0:
                     self.log("Emergency?! Broadcasting to all sockets: ", event.content)
@@ -371,7 +385,7 @@ class ClientBaseManager(ConfigurableComponent):
             except KeyError:
                 if not (
                     request_action == "ping"
-                    and request_component == "isomer.ui.clientmanager"
+                    and request_component == "isomer.ui.clientmanager.latency"
                 ):
                     self.log("User not logged in.", lvl=warn)
 

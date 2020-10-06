@@ -3,7 +3,7 @@
 
 # Isomer - The distributed application framework
 # ==============================================
-# Copyright (C) 2011-2019 Heiko 'riot' Weinen <riot@c-base.org> and others.
+# Copyright (C) 2011-2020 Heiko 'riot' Weinen <riot@c-base.org> and others.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
@@ -30,16 +30,16 @@ This module allows deploying and maintaining instances on remote systems via SSH
 """
 
 import os
-import sys
 import spur
 import tomlkit
 import click
 import getpass
 
+from typing import Optional
 from binascii import hexlify
 
 from isomer.logger import warn, error, debug, verbose
-from isomer.misc import std_now
+from isomer.misc.std import std_now
 from isomer.tool import (
     log,
     run_process,
@@ -53,12 +53,16 @@ from isomer.error import abort, EXIT_INVALID_PARAMETER, EXIT_INVALID_VALUE
 from isomer.tool.cli import cli
 from isomer.tool.etc import load_remotes, remote_template, write_remote
 
+key_dispatch_table: Optional[dict]
+
 try:
+    # noinspection PyPackageRequirements
     from paramiko import DSSKey, RSAKey
 
     key_dispatch_table = {"dsa": DSSKey, "rsa": RSAKey}
 except ImportError:
-    key_dispatch_table = None
+    key_dispatch_table = DSSKey = RSAKey = None
+    log("Could not load paramiko. Remote operations disabled.", lvl=warn)
 
 
 def get_remote_home(username):
@@ -171,8 +175,9 @@ def remote(ctx, name, install, platform, source, url, existing):
 @click.option(
     "--key-bits",
     "-b",
-    default=key_defaults["bits"],
-    help="Key bits (%i)" % key_defaults["bits"],
+    type=int,
+    default=int(key_defaults["bits"]),
+    help="Key bits (%i)" % int(key_defaults["bits"]),
 )
 @click.pass_context
 def add(

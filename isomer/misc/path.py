@@ -3,7 +3,7 @@
 
 # Isomer - The distributed application framework
 # ==============================================
-# Copyright (C) 2011-2019 Heiko 'riot' Weinen <riot@c-base.org> and others.
+# Copyright (C) 2011-2020 Heiko 'riot' Weinen <riot@c-base.org> and others.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
@@ -22,6 +22,7 @@
 """
 
 import os.path
+from typing import Union
 
 from isomer.tool import log, warn, debug
 
@@ -31,9 +32,9 @@ ETC_INSTANCE_PATH = os.path.join(ETC_BASE_PATH, "instances")
 ETC_REMOTE_PATH = os.path.join(ETC_BASE_PATH, "remotes")
 ETC_REMOTE_KEYS_PATH = os.path.join(ETC_BASE_PATH, "keys")
 
-INSTANCE = ""
-ENVIRONMENT = None
-PREFIX = ""
+INSTANCE: str = ""
+ENVIRONMENT: Union[str, None] = None
+PREFIX: str = ""
 
 locations = {
     "cache": "/var/cache/isomer/%s",
@@ -62,7 +63,8 @@ def get_etc_path():
 
 
 def get_etc_instance_path():
-    """Get currently set instance configurations base path"""
+    """Get currently set instance configurations base path, e.g.
+    `/etc/isomer/instances/`"""
     return ETC_INSTANCE_PATH
 
 
@@ -85,11 +87,17 @@ def get_log_path():
     return path
 
 
-def set_prefix(prefix):
+def set_prefix_path(prefix):
     """Set a new base prefix (Caution!)"""
     global PREFIX
 
     PREFIX = prefix
+
+
+def get_prefix_path():
+    """Get the base prefix"""
+
+    return PREFIX
 
 
 def set_instance(instance, environment, prefix=None):
@@ -108,21 +116,35 @@ def set_instance(instance, environment, prefix=None):
     log("Setting Instance: %s and Environment: %s" % (INSTANCE, ENVIRONMENT), lvl=debug)
 
 
-def get_path(location: str, subfolder: str, ensure: bool = False):
+def get_path(location: str, subfolder: str, ensure: bool = False, instance: str = "",
+             environment: str = ""):
     """Return a normalized path for the running instance and environment
 
-    :param location str Either cache, local or lib - all reside in /var
-    :param subfolder str Subfolder inside location
-    :param ensure bool Create folder, if it doesn't exist and this parameter is True
+
+    :param location: Either cache, local or lib - all reside in /var
+    :param subfolder: Subfolder inside location
+    :param ensure: Create the folder, if it doesn't exist and this parameter is True
+    :param instance: Temporarily override to get at another instance's folder
+    :param environment: Temporarily override to pick a specific environment
     """
 
-    if PREFIX not in (None, ""):
-        path = os.path.join(PREFIX, locations[location].lstrip("/") % INSTANCE)
+    if instance != "":
+        instance_name = instance
     else:
-        path = locations[location] % INSTANCE
+        instance_name = INSTANCE
 
-    if ENVIRONMENT is not None:
-        path = os.path.join(path, str(ENVIRONMENT))
+    if environment != "":
+        environment_name = environment
+    else:
+        environment_name = ENVIRONMENT
+
+    if PREFIX not in (None, ""):
+        path = os.path.join(PREFIX, locations[location].lstrip("/") % instance_name)
+    else:
+        path = locations[location] % instance_name
+
+    if environment_name is not None:
+        path = os.path.join(path, str(environment_name))
 
     path = os.path.join(path, subfolder)
     path = path.rstrip("/")

@@ -5,16 +5,23 @@ services:
     build:
       context: ../
     image: isomer:local
-    command: iso launch
+    command: iso -p /isomer --config-path /isomer launch
     environment:
       ISOMER_DBHOST: db:27017
       ISOMER_LAUNCH_WEB_ADDRESS: 0.0.0.0
+    stdin_open: true
+    tty: true
+    depends_on:
+      - db
     ports:
-      - 0.0.0.0:8000:8000
+      - 0.0.0.0:443:443
+      - 0.0.0.0:80:80
     networks:
       - dock_net
+    volumes:
+      - isomer_data:/isomer
   db:
-    image: mongo:latest
+    image: mongo:4.0.14
     volumes:
       - dbdata:/data/db
     ports:
@@ -26,6 +33,7 @@ services:
 
 volumes:
   dbdata:
+  isomer_data:
 
 networks:
   dock_net:

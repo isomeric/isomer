@@ -3,7 +3,7 @@
 
 # Isomer - The distributed application framework
 # ==============================================
-# Copyright (C) 2011-2019 Heiko 'riot' Weinen <riot@c-base.org> and others.
+# Copyright (C) 2011-2020 Heiko 'riot' Weinen <riot@c-base.org> and others.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
@@ -31,5 +31,6 @@ try:
     version_info = version
 except ImportError as e:
     isolog("Could not import scm version:", e, lvl=error)
-    version_info = (1, 2, 1, "dev")  # (major, minor, patch, dev?)
-    version = ".".join(map(str, version_info)) if version_info[-1] != "dev" else "dev"
+    raise ImportError
+    #version_info = (1, 2, 1, "dev")  # (major, minor, patch, dev?)
+    #version = ".".join(map(str, version_info)) if version_info[-1] != "dev" else "dev"

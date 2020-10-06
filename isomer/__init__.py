@@ -3,7 +3,7 @@
 
 # Isomer - The distributed application framework
 # ==============================================
-# Copyright (C) 2011-2019 Heiko 'riot' Weinen <riot@c-base.org> and others.
+# Copyright (C) 2011-2020 Heiko 'riot' Weinen <riot@c-base.org> and others.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
@@ -45,20 +45,6 @@ __all__ = [
     "migration",
 ]
 
-# See http://peak.telecommunity.com/DevCenter/setuptools#namespace-packages
-try:  # pragma: no cover
-    __import__("pkg_resources").declare_namespace(__name__)
-except ImportError:  # pragma: no cover
-
-    from pkgutil import extend_path
-
-    __path__ = extend_path(__path__, __name__)  # noqa
-    import os
-
-    for _path in __path__:
-        _path = os.path.join(_path, "__init__.py")
-        if _path != __file__ and os.path.exists(_path):
-            with open(_path) as fd:
-                exec(fd, globals())
-
-    del os, extend_path, _path
+# See https://packaging.python.org/guides/packaging-namespace-packages/
+# (Specifically the chapter on pkg_resources)
+__import__("pkg_resources").declare_namespace(__name__)

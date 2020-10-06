@@ -3,7 +3,7 @@
 
 # Isomer - The distributed application framework
 # ==============================================
-# Copyright (C) 2011-2019 Heiko 'riot' Weinen <riot@c-base.org> and others.
+# Copyright (C) 2011-2020 Heiko 'riot' Weinen <riot@c-base.org> and others.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
@@ -27,16 +27,15 @@ Authentication (and later Authorization) system
 
 
 """
-
+from hmac import compare_digest
 from uuid import uuid4
-from circuits import Event, Timer
 
-from isomer.component import handler
+from circuits import Event, Timer
+from isomer.component import handler, ConfigurableComponent
 from isomer.events.client import authentication, send
-from isomer.component import ConfigurableComponent
 from isomer.database import objectmodels
 from isomer.logger import error, warn, debug
-from isomer.misc import std_hash, std_salt, std_uuid, std_now, std_human_uid
+from isomer.misc.std import std_salt, std_hash, std_now, std_uuid, std_human_uid
 
 minimum_password_length = 5
 minimum_username_length = 1
@@ -196,7 +195,7 @@ class Authenticator(ConfigurableComponent):
         # They're also required in the Enrol module..!
 
         if (len(event.username) < minimum_username_length) or (
-            len(event.password) < minimum_password_length
+                len(event.password) < minimum_password_length
         ):
             self.log("Illegal username or password received, login cancelled", lvl=warn)
             self._fail(event, "Password or username too short")
@@ -221,7 +220,8 @@ class Authenticator(ConfigurableComponent):
             self._fail(event, "Account deactivated.")
             return
 
-        if not std_hash(event.password, self.salt) == user_account.passhash:
+        if compare_digest(std_hash(event.password, self.salt), user_account.passhash) \
+                is False:
             self.log("Password was wrong!", lvl=warn)
             self._fail(event)
             return
@@ -259,7 +259,7 @@ class Authenticator(ConfigurableComponent):
             client_config.name = std_human_uid(kind="place")
 
             client_config.description = (
-                "New client configuration from " + user_account.name
+                    "New client configuration from " + user_account.name
             )
             client_config.owner = user_account.uuid
 

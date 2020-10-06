@@ -3,7 +3,7 @@
 
 # Isomer - The distributed application framework
 # ==============================================
-# Copyright (C) 2011-2019 Heiko 'riot' Weinen <riot@c-base.org> and others.
+# Copyright (C) 2011-2020 Heiko 'riot' Weinen <riot@c-base.org> and others.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
@@ -34,7 +34,8 @@ from circuits import Event
 
 from isomer.component import handler
 from isomer.debugger import cli_register_event
-from isomer.misc import i18n as _, std_table
+from isomer.misc import i18n as _
+from isomer.misc.std import std_table
 
 from isomer.ui.clientmanager.authentication import AuthenticationManager
 

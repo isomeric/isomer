@@ -3,7 +3,7 @@
 
 # Isomer - The distributed application framework
 # ==============================================
-# Copyright (C) 2011-2019 Heiko 'riot' Weinen <riot@c-base.org> and others.
+# Copyright (C) 2011-2020 Heiko 'riot' Weinen <riot@c-base.org> and others.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
@@ -43,7 +43,7 @@ import pymongo
 from isomer import schemastore
 from isomer.error import abort, EXIT_NO_DATABASE
 from isomer.logger import isolog, warn, critical, debug, verbose, error
-from isomer.misc import std_color
+from isomer.misc.std import std_color
 
 
 def db_log(*args, **kwargs):
@@ -85,13 +85,17 @@ def clear_all():
 
 
 class IsomerBaseModel(formal.formalModel):
+    """Base Isomer Dataclass"""
+
     def save(self, *args, **kwargs):
+        """Set a random default color"""
         if self._fields.get("color", None) is None:
             self._fields["color"] = std_color()
         super(IsomerBaseModel, self).save(*args, **kwargs)
 
     @classmethod
     def by_uuid(cls, uuid):
+        """Find data object by uuid"""
         return cls.find_one({"uuid": uuid})
 
 
@@ -176,6 +180,7 @@ def _build_collections(store):
                 index_type = pymongo.GEOSPHERE
 
             def do_index():
+                """Ensure index on a data class"""
                 col.ensure_index(
                     [(index_name, index_type)], unique=index_unique, sparse=index_sparse
                 )

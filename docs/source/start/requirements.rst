@@ -11,7 +11,7 @@ Backend
 
 Isomer' backend has a few dependencies:
 
-    - `Python`_: >= 3.3 (or possibly pypy >= 2.0)
+    - `Python`_: >= 3.5 (or possibly pypy >= 2.0)
     - Database: `MongoDb`_
 
 
@@ -33,7 +33,7 @@ The Isomer Python package additionally installs a few pure Python libraries:
 
 :Supported Platforms: Linux
 
-:Supported Python Versions: 3.3, 3.4, 3.5, 3.6, 3.7
+:Supported Python Versions: 3.5, 3.6, 3.7, 3.8
 
 Frontend
 --------

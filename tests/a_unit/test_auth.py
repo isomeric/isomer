@@ -3,7 +3,7 @@
 
 # Isomer - The distributed application framework
 # ==============================================
-# Copyright (C) 2011-2019 Heiko 'riot' Weinen <riot@c-base.org> and others.
+# Copyright (C) 2011-2020 Heiko 'riot' Weinen <riot@c-base.org> and others.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
@@ -19,10 +19,10 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-Hackerfleet Operating System - Backend
+Isomer - Backend
 
 Test Isomer Auth
-==============
+================
 
 
 
@@ -32,9 +32,11 @@ from circuits import Manager, Event
 import pytest
 from isomer.ui.auth import Authenticator
 from isomer.events.client import authenticationrequest, authentication
-from isomer.misc import std_uuid, std_now, std_hash
+from isomer.misc.std import std_hash, std_now, std_uuid
 from isomer.database import objectmodels
 import isomer.logger as logger
+
+from bcrypt import gensalt
 
 # from pprint import pprint
 
@@ -51,7 +53,7 @@ new_user = objectmodels['user']({
 
 new_user.name = 'TESTER'
 
-new_user.passhash = std_hash('PASSWORD', 'SALT'.encode('ascii'))
+new_user.passhash = std_hash('PASSWORD', gensalt().decode("utf-8"))
 new_user.save()
 
 system_config = objectmodels['systemconfig']({

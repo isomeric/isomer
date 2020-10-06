@@ -3,7 +3,7 @@
 
 # Isomer - The distributed application framework
 # ==============================================
-# Copyright (C) 2011-2019 Heiko 'riot' Weinen <riot@c-base.org> and others.
+# Copyright (C) 2011-2020 Heiko 'riot' Weinen <riot@c-base.org> and others.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
@@ -137,6 +137,6 @@ def load(ctx, filename):
 @db.command("dump", short_help="Create a full database dump")
 @click.argument("filename")
 @click.pass_context
-def load(ctx, filename):
+def dump(ctx, filename):
     host, port = ctx.obj.get("dbhost").split(":")
     _dump(host, port, ctx.obj.get("dbname"), filename)

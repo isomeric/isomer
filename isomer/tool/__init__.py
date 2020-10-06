@@ -3,7 +3,7 @@
 
 # Isomer - The distributed application framework
 # ==============================================
-# Copyright (C) 2011-2019 Heiko 'riot' Weinen <riot@c-base.org> and others.
+# Copyright (C) 2011-2020 Heiko 'riot' Weinen <riot@c-base.org> and others.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
@@ -60,13 +60,18 @@ tool
 import getpass
 import hashlib
 import os
-import time
 import signal
+import time
 
+import bcrypt
 import distro
 import spur
+
+from typing import Tuple, Union
+from hmac import compare_digest
 from isomer.error import (
     abort,
+    EXIT_ISOMER_URL_REQUIRED,
     EXIT_INVALID_CONFIGURATION,
     EXIT_INSTANCE_UNKNOWN,
     EXIT_ROOT_REQUIRED
@@ -92,6 +97,9 @@ def log(*args, **kwargs):
 
 
 def finish(ctx):
+    """
+    Signalize the successful conclusion of an operation.
+    """
     parent = ctx.parent
     commands = ctx.info_name
     while parent is not None:
@@ -112,9 +120,23 @@ def check_root():
         abort(EXIT_ROOT_REQUIRED)
 
 
-def run_process(cwd, args, shell=None, sudo=None, show=False, stdout=None,
-                stdin=None, timeout=5):
-    """Executes an external process via subprocess.check_output"""
+def run_process(cwd: str, args: list, shell=None, sudo: Union[bool, str] = None,
+                show: bool = False, stdout: str = None, stdin: str = None,
+                timeout: int = 5) -> Tuple[bool, str]:
+    """
+    Executes an external process via subprocess.check_output
+    :param cwd: Working directory
+    :param args: List of command plus its arguments
+    :param shell: Either a spur.LocalShell or a spur.SshShell
+    :param sudo: Username (or True for root) to use with sudo, False for no sudo
+    :param show: Log executed command at info priority before executing
+    :param stdout: String to fill with std_out data
+    :param stdin: String to supply as std_in data
+    :param timeout: Timeout for the process in seconds
+    :return: A boolean success flag and the whole output
+    :rtype:
+
+    """
 
     log("Running:", cwd, args, lvl=verbose)
 
@@ -134,7 +156,7 @@ def run_process(cwd, args, shell=None, sudo=None, show=False, stdout=None,
                 return
 
             log("Using sudo with user:", user, lvl=verbose)
-            cmd = ["sudo", "-u", user] + list(things)
+            cmd = ["sudo", "-H", "-u", user] + list(things)
         else:
             log("Not using sudo", lvl=verbose)
             cmd = []
@@ -166,7 +188,7 @@ def run_process(cwd, args, shell=None, sudo=None, show=False, stdout=None,
                 process._stdin.close()  # SSH
 
             begin = time.time()
-            waiting = 0
+            waiting = 0.0
             while waiting < timeout and process.is_running():
                 waiting = time.time() - begin
             if waiting >= timeout:
@@ -207,13 +229,14 @@ def run_process(cwd, args, shell=None, sudo=None, show=False, stdout=None,
 def ask_password():
     """Securely and interactively ask for a password"""
 
+    # noinspection HardcodedPassword
     password = "Foo"
     password_trial = ""
 
-    while password != password_trial:
+    while not compare_digest(password, password_trial):
         password = getpass.getpass()
         password_trial = getpass.getpass(prompt="Repeat:")
-        if password != password_trial:
+        if not compare_digest(password, password_trial):
             print("\nPasswords do not match!")
 
     return password
@@ -234,6 +257,7 @@ def _get_credentials(username=None, password=None, dbhost=None):
             "iso install provisions -p system"
         )
         abort(3)
+        return
 
     if username is None:
         username = ask("Please enter username: ")
@@ -246,10 +270,9 @@ def _get_credentials(username=None, password=None, dbhost=None):
     except UnicodeDecodeError:
         password = password
 
-    passhash = hashlib.sha512(password)
-    passhash.update(salt)
+    password_hash = bcrypt.hashpw(password, salt).decode('ascii')
 
-    return username, passhash.hexdigest()
+    return username, password_hash
 
 
 def _get_system_configuration(dbhost, dbname):
@@ -310,12 +333,18 @@ def format_result(result):
     return str(result.output, encoding="ascii").replace("\\n", "\n")
 
 
-def get_isomer(source, url, destination, upgrade=False, shell=None, sudo=None):
+def get_isomer(source, url, destination, upgrade=False, release=None,
+               shell=None, sudo=None):
     """Grab a copy of Isomer somehow"""
     success = False
+    log("Beginning get_isomer:",
+        source, url, destination, upgrade, release, shell, sudo, lvl=debug)
 
-    if source == "git":
-        if not upgrade:
+    if url in ("", None) and source == "git" and not upgrade:
+        abort(EXIT_ISOMER_URL_REQUIRED)
+
+    if source in ("git", "github"):
+        if not upgrade or not os.path.exists(os.path.join(destination, "repository")):
             log("Cloning repository from", url)
             success, result = run_process(
                 destination, ["git", "clone", url, "repository"], shell, sudo
@@ -323,17 +352,32 @@ def get_isomer(source, url, destination, upgrade=False, shell=None, sudo=None):
             if not success:
                 log(result, lvl=error)
                 abort(50000)
-        else:
+
+        if upgrade:
             log("Updating repository from", url)
-            success, result = run_process(
-                os.path.join(destination, "repository"),
-                ["git", "pull", "origin", "master"],
-                shell,
-                sudo,
-            )
-            if not success:
-                log(result, lvl=error)
-                abort(50000)
+
+            if release is not None:
+                log("Checking out release:", release)
+                success, result = run_process(
+                    os.path.join(destination, "repository"),
+                    ["git", "checkout", "tags/" + release],
+                    shell,
+                    sudo,
+                )
+                if not success:
+                    log(result, lvl=error)
+                    abort(50000)
+            else:
+                log("Pulling latest")
+                success, result = run_process(
+                    os.path.join(destination, "repository"),
+                    ["git", "pull", "origin", "master"],
+                    shell,
+                    sudo,
+                )
+                if not success:
+                    log(result, lvl=error)
+                    abort(50000)
 
         repository = os.path.join(destination, "repository")
         log("Initializing submodules")
@@ -343,19 +387,21 @@ def get_isomer(source, url, destination, upgrade=False, shell=None, sudo=None):
         if not success:
             log(result, lvl=error)
             abort(50000)
+
+        #log("Pulling frontend")
+        #success, result = run_process(
+        #    os.path.join(repository, "frontend"),
+        #    ["git", "pull", "origin", "master"],
+        #    shell,
+        #    sudo,
+        #)
+        #if not success:
+        #    log(result, lvl=error)
+        #    abort(50000)
+
+        log("Updating frontend")
         success, result = run_process(
             repository, ["git", "submodule", "update"], shell, sudo
-        )
-        if not success:
-            log(result, lvl=error)
-            abort(50000)
-
-        log("Pulling frontend")
-        success, result = run_process(
-            os.path.join(repository, "frontend"),
-            ["git", "pull", "origin", "master"],
-            shell,
-            sudo,
         )
         if not success:
             log(result, lvl=error)
@@ -417,6 +463,9 @@ def get_isomer(source, url, destination, upgrade=False, shell=None, sudo=None):
                 log("Could not change ownership to", sudo, lvl=warn)
                 abort(50000)
         return True
+    else:
+        log("Invalid source selected. "
+            "Currently, only git, github, copy, link are supported ")
 
     return success
 
@@ -436,11 +485,7 @@ def install_isomer(
         platform_name = distro.linux_distribution()[0]
         log("Platform detected as %s" % platform_name)
 
-    if isinstance(platforms[platform_name], str):
-        platform_name = platforms[platform_name]
-        log("This platform is a link to another:", platform_name, lvl=verbose)
-
-    if platform_name not in platforms:
+    if platform_name not in platforms and not omit_platform:
         log(
             "Your platform is not yet officially supported!\n\n"
             "Please check the documentation for more information:\n"
@@ -449,6 +494,10 @@ def install_isomer(
         )
         abort(50000)
 
+    if isinstance(platforms[platform_name], str):
+        platform_name = platforms[platform_name]
+        log("This platform is a link to another:", platform_name, lvl=verbose)
+
     def handle_command(command):
         if command.get("action", None) == "create_file":
             with open(command["filename"], "w") as f:
@@ -456,6 +505,10 @@ def install_isomer(
 
     def platform():
         """In a platform specific way, install all dependencies"""
+
+        if platform_name not in platforms:
+            log("Unknown platform specified, proceeding anyway", lvl=warn)
+            return
 
         tool = platforms[platform_name]["tool"]
         packages = platforms[platform_name]["packages"]
@@ -526,6 +579,7 @@ def _get_configuration(ctx):
     except NonExistentKey:
         log("Instance %s does not exist" % ctx.obj["instance"], lvl=warn)
         abort(EXIT_INSTANCE_UNKNOWN)
+        return
 
     environment_name = instance_configuration["environment"]
     environment_config = instance_configuration["environments"][environment_name]
@@ -543,5 +597,7 @@ def get_next_environment(ctx):
     else:
         current_environment = ctx.obj["instance_configuration"]["environment"]
         next_environment = "blue" if current_environment == "green" else "green"
+
+    log("Acting on environment:", next_environment, lvl=debug)
 
     return next_environment

@@ -3,7 +3,7 @@
 
 # Isomer - The distributed application framework
 # ==============================================
-# Copyright (C) 2011-2019 Heiko 'riot' Weinen <riot@c-base.org> and others.
+# Copyright (C) 2011-2020 Heiko 'riot' Weinen <riot@c-base.org> and others.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
@@ -41,23 +41,19 @@ Frontend repository: http://github.com/isomeric/isomer-frontend
 import grp
 import pwd
 import sys
-import pyinotify
-
-import click
 import os
-from circuits import Event
+
+import pyinotify
+import click
+from circuits import Event, Timer
 from circuits.web import Server, Static
 from circuits.web.websockets.dispatcher import WebSocketsDispatcher
-
-# from circuits.web.errors import redirect
-# from circuits.app.daemon import Daemon
-
 from isomer.misc.path import set_instance, get_path
-from isomer.component import handler, ConfigurableComponent, ComponentDisabled
+from isomer.component import handler, ConfigurableComponent, ComponentDisabled, BaseMeta
 
 # from isomer.schemata.component import ComponentBaseConfigSchema
 from isomer.database import initialize  # , schemastore
-from isomer.events.system import populate_user_events, frontendbuildrequest
+from isomer.events.system import populate_user_events, system_stop
 from isomer.logger import (
     isolog,
     verbose,
@@ -66,8 +62,6 @@ from isomer.logger import (
     error,
     critical,
     setup_root,
-    verbosity,
-    set_logfile,
 )
 from isomer.debugger import cli_register_event
 from isomer.ui.builder import install_frontend
@@ -77,11 +71,20 @@ from isomer.provisions import build_provision_store
 from isomer.provisions.base import provision
 
 
+# from circuits.web.errors import redirect
+# from circuits.app.daemon import Daemon
+
+
 # from pprint import pprint
 
 
 class ready(Event):
     """Event fired to signal completeness of the local node's setup"""
+
+    pass
+
+
+class boot(Event):
 
     pass
 
@@ -107,7 +110,7 @@ class cli_reload(Event):
 class cli_info(Event):
     """Provide information about the running instance"""
 
-    pass
+    verbose = False
 
 
 class cli_quit(Event):
@@ -138,8 +141,8 @@ class FrontendHandler(pyinotify.ProcessEvent):
         self.launcher = launcher
 
     def process_IN_CLOSE_WRITE(self, event):
-        print("CHANGE EVENT:", event)
-        install_frontend(self.launcher.instance, install=False, development=True)
+        isolog("Frontend change:", event, emitter="FRONTENDHANDLER")
+        install_frontend(install=False, development=True)
 
 
 def drop_privileges(uid_name="isomer", gid_name="isomer"):
@@ -258,7 +261,7 @@ class Core(ConfigurableComponent):
 
         self.modules_loaded = {}
         self.loadable_components = {}
-        self.running_components = {}
+        self.loaded_components = {}
 
         self.frontend_running = False
         self.frontend_watcher = None
@@ -267,34 +270,11 @@ class Core(ConfigurableComponent):
         self.static = None
         self.websocket = None
 
-        # TODO: Cleanup
-        self.component_blacklist = [
-            # 'camera',
-            # 'logger',
-            # 'debugger',
-            "recorder",
-            "playback",
-            # 'sensors',
-            # 'navdatasim'
-            # 'ldap',
-            # 'navdata',
-            # 'nmeaparser',
-            # 'objectmanager',
-            # 'wiki',
-            # 'clientmanager',
-            # 'library',
-            # 'nmeaplayback',
-            # 'alert',
-            # 'tilecache',
-            # 'schemamanager',
-            # 'chat',
-            # 'debugger',
-            # 'rcmanager',
-            # 'auth',
-            # 'machineroom'
+        self.component_blacklist = instance["environments"][instance["environment"]][
+            "blacklist"
         ]
 
-        self.component_blacklist += kwargs["blacklist"]
+        self.component_blacklist += list(kwargs.get("blacklist", []))
 
         self._check_provisions()
         self.update_components()
@@ -327,18 +307,18 @@ class Core(ConfigurableComponent):
         self.fireEvent(cli_register_event("quit", cli_quit))
         self.fireEvent(cli_register_event("info", cli_info))
 
+        self.fireEvent(boot(), "*")
+
     @handler("frontendbuildrequest", channel="setup")
     def trigger_frontend_build(self, event):
         """Event hook to trigger a new frontend build"""
 
-        from isomer.database import instance
-
         install_frontend(
-            instance=instance,
-            forcerebuild=event.force,
+            force_rebuild=event.force,
             install=event.install,
             development=self.development,
         )
+        self.log("Frontend install done")
 
     @handler("cli_drop_privileges")
     def cli_drop_privileges(self, event):
@@ -356,9 +336,10 @@ class Core(ConfigurableComponent):
 
     @handler("cli_components")
     def cli_components(self, event):
-        """List all running components"""
+        """List all loaded and running unique components"""
 
-        self.log("Running components: ", sorted(self.running_components.keys()))
+        self.log("Loaded components: ", sorted(self.loaded_components.keys()))
+        self.log("Running unique components: ", sorted(self.names))
 
     @handler("cli_reload_db")
     def cli_reload_db(self, event):
@@ -377,27 +358,53 @@ class Core(ConfigurableComponent):
         self.update_components(forcereload=True)
         initialize()
 
-        from isomer.debugger import cli_compgraph
+        from isomer.debugger import cli_comp_graph
 
-        self.fireEvent(cli_compgraph())
+        self.fireEvent(cli_comp_graph())
 
     @handler("cli_quit")
     def cli_quit(self, event):
-        """Stop the instance immediately"""
+        """Stop the instance on cli request"""
 
         self.log("Quitting on CLI request.")
         if self.frontend_watcher is not None:
             self.frontend_watcher.stop()
+            self.frontend_watcher = None
+
+        if self.context.params["dev"] is False:
+            self.fireEvent(system_stop())
+        else:
+            self.log("Stopping immediately due to --dev flag", lvl=warn)
+            self.stop_core(None)
+
+    @handler("system_stop")
+    def system_stop(self):
+        """Stop instance after settling stop events"""
+
+        self.log("Initiating stop")
+        Timer(5, Event.create("stop_core")).register(self)
+
+    @handler("stop_core")
+    def stop_core(self, event):
+        """Stop execution and exit"""
+
+        self.log("Stopping execution")
+
+        self.stop()
         sys.exit()
 
     @handler("cli_info")
-    def cli_info(self, event):
+    def cli_info(self, *args):
         """Provides information about the running instance"""
 
+        from isomer.database import dbname, dbhost, dbport
+
         self.log(
-            "Instance: %s Dev: %s Host: %s Port: %s Insecure: %s Frontend: %s\nModules:"
+            "Instance: %s DB: %s Dev: %s Host: %s Port: %s Insecure: %s Frontend: %s\n"
+            "Modules:"
             % (
                 self.instance,
+                "%s@%s:%i" % (dbname, dbhost, dbport),
                 self.development,
                 self.host,
                 self.port,
@@ -408,10 +415,13 @@ class Core(ConfigurableComponent):
             pretty=True,
         )
 
-    def _start_server(self, *args):
+        if "-v" in args:
+            self.log("Context:", self.context.obj, pretty=True)
+
+    def _start_server(self):
         """Run the node local server"""
 
-        self.log("Starting server", args)
+        self.log("Starting server")
         secure = self.certificate is not None
         if secure:
             self.log("Running SSL server with cert:", self.certificate)
@@ -463,8 +473,8 @@ class Core(ConfigurableComponent):
         manage configuration updates"""
 
         # TODO: See if we can pull out major parts of the component handling.
-        # They are also used in the manage tool to instantiate the
-        # component frontend bits.
+        #  They are also used in the manage-tool to instantiate the
+        #  component frontend bits.
 
         self.log("Updating components")
         components = {}
@@ -562,7 +572,7 @@ class Core(ConfigurableComponent):
         systemconfig.packages = sorted(list(packages.values()), key=lambda x: x["name"])
         systemconfig.save()
 
-        self.log(list(packages.values()), lvl=critical)
+        # self.log(list(packages.values()), lvl=critical)
 
         self.log(
             "Checking component frontend bits in ", self.frontend_root, lvl=verbose
@@ -631,7 +641,7 @@ class Core(ConfigurableComponent):
             from circuits.tools import kill
             from circuits import Component
 
-            for comp in self.running_components.values():
+            for comp in self.loaded_components.values():
                 self.log(comp, type(comp), isinstance(comp, Component), pretty=True)
                 kill(comp)
             # removables = deepcopy(list(self.runningcomponents.keys()))
@@ -650,7 +660,7 @@ class Core(ConfigurableComponent):
             #                            filename='backref-graph_%s.png' % comp.uniquename)
             #     del comp
             # del removables
-            self.running_components = {}
+            self.loaded_components = {}
 
         self.log(
             "Not running blacklisted components: ", self.component_blacklist, lvl=debug
@@ -663,9 +673,9 @@ class Core(ConfigurableComponent):
         for name, componentdata in self.loadable_components.items():
             if name in self.component_blacklist:
                 continue
-            self.log("Running component: ", name, lvl=verbose)
+            self.log("Running component: ", name, lvl=debug)
             try:
-                if name in self.running_components:
+                if name in self.loaded_components:
                     self.log("Component already running: ", name, lvl=warn)
                 else:
                     try:
@@ -675,7 +685,7 @@ class Core(ConfigurableComponent):
                         continue
 
                     runningcomponent.register(self)
-                    self.running_components[name] = runningcomponent
+                    self.loaded_components[name] = runningcomponent
             except Exception as e:
                 self.log(
                     "Could not register component: ",
@@ -707,10 +717,13 @@ class Core(ConfigurableComponent):
         self.fire(ready(), "isomer-web")
 
 
-def construct_graph(name, instance, args):
+def construct_graph(ctx, name, instance, args):
     """Preliminary Isomer application Launcher"""
 
     app = Core(name, instance, **args)
+
+    # TODO: This should probably be read-only
+    BaseMeta.context = ctx
 
     setup_root(app)
 
@@ -744,6 +757,8 @@ def construct_graph(name, instance, args):
                 "task_success",
                 "task_done",  # Thread completion
                 "keepalive",  # IRC Gateway
+                "peek",  # AVIO and others
+                "joystickchange",  # AVIO
             ]
         )
 
@@ -792,7 +807,7 @@ def construct_graph(name, instance, args):
 )
 @click.option("--live-log", help="Log to in-memory structure as well", is_flag=True)
 @click.option("--debug", help="Run circuits debugger", is_flag=True)
-@click.option("--dev", help="Run development server", is_flag=True, default=True)
+@click.option("--dev", help="Run development server", is_flag=True, default=False)
 @click.option("--insecure", help="Keep privileges - INSECURE", is_flag=True)
 @click.option("--no-run", "-n", help="Only assemble system, do not run", is_flag=True)
 @click.option(
@@ -832,7 +847,7 @@ def launch(ctx, run=True, **args):
     isolog("Setting instance paths", emitter="CORE", lvl=debug)
     set_instance(instance_name, environment_name)
 
-    server = construct_graph(instance_name, instance, args)
+    server = construct_graph(ctx, instance_name, instance, args)
     if run and not args["no_run"]:
         server.run()
 

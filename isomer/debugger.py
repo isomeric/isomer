@@ -3,7 +3,7 @@
 
 # Isomer - The distributed application framework
 # ==============================================
-# Copyright (C) 2011-2019 Heiko 'riot' Weinen <riot@c-base.org> and others.
+# Copyright (C) 2011-2020 Heiko 'riot' Weinen <riot@c-base.org> and others.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
@@ -35,28 +35,29 @@ from uuid import uuid4
 from circuits.core.events import Event
 from circuits.core.handlers import reprhandler
 from circuits.io import stdin
-
+from isomer.logger import isolog, critical, error, warn, debug, verbose, verbosity
 from isomer.component import ConfigurableComponent, handler
 from isomer.events.client import send
 from isomer.events.system import (
     frontendbuildrequest,
     componentupdaterequest,
     logtailrequest,
-    debugrequest,
 )
-from isomer.logger import critical, error, warn, debug, verbose, verbosity
 
 try:
+    # noinspection PyPackageRequirements
     import objgraph
 except ImportError:
     objgraph = None
 
 try:
+    # noinspection PyPackageRequirements
     from guppy import hpy
 except ImportError:
     hpy = None
 
 try:
+    # noinspection PyPackageRequirements
     from pympler import tracker, muppy, summary
 except ImportError:
     tracker = None
@@ -123,31 +124,37 @@ class cli_comp_graph(Event):
 
 
 class cli_mem_summary(Event):
-    """Draw current component graph"""
+    """Output memory usage summary"""
 
     pass
 
 
 class cli_mem_diff(Event):
-    """Draw current component graph"""
+    """Output difference in memory usage since last call"""
 
     pass
 
 
 class cli_mem_hogs(Event):
-    """Draw current component graph"""
+    """Output most memory intense objects"""
 
     pass
 
 
 class cli_mem_growth(Event):
-    """Draw current component graph"""
+    """Output data about memory growth"""
 
     pass
 
 
 class cli_mem_heap(Event):
-    """Draw current component graph"""
+    """Output memory heap data"""
+
+    pass
+
+
+class cli_exception_test(Event):
+    """Raise test-exception to check exception handling"""
 
     pass
 
@@ -203,6 +210,7 @@ class IsomerDebugger(ConfigurableComponent):
             self.fireEvent(cli_register_event("mem_summary", cli_mem_summary))
             self.fireEvent(cli_register_event("mem_diff", cli_mem_diff))
             self.fireEvent(cli_register_event("locations", cli_locations))
+            self.fireEvent(cli_register_event("test_exception", cli_exception_test))
         except AttributeError:
             pass  # We're running in a test environment and root is not yet running
 
@@ -225,6 +233,8 @@ class IsomerDebugger(ConfigurableComponent):
 
     @handler("cli_errors")
     def cli_errors(self, *args):
+        """Display errors in the live log"""
+
         self.log("All errors since startup:")
         from isomer.logger import LiveLog
 
@@ -234,6 +244,8 @@ class IsomerDebugger(ConfigurableComponent):
 
     @handler("cli_log_level")
     def cli_log_level(self, *args):
+        """Adjust log level"""
+
         new_level = int(args[0])
         self.log("Adjusting logging level to", new_level)
 
@@ -243,6 +255,8 @@ class IsomerDebugger(ConfigurableComponent):
 
     @handler("cli_compgraph")
     def cli_compgraph(self, event):
+        """Draw current component graph"""
+
         self.log("Drawing component graph")
         from circuits.tools import graph
 
@@ -251,6 +265,8 @@ class IsomerDebugger(ConfigurableComponent):
 
     @handler("cli_locations")
     def cli_locations(self, *args):
+        """Display all locations of running instance"""
+
         self.log("All locations for this instance:")
         from isomer.misc.path import locations, get_path
 
@@ -259,35 +275,48 @@ class IsomerDebugger(ConfigurableComponent):
 
     @handler("cli_mem_summary")
     def cli_mem_summary(self, event):
+        """Output memory usage summary"""
+
         all_objects = muppy.get_objects()
         state = summary.summarize(all_objects)
         summary.print_(state)
 
     @handler("cli_mem_diff")
     def cli_mem_diff(self, event):
+        """Output difference in memory usage since last call"""
+
         self.tracker.print_diff()
 
     @handler("cli_mem_hogs")
     def cli_mem_hogs(self, *args):
+        """Output most memory intense objects"""
+
         self.log("Memory hogs:", lvl=critical)
         objgraph.show_most_common_types(limit=20)
 
     @handler("cli_mem_growth")
     def cli_mem_growth(self, *args):
+        """Output data about memory growth"""
+
         self.log("Memory growth since last call:", lvl=critical)
         objgraph.show_growth()
 
     @handler("cli_mem_heap")
     def cli_mem_heap(self, *args):
+        """Output memory heap data"""
+
         self.log("Heap log:", self.heapy.heap(), lvl=critical)
 
     @handler("cli_exception_test")
     def cli_exception_test(self, *args):
+        """Raise test-exception to check exception handling"""
+
         raise TestException
 
     @handler("debug_store_json")
     def debug_store_json(self, event):
-        # TODO: Does this actually work? Is this useful? Necessary?
+        """A debug-endpoint to store an event as json dump"""
+
         self.log("Storing received object to /tmp", lvl=critical)
         fp = open(
             "/tmp/isomer_debugger_" + str(event.user.useruuid) + "_" + str(uuid4()), "w"
@@ -299,8 +328,14 @@ class IsomerDebugger(ConfigurableComponent):
     def logtailrequest(self, event):
         self.log("Log requested")
 
-    @handler("exception", channel="*", priority=100.0)
+    @handler("exception", channel="*", priority=1.0)
     def _on_exception(self, error_type, value, traceback, handler=None, fevent=None):
+        # TODO: Generate hashes and thus unique urls with exceptions and fill
+        #  them out with this data:
+        #  self.log('EXCEPTIONHANDLER:', error_type, value, traceback, lvl=critical)
+        #  The idea is to have error pages in the documentation/public Isomer instance
+        #  so people can discuss and get help on runtime errors, like with the
+        #  exitcodes system in the documentation
 
         try:
             s = []
@@ -316,10 +351,10 @@ class IsomerDebugger(ConfigurableComponent):
             )
 
             s.append(msg)
-            s.extend(traceback)
             s.append("\n")
 
-            self.log("\n".join(s), lvl=critical)
+            isolog("\n".join(s), "\n".join(traceback),
+                   lvl=critical, frame_ref=3, emitter="DEBUG")
 
             alert = {
                 "component": "isomer.alert.manager",
@@ -334,7 +369,8 @@ class IsomerDebugger(ConfigurableComponent):
                 self.fireEvent(send(None, alert, username=user, sendtype="user"))
 
         except Exception as e:
-            self.log("Exception during exception handling: ", e, type(e), lvl=critical)
+            self.log("Exception during exception handling: ", e, type(e), lvl=critical,
+                     exc=True)
 
 
 class CLI(ConfigurableComponent):
@@ -342,7 +378,7 @@ class CLI(ConfigurableComponent):
     Command Line Interface support
 
     This is disabled by default.
-    To enable the command line interface, use either the Configuration frontend
+    To enable the command line interface, use either the Configuration frontend,
     or the iso tool:
 
     .. code-block:: sh
@@ -415,6 +451,8 @@ class CLI(ConfigurableComponent):
 
     @handler("cli_help")
     def cli_help(self, *args):
+        """Print a list, and a short documentation of all CLI commands"""
+
         if len(args) == 0 or args[0].startswith("-"):
             self.log("Registered CLI hooks:")
             # TODO: Use std_table for a pretty table

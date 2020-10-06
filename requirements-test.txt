@@ -1,7 +1,7 @@
 # Running Tests
-pluggy>= 0.9
+pluggy>= 0.12.0
 tox
 pytest==5.1.1
 coveralls
 pytest-cov
-safety>=1.8.5
+safety>=1.9.0

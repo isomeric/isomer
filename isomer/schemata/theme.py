@@ -3,7 +3,7 @@
 
 # Isomer - The distributed application framework
 # ==============================================
-# Copyright (C) 2011-2019 Heiko 'riot' Weinen <riot@c-base.org> and others.
+# Copyright (C) 2011-2020 Heiko 'riot' Weinen <riot@c-base.org> and others.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
@@ -18,10 +18,42 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# This is an empty test construct which serves as placeholder for future integration tests.
+"""
+
+Schema: Theme
+=============
+
+Contains
+--------
+
+User interface theme definition
+
+See also
+--------
+
+Provisions
 
 
-def test_empty():
-    """Does nothing. Placeholder for the still empty b test suite (integration)."""
+"""
 
-    assert True
+from isomer.schemata.base import base_object
+
+# Basic Theme definitions
+
+ThemeSchema = base_object("theme", all_roles="crew")
+
+ThemeSchema["properties"].update({
+    "notes": {
+        "type": "string",
+        "format": "html",
+        "title": "Theme notes",
+        "description": "Descriptive Theme notes",
+    },
+    "theme_file": {
+        "type": "string"
+    }
+})
+
+ThemeForm = ["name", "color", "notes"]
+
+Theme = {"schema": ThemeSchema, "form": ThemeForm}

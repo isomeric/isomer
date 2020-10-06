@@ -3,7 +3,7 @@
 
 # Isomer - The distributed application framework
 # ==============================================
-# Copyright (C) 2011-2019 Heiko 'riot' Weinen <riot@c-base.org> and others.
+# Copyright (C) 2011-2020 Heiko 'riot' Weinen <riot@c-base.org> and others.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
@@ -19,10 +19,10 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-Hackerfleet Operating System - Backend
+Isomer - Backend
 
-Test Isomer Launcher
-==================
+Test Isomer Client Manager
+==========================
 
 
 
@@ -36,7 +36,7 @@ from json import dumps  # , loads
 from isomer.ui.clientmanager import ClientManager
 from isomer.ui.clientobjects import Client, Socket
 from isomer.events.client import clientdisconnect
-from isomer.misc import std_uuid
+from isomer.misc.std import std_uuid
 
 from pprint import pprint
 

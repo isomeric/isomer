@@ -32,8 +32,11 @@ except ImportError:
     sys.exit(50050)
 
 ignore = [
+    "/frontend/.idea",
+    "/frontend/.git",
     "/frontend/node_modules",
     "/frontend/build",
+    "/frontend/dist",
     "/frontend/src/components",
     "/docs/build",
     "__pycache__"
@@ -54,6 +57,10 @@ def add_datafiles(*paths):
     with open("MANIFEST.in", "w") as manifest:
         for path in paths:
             files = []
+            if os.path.isfile(path):
+                manifest.write("include " + path + "\n")
+                continue
+
             manifest.write("recursive-include " + path + " *\n")
 
             for root, dirnames, filenames in os.walk(path):
@@ -131,31 +138,39 @@ setup(
     ],
     namespace_packages=["isomer"],
     long_description=readme,
-    long_description_content_type='text/x-rst',
+    long_description_content_type="text/x-rst",
     dependency_links=[
         "https://github.com/ri0t/click-repl/archive/master.zip#egg=click-repl-0.1.3-ri0t",
+        "https://github.com/ri0t/SecretColors/archive/master.zip#egg=SecretColors-1.2.0",
     ],
     install_requires=[
+        "bcrypt>=3.2",
         "click-didyoumean>=0.0.3",
-        "click-plugins>=1.0.3",
+        "click-plugins>=1.1",
         "click-repl>=0.1.3-ri0t",
-        "click>=6.7.0",
+        "click>=7.1.2",
         "circuits",
-        "distro>=1.3",
-        "dpath>=1.4.0",
+        "distro>=1.5",
+        "docutils>=0.16",
+        "dpath>=2.0.1",
         "formal>=0.6.3",
-        "gitpython>=2.1.1",
-        "jsonschema>=3.0.1",
+        "gitpython>=3.1.8",
+        "jsonschema>=3.2.0",
         "networkx",
-        "prompt-toolkit>=2.0,<3",
-        "pycountry>=18.2",
+        "numpy>=1.16.2",
+        "prompt-toolkit>=2.0.10,<3",
+        "pycountry>=20.7",
         "pyinotify>=0.9.6",
+        "pypi-simple>=0.6.0",
         "pystache>=0.5.4",
-        "pytz>=2019.1",
-        "tomlkit>=0.4.6",
-        "spur>=0.3.20",
-        "six>=1.11.0",
-        "SecretColors>=1.1.0"
+        "pytz>=2020.1",
+        "requests>=2.24.0",
+        "spur>=0.3.21",
+        "six>=1.15.0",
+        "SecretColors>=1.2.0",
+        "tomlkit>=0.7.0",
+        "typing_extensions>=3.7.4.2",
+
     ],
     data_files=datafiles,
     entry_points="""[console_scripts]
@@ -176,6 +191,8 @@ setup(
     schemamanager=isomer.ui.schemamanager:SchemaManager
     tagmanager=isomer.ui.tagmanager:TagManager
     configurator=isomer.ui.configurator:Configurator
+    store=isomer.ui.store.component:Store
+    instanceinfo=isomer.ui.instance:InstanceInfo
 
     [isomer.schemata]
     systemconfig=isomer.schemata.system:Systemconfig
@@ -184,6 +201,7 @@ setup(
     user=isomer.schemata.user:User
     logmessage=isomer.schemata.logmessage:LogMessage
     tag=isomer.schemata.tag:Tag
+    theme=isomer.schemata.theme:Theme
 
     [isomer.provisions]
     system=isomer.provisions.system:provision

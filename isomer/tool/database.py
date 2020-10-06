@@ -3,7 +3,7 @@
 
 # Isomer - The distributed application framework
 # ==============================================
-# Copyright (C) 2011-2019 Heiko 'riot' Weinen <riot@c-base.org> and others.
+# Copyright (C) 2011-2020 Heiko 'riot' Weinen <riot@c-base.org> and others.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
@@ -33,7 +33,7 @@ import pymongo
 from click_didyoumean import DYMGroup
 
 from isomer.logger import warn, error
-from isomer.migration import make_migrations
+from isomer.migration import make_migrations, apply_migrations
 from isomer.tool import log, ask, finish
 from isomer.error import abort
 
@@ -169,6 +169,34 @@ def delete_database(db_host, db_name, force):
             log("Database does not exist")
 
 
+@db.command(short_help="Copy a database")
+@click.option(
+    "--source", "-s", default=None,
+    help="Specify source database. "
+         "Leave out to use the default instance's active database."
+)
+@click.argument("destination")
+@click.pass_context
+def copy(ctx, source, destination):
+    """Copies an entire database"""
+
+    if source is None:
+        source = ctx.obj["dbname"]
+
+    copy_database(ctx.obj["dbhost"], source, destination)
+
+    finish(ctx)
+
+
+def copy_database(db_host, source, destination):
+    """Actually copy a database"""
+
+    host, port = db_host.split(":")
+
+    client = pymongo.MongoClient(host=host, port=int(port))
+    client.admin.command('copydb', fromdb=source, todb=destination)
+
+
 @db.group(cls=DYMGroup)
 @click.option("--schema", help="Specify schema to work with", default=None)
 @click.pass_context
@@ -186,3 +214,14 @@ def make(ctx):
     make_migrations(ctx.obj["schema"])
 
     finish(ctx)
+
+
+@migrations.command(short_help="Apply migrations to a database (WiP)")
+@click.pass_context
+def apply(ctx):
+    """Applies migrations for all or the specified schema"""
+
+    apply_migrations(ctx)
+
+    finish(ctx)
+

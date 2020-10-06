@@ -3,7 +3,7 @@
 
 # Isomer - The distributed application framework
 # ==============================================
-# Copyright (C) 2011-2019 Heiko 'riot' Weinen <riot@c-base.org> and others.
+# Copyright (C) 2011-2020 Heiko 'riot' Weinen <riot@c-base.org> and others.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
@@ -18,8 +18,10 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from isomer.logger import isolog, warn
-from pycountry import countries, currencies, languages, subdivisions
+from isomer.logger import isolog, warn  # , verbose
+from isomer.misc.std import colors
+from pycountry import countries, subdivisions  # , currencies, languages,
+from random import randint, choice
 
 """
 
@@ -212,14 +214,33 @@ def fieldset(title, items, options=None):
     return result
 
 
-def section(rows, columns, items, label=None, condition=None):
-    """A section consisting of rows and columns"""
+def section(rows: int, columns: int, items: list,
+            label: str = None, condition: str = None):
+    """A section consisting of rows and columns
 
-    # TODO: Integrate label
+    :param rows: Number of rows
+    :param columns: Number of columns
+    :param items: Section items
+    :param label: Optional label - if you use this, unpack the section with
+            ``*section(.., label="foo")`` in your form
+    :param condition: A angular-schema-form model condition
+    :return: A complex form section object
+    """
+
+    if label is None:
+        label = "Section " + choice(colors) + " " + str(randint(0, 500))
+        label_widget = None
+    else:
+        label_widget = {'type': 'help', 'helpvalue': '<h2>' + label + '</h2>'}
 
     sections = []
 
     column_class = "section-column col-sm-%i" % (12 / columns)
+
+    items_total = 0
+    items_count = 0
+    for row in items:
+        items_total += len(row)
 
     for vertical in range(columns):
         column_items = []
@@ -227,26 +248,32 @@ def section(rows, columns, items, label=None, condition=None):
             try:
                 item = items[horizontal][vertical]
                 column_items.append(item)
+                items_count += 1
             except IndexError:
-                isolog(
-                    "Field in",
-                    label,
-                    "omitted, due to missing row/column:",
-                    vertical,
-                    horizontal,
-                    lvl=warn,
-                    emitter="FORMS",
-                    tb=True,
-                    frame=2,
-                )
-
+                # No item in this part of the form, doesn't matter
+                pass
         column = {"type": "section", "htmlClass": column_class, "items": column_items}
         sections.append(column)
+
+    if items_count < items_total:
+        isolog(
+            items_total - items_count,
+            "field(s) in",
+            label,
+            "omitted, due to missing row/column:",
+            lvl=warn,
+            emitter="FORMS",
+            tb=True,
+            frame=2,
+        )
 
     result = {"type": "section", "htmlClass": "row", "items": sections}
 
     if condition is not None:
         result["condition"] = condition
+
+    if label_widget is not None:
+        result = [label_widget, result]
 
     return result
 
@@ -378,6 +405,7 @@ def horizontal_divider():
 
 def test():
     """Development function to manually test all widgets"""
+    # TODO: Get rid of this and put it into testing
     print("Hello")
     from pprint import pprint
 

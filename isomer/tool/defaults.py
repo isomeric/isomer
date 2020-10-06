@@ -3,7 +3,7 @@
 
 # Isomer - The distributed application framework
 # ==============================================
-# Copyright (C) 2011-2019 Heiko 'riot' Weinen <riot@c-base.org> and others.
+# Copyright (C) 2011-2020 Heiko 'riot' Weinen <riot@c-base.org> and others.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
@@ -33,7 +33,7 @@ templates and a table of exit codes for the management tool.
 
 import distro
 
-distribution = "DEBIAN"
+distribution = distro.id().upper()
 
 db_host_default = "127.0.0.1:27017"
 db_host_help = "Define hostname for database server (default: " + db_host_default + ")"
@@ -43,11 +43,10 @@ db_default = "isomer"
 db_help = "Define name of database (default: " + db_default + ")"
 db_metavar = "<name>"
 
-key_file = "/etc/ssl/certs/isomer/selfsigned.key"
-cert_file = "/etc/ssl/certs/isomer/selfsigned.crt"
-combined_file = "/etc/ssl/certs/isomer/selfsigned.pem"
-
 source_url = "https://github.com/isomeric/isomer"
+source_api_url = "https://api.github.com/repos/isomeric/isomer"
+
+pypi_api_url = "https://pypi.org/pypi/isomer/json"
 
 distribution_name = distro.codename()
 
@@ -58,26 +57,26 @@ deb-src https://deb.nodesource.com/node_11.x sid main
 
 
 platforms = {
-    "Docker": {
-        "pre_install": [
-            [
-                "sh",
-                "-c",
-                "wget --quiet -O - https://deb.nodesource.com/gpgkey/nodesource.gpg.key | sudo apt-key add -",
-            ],
-            {
-                "action": "create_file",
-                "filename": "/etc/apt/sources.list.d/nodesource.list",
-                "content": node_source_list_docker,
-            },
-            ["apt-get", "update"],
-        ],
-        "post_install": [],
-        "tool": ["apt-get", "install", "-y"],
-        "packages": [
-            "nodejs",
-        ],
-    },
+    # "Docker": {
+    #     "pre_install": [
+    #         [
+    #             "sh",
+    #             "-c",
+    #             "wget --quiet -O - https://deb.nodesource.com/gpgkey/nodesource.gpg.key | sudo apt-key add -",
+    #         ],
+    #         {
+    #             "action": "create_file",
+    #             "filename": "/etc/apt/sources.list.d/nodesource.list",
+    #             "content": node_source_list_docker,
+    #         },
+    #         ["apt-get", "update"],
+    #     ],
+    #     "post_install": [],
+    #     "tool": ["apt-get", "install", "-y"],
+    #     "packages": [
+    #         "nodejs",
+    #     ],
+    # },
     "Debian GNU/Linux": {
         "pre_install": [
             [
@@ -184,7 +183,7 @@ server {
     ssl_certificate_key  {{ssl_key}};
 
     ssl_session_timeout 5m;
-    ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
+    ssl_protocols TLSv1.2 TLSv1.3;
     ssl_ciphers ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA:ECDHE-RSA-AES128-SHA:DHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA;
     ssl_session_cache shared:SSL:50m;
     # ssl_dhparam /path/to/server.dhparam;

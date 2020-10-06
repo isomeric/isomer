@@ -1,30 +1,36 @@
-.. image:: https://travis-ci.org/isomeric/isomer.png?branch=master
+.. image:: https://travis-ci.org/isomeric/isomer.svg?branch=master
     :target: https://travis-ci.org/isomeric/isomer
     :alt: Build Status
 
-.. image:: https://coveralls.io/repos/isomeric/isomer/badge.png
+.. image:: https://bestpractices.coreinfrastructure.org/projects/3650/badge
+    :target: https://bestpractices.coreinfrastructure.org/projects/3650
+    :alt: CII Best Practices
+
+.. image:: https://coveralls.io/repos/isomeric/isomer/badge.svg
     :target: https://coveralls.io/r/isomeric/isomer
     :alt: Coverage
 
-.. image:: https://requires.io/github/isomeric/isomer/requirements.png?branch=master
+.. image:: https://requires.io/github/isomeric/isomer/requirements.svg?branch=master
     :target: https://requires.io/github/isomeric/isomer/requirements/?branch=master
     :alt: Requirements Status
 
-.. image:: https://img.shields.io/badge/IRC-%23hackerfleet%20on%20freenode-blue.png
+.. image:: https://img.shields.io/badge/IRC-%23hackerfleet%20on%20freenode-blue.svg
     :target: http://webchat.freenode.net/?randomnick=1&channels=hackerfleet&uio=d4>
     :alt: IRC Channel
 
-.. image:: https://www.codetriage.com/isomeric/isomer/badges/users.png
+.. image:: https://img.shields.io/badge/dynamic/json.svg?url=https://pypistats.org/api/packages/isomer/recent?mirrors=false&label=downloads&query=$.data.last_month&suffix=/month
+    :target: https://pypistats.org/packages/isomer
+
+.. image:: https://www.codetriage.com/isomeric/isomer/badges/users.svg
     :target: https://www.codetriage.com/isomeric/isomer
     :alt: Help via codetriage.com
 
-.. image:: https://img.shields.io/badge/dynamic/json.png?url=https://pypistats.org/api/packages/isomer/recent?mirrors=false&label=downloads&query=$.data.last_month&suffix=/month
-    :target: https://pypistats.org/packages/isomer
+.. image:: https://raw.githubusercontent.com/isomeric/isomer/master/docs/source/_static/logo.png
+    :target: https://github.com/isomeric/isomer
+    :alt: Isomer Logo
 
-Please be wary of bugs and report strange things, thank you!
-
-Isomer - Be Collaborative!
-==========================
+♦ Isomer - Be Collaborative!
+============================
 
 **A collaborative and modular infrastructure for your data.**
 
@@ -38,11 +44,13 @@ Isomer - Be Collaborative!
 
 Much more incoming!
 
-Installation
-============
+⛁ Installation
+==============
 
-Docker: Yes, please!
---------------------
+Please be wary of bugs and report strange things, thank you!
+
+► Docker: Yes, please!
+----------------------
 
 If you just want to try it out or generally are happy with using docker, there
 is no need to clone the repo, just download the docker compose file and get
@@ -58,8 +66,8 @@ See the `docker detail page
 for more information.
 
 
-Docker: No, thanks..
---------------------
+☓ Docker: No, thanks..
+----------------------
 
 There is more than one way of installing Isomer, `see the detailed instructions
 for those <https://isomer.readthedocs.io/en/latest/start/quick.html>`__.
@@ -69,8 +77,8 @@ development workflow instructions
 <https://isomer.readthedocs.io/en/latest/dev/workflow.html>`__.
 
 
-Modules
-=======
+⊕ Modules
+=========
 
 The system is modular, so you can install what you need and leave out other
 things.
@@ -79,8 +87,8 @@ A lot of the included modules are still Work in Progress, so help out, if
 you're interested in a powerful - **cloud independent** - collaboration tool
 suite.
 
-General modules
----------------
+♨ General modules
+-----------------
 
 These are 'official' isomer modules. If you'd like to contribute your own,
 ping riot@c-base.org, to get it added to the list.
@@ -113,8 +121,8 @@ transcript*    Meeting notes module
 wiki           Etherpad + Wiki = awesomeness
 ============== ==============================================================
 
-Navigation (Hackerfleet) modules
---------------------------------
+⚓ Navigation (Hackerfleet) modules
+-----------------------------------
 
 We primarily focused on navigation tools, so these are currently the
 'more usable' modules.
@@ -144,8 +152,8 @@ signal-k       Signal-K connector
 webguides      Importer for skipperguide.de wiki content into the map
 ============== ==============================================================
 
-Work in progress
-----------------
+☕ Work in progress
+-------------------
 
 -  Full GDAL based vector chart support (Currently only raster charts)
 -  Dynamic Logbook
@@ -155,8 +163,8 @@ Work in progress
 -  Crew management, more safety tools
 -  wireless crew network and general communications
 
-Other 3rd party modules
------------------------
+⚯ Other 3rd party modules
+-------------------------
 
 ============== ==============================================================
   Name           Description
@@ -168,8 +176,8 @@ garden         Garden automation tools
 ============== ==============================================================
 
 
-Bugs & Discussion
-=================
+↯ Bugs & Discussion
+===================
 
 Please research any bugs you find via our `Github issue tracker for
 Isomer <https://github.com/isomeric/isomer/issues>`__ and report them,
@@ -193,8 +201,8 @@ You can also find us here:
 
 .. note:: Please be patient when using IRC, responses might take a few hours!
 
-Contributors
-============
+♚ Contributors
+==============
 
 Code
 ----
@@ -229,8 +237,8 @@ Support
 -  `BrowserStack <https://browserstack.com>`__ for cross device testing
    capabilities
 
-License
-=======
+© License
+=========
 
 Copyright (C) 2011-2019 Heiko 'riot' Weinen <riot@c-base.org> and others.
 
@@ -248,4 +256,4 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
--- :boat: :+1:
+-- ⛵🖤

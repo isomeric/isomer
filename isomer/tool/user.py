@@ -3,7 +3,7 @@
 
 # Isomer - The distributed application framework
 # ==============================================
-# Copyright (C) 2011-2019 Heiko 'riot' Weinen <riot@c-base.org> and others.
+# Copyright (C) 2011-2020 Heiko 'riot' Weinen <riot@c-base.org> and others.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
@@ -34,7 +34,7 @@ import click
 from click_didyoumean import DYMGroup
 
 from isomer.logger import warn
-from isomer.misc import std_now
+from isomer.misc.std import std_now
 from isomer.tool import _get_credentials, log, ask, finish
 from isomer.tool.database import db
 

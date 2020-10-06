@@ -3,7 +3,7 @@
 
 # Isomer - The distributed application framework
 # ==============================================
-# Copyright (C) 2011-2019 Heiko 'riot' Weinen <riot@c-base.org> and others.
+# Copyright (C) 2011-2020 Heiko 'riot' Weinen <riot@c-base.org> and others.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
@@ -33,10 +33,27 @@ Profile: Userprofile with general flags and fields
 from isomer.schemata.defaultform import (
     savebutton,
     lookup_field,
-    country_field,
-    area_field,
+    # country_field,
+    # area_field,
 )
 from isomer.schemata.base import base_object, uuid_object, language_field
+
+blend_modes = [
+    "normal",
+    "multiply",
+    "screen",
+    "overlay",
+    "darken",
+    "lighten",
+    "color-dodge",
+    "color-burn",
+    "difference",
+    "exclusion",
+    "hue",
+    "saturation",
+    "color",
+    "luminosity"
+]
 
 ProfileSchema = base_object("profile", roles_create="crew")
 
@@ -139,12 +156,22 @@ ProfileSchema["properties"].update(
                     "type": "string",
                     "title": "User Color",
                     "format": "color",
-                    "description": "Color used for map annotations, " "chat etc",
+                    "description": "Color used for map annotations, chat etc",
                 },
-                "theme": {
-                    "type": "string",
-                    "title": "User Theme",
-                    "description": "Theme used for user interface",
+                "theme": uuid_object(
+                    title="theme",
+                    description="Theme used for user interface"
+                ),
+                "screen_filter": {
+                    "type": "object",
+                    "title": "Screen filter",
+                    "description": "Adjust overall colors freely",
+                    "properties": {
+                        "color": {"type": "string", "format": "color"},
+                        "mode": {"type": "string", "enum": blend_modes},
+                        "opacity": {"type": "number", "max": 0.9, "min": 0, "step": 0.1}
+                    }
+
                 },
                 "background": {
                     "type": "string",
@@ -243,19 +270,38 @@ ProfileForm = [
         "htmlClass": "row",
         "items": [
             {"type": "help", "helpvalue": "<h2>User interface settings</h2>"},
+            {"type": "help", "helpvalue": "<h3>Default Color and Theme</h3>"},
             {
                 "type": "section",
                 "htmlClass": "col-xs-3",
-                "items": ["settings.color", "settings.theme"],
+                "items": ["settings.color", lookup_field("settings.theme", "theme")],
             },
+            {"type": "help", "helpvalue": "<h3>Background</h3>"},
             {
                 "type": "section",
                 "htmlClass": "col-xs-9",
                 "items": ["settings.background"],
             },
+            {"type": "help", "helpvalue": "<h3>Screen filter</h3>"},
+            {
+                "type": "section",
+                "htmlClass": "col-xs-9",
+                "items": [
+                    "settings.screen_filter.mode",
+                    "settings.screen_filter.opacity",
+                    "settings.screen_filter.color"
+                ],
+            }
         ],
     },
-    "settings.notifications",
+    {
+        "type": "section",
+        "htmlClass": "row",
+        "items": [
+            {"type": "help", "helpvalue": "<h2>Notifications</h2>"},
+            "settings.notifications",
+            ]
+    },
     {
         "id": "modules",
         "type": "section",

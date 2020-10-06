@@ -3,7 +3,7 @@
 
 # Isomer - The distributed application framework
 # ==============================================
-# Copyright (C) 2011-2019 Heiko 'riot' Weinen <riot@c-base.org> and others.
+# Copyright (C) 2011-2020 Heiko 'riot' Weinen <riot@c-base.org> and others.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
@@ -19,9 +19,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-Hackerfleet Operating System - Backend
+Isomer - Backend
 
-Test Isomer Launcher
+Test Isomer Logger
 ==================
 
 
@@ -31,12 +31,13 @@ Test Isomer Launcher
 from circuits import Manager
 import pytest
 from isomer import logger
+
 # from time import sleep
 
 # from pprint import pprint
 
 m = Manager()
-component = pytest.TestComponent()
+component = pytest.TestComponent("FOO")
 component.register(m)
 
 
@@ -47,7 +48,7 @@ def test_component_logging():
     m.start()
 
     logger.live = True
-    component.log('FOOBAR')
+    component.log("FOOBAR")
 
     lastlog = logger.LiveLog[-1][-1]
 
@@ -57,7 +58,7 @@ def test_component_logging():
 def test_script_logging():
     logger.live = True
 
-    logger.isolog('FOOBAR')
+    logger.isolog("FOOBAR")
 
     lastlog = logger.LiveLog[-1][-1]
 

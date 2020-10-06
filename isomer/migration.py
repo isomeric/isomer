@@ -3,7 +3,7 @@
 
 # Isomer - The distributed application framework
 # ==============================================
-# Copyright (C) 2011-2019 Heiko 'riot' Weinen <riot@c-base.org> and others.
+# Copyright (C) 2011-2020 Heiko 'riot' Weinen <riot@c-base.org> and others.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
@@ -43,6 +43,14 @@ MIGRATION_TEMPLATE = """#!/usr/bin/env python
 """
 
 
+def log(*args, **kwargs):
+    """Log as previous emitter"""
+    kwargs.update({"frame_ref": 2})
+    if "emitter" not in kwargs:
+        kwargs["emitter"] = "MIGRATIONS"
+    isolog(*args, **kwargs)
+
+
 def make_migrations(schema=None):
     """Create migration data for a specified schema"""
 
@@ -55,10 +63,10 @@ def make_migrations(schema=None):
         def get_path(raw_path):
             """Get local path of schema definition"""
 
-            print("RAW PATH:", raw_path, type(raw_path))
+            log("RAW PATH:", raw_path, type(raw_path))
             path = []
             for item in raw_path.split("["):
-                print(item)
+                log(item)
                 item = item.rstrip("]")
                 item = item.replace('"', "")
                 item = item.replace("'", "")
@@ -68,7 +76,7 @@ def make_migrations(schema=None):
                     pass
                 path.append(item)
             path.remove("root")
-            print("PATH:", path)
+            log("PATH:", path)
             return path
 
         def apply_entry(changetype, change, result):
@@ -89,26 +97,26 @@ def make_migrations(schema=None):
                 for addition in additions:
                     path = get_path(addition)
                     entry = additions[addition]
-                    isolog("Adding:", entry, "at", path)
+                    log("Adding:", entry, "at", path)
                     dpath.util.new(result, path, entry)
                 return result
 
             if changetype == "type_changes":
-                isolog("Creating new object")
+                log("Creating new object")
                 result = change["root"]["new_value"]
                 return result
 
             if changetype == "dictionary_item_added":
-                isolog("Adding items")
+                log("Adding items")
                 result = apply_additions(change, result)
             elif changetype == "dictionary_item_removed":
-                isolog("Removing items")
+                log("Removing items")
                 result = apply_removes(change, result)
             elif changetype == "values_changed":
-                isolog("Changing items' types")
+                log("Changing items' types")
                 for item in change:
                     path = get_path(item)
-                    isolog(
+                    log(
                         "Changing",
                         path,
                         "from",
@@ -125,7 +133,7 @@ def make_migrations(schema=None):
         def get_renames(migrations):
             """Check migrations for renamed fields"""
 
-            isolog("Checking for rename operations:")
+            log("Checking for rename operations:")
             # pprint(migrations)
             added = removed = None
 
@@ -141,14 +149,14 @@ def make_migrations(schema=None):
                     for removal in removed:
                         removed_path = get_path(removal)
                         if path[:-1] == removed_path[:-1]:
-                            isolog("Possible rename detected:", removal, "->", addition)
+                            log("Possible rename detected:", removal, "->", addition)
                             renames.append((removed_path, path))
             return renames
 
         result = {}
         for no, migration in enumerate(migrations):
-            isolog("Migrating", no)
-            isolog("Migration:", migration, lvl=debug)
+            log("Migrating", no)
+            log("Migration:", migration, lvl=debug)
             renamed = get_renames(migrations)
 
             for entry in migration:
@@ -163,18 +171,18 @@ def make_migrations(schema=None):
         filename = "%s_%04i.json" % (schema, counter)
         migration = DeepDiff(previous, current, verbose_level=2).to_json_pickle()
         if migration == "{}":
-            isolog("Nothing changed - no new migration data.", lvl=warn)
+            log("Nothing changed - no new migration data.", lvl=warn)
             return
 
-        print("Writing migration: ", os.path.join(path, filename))
-        pprint(migration)
+        log("Writing migration: ", os.path.join(path, filename))
+        log(migration, pretty=True)
 
         with open(os.path.join(path, filename), "w") as f:
             f.write(migration)
 
     for schema_entrypoint in iter_entry_points(group="isomer.schemata", name=None):
         try:
-            isolog("Schemata found: ", schema_entrypoint.name, lvl=debug, emitter="DB")
+            log("Schemata found: ", schema_entrypoint.name, lvl=debug)
             if schema is not None and schema_entrypoint.name != schema:
                 continue
 
@@ -194,11 +202,11 @@ def make_migrations(schema=None):
                     if not file.endswith(".json"):
                         continue
                     fullpath = os.path.join(path, file)
-                    isolog("Importing migration", fullpath)
+                    log("Importing migration", fullpath)
                     with open(fullpath, "r") as f:
                         migration = DeepDiff.from_json_pickle(f.read())
                     migrations.append(migration)
-                    isolog("Successfully imported")
+                    log("Successfully imported")
 
                 if len(migrations) == 0:
                     raise ImportError
@@ -206,27 +214,33 @@ def make_migrations(schema=None):
                 model = apply_migrations(migrations, new_model)
                 write_migration(schema, len(migrations) + 1, path, model, new_model)
             except ImportError as e:
-                isolog("No previous migrations for", schema, e, type(e), exc=True)
+                log("No previous migrations for", schema, e, type(e), exc=True)
 
             if len(migrations) == 0:
                 write_migration(schema, 1, path, None, new_model)
 
         except (ImportError, DistributionNotFound) as e:
-            isolog(
+            log(
                 "Problematic schema: ",
                 e,
                 type(e),
                 schema_entrypoint.name,
                 exc=True,
                 lvl=warn,
-                emitter="SCHEMATA",
             )
 
-    isolog(
-        "Found schemata: ", sorted(entrypoints.keys()), lvl=debug, emitter="SCHEMATA"
+    log(
+        "Found schemata: ", sorted(entrypoints.keys()), lvl=debug
     )
 
-    pprint(entrypoints)
+    log("Entrypoints:", entrypoints, pretty=True, lvl=debug)
 
     def make_single_migration(old, new):
         pass
+
+
+def apply_migrations(ctx):
+    """Apply migrations to a database"""
+    log("Applying migrations is not implemented, yet.", lvl=warn)
+
+    _ = ctx

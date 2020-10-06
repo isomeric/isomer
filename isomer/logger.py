@@ -3,7 +3,7 @@
 
 # Isomer - The distributed application framework
 # ==============================================
-# Copyright (C) 2011-2019 Heiko 'riot' Weinen <riot@c-base.org> and others.
+# Copyright (C) 2011-2020 Heiko 'riot' Weinen <riot@c-base.org> and others.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
@@ -113,12 +113,25 @@ def set_color():
     color = True
 
 
-def set_verbosity(new_lvl: int):
+def set_verbosity(global_level: int, console_level: int = None, file_level: int = None):
     """Adjust logging verbosity"""
     global verbosity
-    verbosity["global"] = new_lvl
-    verbosity["console"] = new_lvl
-    verbosity["file"] = new_lvl
+
+    if console_level is None:
+        console_level = verbosity["console"]
+    if file_level is None:
+        file_level = verbosity["file"]
+
+    verbosity["global"] = global_level
+    verbosity["console"] = console_level
+    verbosity["file"] = file_level
+
+
+def get_verbosity():
+    """Returns logging verbosity"""
+    global verbosity
+
+    return verbosity
 
 
 def set_logfile(path: str, instance: str, filename: str = None):
@@ -189,16 +202,16 @@ def is_marked(what) -> bool:
     return False
 
 
-def setup_root(newroot: "isomer.components.Component"):
+def setup_root(new_root: "isomer.components.Component"):
     """
     Sets up the root component, so the logger knows where to send logging
     signals.
 
-    :param isomer.components.Component newroot:
+    :param isomer.components.Component new_root:
     """
     global root
 
-    root = newroot
+    root = new_root
 
 
 # noinspection PyUnboundLocalVariable,PyIncorrectDocstring

@@ -3,7 +3,7 @@
 
 # Isomer - The distributed application framework
 # ==============================================
-# Copyright (C) 2011-2019 Heiko 'riot' Weinen <riot@c-base.org> and others.
+# Copyright (C) 2011-2020 Heiko 'riot' Weinen <riot@c-base.org> and others.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
@@ -31,7 +31,8 @@ Basic functionality around provisioning.
 
 """
 
-import networkx
+from networkx import DiGraph, is_directed_acyclic_graph, simple_cycles
+from networkx.algorithms import topological_sort
 from jsonschema import ValidationError
 
 from isomer.logger import isolog, debug, verbose, warn, error
@@ -170,7 +171,7 @@ def provision(
     def sort_dependencies(items):
         """Topologically sort the dependency tree"""
 
-        g = networkx.DiGraph()
+        g = DiGraph()
         log("Sorting dependencies")
 
         for key, item in items:
@@ -185,11 +186,11 @@ def provision(
             for link in dependencies:
                 g.add_edge(key, link)
 
-        if not networkx.is_directed_acyclic_graph(g):
+        if not is_directed_acyclic_graph(g):
             log("Cycles in provisioning dependency graph detected!", lvl=error)
-            log("Involved provisions:", list(networkx.simple_cycles(g)), lvl=error)
+            log("Involved provisions:", list(simple_cycles(g)), lvl=error)
 
-        topology = list(networkx.algorithms.topological_sort(g))
+        topology = list(topological_sort(g))
         topology.reverse()
         topology = list(set(topology).difference(installed))
 

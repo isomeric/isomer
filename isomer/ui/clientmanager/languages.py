@@ -3,7 +3,7 @@
 
 # Isomer - The distributed application framework
 # ==============================================
-# Copyright (C) 2011-2019 Heiko 'riot' Weinen <riot@c-base.org> and others.
+# Copyright (C) 2011-2020 Heiko 'riot' Weinen <riot@c-base.org> and others.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
@@ -33,7 +33,7 @@ from isomer.component import handler
 from isomer.events.system import anonymous_event
 from isomer.events.client import send
 
-from isomer.misc import i18n as _, all_languages, language_token_to_name
+from isomer.misc import all_languages, language_token_to_name
 from isomer.logger import verbose, warn
 
 from isomer.ui.clientmanager.floodprotection import FloodProtectedManager

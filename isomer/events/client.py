@@ -3,7 +3,7 @@
 
 # Isomer - The distributed application framework
 # ==============================================
-# Copyright (C) 2011-2019 Heiko 'riot' Weinen <riot@c-base.org> and others.
+# Copyright (C) 2011-2020 Heiko 'riot' Weinen <riot@c-base.org> and others.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
@@ -60,7 +60,7 @@ class send(Event):
         isolog(
             "[CM-EVENT] Send event generated:",
             uuid,
-            str(packet)[:50],
+            str(packet)[:80],
             sendtype,
             lvl=events,
         )
@@ -69,19 +69,23 @@ class send(Event):
 class broadcast(Event):
     """Send a packet to a known client by UUID"""
 
-    def __init__(self, broadcasttype, content, *args):
+    def __init__(self, broadcasttype, content, group=None, *args):
         """
 
-        :param uuid: Unique User ID of known connection
-        :param packet: Data packet to transmit to client
+        :param broadcasttype: One of [users|clients|usergroup|clientgroup|socks]
+        :param content: Data packet to transmit to client
+        :param group: Used for group broadcasting (a list of either client or
+                      user uuids)
         :param args: Further Args
         """
         super(broadcast, self).__init__(*args)
         self.broadcasttype = broadcasttype
         self.content = content
+        self.group = group
 
         isolog(
-            "[CM-EVENT] Broadcast event generated:", broadcasttype, content, lvl=events
+            "[CM-EVENT] Broadcast event generated:", broadcasttype, content, group,
+            lvl=events
         )
 
 

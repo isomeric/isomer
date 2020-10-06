@@ -3,7 +3,7 @@
 
 # Isomer - The distributed application framework
 # ==============================================
-# Copyright (C) 2011-2019 Heiko 'riot' Weinen <riot@c-base.org> and others.
+# Copyright (C) 2011-2020 Heiko 'riot' Weinen <riot@c-base.org> and others.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
@@ -19,46 +19,47 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-Hackerfleet Operating System - Backend
+Isomer - Backend
 
-Test Isomer Auth
-==============
+Test Isomer Environment Management
+==================================
 
 
 
 """
 
 import os
-
 import pytest
+
 from isomer.tool.etc import load_instance
 from isomer.tool.tool import isotool
-
-from . import reset_base, run_cli
 
 
 def test_instance_clear():
     """Creates a new default instances and clears it without archiving"""
-    reset_base()
+    pytest.reset_base()
 
-    _ = run_cli(isotool, ['instance', 'create'], full_log=True)
-    # pytest.exit('LOL')
+    _ = pytest.run_cli(isotool, ['instance', 'create'], full_log=True)
 
-    assert os.path.exists('/tmp/isomer-test/etc/isomer/instances/default.conf')
-    assert not os.path.exists('/tmp/isomer-test/var/lib/isomer/default/green')
+    assert os.path.exists('/tmp/isomer-test/etc/isomer/instances/' +
+                          pytest.INSTANCENAME + '.conf')
+    assert not os.path.exists('/tmp/isomer-test/var/lib/isomer/' +
+                              pytest.INSTANCENAME + '/green')
 
-    result = run_cli(isotool, ['environment', 'clear', '--no-archive'])
-    print(result.output)
+    result = pytest.run_cli(isotool, ['environment', 'clear', '--no-archive'])
 
-    assert os.path.exists('/tmp/isomer-test/var/lib/isomer/default/green')
-    assert os.path.exists('/tmp/isomer-test/var/cache/isomer/default/green')
-    assert os.path.exists('/tmp/isomer-test/var/local/isomer/default/green')
+    assert os.path.exists('/tmp/isomer-test/var/lib/isomer/' +
+                          pytest.INSTANCENAME + '/green')
+    assert os.path.exists('/tmp/isomer-test/var/cache/isomer/' +
+                          pytest.INSTANCENAME + '/green')
+    assert os.path.exists('/tmp/isomer-test/var/local/isomer/' +
+                          pytest.INSTANCENAME + '/green')
     assert result.exit_code == 0
 
 
 def test_install():
     """Creates a new default instances and clears it without archiving"""
-    reset_base()
+    pytest.reset_base(unset_instance=True)
     import os
     import pwd
 
@@ -66,46 +67,55 @@ def test_install():
         """Return current username"""
         return pwd.getpwuid(os.getuid())[0]
 
-    _ = run_cli(isotool, ['instance', 'create'], full_log=True)
-    _ = run_cli(isotool, ['instance', 'set', 'user', get_username()], full_log=True)
-    _ = run_cli(isotool, ['environment', 'clear', '--no-archive'], full_log=True)
+    _ = pytest.run_cli(isotool, ['instance', 'create'], full_log=True)
+    _ = pytest.run_cli(isotool, ['instance', 'set', 'user', get_username()],
+                       full_log=True)
+    _ = pytest.run_cli(isotool, ['environment', 'clear', '--no-archive'], full_log=True)
 
-    assert os.path.exists('/tmp/isomer-test/etc/isomer/instances/default.conf')
-    assert os.path.exists('/tmp/isomer-test/var/lib/isomer/default/green')
+    assert os.path.exists('/tmp/isomer-test/etc/isomer/instances/' +
+                          pytest.INSTANCENAME + '.conf')
+    assert os.path.exists('/tmp/isomer-test/var/lib/isomer/' +
+                          pytest.INSTANCENAME + '/green')
 
     repo_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../..'))
 
-    result = run_cli(
+    result = pytest.run_cli(
         isotool,
-        ['--clog', '10', 'environment', 'install', '--no-sudo', '--source', 'copy',
-         '--url', repo_path],
+        ['environment', 'install', '--no-sudo', '--source', 'copy',
+         '--url', repo_path, '--skip-provisions', '--skip-frontend'],
         full_log=True
     )
 
     assert result.exit_code == 0
 
-    assert os.path.exists('/tmp/isomer-test/var/lib/isomer/default/green')
-    assert os.path.exists('/tmp/isomer-test/var/cache/isomer/default/green')
-    assert os.path.exists('/tmp/isomer-test/var/local/isomer/default/green')
+    assert os.path.exists('/tmp/isomer-test/var/lib/isomer/' +
+                          pytest.INSTANCENAME + '/green')
+    assert os.path.exists('/tmp/isomer-test/var/cache/isomer/' +
+                          pytest.INSTANCENAME + '/green')
+    assert os.path.exists('/tmp/isomer-test/var/local/isomer/' +
+                          pytest.INSTANCENAME + '/green')
     assert os.path.exists(
-        '/tmp/isomer-test/var/lib/isomer/default/green/venv/bin/python3')
-    assert os.path.exists('/tmp/isomer-test/var/lib/isomer/default/green/venv/bin/iso')
-    assert os.path.exists('/tmp/isomer-test/var/lib/isomer/default/green/repository')
+        '/tmp/isomer-test/var/lib/isomer/' +
+        pytest.INSTANCENAME + '/green/venv/bin/python3')
+    assert os.path.exists('/tmp/isomer-test/var/lib/isomer/' +
+                          pytest.INSTANCENAME + '/green/venv/bin/iso')
+    assert os.path.exists('/tmp/isomer-test/var/lib/isomer/' +
+                          pytest.INSTANCENAME + '/green/repository')
     assert os.path.exists(
-        '/tmp/isomer-test/var/lib/isomer/default/green/repository/frontend')
+        '/tmp/isomer-test/var/lib/isomer/' +
+        pytest.INSTANCENAME + '/green/repository/frontend')
 
-    instance_configuration = load_instance('default')
+    instance_configuration = load_instance(pytest.INSTANCENAME)
     environment = instance_configuration['environments']['green']
 
     assert environment['installed'] is True
-    # TODO: IMPORTANT|Investigation pending for 1.0.1 ff.
-    # Rest of the test deactivated due to strange problems on travis.ci.
-    return True
-    assert environment['provisioned'] is True
+    assert environment['provisioned'] is False
     assert environment['migrated'] is True
-    assert environment['frontend'] is True
-    assert environment['tested'] is True
-    assert environment['database'] == 'default_green'
+    assert environment['frontend'] is False
+    assert environment['tested'] is False
+    assert environment['database'] == pytest.INSTANCENAME + '_green'
 
     if result.exit_code != 0:
         print(result.output)
+        print("For more information on possibly failed subtasks, "
+              "consult /tmp/isomer_test_run_cli_logfile")

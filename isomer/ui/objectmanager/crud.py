@@ -3,7 +3,7 @@
 
 # Isomer - The distributed application framework
 # ==============================================
-# Copyright (C) 2011-2019 Heiko 'riot' Weinen <riot@c-base.org> and others.
+# Copyright (C) 2011-2020 Heiko 'riot' Weinen <riot@c-base.org> and others.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
@@ -52,7 +52,8 @@ from isomer.events.objectmanager import (
     objectdeletion,
 )
 from isomer.logger import warn, verbose, error, debug, critical
-from isomer.misc import nested_map_find, nested_map_update, std_uuid
+from isomer.misc import nested_map_find, nested_map_update
+from isomer.misc.std import std_uuid
 from pymongo import ASCENDING, DESCENDING
 
 from isomer.ui.objectmanager.cli import CliManager

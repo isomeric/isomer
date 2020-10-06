@@ -3,7 +3,7 @@
 
 # Isomer - The distributed application framework
 # ==============================================
-# Copyright (C) 2011-2019 Heiko 'riot' Weinen <riot@c-base.org> and others.
+# Copyright (C) 2011-2020 Heiko 'riot' Weinen <riot@c-base.org> and others.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
@@ -29,8 +29,8 @@ Client: Clientprofile to store client specific settings
 
 
 """
-from isomer.schemata.defaultform import savebutton, lookup_field
-from isomer.schemata.base import base_object, uuid_object, language_field
+from isomer.schemata.defaultform import savebutton
+from isomer.schemata.base import base_object, language_field
 from isomer.misc import i18n as _
 
 ScreenRotationSchema = {

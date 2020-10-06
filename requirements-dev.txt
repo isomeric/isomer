@@ -13,7 +13,11 @@ mccabe
 # Debugging
 pudb
 objgraph
-#guppy
+guppy3
+heapy
+pympler
+asciichartpy
+
 
 # Packaging
 wheel

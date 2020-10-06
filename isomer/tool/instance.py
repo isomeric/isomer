@@ -3,7 +3,7 @@
 
 # Isomer - The distributed application framework
 # ==============================================
-# Copyright (C) 2011-2019 Heiko 'riot' Weinen <riot@c-base.org> and others.
+# Copyright (C) 2011-2020 Heiko 'riot' Weinen <riot@c-base.org> and others.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
@@ -40,16 +40,32 @@ Instance management functionality.
 
 """
 
-import tomlkit
-import click
 import os
 import webbrowser
-from click_didyoumean import DYMGroup
+from socket import gethostname
+from shutil import rmtree
 
-from isomer.misc.path import set_instance
+import tomlkit
+import click
+from click_didyoumean import DYMGroup
+from isomer.error import (
+    abort,
+    EXIT_INVALID_CONFIGURATION,
+    EXIT_INSTALLATION_FAILED,
+    EXIT_INSTANCE_EXISTS,
+    EXIT_INSTANCE_UNKNOWN,
+    EXIT_SERVICE_INVALID,
+    EXIT_USER_BAILED_OUT,
+    EXIT_INVALID_PARAMETER,
+)
+from isomer.migration import apply_migrations
+from isomer.misc import sorted_alphanumerical
+from isomer.misc.path import set_instance, get_etc_instance_path, get_path
 from isomer.logger import warn, critical
 from isomer.tool import (
     _get_system_configuration,
+    _get_configuration,
+    get_next_environment,
     ask,
     finish,
     run_process,
@@ -57,8 +73,6 @@ from isomer.tool import (
     log,
     error,
     debug,
-    get_next_environment,
-    _get_configuration,
 )
 from isomer.tool.etc import (
     write_instance,
@@ -70,20 +84,7 @@ from isomer.tool.templates import write_template
 from isomer.tool.defaults import (
     service_template,
     nginx_template,
-    cert_file,
-    key_file,
-    combined_file,
     distribution,
-)
-from isomer.error import (
-    abort,
-    EXIT_INVALID_CONFIGURATION,
-    EXIT_INSTALLATION_FAILED,
-    EXIT_INSTANCE_EXISTS,
-    EXIT_INSTANCE_UNKNOWN,
-    EXIT_SERVICE_INVALID,
-    EXIT_USER_BAILED_OUT,
-    EXIT_INVALID_PARAMETER,
 )
 from isomer.tool.environment import (
     _install_environment,
@@ -91,6 +92,10 @@ from isomer.tool.environment import (
     _clear_environment,
     _check_environment,
 )
+from isomer.tool.database import copy_database
+from isomer.tool.version import _get_versions
+from isomer.ui.builder import copy_directory_tree
+from isomer.ui.store import DEFAULT_STORE_URL
 
 
 @click.group(cls=DYMGroup)
@@ -205,6 +210,7 @@ def set_parameter(ctx, parameter, value):
     log("Setting %s to %s" % (parameter, value))
     instance_configuration = ctx.obj["instance_configuration"]
     defaults = instance_template
+    converted_value = None
 
     try:
         parameter_type = type(defaults[parameter])
@@ -219,6 +225,9 @@ def set_parameter(ctx, parameter, value):
     except KeyError:
         log("Available parameters:", sorted(list(defaults.keys())))
         abort(EXIT_INVALID_PARAMETER)
+
+    if converted_value is None:
+        log("Converted value was None! Recheck the new config!", lvl=warn)
 
     instance_configuration[parameter] = converted_value
     log("New config:", instance_configuration, pretty=True, lvl=debug)
@@ -257,9 +266,10 @@ def create(ctx, instance_name):
 @instance.command(name="install", short_help="Install a fresh instance")
 @click.option("--force", "-f", is_flag=True, default=False)
 @click.option(
-    "--source", "-s", default="git", type=click.Choice(["link", "copy", "git"])
+    "--source", "-s", default="git",
+    type=click.Choice(["link", "copy", "git", "github"])
 )
-@click.option("--url", "-u", default="")
+@click.option("--url", "-u", default="", type=click.Path())
 @click.option(
     "--import-file", "--import", default=None, help="Import the specified backup"
 )
@@ -268,6 +278,9 @@ def create(ctx, instance_name):
     is_flag=True,
     default=False,
     help="Do not use sudo to install (Mostly for tests)",
+)
+@click.option(
+    "--release", "-r", default=None, help="Override installed release version"
 )
 @click.option("--skip-modules", is_flag=True, default=False)
 @click.option("--skip-data", is_flag=True, default=False)
@@ -294,6 +307,7 @@ def install(ctx, **kwargs):
         abort(50081)
 
     _clear_instance(ctx, force=kwargs["force"], clear=False, no_archive=True)
+
     _install_environment(ctx, **kwargs)
 
     ctx.obj["instance_configuration"]["source"] = kwargs["source"]
@@ -302,6 +316,7 @@ def install(ctx, **kwargs):
     write_instance(ctx.obj["instance_configuration"])
 
     _turnover(ctx, force=kwargs["force"])
+
     finish(ctx)
 
 
@@ -353,8 +368,13 @@ def remove(ctx, clear, no_archive):
     "--source",
     "-s",
     default="git",
-    type=click.Choice(["link", "copy", "git", "develop"]),
+    type=click.Choice(["link", "copy", "git", "develop", "store"]),
     help="Specify installation source/method",
+)
+@click.option(
+    "--store-url",
+    default=DEFAULT_STORE_URL,
+    help="Specify alternative store url (Default: %s)" % DEFAULT_STORE_URL,
 )
 @click.option(
     "--install-env",
@@ -373,11 +393,14 @@ def remove(ctx, clear, no_archive):
 )
 @click.argument("urls", nargs=-1)
 @click.pass_context
-def install_instance_modules(ctx, source, urls, install_env, force):
+def install_instance_modules(ctx, source, urls, install_env, force, store_url):
     """Add (and optionally immediately install) modules for an instance.
 
     This will add them to the instance's configuration, so they will be upgraded as well
     as reinstalled on other environment changes.
+
+    If you're installing from a store, you can specify a custom store URL with the
+    --store-url argument.
     """
 
     instance_name = ctx.obj["instance"]
@@ -385,6 +408,8 @@ def install_instance_modules(ctx, source, urls, install_env, force):
 
     for url in urls:
         descriptor = [source, url]
+        if store_url != DEFAULT_STORE_URL:
+            descriptor.append(store_url)
         if descriptor not in instance_configuration["modules"]:
             instance_configuration["modules"].append(descriptor)
         elif not force:
@@ -394,6 +419,14 @@ def install_instance_modules(ctx, source, urls, install_env, force):
     write_instance(instance_configuration)
 
     if install_env is True:
+        next_environment = get_next_environment(ctx)
+        environments = instance_configuration['environments']
+
+        if environments[next_environment]["installed"] is False:
+            log("Environment %s is not installed, cannot install modules."
+                % next_environment, lvl=warn)
+            abort(50600)
+            return
         del ctx.params["install_env"]
         ctx.forward(install_environment_modules)
 
@@ -407,6 +440,7 @@ def turnover(ctx, **kwargs):
     """Activates the other environment """
 
     _turnover(ctx, **kwargs)
+    finish(ctx)
 
 
 def _turnover(ctx, force):
@@ -428,9 +462,9 @@ def _turnover(ctx, force):
             abort(EXIT_INSTALLATION_FAILED)
 
         if (
-            not env.get("installed", False)
-            or not env.get("tested", False)
-            or not env.get("migrated", False)
+                not env.get("installed", False)
+                or not env.get("tested", False)
+                or not env.get("migrated", False)
         ):
             log("Installation failed, cannot activate!", lvl=critical)
             abort(EXIT_INSTALLATION_FAILED)
@@ -450,15 +484,120 @@ def _turnover(ctx, force):
     #   - if yes, Store instance configuration and terminate, we're done
 
     log("Turned instance over to", next_environment)
-    finish(ctx)
 
 
 @instance.command(short_help="Upgrades the other environment")
-# @click.option('--force', '-f', is_flag=True, default=False, help='Force turnover')
+@click.option("--release", "-r", default=None, help="Specify release to upgrade to")
+@click.option("--upgrade-modules", default=False, is_flag=True,
+              help="Also, upgrade modules if possible")
+@click.option("--restart", default=False, is_flag=True,
+              help="Restart systemd service via systemctl on success")
+@click.option("--handle-cache", "-c",
+              type=click.Choice(["ignore", "move", "copy"], case_sensitive=False),
+              default="ignore", help="Handle cached data as well (ignore, move, copy)")
+@click.option(
+    "--source",
+    "-s",
+    default="git",
+    type=click.Choice(["link", "copy", "git", "develop", "github", "pypi"]),
+    help="Specify installation source/method",
+)
+@click.option("--url", "-u", default="", type=click.Path())
 @click.pass_context
-def upgrade(ctx):
-    """Upgrades an instance on its other environment and turns over on success"""
-    log("Work in progress!")
+def upgrade(ctx, release, upgrade_modules, restart, handle_cache, source, url):
+    """Upgrades an instance on its other environment and turns over on success.
+
+    \b
+    1. Test if other environment is empty
+    1.1. No - archive and clear it
+    2. Copy current environment to other environment
+    3. Clear old bits (venv, frontend)
+    4. Fetch updates in other environment repository
+    5. Select a release
+    6. Checkout that release and its submodules
+    7. Install release
+    8. Copy database
+    9. Migrate data (WiP)
+    10. Turnover
+
+    """
+
+    instance_config = ctx.obj["instance_configuration"]
+    repository = get_path("lib", "repository")
+
+    installation_source = source if source is not None else instance_config['source']
+    installation_url = url if url is not None else instance_config['url']
+
+    environments = instance_config["environments"]
+
+    active = instance_config["environment"]
+
+    next_environment = get_next_environment(ctx)
+    if environments[next_environment]["installed"] is True:
+        _clear_environment(ctx, clear_env=next_environment)
+
+    source_paths = [
+        get_path("lib", "", environment=active),
+        get_path("local", "", environment=active)
+    ]
+
+    destination_paths = [
+        get_path("lib", "", environment=next_environment),
+        get_path("local", "", environment=next_environment)
+    ]
+
+    log(source_paths, destination_paths, pretty=True)
+
+    for source, destination in zip(source_paths, destination_paths):
+        log("Copying to new environment:", source, destination)
+        copy_directory_tree(source, destination)
+
+    if handle_cache != "ignore":
+        log("Handling cache")
+        move = handle_cache == "move"
+        copy_directory_tree(
+            get_path("cache", "", environment=active),
+            get_path("cache", "", environment=next_environment),
+            move=move
+        )
+
+    rmtree(get_path("lib", "venv"), ignore_errors=True)
+    # TODO: This potentially leaves frontend-dev:
+    rmtree(get_path("lib", "frontend"), ignore_errors=True)
+
+    releases = _get_versions(
+        ctx,
+        source=installation_source,
+        url=installation_url,
+        fetch=True
+    )
+
+    releases_keys = sorted_alphanumerical(releases.keys())
+
+    if release is None:
+        release = releases_keys[-1]
+    else:
+        if release not in releases_keys:
+            log("Unknown release. Maybe try a different release or source.")
+            abort(50100)
+
+    log("Choosing release", release)
+
+    _install_environment(
+        ctx, installation_source, installation_url, upgrade=True, release=release
+    )
+
+    new_database_name = instance_config["name"] + "_" + next_environment
+
+    copy_database(
+        ctx.obj["dbhost"],
+        active['database'],
+        new_database_name
+    )
+
+    apply_migrations(ctx)
+
+    finish(ctx)
 
 
 def update_service(ctx, next_environment):
@@ -557,86 +696,78 @@ def validate_services(ctx):
     help="Use a self-signed certificate",
     default=False,
     is_flag=True,
-    hidden=True,
 )
 @click.pass_context
 def cert(ctx, selfsigned):
     """instance a local SSL certificate"""
 
-    instance_cert(ctx, selfsigned)
-
-
-def instance_cert(ctx, selfsigned):
-    """instance a local SSL certificate"""
-
     instance_configuration = ctx.obj["instance_configuration"]
     instance_name = ctx.obj["instance"]
     next_environment = get_next_environment(ctx)
+
+    set_instance(instance_name, next_environment)
+
+    if selfsigned:
+        _instance_selfsigned(instance_configuration)
+    else:
+        log("This is work in progress")
+        abort(55555)
+
+        _instance_letsencrypt(instance_configuration)
+
+    finish(ctx)
+
+
+def _instance_letsencrypt(instance_configuration):
     hostnames = instance_configuration.get("web_hostnames", False)
     hostnames = hostnames.replace(" ", "")
-
-    instance_argument = "" if instance_name == "default" else "-i %s " % instance_name
 
     if not hostnames or hostnames == "localhost":
         log(
             "Please configure the public fully qualified domain names of this instance.\n"
-            "Use 'iso %sinstance set web_hostnames your.hostname.tld' to do that.\n"
-            "You can add multiple names by separating them with commas."
-            % instance_argument,
+            "Use 'iso instance set web_hostnames your.hostname.tld' to do that.\n"
+            "You can add multiple names by separating them with commas.",
             lvl=error,
         )
         abort(50031)
 
-    set_instance(instance_name, next_environment)
-
-    if not selfsigned:
-        contact = instance_configuration.get("contact", False)
-        if not contact:
-            log(
-                "You need to specify a contact mail address for this instance to generate certificates.\n"
-                "Use 'iso %sinstance set contact your@address.com' to do that."
-                % instance_argument,
-                lvl=error,
-            )
-            abort(50032)
-
-        success, result = run_process(
-            "/",
-            [
-                "certbot",
-                "--nginx",
-                "certonly",
-                "-m",
-                contact,
-                "-d",
-                hostnames,
-                "--agree-tos",
-                "-n",
-            ],
+    contact = instance_configuration.get("contact", False)
+    if not contact:
+        log(
+            "You need to specify a contact mail address for this instance to generate certificates.\n"
+            "Use 'iso instance set contact your@address.com' to do that.",
+            lvl=error,
         )
-        if not success:
-            log(
-                "Error getting certificate:",
-                format_result(result),
-                pretty=True,
-                lvl=error,
-            )
-            abort(50033)
+        abort(50032)
+
+    success, result = run_process(
+        "/",
+        [
+            "certbot",
+            "--nginx",
+            "certonly",
+            "-m",
+            contact,
+            "-d",
+            hostnames,
+            "--agree-tos",
+            "-n",
+        ],
+    )
+    if not success:
+        log(
+            "Error getting certificate:",
+            format_result(result),
+            pretty=True,
+            lvl=error,
+        )
+        abort(50033)
 
 
-@instance.command(short_help="instance snakeoil certificate")
-@click.pass_context
-def snakeoil(ctx):
-    """instance a local snakeoil SSL certificate"""
-
-    _instance_snakeoil(ctx)
-    finish(ctx)
-
-
-def _instance_snakeoil(ctx):
+def _instance_selfsigned(instance_configuration):
     """Generates a snakeoil certificate that has only been self signed"""
 
-    log("Generating self signed (insecure) certificate/key combination")
+    log("Generating self signed certificate/key combination")
 
     try:
         os.mkdir("/etc/ssl/certs/isomer")
@@ -649,17 +780,29 @@ def _instance_snakeoil(ctx):
     try:
         from OpenSSL import crypto
     except ImportError:
-        log("Need python3-crypto to do this.")
+        log("Need python3-openssl to do this.")
         abort(1)
+        return
 
-    from socket import gethostname
-
-    def create_self_signed_cert():
+    def create_self_signed_cert(target):
         """Create a simple self signed SSL certificate"""
+
+        key_file = os.path.join(target, "selfsigned.key")
+        cert_file = os.path.join(target, "selfsigned.crt")
+        combined_file = os.path.join(target, "selfsigned.pem")
+
+        cert_conf = {k: v for k, v in instance_configuration.items() if
+                     k.startswith("web_certificate")}
+
+        log("Certificate data:", cert_conf, pretty=True)
+
+        hostname = instance_configuration.get("web_hostnames", gethostname())
+        if isinstance(hostname, list):
+            hostname = hostname[0]
 
         # create a key pair
         k = crypto.PKey()
-        k.generate_key(crypto.TYPE_RSA, 1024)
+        k.generate_key(crypto.TYPE_RSA, 2048)
 
         if os.path.exists(cert_file):
             try:
@@ -680,13 +823,14 @@ def _instance_snakeoil(ctx):
 
         # create a self-signed certificate
         certificate = crypto.X509()
-        certificate.get_subject().C = "DE"
-        certificate.get_subject().ST = "Berlin"
-        certificate.get_subject().L = "Berlin"
+        certificate.get_subject().C = cert_conf.get("web_certificate_country",
+                                                    "EU")
+        certificate.get_subject().ST = cert_conf.get("web_certificate_state", "Sol")
+        certificate.get_subject().L = cert_conf.get("web_certificate_location", "Earth")
         # noinspection PyPep8
-        certificate.get_subject().O = "Hackerfleet"
-        certificate.get_subject().OU = "Hackerfleet"
-        certificate.get_subject().CN = gethostname()
+        certificate.get_subject().O = cert_conf.get("web_certificate_issuer", "Unknown")
+        certificate.get_subject().OU = cert_conf.get("web_certificate_unit", "Unknown")
+        certificate.get_subject().CN = hostname
         certificate.set_serial_number(serial)
         certificate.gmtime_adj_notBefore(0)
         certificate.gmtime_adj_notAfter(10 * 365 * 24 * 60 * 60)
@@ -713,7 +857,17 @@ def _instance_snakeoil(ctx):
             + str(crypto.dump_privatekey(crypto.FILETYPE_PEM, k), encoding="ASCII")
         )
 
-    create_self_signed_cert()
+    location = os.path.join(
+        get_etc_instance_path(),
+        instance_configuration.get("name")
+    )
+
+    create_self_signed_cert(location)
+
+    instance_configuration["web_key"] = os.path.join(location, "selfsigned.key")
+    instance_configuration["web_certificate"] = os.path.join(location, "selfsigned.crt")
+
+    write_instance(instance_configuration)
 
 
 @instance.command(short_help="install systemd service")
@@ -784,8 +938,8 @@ Using 'localhost' for now""",
 
     definitions = {
         "server_public_name": hostnames.replace(",", " "),
-        "ssl_certificate": cert_file,
-        "ssl_key": key_file,
+        "ssl_certificate": config["web_certificate"],
+        "ssl_key": config["web_key"],
         "host_url": "http://%s:%i/" % (address, port),
         "instance": instance_name,
         "environment": current_env,
@@ -812,8 +966,10 @@ Using 'localhost' for now""",
         if not os.path.exists(configuration_link):
             os.symlink(configuration_file, configuration_link)
 
-    log("Restarting nginx service")
-    run_process("/", ["systemctl", "restart", "nginx.service"], sudo="root")
-
+    if os.path.exists("/bin/systemctl"):
+        log("Restarting nginx service")
+        run_process("/", ["systemctl", "restart", "nginx.service"], sudo="root")
+    else:
+        log("No systemctl found, not restarting nginx")
 
 # TODO: Add instance user

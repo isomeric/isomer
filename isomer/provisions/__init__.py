@@ -3,7 +3,7 @@
 
 # Isomer - The distributed application framework
 # ==============================================
-# Copyright (C) 2011-2019 Heiko 'riot' Weinen <riot@c-base.org> and others.
+# Copyright (C) 2011-2020 Heiko 'riot' Weinen <riot@c-base.org> and others.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
@@ -32,8 +32,6 @@ from isomer.logger import isolog, debug, warn  # , verbose, error, warn
 from pkg_resources import iter_entry_points
 
 
-# TODO: This probably has to be moved somewhere else (due to clashes with
-#  namespace-architecture)
 def build_provision_store():
     available = {}
 
@@ -55,6 +53,3 @@ def build_provision_store():
     # pprint(available)
 
     return available
-
-
-__import__("pkg_resources").declare_namespace(__name__)

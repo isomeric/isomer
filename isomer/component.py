@@ -3,7 +3,7 @@
 
 # Isomer - The distributed application framework
 # ==============================================
-# Copyright (C) 2011-2019 Heiko 'riot' Weinen <riot@c-base.org> and others.
+# Copyright (C) 2011-2020 Heiko 'riot' Weinen <riot@c-base.org> and others.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
@@ -37,22 +37,29 @@ Provisions
 
 
 """
+
 import inspect
+import os
 import traceback
+from copy import deepcopy
+from random import randint
 from sys import exc_info
 from uuid import uuid4
 
 from circuits import Component
 from circuits.web.controllers import Controller
-from copy import deepcopy
-from jsonschema import ValidationError
-from pymongo.errors import ServerSelectionTimeoutError
-from random import randint
 from formal import model_factory
 
+# TODO: Part of the event-clean up efforts.
+#
+# noinspection PyUnresolvedReferences
 from isomer.events.system import isomer_ui_event, authorized_event, anonymous_event
+from isomer.events.client import send
 from isomer.logger import isolog, warn, critical, error, verbose
 from isomer.schemata.component import ComponentBaseConfigSchema
+from isomer.misc import nested_map_update
+from jsonschema import ValidationError
+from pymongo.errors import ServerSelectionTimeoutError
 
 
 # from pprint import pprint
@@ -145,17 +152,33 @@ def handler(*names, **kwargs):
     return wrapper
 
 
-class LoggingMeta(object):
-    """Baseclass for all components that adds naming and logging
+class BaseMeta(object):
+    """Isomer Base Component Class"""
+
+    context = None
+
+
+class LoggingMeta(BaseMeta):
+    """Base class for all components that adds naming and logging
     functionality"""
 
-    names = []
+    names: list = []
 
     def __init__(self, uniquename=None, *args, **kwargs):
         """Check for configuration issues and instantiate a component"""
+
+        def pick_unique_name():
+            while True:
+                uniquename = "%s%s" % (self.__class__.__name__, randint(0, 32768))
+                if uniquename not in self.names:
+                    self.uniquename = uniquename
+                    self.names.append(uniquename)
+
+                    break
+
         self.uniquename = ""
 
-        if uniquename:
+        if uniquename is not None:
             if uniquename not in self.names:
                 self.uniquename = uniquename
                 self.names.append(uniquename)
@@ -166,14 +189,9 @@ class LoggingMeta(object):
                     lvl=critical,
                     emitter="CORE",
                 )
+                pick_unique_name()
         else:
-            while True:
-                uniquename = "%s%s" % (self.__class__.__name__, randint(0, 32768))
-                if uniquename not in self.names:
-                    self.uniquename = uniquename
-                    self.names.append(uniquename)
-
-                    break
+            pick_unique_name()
 
     def log(self, *args, **kwargs):
         """Log a statement from this component"""
@@ -196,13 +214,13 @@ class LoggingMeta(object):
 class ConfigurableMeta(LoggingMeta):
     """Meta class to add configuration capabilities to circuits objects"""
 
-    configprops = {}
-    configform = []
+    configprops: dict = {}
+    configform: dict = []
 
-    def __init__(self, *args, no_db=False, **kwargs):
+    def __init__(self, uniquename, no_db=False, *args, **kwargs):
         """Check for configuration issues and instantiate a component"""
 
-        super(ConfigurableMeta, self).__init__(*args, **kwargs)
+        LoggingMeta.__init__(self, uniquename, *args, **kwargs)
 
         if no_db is True:
             self.no_db = True
@@ -242,6 +260,19 @@ class ConfigurableMeta(LoggingMeta):
             except ValidationError as e:
                 self.log("Error during configuration reading: ", e, type(e), exc=True)
 
+        environment_identifier = 'ISOMER_COMPONENT_' + self.uniquename
+
+        overrides = [key for key, item in
+                     os.environ.items() if key.startswith(environment_identifier)]
+
+        if len(overrides) > 0:
+            self.log('Environment overrides found:', overrides)
+            for item in overrides:
+                path = item.lstrip(environment_identifier).lower().split("_")
+                nested_map_update(self.config._fields, os.environ[item], path)
+
+            self.config.save()
+
         if self.config.active is False:
             self.log("Component disabled.", lvl=warn)
             # raise ComponentDisabled
@@ -262,10 +293,11 @@ class ConfigurableMeta(LoggingMeta):
         # pprint(self.configschema)
         configschemastore[self.name] = self.configschema
 
-    def unregister(self):
+    def unregister(self, *args):
         """Removes the unique name from the systems unique name list"""
+        super(ConfigurableMeta, self).unregister(*args)
+
         self.names.remove(self.uniquename)
-        super(ConfigurableMeta, self).unregister()
 
     def _read_config(self):
         """Read this component's configuration from the database"""
@@ -379,25 +411,44 @@ class ComponentDisabled(Exception):
 class LoggingComponent(LoggingMeta, Component):
     """Logging capable component for simple Isomer components"""
 
-    def __init__(self, uniquename=None, *args, **kwargs):
-        LoggingMeta.__init__(self, uniquename)
+    def __init__(self, uniquename, *args, **kwargs):
         Component.__init__(self, *args, **kwargs)
+        LoggingMeta.__init__(self, uniquename=uniquename, *args, **kwargs)
 
 
 class ConfigurableController(ConfigurableMeta, Controller):
     """Configurable controller for direct web access"""
 
-    def __init__(self, uniquename=None, *args, **kwargs):
-        ConfigurableMeta.__init__(self, uniquename, **kwargs)
+    def __init__(self, uniquename, *args, **kwargs):
         Controller.__init__(self, *args, **kwargs)
+        ConfigurableMeta.__init__(self, uniquename=uniquename, *args, **kwargs)
 
 
 class ConfigurableComponent(ConfigurableMeta, Component):
     """Configurable component for default Isomer modules"""
 
-    def __init__(self, uniquename=None, *args, **kwargs):
-        ConfigurableMeta.__init__(self, uniquename)
+    def __init__(self, uniquename, *args, **kwargs):
         Component.__init__(self, *args, **kwargs)
+        ConfigurableMeta.__init__(self, uniquename=uniquename, *args, **kwargs)
+
+    # TODO: Move to its own meta somehow
+    def _respond(self, event, data):
+        self.log(event.source(), event.realname(), event.channels[0], pretty=True)
+        response = {"component": event.source(), "action": event.action, "data": data}
+
+        self.fireEvent(send(event.client.uuid, response), event.channels[0])
+
+
+class FrontendMeta(LoggingMeta):
+    """Meta component for frontend-only modules
+
+    There is nothing to configure here.
+    """
+
+    def register(self, *_):
+        """Mock command, does not do anything except log invocation"""
+
+        self.log("Frontend meta component loaded:", self.uniquename)
 
 
 class ExampleComponent(ConfigurableComponent):
