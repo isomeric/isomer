@@ -510,29 +510,33 @@ def install_isomer(
             log("Unknown platform specified, proceeding anyway", lvl=warn)
             return
 
-        tool = platforms[platform_name]["tool"]
-        packages = platforms[platform_name]["packages"]
-        pre_install_commands = platforms[platform_name]["pre_install"]
-        post_install_commands = platforms[platform_name]["post_install"]
+        dependency_handling = platforms[platform_name].get('dependencies', None)
+        pre_install_commands = platforms[platform_name].get("pre_install", [])
+        post_install_commands = platforms[platform_name].get("post_install", [])
 
         for command in pre_install_commands:
+            log("Running pre install command", " ".join(command))
             if isinstance(command, dict):
                 handle_command(command)
             else:
-                log("Running pre install command", " ".join(command))
+
                 success, output = run_process(cwd, command, shell, sudo=use_sudo)
                 if not success:
                     log("Could not run command %s!" % command, lvl=error)
                     log(output, pretty=True)
 
-        log("Installing platform dependencies")
-        success, output = run_process(cwd, tool + packages, shell, sudo=use_sudo)
-        if not success:
-            log("Could not install %s dependencies!" % platform_name, lvl=error)
-            log(output, pretty=True)
+        if dependency_handling is not None:
+            log("Installing platform dependencies")
+            tool = platforms[platform_name]["tool"]
+            packages = platforms[platform_name]["packages"]
+
+            success, output = run_process(cwd, tool + packages, shell, sudo=use_sudo)
+            if not success:
+                log("Could not install %s dependencies!" % platform_name, lvl=error)
+                log(output, pretty=True)
 
         for command in post_install_commands:
-            log("Running post install command")
+            log("Running post install command", " ".join(command))
             success, output = run_process(cwd, command, shell, sudo=use_sudo)
             if not success:
                 log("Could not run command %s!" % command, lvl=error)
