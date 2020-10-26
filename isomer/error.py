@@ -113,3 +113,25 @@ def abort(error_object):
             "for more information!",
         )
         sys.exit(error_object["code"])
+
+
+def warn_error(error_object):
+    """Warn with a nice error message and if possible an error description
+    url leading to the online documentation."""
+
+    url = "https://isomer.readthedocs.io/en/latest/manual/Administration/Errors/%i.html"
+    if isinstance(error_object, int):
+        log("Unknown error code.")
+        log("You might be able to find more information above or here:",
+            url % error_object)
+    else:
+        log(
+            error_object.get(
+                "message", "Sorry, no error message for this specific problem found!"
+            )
+        )
+        log(
+            "Please see ",
+            url % error_object.get("code", "no_code"),
+            "for more information!",
+            )
