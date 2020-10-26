@@ -384,6 +384,13 @@ class Core(ConfigurableComponent):
         self.log("Initiating stop")
         Timer(5, Event.create("stop_core")).register(self)
 
+    @handler("signal", channel="*")
+    def _on_signal(self, signo, stack):
+        """Handle abort signals"""
+        if signo in [2, 15]:
+            self.log("Initiating stop")
+            Timer(5, Event.create("stop_core")).register(self)
+
     @handler("stop_core")
     def stop_core(self, event):
         """Stop execution and exit"""
