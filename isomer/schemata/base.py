@@ -37,6 +37,44 @@ base_object: For generating a basic Isomer object schema
 from isomer.misc import all_languages
 
 
+def coordinate(
+        title="Coordinate", description="A coordinate", default=None, display=True
+):
+    """Generates geo coordinate field"""
+
+    result = {
+        "type": "object",
+        "title": title,
+        "description": description,
+        "items": [
+            {
+                'lat': {
+                    'type': 'string',
+                    'pattern': "^[-+]?([1-8]?\d(\.\d+)?|90(\.0+)?)$",
+                    'title': 'Latitude',
+                    'description': 'From 90 Degrees North (+) to South (-)'
+                }
+            },
+            {
+                'lon': {
+                    'type': 'string',
+                    'pattern': '^[-+]?(180(\.0+)?|((1[0-7]\d)|([1-9]?\d))(\.\d+)?)$',
+                    'title': 'Longitude',
+                    'description': 'From 180 Degrees East (+) to West (-)'
+                }
+            }
+        ]
+    }
+
+    if not display:
+        result["x-schema-form"] = {"condition": "false"}
+
+    if default is not None:
+        result["default"] = default
+
+    return result
+
+
 def uuid_object(
     title="Reference", description="Select an object", default=None, display=True
 ):
