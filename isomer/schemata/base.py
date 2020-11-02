@@ -46,24 +46,20 @@ def coordinate(
         "type": "object",
         "title": title,
         "description": description,
-        "items": [
-            {
-                'lat': {
-                    'type': 'string',
-                    'pattern': "^[-+]?([1-8]?\d(\.\d+)?|90(\.0+)?)$",
-                    'title': 'Latitude',
-                    'description': 'From 90 Degrees North (+) to South (-)'
-                }
+        "properties": {
+            'lat': {
+                'type': 'string',
+                'pattern': "^[-+]?([1-8]?\d(\.\d+)?|90(\.0+)?)$",
+                'title': 'Latitude',
+                'description': 'From 90 Degrees North (+) to South (-)'
             },
-            {
-                'lon': {
-                    'type': 'string',
-                    'pattern': '^[-+]?(180(\.0+)?|((1[0-7]\d)|([1-9]?\d))(\.\d+)?)$',
-                    'title': 'Longitude',
-                    'description': 'From 180 Degrees East (+) to West (-)'
-                }
+            'lon': {
+                'type': 'string',
+                'pattern': '^[-+]?(180(\.0+)?|((1[0-7]\d)|([1-9]?\d))(\.\d+)?)$',
+                'title': 'Longitude',
+                'description': 'From 180 Degrees East (+) to West (-)'
             }
-        ]
+        }
     }
 
     if not display:
@@ -76,7 +72,7 @@ def coordinate(
 
 
 def uuid_object(
-    title="Reference", description="Select an object", default=None, display=True
+        title="Reference", description="Select an object", default=None, display=True
 ):
     """Generates a regular expression controlled UUID field"""
 
@@ -98,17 +94,17 @@ def uuid_object(
 
 
 def base_object(
-    name,
-    no_perms=False,
-    no_color=False,
-    has_owner=True,
-    hide_owner=True,
-    has_uuid=True,
-    roles_write=None,
-    roles_read=None,
-    roles_list=None,
-    roles_create=None,
-    all_roles=None,
+        name,
+        no_perms=False,
+        no_color=False,
+        has_owner=True,
+        hide_owner=True,
+        has_uuid=True,
+        roles_write=None,
+        roles_read=None,
+        roles_list=None,
+        roles_create=None,
+        all_roles=None,
 ):
     """Generates a basic object with RBAC properties"""
     base_schema = {"id": "#" + name, "type": "object", "name": name, "properties": {}}
