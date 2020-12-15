@@ -248,6 +248,8 @@ def cli(
                     log("RPi Python module not found. "
                         "This only works on a Raspberry Pi!", lvl=critical)
                     return False
+
+                GPIO.setmode(GPIO.BOARD)
                 GPIO.setup(RPI_GPIO_CHANNEL, GPIO.IN)
 
                 state = GPIO.input(RPI_GPIO_CHANNEL) is True
