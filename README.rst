@@ -14,6 +14,10 @@
     :target: https://requires.io/github/isomeric/isomer/requirements/?branch=master
     :alt: Requirements Status
 
+.. image:: https://badges.gitter.im/isomeric/community.svg
+    :target: https://gitter.im/isomeric/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge
+    :alt: Gitter Channel
+
 .. image:: https://img.shields.io/badge/IRC-%23hackerfleet%20on%20freenode-blue.svg
     :target: http://webchat.freenode.net/?randomnick=1&channels=hackerfleet&uio=d4>
     :alt: IRC Channel
@@ -93,7 +97,7 @@ for those <https://isomer.readthedocs.io/en/latest/start/quick.html>`__.
 
 If you intend to set up a development environment, `please follow the
 development workflow instructions
-<https://isomer.readthedocs.io/en/latest/dev/workflow.html>`__.
+<https://isomer.readthedocs.io/en/latest/dev/general/environment.html>`__.
 
 🕮 Documentation
 ================
