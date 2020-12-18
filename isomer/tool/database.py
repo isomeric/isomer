@@ -38,7 +38,10 @@ from isomer.tool import log, ask, finish
 from isomer.error import abort
 
 
-@click.group(cls=DYMGroup)
+@click.group(
+    cls=DYMGroup,
+    short_help="Database management"
+)
 @click.pass_context
 def db(ctx):
     """[GROUP] Database management operations"""

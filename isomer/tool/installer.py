@@ -49,7 +49,10 @@ from git import Repo, exc
 from isomer.version import version
 
 
-@click.group(cls=DYMGroup)
+@click.group(
+    cls=DYMGroup,
+    short_help="Installation helpers"
+)
 @click.option("--port", help="Specify local Isomer port", default=8055)
 @click.pass_context
 def install(ctx, port):

@@ -43,7 +43,10 @@ from isomer.misc.path import locations, get_path, get_log_path
 from isomer.tool import platforms, install_isomer, log, run_process, ask, finish
 
 
-@click.group(cls=DYMGroup)
+@click.group(
+    cls=DYMGroup,
+    short_help="System and platform management tasks"
+)
 @click.pass_context
 @click.option(
     "--platform",

@@ -41,7 +41,10 @@ from isomer.tool import log, ask, finish
 from isomer.tool.database import db
 
 
-@db.group(cls=DYMGroup)
+@db.group(
+    cls=DYMGroup,
+    short_help="Object operations"
+)
 @click.pass_context
 def objects(ctx):
     """[GROUP] Object operations"""

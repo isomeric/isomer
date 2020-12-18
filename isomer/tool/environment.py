@@ -77,7 +77,10 @@ from isomer.ui.store.inventory import get_store
 from isomer.ui.store import DEFAULT_STORE_URL
 
 
-@click.group(cls=DYMGroup)
+@click.group(
+    cls=DYMGroup,
+    short_help="Environment handling"
+)
 @click.pass_context
 def environment(ctx):
     """[GROUP] Various aspects of Isomer environment handling"""

@@ -146,7 +146,10 @@ def _ask_questionnaire():
     return answers
 
 
-@click.group(cls=DYMGroup)
+@click.group(
+    cls=DYMGroup,
+    short_help="Developer support operations"
+)
 def dev():
     """[GROUP] Developer support operations"""
 

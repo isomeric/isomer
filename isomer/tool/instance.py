@@ -98,7 +98,10 @@ from isomer.ui.builder import copy_directory_tree
 from isomer.ui.store import DEFAULT_STORE_URL
 
 
-@click.group(cls=DYMGroup)
+@click.group(
+    cls=DYMGroup,
+    short_help="Instance handling"
+)
 @click.pass_context
 def instance(ctx):
     """[GROUP] instance various aspects of Isomer"""

@@ -37,6 +37,7 @@ import getpass
 
 from typing import Optional
 from binascii import hexlify
+from click_didyoumean import DYMGroup
 
 from isomer.logger import warn, error, debug, verbose
 from isomer.misc.std import std_now
@@ -74,7 +75,10 @@ def get_remote_home(username):
         return "/home/" + username
 
 
-@cli.group()
+@cli.group(
+    cls=DYMGroup,
+    short_help="Remote Isomer Management"
+)
 @click.option("--name", "-n", default="default")
 @click.option("--install", "-i", is_flag=True, default=False)
 @click.option(

@@ -50,7 +50,11 @@ from isomer.version import version_info
 
 RPI_GPIO_CHANNEL = 5
 
-@click.group(context_settings={"help_option_names": ["-h", "--help"]}, cls=DYMGroup)
+@click.group(
+    context_settings={"help_option_names": ["-h", "--help"]},
+    cls=DYMGroup,
+    short_help="Main Isomer CLI"
+)
 @click.option(
     "--instance",
     "-i",
@@ -329,7 +333,10 @@ def cli(
 
 
 @with_plugins(iter_entry_points("isomer.management"))
-@cli.group(cls=DYMGroup)
+@cli.group(
+    cls=DYMGroup,
+    short_help="Plugin module management commands"
+)
 @click.pass_context
 def module(ctx):
     """[GROUP] Module commands"""

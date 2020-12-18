@@ -38,7 +38,10 @@ from formal import model_factory
 from isomer.tool import log, finish
 
 
-@click.group(cls=DYMGroup)
+@click.group(
+    cls=DYMGroup,
+    short_help="Configuration management operations"
+)
 @click.pass_context
 def config(ctx):
     """[GROUP] Configuration management operations"""
