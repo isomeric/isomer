@@ -46,6 +46,7 @@ def coordinate(
         "type": "object",
         "title": title,
         "description": description,
+        "additionalProperties": False,
         "properties": {
             'lat': {
                 'type': 'string',
@@ -95,6 +96,7 @@ def uuid_object(
 
 def base_object(
         name,
+        no_additional=False,
         no_perms=False,
         no_color=False,
         has_owner=True,
@@ -108,6 +110,9 @@ def base_object(
 ):
     """Generates a basic object with RBAC properties"""
     base_schema = {"id": "#" + name, "type": "object", "name": name, "properties": {}}
+
+    if no_additional:
+        base_schema['additionalProperties'] = False
 
     if not no_perms:
         if all_roles:

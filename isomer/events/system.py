@@ -29,6 +29,7 @@ Major Isomer event declarations
 
 """
 
+from copy import copy
 from typing import Dict
 
 from circuits.core import Event
@@ -36,8 +37,11 @@ from isomer.logger import isolog, events
 
 # from isomer.ui.clientobjects import User
 
+
 AuthorizedEvents: Dict[str, Event] = {}
 AnonymousEvents: Dict[str, Event] = {}
+
+populated = False
 
 
 def get_user_events():
@@ -57,6 +61,7 @@ def populate_user_events():
 
     global AuthorizedEvents
     global AnonymousEvents
+    global populated
 
     def inheritors(klass):
         """Find inheritors of a specified object class"""
@@ -76,7 +81,9 @@ def populate_user_events():
                         "event": child,
                         "name": name,
                         "doc": child.__doc__,
-                        "args": [],
+                        "summary": child.summary,
+                        "tags": child.tags,
+                        "args": child.args,
                     }
 
                     if child.__module__ in subclasses:
@@ -94,10 +101,15 @@ def populate_user_events():
     AnonymousEvents = inheritors(anonymous_event)
 
     # AuthorizedEvents.update(NormalEvents)
+    populated = True
 
 
 class isomer_basic_event(Event):
     """Basic Isomer event class"""
+
+    args = {}
+    tags = []
+    summary = "Basic Isomer Event"
 
     def __init__(self, *args, **kwargs):
         """Initializes a basic Isomer event.
@@ -262,3 +274,97 @@ class debugrequest(authorized_event):
         super(debugrequest, self).__init__(*args)
 
         isolog("Created debugrequest", lvl=events, emitter="DEBUG-EVENT")
+
+
+asyncapi_template = {
+    "asyncapi": "2.0.0",
+    "info": {
+        "title": "isomer",
+        "version": "2.0.0",
+        "contact": {
+            "name": "Isomer API Support",
+            "url": "http://github.com/isomeric/api",
+            "email": "info@isomeric.eu"
+        },
+        "license": {
+            "name": "AGPL 3.0",
+            "url": "http://www.gnu.org/licenses/agpl-3.0.en.html"
+        },
+        "description": "This is a local Isomer API.",
+
+    },
+    "tags": [
+        {
+            "name": "isomer",
+            "description": "Isomer Application Framework"
+        }
+    ],
+    "servers": {
+        "development": {
+            "url": "ws://localhost:15674/ws",
+            "description": "Local rabbitmq server with stomp",
+            "protocol": "stomp",
+            "protocolVersion": "1.2.0"
+        },
+        "docker-compose": {
+            "url": "ws://rabbit_container:15674/ws",
+            "description": "Local docker composer based rabbitmq server with stomp",
+            "protocol": "stomp",
+            "protocolVersion": "1.2.0"
+        }
+    },
+    "channels": {}
+}
+
+
+# {
+#    'event': <class 'isomer.ui.configurator.get'>,
+#    'name': 'isomer.ui.configurator.get',
+#    'doc': 'A client requires a schema to validate data or display a form',
+#    'args': {'uuid': jsonschema}
+# }
+
+# {'uuid': {'description': 'Select an object',
+#           'pattern': '^[a-fA-F0-9]*$',
+#           'title': 'Reference',
+#           'type': 'string'}}
+
+def generate_asyncapi():
+    """Generate async-api definition"""
+
+    if not populated:
+        populate_user_events()
+
+    api_events = {**AuthorizedEvents, **AnonymousEvents}
+
+    api = copy(asyncapi_template)
+
+    for package, channel_events in api_events.items():
+        isolog('Inspecting package:', package)
+        for name, meta in channel_events.items():
+            isolog(meta, lvl=verbose)
+            if meta['args'] == {}:
+                isolog(name.ljust(20), ":", meta, pretty=True, lvl=debug)
+            else:
+                isolog(meta['args'], pretty=True, lvl=debug)
+                channel, event_name = meta['name'].rsplit('.', 1)
+                channel = channel.replace(".", "/")
+
+                if channel not in api['channels']:
+                    api['channels'][channel] = {}
+
+                api['channels'][channel][event_name] = {
+                    "summary": meta["summary"],
+                    "tags": meta["tags"],
+                    "description": meta["doc"],
+                    'operationId': event_name,
+                    "message": {
+                        "payload": meta['args'],
+                    }
+                }
+
+    isolog("\n", api, pretty=True, lvl=hilight)
+
+    return api
+
+

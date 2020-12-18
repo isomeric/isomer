@@ -151,6 +151,166 @@ def dev():
     """[GROUP] Developer support operations"""
 
 
+@dev.command(short_help="generate async-api definition")
+@click.option(
+    "--filename",
+    "-f",
+    help="Filename to write output",
+    default="",
+    type=click.types.Path(exists=False),
+)
+@click.pass_context
+def generate_api(ctx, filename):
+    """Generate and output isomer async api definition"""
+
+    _ = get_components("")
+
+    api = generate_asyncapi()
+
+    if filename == "":
+        print(api)
+    else:
+        with open(filename, "w") as f:
+            dump(api, f, indent=4)
+
+
+@dev.command(short_help="list known events")
+def events():
+    """List all known authorized and anonymous events"""
+
+    from isomer.events.system import (
+        get_anonymous_events,
+        get_user_events,
+        populate_user_events,
+    )
+
+    populate_user_events()
+
+    event_list = {**get_user_events(), **get_anonymous_events()}
+
+    log("Events:\n", event_list, pretty=True)
+
+
+@dev.command(short_help="export schemata")
+@click.option("--output-path", "-o", help="output path", type=click.types.Path())
+@click.option(
+    "--format",
+    "-f",
+    help="Specify format",
+    default="jsonschema",
+    type=click.types.Choice(["jsonschema", "typescript"]),
+)
+@click.option(
+    "--no-entity-mode",
+    "-n",
+    help="Do not use ngrx-auto-entity mode (removes key and does not uses classes)",
+    default=False,
+    is_flag=True,
+)
+@click.option(
+    "--include-meta",
+    "-m",
+    is_flag=True,
+    default=False,
+    help="Include meta properties like permissions",
+)
+@click.argument("schemata", nargs=-1)
+@click.pass_context
+def export_schemata(ctx, output_path, format, no_entity_mode, include_meta, schemata):
+    """Utility function for exporting known schemata to various formats
+
+    Exporting to typescript requires the "json-schema-to-typescript" tool.
+    You can install it via:
+
+        npm -g install json-schema-to-typescript
+    """
+
+    # TODO: This one is rather ugly to edit, should the need arise..
+    banner = (
+        "/* tslint:disable */\n/**\n* This file was automatically generated "
+        "by Isomer's command line tool using:\n"
+        " * 'iso dev export-schemata -f typescript' "
+        "- using json-schema-to-typescript.\n"
+        " * DO NOT MODIFY IT BY HAND. Instead, modify the source isomer object "
+        "file,\n* and run the iso tool schemata exporter again, to regenerate this file.\n*/"
+    )
+
+    # TODO: This should be employable to automatically generate
+    #  typescript definitions inside a modules frontend part as part
+    #  of the development cycle.
+
+    from isomer import database, schemastore
+
+    database.initialize(ctx.obj["dbhost"], ctx.obj["dbname"], ignore_fail=True)
+
+    if len(schemata) == 0:
+        schemata = database.objectmodels.keys()
+
+    if output_path is not None:
+        stdout = False
+        if not os.path.exists(output_path):
+            abort("Output Path doesn't exist.")
+    else:
+        stdout = True
+
+    for item in schemata:
+        if item not in schemastore.schemastore:
+            log("Schema not registered:", item, lvl=warn)
+            continue
+
+        schema = schemastore.schemastore[item]["schema"]
+
+        if not include_meta:
+            if "perms" in schema["properties"]:
+                del schema["properties"]["perms"]
+            if "roles_create" in schema:
+                del schema["roles_create"]
+            if "required" in schema:
+                del schema["required"]
+
+        if format == "jsonschema":
+            log("Generating json schema of", item)
+
+            if stdout:
+                print(json.dumps(schema, indent=4))
+            else:
+                with open(os.path.join(output_path, item + ".json"), "w") as f:
+                    json.dump(schema, f, indent=4)
+
+        elif format == "typescript":
+            log("Generating typescript annotations of", item)
+
+            success, result = run_process(
+                output_path,
+                [
+                    "json2ts",
+                    "--bannerComment",
+                    banner,
+                ],
+                stdin=json.dumps(schema).encode("utf-8"),
+            )
+            typescript = result.output.decode("utf-8")
+
+            if no_entity_mode is False:
+                typescript = (
+                        "import { Entity, Key } from '@briebug/ngrx-auto-entity';\n"
+                        + typescript
+                )
+                typescript = typescript.replace("uuid", "@Key uuid")
+                typescript = typescript.replace(
+                    "export interface",
+                    "@Entity({modelName: '%s'})\n" "export class" % item,
+                )
+
+            if stdout:
+                print(typescript)
+            else:
+                with open(os.path.join(output_path, item + ".ts"), "w") as f:
+                    f.write(typescript)
+
+    finish(ctx)
+
+
 @dev.command(short_help="create starterkit module")
 @click.option(
     "--clear-target",

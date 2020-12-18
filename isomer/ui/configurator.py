@@ -45,12 +45,37 @@ class get(authorized_event):
     """A client requires a schema to validate data or display a form"""
 
     roles = ["admin"]
+    tags = [
+        {"name": "admin", "description": "Administrative topics"},
+        {"name": "configuration", "description": "Configuration topics"}
+    ]
+    summary = "Get component configuration data"
+    channel_hints = {
+        'uuid': {
+        }
+    }
+
+    args = {
+        "uuid": uuid_object()
+    }
 
 
 class put(authorized_event):
     """A client requires a schema to validate data or display a form"""
 
     roles = ["admin"]
+    tags = [
+        {"name": "admin", "description": "Administrative topics"},
+        {"name": "configuration", "description": "Configuration topics"}
+    ]
+    summary = "Store component configuration data"
+    channel_hints = {
+        'configuration': {}
+    }
+
+    args = {
+        'configuration': {'type': 'object'}
+    }
 
 
 class Configurator(ConfigurableComponent):
