@@ -205,6 +205,24 @@ def create_module(clear_target, target):
     help="Also list isomer-sails (integrated) modules",
 )
 @click.option(
+    "--schemata",
+    is_flag=True,
+    default=False,
+    help="Also list registered schemata"
+)
+@click.option(
+    "--management",
+    is_flag=True,
+    default=False,
+    help="Also list registered management commands"
+)
+@click.option(
+    "--provisions",
+    is_flag=True,
+    default=False,
+    help="Also list registered provisions"
+)
+@click.option(
     "--frontend-only",
     "-f",
     is_flag=True,
@@ -222,13 +240,29 @@ def create_module(clear_target, target):
     "--directory", "-d", is_flag=True, default=False, help="Show directory of module"
 )
 @click.option(
-    "--sort-key", "-k", default="package",
-    type=click.Choice(["name", "package", "classname", "location", "frontend"])
+    "--sort-key",
+    "-k",
+    default="package",
+    type=click.Choice(
+        ["name", "package", "classname", "location", "frontend", "group"]),
 )
 @click.option(
-    "--long", is_flag=True, default=False, help="Show full table"
+    "--all",
+    "-a",
+    is_flag=True,
+    default=False,
+    help="List all registered entrypoints"
 )
-def entrypoints(base, sails, frontend_only, frontend_list, directory, sort_key, long):
+@click.option(
+    "--filter",
+    "-f",
+    default="",
+    type=str,
+    help="Filter table by string"
+)
+@click.option("--long", is_flag=True, default=False, help="Show full table")
+def entrypoints(base, sails, schemata, management, provisions, frontend_only,
+                frontend_list, directory, sort_key, all, filter, long):
     """Display list of entrypoints and diagnose module loading problems."""
 
     log("Showing entrypoints:")
@@ -236,19 +270,30 @@ def entrypoints(base, sails, frontend_only, frontend_list, directory, sort_key, 
     full_component = namedtuple(
         "Component", ["name", "package", "classname", "location", "frontend", "group"]
     )
-    component = namedtuple(
-        "Component", ["name", "package", "frontend"]
-    )
+    component = namedtuple("Component", ["name", "package", "frontend", "group"])
     results = []
 
     from pkg_resources import iter_entry_points
 
-    entry_points = {'components': iter_entry_points(group="isomer.components", name=None)}
+    entry_points = {
+        "components": iter_entry_points(group="isomer.components", name=None)
+    }
+
+    if all:
+        sails = base = schemata = management = provisions = True
 
     if sails:
-        entry_points['sails'] = iter_entry_points(group="isomer.sails", name=None)
+        entry_points["sails"] = iter_entry_points(group="isomer.sails", name=None)
     if base:
-        entry_points['base'] = iter_entry_points(group="isomer.base", name=None)
+        entry_points["base"] = iter_entry_points(group="isomer.base", name=None)
+    if schemata:
+        entry_points["schemata"] = iter_entry_points(group="isomer.schemata", name=None)
+    if management:
+        entry_points["management"] = iter_entry_points(group="isomer.management",
+                                                       name=None)
+    if provisions:
+        entry_points["provisions"] = iter_entry_points(group="isomer.provisions",
+                                                       name=None)
 
     log("Entrypoints:", entry_points, pretty=True, lvl=verbose)
     try:
@@ -289,8 +334,12 @@ def entrypoints(base, sails, frontend_only, frontend_list, directory, sort_key, 
                         frontend = pkg_resources.resource_listdir(pkg, "frontend")
                         log("Frontend resources found:", frontend, lvl=debug)
                     except Exception as e:
-                        log("Exception during frontend resource lookup:", e, lvl=debug,
-                            exc=True)
+                        log(
+                            "Exception during frontend resource lookup:",
+                            e,
+                            lvl=debug,
+                            exc=True,
+                        )
                         frontend = None
 
                     if frontend not in (None, []):
@@ -299,33 +348,42 @@ def entrypoints(base, sails, frontend_only, frontend_list, directory, sort_key, 
                             frontend = "[X]"
                     else:
                         frontend = "[ ]"
+
+                    if filter != "":
+                        if filter not in name and filter not in package and filter not in location:
+                            continue
+
                     if long:
+                        if key in ("schemata", "provisions"):
+                            classname = "[SCHEMA]"
+                        else:
+                            classname = repr(loaded).lstrip("<class '").rstrip("'>")
+
                         result = full_component(
                             frontend=frontend,
                             name=name,
                             package=package,
-                            classname=repr(loaded).lstrip("<class '").rstrip("'>"),
+                            classname=classname,
                             location=location if directory else "use -d",
-                            group=key
+                            group=key,
                         )
                     else:
                         result = component(
-                            frontend=frontend,
-                            name=name,
-                            package=package
+                            frontend=frontend, name=name, package=package, group=key
                         )
 
                     if not frontend_only or frontend:
                         results.append(result)
                 except ImportError as e:
-                    log("Exception while iterating entrypoints:", e, type(e), exc=True)
+                    log("Exception while iterating entrypoints:", e, type(e), lvl=warn,
+                        exc=True)
     except ModuleNotFoundError as e:
         log("Module could not be loaded:", e, exc=True)
 
     results = sorted(results, key=attrgetter(sort_key))
 
     table = std_table(results)
-    log("Found components:\n%s" % table)
+    log("\n%s" % table)
 
 
 @dev.command(short_help="Grab and show software store inventory")
