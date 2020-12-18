@@ -183,6 +183,7 @@ setup(
     syslog=isomer.ui.syslog:Syslog
     maintenance=isomer.database.components:Maintenance
     backup=isomer.database.components:BackupManager
+    memlog=isomer.debugger:MemoryLogger
 
     [isomer.sails]
     auth=isomer.ui.auth:Authenticator

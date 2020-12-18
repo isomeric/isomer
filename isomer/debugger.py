@@ -30,8 +30,12 @@ Debugger overlord
 """
 
 import json
+from collections import deque
+from itertools import islice
 from uuid import uuid4
 
+import asciichartpy
+from circuits.core import Timer
 from circuits.core.events import Event
 from circuits.core.handlers import reprhandler
 from circuits.io import stdin
@@ -153,6 +157,19 @@ class cli_mem_heap(Event):
     pass
 
 
+class cli_mem_chart(Event):
+    """Output memory consumption chart
+
+    Arguments:
+        count   Integer specifying the number of last measurements to chart
+
+    Additional options:
+        -o      Omit first value
+    """
+
+    pass
+
+
 class cli_exception_test(Event):
     """Raise test-exception to check exception handling"""
 
@@ -191,12 +208,6 @@ class IsomerDebugger(ConfigurableComponent):
         else:
             self.root = root
 
-        if hpy is not None:
-            # noinspection PyCallingNonCallable
-            self.heapy = hpy()
-        else:
-            self.log("Cannot use heapy. guppy package missing?", lvl=warn)
-
         if objgraph is None:
             self.log("Cannot use objgraph.", lvl=warn)
 
@@ -204,11 +215,6 @@ class IsomerDebugger(ConfigurableComponent):
             self.fireEvent(cli_register_event("errors", cli_errors))
             self.fireEvent(cli_register_event("log_level", cli_log_level))
             self.fireEvent(cli_register_event("comp_graph", cli_comp_graph))
-            self.fireEvent(cli_register_event("mem_growth", cli_mem_growth))
-            self.fireEvent(cli_register_event("mem_hogs", cli_mem_hogs))
-            self.fireEvent(cli_register_event("mem_heap", cli_mem_heap))
-            self.fireEvent(cli_register_event("mem_summary", cli_mem_summary))
-            self.fireEvent(cli_register_event("mem_diff", cli_mem_diff))
             self.fireEvent(cli_register_event("locations", cli_locations))
             self.fireEvent(cli_register_event("test_exception", cli_exception_test))
         except AttributeError:
@@ -272,40 +278,6 @@ class IsomerDebugger(ConfigurableComponent):
 
         for path in locations:
             self.log(get_path(path, ""), pretty=True)
-
-    @handler("cli_mem_summary")
-    def cli_mem_summary(self, event):
-        """Output memory usage summary"""
-
-        all_objects = muppy.get_objects()
-        state = summary.summarize(all_objects)
-        summary.print_(state)
-
-    @handler("cli_mem_diff")
-    def cli_mem_diff(self, event):
-        """Output difference in memory usage since last call"""
-
-        self.tracker.print_diff()
-
-    @handler("cli_mem_hogs")
-    def cli_mem_hogs(self, *args):
-        """Output most memory intense objects"""
-
-        self.log("Memory hogs:", lvl=critical)
-        objgraph.show_most_common_types(limit=20)
-
-    @handler("cli_mem_growth")
-    def cli_mem_growth(self, *args):
-        """Output data about memory growth"""
-
-        self.log("Memory growth since last call:", lvl=critical)
-        objgraph.show_growth()
-
-    @handler("cli_mem_heap")
-    def cli_mem_heap(self, *args):
-        """Output memory heap data"""
-
-        self.log("Heap log:", self.heapy.heap(), lvl=critical)
 
     @handler("cli_exception_test")
     def cli_exception_test(self, *args):
@@ -488,3 +460,187 @@ class CLI(ConfigurableComponent):
             "Registering event hook:", event.cmd, event.thing, pretty=True, lvl=verbose
         )
         self.hooks[event.cmd] = event.thing
+
+
+class MemoryLogger(ConfigurableComponent):
+    """
+    Periodically logs memory consumption statistics
+    """
+
+    configprops = {
+        "notificationusers": {
+            "type": "array",
+            "title": "Notification receivers",
+            "description": "Users that should be notified about exceptions.",
+            "default": [],
+            "items": {
+                "oneOf": [
+                    {"type": "string"},
+                    {"type": "null"}
+                ]
+            },
+        },
+        "interval": {
+            "type": "integer",
+            "title": "Interval",
+            "description": "Memory growth snapshot interval",
+            "default": 600,
+        },
+        "snapshot_diffs": {
+            "type": "integer",
+            "title": "History length (snapshots)",
+            "description": "Number of memory snapshots diffs to keep",
+            "default": 30
+        },
+        "size_diffs": {
+            "type": "integer",
+            "title": "History length (size)",
+            "description": "Number of memory size diffs to keep",
+            "default": 1000
+        }
+    }
+    channel = "isomer-web"
+
+    def __init__(self, *args):
+        super(MemoryLogger, self).__init__("MEM", *args)
+
+        if self.args['debug'] is True:
+            self.log('Debug flag set, decreasing memory logger measurement '
+                     'interval to 20 seconds')
+            interval = 20
+        else:
+            interval = self.config.interval
+
+        self.size = 0
+        self.snapshot_diffs = deque(maxlen=self.config.snapshot_diffs)
+        self.size_diffs = deque(maxlen=self.config.size_diffs)
+
+        if hpy is not None:
+            # noinspection PyCallingNonCallable
+            self.heapy = hpy()
+        else:
+            self.log("Cannot use heapy. guppy package missing?", lvl=warn)
+
+        if objgraph is None:
+            self.log("Cannot use objgraph.", lvl=warn)
+
+        try:
+            self.fireEvent(cli_register_event("mem_growth", cli_mem_growth))
+            self.fireEvent(cli_register_event("mem_hogs", cli_mem_hogs))
+            self.fireEvent(cli_register_event("mem_heap", cli_mem_heap))
+            self.fireEvent(cli_register_event("mem_summary", cli_mem_summary))
+            self.fireEvent(cli_register_event("mem_diff", cli_mem_diff))
+            self.fireEvent(cli_register_event("mem_chart", cli_mem_chart))
+
+        except AttributeError:
+            pass  # We're running in a test environment and root is not yet running
+
+        try:
+            self.tracker = tracker.SummaryTracker()
+            self.tracking_timer = Timer(
+                interval, Event.create("memlog-timer"), persist=True
+            ).register(self)
+
+        except AttributeError:
+            self.tracking_timer = None
+            self.log("No pympler library for memory analysis installed.", lvl=warn)
+
+        self.log("Started. Notification users: ", self.config.notificationusers)
+
+    @handler("memlog-timer")
+    def memlog_timer(self):
+
+        growth = 0
+        diff = self.tracker.diff()
+
+        for element in diff:
+            growth += element[2]
+
+        self.size += growth
+        self.snapshot_diffs.append(diff)
+        self.size_diffs.append(growth)
+
+        log_level = debug
+        if growth > (self.size * 0.1) and len(self.size_diffs) > 1:
+            self.log('Memory growth exceeded 10%!', lvl=warn)
+            log_level = warn
+        self.log("Memory: total %i growth %i (in %i seconds)" % (
+            self.size, growth, self.config.interval), lvl=log_level)
+
+    @handler("cli_mem_summary")
+    def cli_mem_summary(self, event):
+        """Output memory usage summary"""
+
+        all_objects = muppy.get_objects()
+        state = summary.summarize(all_objects)
+        summary.print_(state)
+
+    @handler("cli_mem_diff")
+    def cli_mem_diff(self, event):
+        """Output difference in memory usage since last call"""
+
+        self.tracker.print_diff()
+
+    @handler("cli_mem_hogs")
+    def cli_mem_hogs(self, *args):
+        """Output most memory intense objects"""
+
+        self.log("Memory hogs:", lvl=critical)
+        objgraph.show_most_common_types(limit=20)
+
+    @handler("cli_mem_growth")
+    def cli_mem_growth(self, *args):
+        """Output data about memory growth"""
+
+        self.log("Memory growth since last call:", lvl=critical)
+        objgraph.show_growth()
+
+    @handler("cli_mem_heap")
+    def cli_mem_heap(self, *args):
+        """Output memory heap data"""
+
+        self.log("Heap log:", self.heapy.heap(), lvl=critical)
+
+    @handler("cli_mem_chart")
+    def cli_mem_chart(self, *args):
+        """Output memory consumption chart"""
+
+        config = {
+            'colors': [
+                asciichartpy.blue,
+                asciichartpy.red
+            ],
+            'height': 10,
+            'format': '{:6.0f}kB'
+        }
+
+        total_length = len(self.size_diffs)
+
+        try:
+            count = int(args[-1])
+        except (TypeError, ValueError, IndexError):
+            count = total_length
+
+        if count > total_length:
+            self.log('Only %i measurements available!' % total_length, lvl=warn)
+            return
+
+        size_k = [x / 1024.0 for x in islice(
+            self.size_diffs, len(self.size_diffs) - count, len(self.size_diffs)
+        )]
+
+        if len(args) > 0:
+            if "-o" in args:
+                size_k.pop(0)
+
+        length = len(size_k)
+
+        self.log(
+            "Memory consumption (%i measurements, "
+            "%i seconds interval, %3.0f minutes total)" % (
+                length,
+                self.config.interval,
+                (length * self.config.interval / 60.0)
+            )
+        )
+        self.log("\n%s" % asciichartpy.plot(size_k, config), nc=True)
