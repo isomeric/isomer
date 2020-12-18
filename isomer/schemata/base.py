@@ -37,7 +37,7 @@ base_object: For generating a basic Isomer object schema
 from isomer.misc import all_languages
 
 
-def coordinate(
+def geo_coordinate(
         title="Coordinate", description="A coordinate", default=None, display=True
 ):
     """Generates geo coordinate field"""
