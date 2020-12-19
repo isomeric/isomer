@@ -30,6 +30,7 @@ from isomer.events.client import send
 from isomer.events.system import reload_configuration
 from isomer.component import ConfigurableComponent, authorized_event, handler
 from isomer.schemata.component import ComponentConfigSchemaTemplate as Schema
+from isomer.schemata.base import uuid_object
 from isomer.database import ValidationError
 from isomer.logger import error, warn
 from formal import model_factory
