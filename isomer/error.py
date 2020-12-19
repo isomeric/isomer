@@ -50,23 +50,30 @@ def log(*args, **kwargs):
 
 EXIT_INVALID_ENVIRONMENT = {"code": 1, "message": ""}
 EXIT_INVALID_CONFIGURATION = {"code": 2, "message": ""}
+EXIT_NOT_OVERWRITING_CONFIGURATION = {
+    "code": 4,
+    "message": "Configuration directory exists, not overwriting!",
+}
+EXIT_NO_CONFIGURATION = {"code": 61, "message": ""}
+
 EXIT_INVALID_SOURCE = {
     "code": 3,
     "message": "Only installing from github or local is currently supported",
 }
-EXIT_ROOT_REQUIRED = {
-    "code": 4,
-    "message": "Need root access to install. Use sudo!"
+EXIT_ROOT_REQUIRED = {"code": 4, "message": "Need root access to install. Use sudo."}
+EXIT_NO_PERMISSION = {"code": 5, "message": "No permission. Maybe use sudo?"}
+EXIT_INSTALLATION_FAILED = {
+    "code": 11,
+    "message": "Installation failed. Check logs and/or increase logging via "
+               "--clog/--flog",
 }
-EXIT_NO_PERMISSION = {"code": 5, "message": ""}
-EXIT_INSTALLATION_FAILED = {"code": 11, "message": ""}
-EXIT_PROVISIONING_FAILED = {"code": 12, "message": ""}
+EXIT_PROVISIONING_FAILED = {"code": 12, "message": "Could not provision required data."}
 EXIT_INSTANCE_EXISTS = {"code": 21, "message": "Instance already exists"}
 EXIT_INSTANCE_UNKNOWN = {"code": 22, "message": ""}
 EXIT_SERVICE_INVALID = {"code": 31, "message": ""}
 EXIT_USER_BAILED_OUT = {"code": 41, "message": ""}
 EXIT_NOTHING_TO_ARCHIVE = {"code": 51, "message": ""}
-EXIT_NO_CONFIGURATION = {"code": 61, "message": ""}
+
 EXIT_INVALID_PARAMETER = {
     "code": 62,
     "message": "Invalid instance configuration parameter specified",
@@ -79,16 +86,13 @@ EXIT_NO_CERTIFICATE = {"code": 63, "message": ""}
 EXIT_NO_DATABASE = {"code": 50020, "message": "No database is available"}
 EXIT_ISOMER_URL_REQUIRED = {
     "code": 50100,
-    "message": "You need to specify a source url via --url/-u for isomer"
+    "message": "You need to specify a source url via --url/-u for isomer",
 }
 EXIT_STORE_PACKAGE_NOT_FOUND = {
     "code": 50404,
-    "message": "The requested package is not available in the store"
+    "message": "The requested package is not available in the store",
 }
-EXIT_WORK_IN_PROGRESS = {
-    "code": 55555,
-    "message": "This is work in progress"
-}
+EXIT_WORK_IN_PROGRESS = {"code": 55555, "message": "This is work in progress"}
 
 
 def abort(error_object):
@@ -98,8 +102,10 @@ def abort(error_object):
     url = "https://isomer.readthedocs.io/en/latest/manual/Administration/Errors/%i.html"
     if isinstance(error_object, int):
         log("Unknown error code.")
-        log("You might be able to find more information above or here:",
-            url % error_object)
+        log(
+            "You might be able to find more information above or here:",
+            url % error_object,
+        )
         sys.exit(error_object)
     else:
         log(
@@ -122,8 +128,10 @@ def warn_error(error_object):
     url = "https://isomer.readthedocs.io/en/latest/manual/Administration/Errors/%i.html"
     if isinstance(error_object, int):
         log("Unknown error code.")
-        log("You might be able to find more information above or here:",
-            url % error_object)
+        log(
+            "You might be able to find more information above or here:",
+            url % error_object,
+        )
     else:
         log(
             error_object.get(
@@ -134,4 +142,4 @@ def warn_error(error_object):
             "Please see ",
             url % error_object.get("code", "no_code"),
             "for more information!",
-            )
+        )
