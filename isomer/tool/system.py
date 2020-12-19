@@ -32,6 +32,7 @@ Contains system setup tasks.
 
 """
 
+import os
 import time
 import click
 import shutil
@@ -39,8 +40,10 @@ import shutil
 from click_didyoumean import DYMGroup
 
 from isomer.logger import error
-from isomer.misc.path import locations, get_path, get_log_path
+from isomer.misc.path import locations, get_path, get_log_path, get_etc_path
 from isomer.tool import platforms, install_isomer, log, run_process, ask, finish
+from isomer.tool.etc import create_configuration
+from isomer.error import abort, EXIT_NOT_OVERWRITING_CONFIGURATION
 
 
 @click.group(
@@ -66,6 +69,9 @@ from isomer.tool import platforms, install_isomer, log, run_process, ask, finish
 def system(ctx, platform, omit_platform, use_sudo, log_actions):
     """[GROUP] Various aspects of Isomer system handling"""
 
+    if ctx.invoked_subcommand == 'configure':
+        return
+
     ctx.obj["platform"] = platform
     ctx.obj["omit_platform"] = omit_platform
 
@@ -80,12 +86,25 @@ def system_all(ctx):
 
     use_sudo = ctx.obj["use_sudo"]
 
+    generate_configuration(ctx)
     install_isomer(
         ctx.obj["platform"], use_sudo, show=ctx.obj["log_actions"],
         omit_platform=ctx.obj['omit_platform'], omit_common=True
     )
     _add_system_user(use_sudo)
     _create_system_folders(use_sudo)
+
+    finish(ctx)
+
+
+@system.command(short_help="Generate a skeleton configuration for Isomer (needs sudo)")
+@click.pass_context
+def configure(ctx):
+    """Generate a skeleton configuration for Isomer (needs sudo)"""
+
+    if os.path.exists(get_etc_path()):
+        abort(EXIT_NOT_OVERWRITING_CONFIGURATION)
+    ctx = create_configuration(ctx)
 
     finish(ctx)
 

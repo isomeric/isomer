@@ -44,7 +44,6 @@ from isomer.tool.etc import (
     load_configuration,
     load_instances,
     instance_template,
-    create_configuration,
 )
 from isomer.version import version_info
 
@@ -169,11 +168,13 @@ def cli(
     set_etc_path(config_path)
     configuration = load_configuration()
 
-    if configuration is None:
-        ctx = create_configuration(ctx)
-        configuration = ctx.obj["config"]
-    else:
+    if configuration is not None:
         ctx.obj["config"] = configuration
+    else:
+        if ctx.invoked_subcommand not in ("version", "cmdmap"):
+            log("No configuration found. Most commands won't work. "
+                "Use 'iso system configure' to generate a configuration.", lvl=warn)
+        return
 
     set_prefix_path(configuration['meta']['prefix'])
 

@@ -36,6 +36,7 @@ from isomer.database import initialize
 from isomer.component import ConfigurableComponent
 from isomer.misc.path import set_etc_path, set_instance
 from isomer.schemata.component import ComponentConfigSchemaTemplate
+from isomer.tool.etc import create_configuration
 
 """Basic Test suite bits and pieces"""
 
@@ -232,6 +233,10 @@ def run_cli(cmd, args, full_log=False):
 
 def reset_base(unset_instance=False):
     """Prepares a testing folder and sets Isomer's base to that"""
+
+    class ctx_mock():
+        obj = {'config': None}
+
     if os.path.exists('/tmp/isomer-test'):
         shutil.rmtree('/tmp/isomer-test')
 
@@ -239,6 +244,7 @@ def reset_base(unset_instance=False):
     os.makedirs('/tmp/isomer-test/var/log/isomer')
 
     set_etc_path('/tmp/isomer-test/etc/isomer')
+    create_configuration(ctx_mock())
     if unset_instance is False:
         set_instance('foobar', 'green', '/tmp/isomer-test/')
 
