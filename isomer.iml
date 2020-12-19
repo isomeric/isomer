@@ -8,6 +8,16 @@
       <sourceFolder url="file://$MODULE_DIR$/frontend" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/tests" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/isomer" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/isomer/database" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/isomer/events" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/isomer/misc" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/isomer/provisions" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/isomer/schemata" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/isomer/tool" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/isomer/ui" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/isomer/ui/clientmanager" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/isomer/ui/objectmanager" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/isomer/ui/store" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/.cache" />
       <excludeFolder url="file://$MODULE_DIR$/.eggs" />
       <excludeFolder url="file://$MODULE_DIR$/.idea" />
@@ -20,11 +30,11 @@
       <excludeFolder url="file://$MODULE_DIR$/frontend/dist" />
       <excludeFolder url="file://$MODULE_DIR$/frontend/src/components" />
       <excludeFolder url="file://$MODULE_DIR$/hfos.egg-info" />
+      <excludeFolder url="file://$MODULE_DIR$/frontend/node_modules" />
     </content>
     <content url="file://$MODULE_DIR$/frontend/node_modules" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="inheritedJdk" />
-    <orderEntry type="library" name="Python 3.6 (isomer) interpreter library" level="application" />
   </component>
   <component name="PyDocumentationSettings">
     <option name="renderExternalDocumentation" value="true" />

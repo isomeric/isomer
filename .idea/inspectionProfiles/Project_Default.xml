@@ -57,5 +57,6 @@
         </list>
       </option>
     </inspection_tool>
+    <inspection_tool class="PyUnusedFunctionInspection" enabled="false" level="WEAK WARNING" enabled_by_default="false" />
   </profile>
 </component>
