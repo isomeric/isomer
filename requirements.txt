@@ -32,3 +32,4 @@ typing_extensions>=3.7.4.2
 requests>=2.24.0
 docutils>=0.16
 bcrypt>=3.2
+asciichartpy>=1.5.25

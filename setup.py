@@ -144,6 +144,7 @@ setup(
         "https://github.com/ri0t/SecretColors/archive/master.zip#egg=SecretColors-1.2.0",
     ],
     install_requires=[
+        "asciichartpy>=1.5.25",
         "bcrypt>=3.2",
         "click-didyoumean>=0.0.3",
         "click-plugins>=1.1",
