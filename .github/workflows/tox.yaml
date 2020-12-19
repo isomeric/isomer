@@ -1,6 +1,6 @@
 name: Tox
 
-on: [push]
+on: [ push ]
 
 jobs:
   build:
@@ -8,9 +8,9 @@ jobs:
     strategy:
       max-parallel: 4
       matrix:
-        python-version: [3.8]
-        mongodb-version: [3.2]
-        nodejs-version: [12.x]
+        python-version: [ 3.8 ]
+        mongodb-version: [ 3.2 ]
+        nodejs-version: [ 12.x ]
 
     steps:
       - uses: actions/checkout@v1
@@ -21,9 +21,9 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       - name: Start MongoDB v${{ matrix.mongodb-version }}
-          uses: supercharge/mongodb-github-action@1.2.0
-          with:
-            mongodb-version: ${{ matrix.mongodb-version }}
+        uses: supercharge/mongodb-github-action@1.2.0
+        with:
+          mongodb-version: ${{ matrix.mongodb-version }}
 
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
