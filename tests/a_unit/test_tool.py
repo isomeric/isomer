@@ -47,12 +47,15 @@ def test_tool_main():
 def test_view_no_objects():
     """"""
 
+    pytest.reset_base()
     result = pytest.run_cli(isotool, [
         "--dbhost", pytest.DBHOST + ":" + str(pytest.DBPORT),
         "--dbname", pytest.DBNAME,
         'db', 'objects', 'view',
         "--schema", "systemconfig"
     ], full_log=True)
+
+    print(result.output)
 
     assert result.exit_code == 0
     assert "Done: cli db objects view" in result.output
