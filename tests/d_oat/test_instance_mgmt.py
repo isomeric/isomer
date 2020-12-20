@@ -62,6 +62,19 @@ def test_path_prefix():
                     prefixed + 'Path prefixing is broken! Not continuing until '
                                'you fix "isomer.misc.path"!')
 
+@pytest.mark.dependency(depends=["test_00_environment_clear"])
+def test_instance_clear():
+    """Creates a new instances and checks if clearing it works"""
+    pytest.reset_base()
+
+    _ = pytest.run_cli(isotool, ['instance', 'create'])
+
+    result = pytest.run_cli(isotool, ['instance', 'clear', '--force', '--no-archive'])
+    pprint(result.output)
+
+    assert result.exit_code == 0
+    # TODO: Verify that the instance has been cleared (Probably: fill it first)
+
 
 def test_instance_create():
     """On a blank setup, tests if creating an instance works"""
@@ -123,16 +136,3 @@ def test_instance_set():
 
     assert result.exit_code == 0
     assert new_config['quiet'] is False
-
-
-def test_instance_clear():
-    """Creates a new instances and checks if clearing it works"""
-    pytest.reset_base()
-
-    _ = pytest.run_cli(isotool, ['instance', 'create'])
-
-    result = pytest.run_cli(isotool, ['instance', 'clear', '--force', '--no-archive'])
-    pprint(result.output)
-
-    assert result.exit_code == 0
-    # TODO: Verify that the instance has been cleared (Probably: fill it first)

@@ -35,7 +35,12 @@ from isomer.tool.etc import load_instance
 from isomer.tool.tool import isotool
 
 
-def test_instance_clear():
+# TODO: The numbering is here because pytest-dependency is missing dependency test
+#  sorting. Remove when the PR ( https://github.com/RKrahl/pytest-dependency/pull/44 )
+#  has been integrated
+@pytest.mark.dependency()
+def test_00_environment_clear():
+
     """Creates a new default instances and clears it without archiving"""
     pytest.reset_base()
 
@@ -57,7 +62,8 @@ def test_instance_clear():
     assert result.exit_code == 0
 
 
-def test_install():
+@pytest.mark.dependency(depends=["test_00_environment_clear"])
+def test_01_install():
     """Creates a new default instances and clears it without archiving"""
     pytest.reset_base(unset_instance=True)
     import os
