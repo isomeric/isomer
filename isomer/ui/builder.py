@@ -193,14 +193,17 @@ def generate_component_folders(folder):
     if not os.path.isdir(folder):
         log("Creating new components folder")
         os.makedirs(folder)
+        return True
     else:
         log("Clearing components folder")
         for thing in os.listdir(folder):
             target = os.path.join(folder, thing)
 
             try:
+                log("Deleting target '%s'", lvl=debug)
                 shutil.rmtree(target)
             except NotADirectoryError:
+                log("Target '%s' is a symbolical link, unlinking", lvl=debug)
                 os.unlink(target)
             except PermissionError:
                 log(
@@ -210,7 +213,12 @@ def generate_component_folders(folder):
                     thing,
                     lvl=warn,
                 )
+                return False
+            finally:
+                log("Cannot clear old components, giving up", lvl=error, exc=True)
+                return False
 
+    return True
 
 def get_components(frontend_root):
     """Iterate over all installed isomer modules to find all the isomer
@@ -327,6 +335,7 @@ def get_components(frontend_root):
 
     except Exception as e:
         log("Error during frontend install: ", e, type(e), lvl=error, exc=True)
+        return False
 
     component_list = list(inspected_components.keys())
     log("Components after lookup (%i):" % len(component_list),
@@ -500,6 +509,7 @@ def install_dependencies(dependency_list: list, frontend_root: str):
         log("Frontend installing done.", lvl=debug)
     else:
         log("Could not install dependencies:", installer)
+        return False
 
 
 def write_main(importable_modules: list, root: str):
@@ -517,7 +527,7 @@ def write_main(importable_modules: list, root: str):
     parts = main.split("/* COMPONENT SECTION */")
     if len(parts) != 3:
         log("Frontend loader seems damaged! Please check!", lvl=critical)
-        return
+        return False
 
     try:
         with open(os.path.join(root, "src", "main.js"), "w") as f:
@@ -533,6 +543,7 @@ def write_main(importable_modules: list, root: str):
             write_exception,
             lvl=error,
         )
+        return False
 
 
 def rebuild_frontend(root: str, target: str, build_type: str):
@@ -554,7 +565,7 @@ def rebuild_frontend(root: str, target: str, build_type: str):
 
     if success is False:
         log("Error during frontend build:", builder_output, lvl=error)
-        return
+        return False
 
     log("Frontend build done: ", builder_output, lvl=debug)
 
@@ -569,6 +580,7 @@ def rebuild_frontend(root: str, target: str, build_type: str):
         )
     except PermissionError:
         log("No permission to change:", target, lvl=error)
+        return False
 
     log("Frontend deployed")
 
@@ -602,14 +614,20 @@ def install_frontend(
     frontend_root, frontend_target = get_frontend_locations(development)
 
     if frontend_root is None or frontend_target is None:
-        log("Cannot determine either frontend root or target, please inspect",
+        log("Cannot determine either frontend root or target",
             lvl=error)
-        return
+        return False
 
     component_folder = os.path.join(frontend_root, "src", "components")
-    generate_component_folders(component_folder)
+    if not generate_component_folders(component_folder):
+        log("Cannot generate component folders",
+            lvl=error)
+        return False
 
     components = get_components(frontend_root)
+    if components is False:
+        log("Could not get components", lvl=error)
+        return False
 
     installation_packages, imports = update_frontends(
         components, frontend_root, install
@@ -617,14 +635,25 @@ def install_frontend(
 
     if install:
         installation_packages += get_sails_dependencies(frontend_root)
-        install_dependencies(installation_packages, frontend_root)
+        installed = install_dependencies(installation_packages, frontend_root)
+        if installed is False:
+            log("Could not install dependencies", lvl=error)
+            return False
 
-    write_main(imports, frontend_root)
+    wrote_main = write_main(imports, frontend_root)
+
+    if wrote_main is False:
+        log("Could not write frontend loader", lvl=error)
+        return False
 
     if force_rebuild:
-        rebuild_frontend(frontend_root, frontend_target, build_type)
+        rebuilt = rebuild_frontend(frontend_root, frontend_target, build_type)
+        if rebuilt is False:
+            log("Frontend build failed", lvl=error)
+            return False
 
     log("Done: Install Frontend")
+    return True
 
     # TODO: We have to find a way to detect if we need to rebuild (and
     #  possibly wipe) stuff. This maybe the case, when a frontend

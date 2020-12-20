@@ -39,6 +39,7 @@ from subprocess import Popen
 
 from click_didyoumean import DYMGroup
 
+from isomer.error import abort, EXIT_FRONTEND_BUILD_FAILED
 from isomer.tool.etc import NonExistentKey, instance_template
 from isomer.logger import error, warn, debug
 from isomer.tool import check_root, log, finish
@@ -118,12 +119,16 @@ def frontend(ctx, dev, rebuild, no_install, build_type):
 
     # TODO: Move this to the environment handling and deprecate it here
 
-    install_frontend(
+    installed = install_frontend(
         force_rebuild=rebuild,
         development=dev,
         install=not no_install,
         build_type=build_type,
     )
+    if installed is True:
+        finish(ctx)
+    else:
+        abort(EXIT_FRONTEND_BUILD_FAILED, ctx)
 
 
 @install.command(short_help="build and install docs")
