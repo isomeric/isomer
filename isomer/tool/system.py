@@ -69,9 +69,6 @@ from isomer.error import abort, EXIT_NOT_OVERWRITING_CONFIGURATION
 def system(ctx, platform, omit_platform, use_sudo, log_actions):
     """[GROUP] Various aspects of Isomer system handling"""
 
-    if ctx.invoked_subcommand == 'configure':
-        return
-
     ctx.obj["platform"] = platform
     ctx.obj["omit_platform"] = omit_platform
 
@@ -86,7 +83,12 @@ def system_all(ctx):
 
     use_sudo = ctx.obj["use_sudo"]
 
-    generate_configuration(ctx)
+    log("Generating configuration")
+    if os.path.exists(get_etc_path()):
+        abort(EXIT_NOT_OVERWRITING_CONFIGURATION)
+    ctx = create_configuration(ctx)
+
+    log("Installing Isomer system wide")
     install_isomer(
         ctx.obj["platform"], use_sudo, show=ctx.obj["log_actions"],
         omit_platform=ctx.obj['omit_platform'], omit_common=True
