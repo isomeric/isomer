@@ -54,7 +54,7 @@ def test_00_environment_clear():
 
     result = pytest.run_cli(isotool, ['environment', 'clear', '--no-archive'])
 
-    warnings.warn(print.output)
+    warnings.warn(result.output)
 
     # assert os.path.exists('/tmp/isomer-test/var/lib/isomer/' +
     #                       pytest.INSTANCENAME + '/green')

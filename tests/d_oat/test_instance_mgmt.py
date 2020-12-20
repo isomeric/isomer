@@ -72,7 +72,7 @@ def test_instance_clear():
     _ = pytest.run_cli(isotool, ['instance', 'create'])
 
     result = pytest.run_cli(isotool, ['instance', 'clear', '--force', '--no-archive'])
-    warnings.warn(print.output)
+    warnings.warn(result.output)
 
     assert result.exit_code == 0
     # TODO: Verify that the instance has been cleared (Probably: fill it first)
