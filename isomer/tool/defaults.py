@@ -137,6 +137,7 @@ platforms = {
             ],
         },
     },
+    "Debian": "Debian GNU/Linux",
     "Ubuntu": "Debian GNU/Linux",
     "Raspbian GNU/Linux": {
         'pre_install': [],
