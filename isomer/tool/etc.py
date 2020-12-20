@@ -242,7 +242,10 @@ instance_template.add("name", "")
 instance_template.add("contact", "")
 instance_template.add("active", False)
 instance_template.add("environment", "blue")
-instance_template.add("environment_toggles", ["temp_file", "gpio_switch"])
+instance_template.add("environment_toggles", ["temp_file"])
+instance_template["environment_toggles"].comment(
+    "possible values: temp_file, gpio_switch"
+)
 instance_template.add("loglevel", "20")
 instance_template.add("quiet", True)
 instance_template.add("database_host", "localhost")
