@@ -504,7 +504,7 @@ class MemoryLogger(ConfigurableComponent):
     def __init__(self, *args):
         super(MemoryLogger, self).__init__("MEM", *args)
 
-        if self.args['debug'] is True:
+        if self.context.params['debug'] is True:
             self.log('Debug flag set, decreasing memory logger measurement '
                      'interval to 20 seconds')
             interval = 20
