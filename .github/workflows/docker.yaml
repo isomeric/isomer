@@ -1,6 +1,6 @@
 name: CI to Docker Hub
 
-on: [ push ]
+on:
   push:
     branches: [ master ]
 
