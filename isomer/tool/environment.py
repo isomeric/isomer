@@ -44,12 +44,16 @@ import grp
 import pwd
 import click
 import pymongo
+import tomlkit
 from click_didyoumean import DYMGroup
 from git import Repo, exc
+
 from isomer.database.backup import dump, load
-from isomer.error import abort, EXIT_INVALID_SOURCE, EXIT_STORE_PACKAGE_NOT_FOUND
+from isomer.error import abort, EXIT_INVALID_SOURCE, EXIT_STORE_PACKAGE_NOT_FOUND, \
+    EXIT_INVALID_PARAMETER, EXIT_INVALID_CONFIGURATION
 from isomer.logger import error, verbose, warn, critical, debug, hilight
 from isomer.misc.std import std_now, std_uuid
+from isomer.tool.etc import valid_configuration
 from isomer.misc.path import (
     set_instance,
     get_path,
@@ -299,6 +303,60 @@ def _create_folders(ctx):
         log("Could not change ownership:", logfile, lvl=warn, exc=True)
 
     finish(ctx)
+
+
+@environment.command(name="set", short_help="Set a parameter of an environment")
+@click.argument("parameter")
+@click.argument("value")
+@click.option(
+    "--force",
+    "-f",
+    is_flag=True,
+    help="Ignore configuration validation errors"
+)
+@click.pass_context
+def set_parameter(ctx, parameter, value, force):
+    """Set a configuration parameter of an environment"""
+
+    # TODO: Generalize and improve this.
+    #  - To get less code redundancy (this is also in instance.py)
+    #  - To be able to set lists, dicts and other types correctly
+
+    log("Setting %s to %s" % (parameter, value))
+
+    next_environment = get_next_environment(ctx)
+    environment_configuration = ctx.obj["instance_configuration"]['environments'][next_environment]
+    defaults = environment_template
+    converted_value = None
+
+    try:
+        parameter_type = type(defaults[parameter])
+        log(parameter_type, pretty=True, lvl=debug)
+
+        if parameter_type == tomlkit.items.Integer:
+            converted_value = int(value)
+        elif parameter_type == bool:
+            converted_value = value.upper() == "TRUE"
+        else:
+            converted_value = value
+    except KeyError:
+        log("Available parameters:", sorted(list(defaults.keys())))
+        abort(EXIT_INVALID_PARAMETER)
+
+    if converted_value is None:
+        log("Converted value was None! Recheck the new config!", lvl=warn)
+
+    environment_configuration[parameter] = converted_value
+    log("New config:", environment_configuration, pretty=True, lvl=debug)
+
+    ctx.obj["instances"][ctx.obj["instance"]]['environments'][next_environment] = environment_configuration
+
+    if valid_configuration(ctx) or force:
+        write_instance(ctx.obj["instances"][ctx.obj["instance"]])
+        finish(ctx)
+    else:
+        log("New configuration would not be valid", lvl=critical)
+        abort(EXIT_INVALID_CONFIGURATION)
 
 
 @environment.command(short_help="Archive an environment")
