@@ -214,11 +214,9 @@ def generate_component_folders(folder):
                     lvl=warn,
                 )
                 return False
-            finally:
-                log("Cannot clear old components, giving up", lvl=error, exc=True)
-                return False
 
     return True
+
 
 def get_components(frontend_root):
     """Iterate over all installed isomer modules to find all the isomer
