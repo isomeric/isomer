@@ -41,7 +41,8 @@ import jsonschema
 import pymongo
 
 from isomer import schemastore
-from isomer.error import abort, EXIT_NO_DATABASE
+from isomer.error import abort, EXIT_NO_DATABASE, EXIT_NO_DATABASE_DEFINED,\
+    EXIT_NO_DATABASE_HOST
 from isomer.logger import isolog, warn, critical, debug, verbose, error
 from isomer.misc.std import std_color
 
@@ -241,6 +242,11 @@ def initialize(
 
     db_log("Using database:", dbname, "@", dbhost, ":", dbport)
 
+    if dbname == "" and not ignore_fail:
+        abort(EXIT_NO_DATABASE_DEFINED)
+    if dbhost == "" and not ignore_fail:
+        abort(EXIT_NO_DATABASE_HOST)
+
     try:
         client = pymongo.MongoClient(host=dbhost, port=dbport)
         db = client[dbname]
@@ -251,7 +257,7 @@ def initialize(
             "No database available! Check if you have mongodb > 2.2 "
             "installed and running as well as listening on port %i "
             "of %s and check if you specified the correct "
-            "instance and environment. (Error: %s) -> EXIT" % (dbport, dbhost, e),
+            "instance and environment. Detailed Error:\n%s" % (dbport, dbhost, e),
             lvl=log_level,
         )
         if not ignore_fail:

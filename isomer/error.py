@@ -85,6 +85,8 @@ EXIT_INVALID_VALUE = {
 }
 EXIT_NO_CERTIFICATE = {"code": 63, "message": ""}
 EXIT_NO_DATABASE = {"code": 50020, "message": "No database is available"}
+EXIT_NO_DATABASE_DEFINED = {"code": 50021, "message": "No database name is defined for this instance - is it created already?"}
+EXIT_NO_DATABASE_HOST = {"code": 50021, "message": "Database host is not correctly defined. Check your command arguments or the configuration files."}
 EXIT_ISOMER_URL_REQUIRED = {
     "code": 50100,
     "message": "You need to specify a source url via --url/-u for isomer",
