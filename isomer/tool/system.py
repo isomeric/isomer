@@ -93,7 +93,11 @@ def system_all(ctx):
         ctx.obj["platform"], use_sudo, show=ctx.obj["log_actions"],
         omit_platform=ctx.obj['omit_platform'], omit_common=True
     )
+
+    log("Adding Isomer system user")
     _add_system_user(use_sudo)
+
+    log("Creating Isomer filesystem locations")
     _create_system_folders(use_sudo)
 
     finish(ctx)
