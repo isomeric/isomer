@@ -41,6 +41,7 @@ off = 100
 
 # from circuits.core import Event
 import pprint
+import tempfile
 from traceback import format_exception
 
 # from circuits import Component, handler
@@ -89,6 +90,7 @@ terminator = "\033[0m"
 count = 0
 
 logfile = "/var/log/isomer/service.log"
+log_emergency = False
 
 console = verbose
 live = False
@@ -254,14 +256,35 @@ def isolog(*what, **kwargs):
         return result
 
     def write_to_log(message: str):
-        try:
-            f = open(logfile, "a")
-            f.write(message + "\n")
-            f.flush()
-            f.close()
-        except IOError:
-            print("Can't open logfile %s for writing!" % logfile)
-            # sys.exit(23)
+        global logfile
+
+        while True:
+            try:
+                f = open(logfile, "a")
+                f.write(message + "\n")
+                f.flush()
+                f.close()
+
+                break
+            except IOError:
+                global log_emergency
+                print("Cannot open logfile '%s' for writing" % logfile)
+
+                if log_emergency is True:
+                    print(
+                        "Safe temporary logging is not working either, "
+                        "giving up on file logging"
+                    )
+                    break
+
+                logfile = os.path.join(
+                    tempfile.mkdtemp(prefix="isomer_"),
+                    "emergency_log"
+                )
+                print("Logging to temporary logfile '%s'" % logfile)
+                log_emergency = True
+
+                continue
 
     def write_to_console(message: str):
         try:
