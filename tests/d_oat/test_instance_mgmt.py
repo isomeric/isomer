@@ -36,7 +36,6 @@ from isomer.misc.path import set_instance, get_path
 from isomer.tool.etc import load_instance
 from isomer.tool.tool import isotool
 
-import warnings
 
 def test_path_prefix():
     """Tests correct package importing - critical test! If this one fails,
@@ -72,8 +71,9 @@ def test_instance_clear():
     _ = pytest.run_cli(isotool, ['instance', 'create'])
 
     result = pytest.run_cli(isotool, ['instance', 'clear', '--force', '--no-archive'])
-    warnings.warn(result.output)
 
+    # TODO: Github doesn't like messing with /tmp folders, apparently. These fail
+    #  completely on github, yet neither on my local dev install or a docker build.
     assert result.exit_code == 0
     # TODO: Verify that the instance has been cleared (Probably: fill it first)
 
