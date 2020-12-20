@@ -36,6 +36,7 @@ from isomer.misc.path import set_instance, get_path
 from isomer.tool.etc import load_instance
 from isomer.tool.tool import isotool
 
+import warnings
 
 def test_path_prefix():
     """Tests correct package importing - critical test! If this one fails,
@@ -62,6 +63,7 @@ def test_path_prefix():
                     prefixed + 'Path prefixing is broken! Not continuing until '
                                'you fix "isomer.misc.path"!')
 
+
 @pytest.mark.dependency(depends=["test_00_environment_clear"])
 def test_instance_clear():
     """Creates a new instances and checks if clearing it works"""
@@ -70,7 +72,7 @@ def test_instance_clear():
     _ = pytest.run_cli(isotool, ['instance', 'create'])
 
     result = pytest.run_cli(isotool, ['instance', 'clear', '--force', '--no-archive'])
-    pprint(result.output)
+    warnings.warn(print.output)
 
     assert result.exit_code == 0
     # TODO: Verify that the instance has been cleared (Probably: fill it first)
