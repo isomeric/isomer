@@ -863,7 +863,7 @@ def _install_environment(
         )
         if result is False:
             log("Getting Isomer failed", lvl=critical)
-            abort(50011)
+            abort(50011, ctx)
     except FileExistsError:
         if not force:
             log(
@@ -871,7 +871,7 @@ def _install_environment(
                 "inspect the environment before continuing! Use --force to ignore.",
                 lvl=warn,
             )
-            abort(50012)
+            abort(50012, ctx)
         else:
             log("Isomer already present, forcing through anyway.")
 

@@ -62,6 +62,7 @@ EXIT_INVALID_SOURCE = {
 }
 EXIT_ROOT_REQUIRED = {"code": 4, "message": "Need root access to install. Use sudo."}
 EXIT_NO_PERMISSION = {"code": 5, "message": "No permission. Maybe use sudo?"}
+EXIT_FRONTEND_BUILD_FAILED = {"code": 6, "message": "Frontend was not built."}
 EXIT_INSTALLATION_FAILED = {
     "code": 11,
     "message": "Installation failed. Check logs and/or increase logging via "
@@ -95,9 +96,17 @@ EXIT_STORE_PACKAGE_NOT_FOUND = {
 EXIT_WORK_IN_PROGRESS = {"code": 55555, "message": "This is work in progress"}
 
 
-def abort(error_object):
+def abort(error_object, ctx=None):
     """Abort with a nice error message and if possible an error description
     url leading to the online documentation."""
+
+    if ctx is not None:
+        parent = ctx.parent
+        commands = ctx.info_name
+        while parent is not None:
+            commands = parent.info_name + " " + commands
+            parent = parent.parent
+        log("Abort:", commands)
 
     url = "https://isomer.readthedocs.io/en/latest/manual/Administration/Errors/%i.html"
     if isinstance(error_object, int):
