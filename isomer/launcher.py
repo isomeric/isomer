@@ -48,9 +48,9 @@ import click
 from circuits import Event, Timer
 from circuits.web import Server, Static
 from circuits.web.websockets.dispatcher import WebSocketsDispatcher
+
 from isomer.misc.path import set_instance, get_path
 from isomer.component import handler, ConfigurableComponent, ComponentDisabled, BaseMeta
-
 # from isomer.schemata.component import ComponentBaseConfigSchema
 from isomer.database import initialize  # , schemastore
 from isomer.events.system import populate_user_events, system_stop
@@ -85,7 +85,6 @@ class ready(Event):
 
 
 class boot(Event):
-
     pass
 
 
@@ -474,7 +473,7 @@ class Core(ConfigurableComponent):
     #     self.update_components(forcereload=event.force)
 
     def update_components(
-        self, forcereload=False, forcerebuild=False, forcecopy=True, install=False
+            self, forcereload=False, forcerebuild=False, forcecopy=True, install=False
     ):
         """Check all known entry points for components. If necessary,
         manage configuration updates"""
@@ -616,7 +615,7 @@ class Core(ConfigurableComponent):
                 )
                 self.frontend_watcher.start()
                 mask = (
-                    pyinotify.IN_DELETE | pyinotify.IN_CREATE | pyinotify.IN_CLOSE_WRITE
+                        pyinotify.IN_DELETE | pyinotify.IN_CREATE | pyinotify.IN_CLOSE_WRITE
                 )
                 self.log("Frontend root:", self.frontend_root, lvl=debug)
                 self.frontend_watch_manager.add_watch(self.module_root, mask, rec=True)
@@ -832,7 +831,11 @@ def launch(ctx, run=True, **args):
     instance = load_instance(instance_name)
     environment_name = ctx.obj["environment"]
 
-    isolog("Launching instance %s - (%s)" % (instance_name, environment_name))
+    isolog(
+        "Launching instance %s - (%s)" % (instance_name, environment_name),
+        emitter="CORE",
+        lvl=debug
+    )
 
     database_host = ctx.obj["dbhost"]
     database_name = ctx.obj["dbname"]
