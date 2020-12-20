@@ -251,7 +251,7 @@ def set_parameter(ctx, parameter, value):
 def create(ctx, instance_name):
     """Create a new instance"""
 
-    if instance_name is "":
+    if instance_name == "":
         instance_name = ctx.obj["instance"]
 
     if instance_name in ctx.obj["instances"]:

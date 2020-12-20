@@ -168,7 +168,7 @@ def _get_versions(ctx, source, url, fetch):
     elif source == "pypi":
         releases = get_pypi_releases()
     elif source == "git":
-        if url is not "":
+        if url != "":
             repo = url
         else:
             repo = instance_configuration["url"]
