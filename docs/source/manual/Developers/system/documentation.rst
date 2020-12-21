@@ -1,6 +1,11 @@
 Documentation
 *************
 
+This section describes how to document your Isomer module properly, which includes
+a module readme as well as store meta data.
+
+More (and well integrated) documentation structures are work in progress.
+
 Module Overview
 ===============
 
