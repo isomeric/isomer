@@ -39,7 +39,15 @@ from pkg_resources import iter_entry_points
 from isomer.logger import set_logfile, set_color, set_verbosity, warn, verbose, \
     critical, debug
 from isomer.misc.path import get_log_path, set_etc_path, set_instance, set_prefix_path
-from isomer.tool import log, db_host_help, db_host_metavar, db_help, db_metavar
+from isomer.tool import log
+from isomer.tool.defaults import (
+    db_host_default,
+    db_host_help,
+    db_host_metavar,
+    db_default,
+    db_help,
+    db_metavar,
+)
 from isomer.tool.etc import (
     load_configuration,
     load_instances,
