@@ -40,6 +40,8 @@ off = 100
 """
 
 # from circuits.core import Event
+import random
+import string
 import pprint
 import tempfile
 from traceback import format_exception
@@ -86,6 +88,9 @@ level_data = {
 }
 
 terminator = "\033[0m"
+
+process_identifier = ''.join(
+    [random.choice(string.ascii_letters + string.digits) for i in range(3)])
 
 count = 0
 
@@ -340,8 +345,9 @@ def isolog(*what, **kwargs):
             callee = kwargs["sourceloc"]
 
     now = time.asctime()
-    msg = "[%s] : %5s : %.5f : %3i : [%5s]" % (
+    msg = "[%s]:[%s]: %5s : %.5f : %3i : [%5s]" % (
         now,
+        process_identifier,
         level_data[lvl][0],
         runtime,
         count,
