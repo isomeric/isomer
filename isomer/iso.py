@@ -50,6 +50,7 @@ if not sys.warnoptions:
     warnings.simplefilter("ignore")
 
 try:
+    # noinspection PyUnresolvedReferences
     from isomer.tool import install_isomer, ask
 except ImportError as e:
     # TODO: Make sure weird, pre install dependencies are mentioned:

@@ -54,34 +54,34 @@ def build_schemastore_new():
                 "Problematic schema: ", schema_entrypoint.name, exc=True, lvl=warn
             )
 
-    def schema_insert(dictionary, path, obj):
-        path = path.split("/")
+    def schema_insert(dictionary, insert_path, insert_object):
+        insert_path = insert_path.split("/")
 
         place = dictionary
 
-        for element in path:
+        for element in insert_path:
             if element != "":
                 place = place[element]
 
-        place.update(obj)
+        place.update(insert_object)
 
         return dictionary
 
-    def form_insert(form, index, path, obj):
-        path = path.split("/")
+    def form_insert(insert_form, insert_index, insert_path, insert_object):
+        insert_path = insert_path.split("/")
         place = None
-        if isinstance(index, str):
-            for widget in form:
+        if isinstance(insert_index, str):
+            for widget in insert_form:
                 if isinstance(widget, dict) and widget.get("id", None) is not None:
                     place = widget
         else:
-            place = form[index]
+            place = insert_form[insert_index]
 
         if place is None:
-            schemata_log("No place to insert into form found:", path, form, obj)
+            schemata_log("No place to insert into form found:", insert_path, insert_form, insert_object)
             return
 
-        for element in path:
+        for element in insert_path:
             schemata_log(element, place, lvl=verbose)
             try:
                 element = int(element)
@@ -91,11 +91,11 @@ def build_schemastore_new():
                 place = place[element]
 
         if isinstance(place, dict):
-            place.update(obj)
+            place.update(insert_object)
         else:
-            place.append(obj)
+            place.append(insert_object)
 
-        return form
+        return insert_form
 
     for key, item in available.items():
         extends = item.get("extends", None)
@@ -179,8 +179,8 @@ def build_l10n_schemastore(available):
                         # schemata_log(branch['description'])
                         branch["description"] = _(branch["description"], lang=lang)
 
-                    for key, item in branch.items():
-                        walk(item)
+                    for branch_item in branch.values():
+                        walk(branch_item)
 
             walk(localized)
 

@@ -201,7 +201,8 @@ def events():
 @dev.command(short_help="export schemata")
 @click.option("--output-path", "-o", help="output path", type=click.types.Path())
 @click.option(
-    "--format",
+    "--output-format",
+    "--format"
     "-f",
     help="Specify format",
     default="jsonschema",
@@ -223,7 +224,7 @@ def events():
 )
 @click.argument("schemata", nargs=-1)
 @click.pass_context
-def export_schemata(ctx, output_path, format, no_entity_mode, include_meta, schemata):
+def export_schemata(ctx, output_path, output_format, no_entity_mode, include_meta, schemata):
     """Utility function for exporting known schemata to various formats
 
     Exporting to typescript requires the "json-schema-to-typescript" tool.
@@ -275,7 +276,7 @@ def export_schemata(ctx, output_path, format, no_entity_mode, include_meta, sche
             if "required" in schema:
                 del schema["required"]
 
-        if format == "jsonschema":
+        if output_format == "jsonschema":
             log("Generating json schema of", item)
 
             if stdout:
@@ -284,9 +285,10 @@ def export_schemata(ctx, output_path, format, no_entity_mode, include_meta, sche
                 with open(os.path.join(output_path, item + ".json"), "w") as f:
                     json.dump(schema, f, indent=4)
 
-        elif format == "typescript":
+        elif output_format == "typescript":
             log("Generating typescript annotations of", item)
 
+            # TODO: Fix typing issues here and esp. in run_process
             success, result = run_process(
                 output_path,
                 [
@@ -414,6 +416,7 @@ def create_module(clear_target, target):
         ["name", "package", "classname", "location", "frontend", "group"]),
 )
 @click.option(
+    "--list-all",
     "--all",
     "-a",
     is_flag=True,
@@ -421,6 +424,7 @@ def create_module(clear_target, target):
     help="List all registered entrypoints"
 )
 @click.option(
+    "--filter-string",
     "--filter",
     "-f",
     default="",
@@ -429,7 +433,7 @@ def create_module(clear_target, target):
 )
 @click.option("--long", is_flag=True, default=False, help="Show full table")
 def entrypoints(base, sails, schemata, management, provisions, frontend_only,
-                frontend_list, directory, sort_key, all, filter, long):
+                frontend_list, directory, sort_key, list_all, filter_string, long):
     """Display list of entrypoints and diagnose module loading problems."""
 
     log("Showing entrypoints:")
@@ -446,7 +450,7 @@ def entrypoints(base, sails, schemata, management, provisions, frontend_only,
         "components": iter_entry_points(group="isomer.components", name=None)
     }
 
-    if all:
+    if list_all:
         sails = base = schemata = management = provisions = True
 
     if sails:
@@ -516,8 +520,8 @@ def entrypoints(base, sails, schemata, management, provisions, frontend_only,
                     else:
                         frontend = "[ ]"
 
-                    if filter != "":
-                        if filter not in name and filter not in package and filter not in location:
+                    if filter_string != "":
+                        if filter_string not in name and filter_string not in package and filter_string not in location:
                             continue
 
                     if long:

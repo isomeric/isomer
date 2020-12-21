@@ -58,7 +58,6 @@ tool
 """
 
 import getpass
-import hashlib
 import os
 import signal
 import time
@@ -77,15 +76,7 @@ from isomer.error import (
     EXIT_ROOT_REQUIRED
 )
 from isomer.logger import isolog, verbose, debug, error, warn
-from isomer.tool.defaults import (
-    db_host_default,
-    db_host_help,
-    db_host_metavar,
-    db_default,
-    db_help,
-    db_metavar,
-    platforms,
-)
+from isomer.tool.defaults import platforms
 from tomlkit.exceptions import NonExistentKey
 
 
@@ -122,7 +113,7 @@ def check_root():
 
 def run_process(cwd: str, args: list, shell=None, sudo: Union[bool, str] = None,
                 show: bool = False, stdout: str = None, stdin: str = None,
-                timeout: int = 5) -> Tuple[bool, str]:
+                timeout: int = 5) -> Tuple[bool, any]:
     """
     Executes an external process via subprocess.check_output
     :param cwd: Working directory

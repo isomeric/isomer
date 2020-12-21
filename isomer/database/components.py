@@ -151,8 +151,8 @@ class Maintenance(ConfigurableComponent):
                 for file in item[2]:
                     try:
                         total_size = total_size + getsize(join(item[0], file))
-                    except (OSError, PermissionError) as e:
-                        self.log("error with file:  " + join(item[0], file), e)
+                    except (OSError, PermissionError) as folder_size_e:
+                        self.log("error with file:  " + join(item[0], file), folder_size_e)
             return total_size
 
         for name, checkpoint in self.config.locations.items():

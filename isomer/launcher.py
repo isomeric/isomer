@@ -391,7 +391,7 @@ class Core(ConfigurableComponent):
             Timer(5, Event.create("stop_core")).register(self)
 
     @handler("stop_core")
-    def stop_core(self, event):
+    def stop_core(self):
         """Stop execution and exit"""
 
         self.log("Stopping execution")
@@ -614,6 +614,7 @@ class Core(ConfigurableComponent):
                     self.frontend_watch_manager, FrontendHandler(self)
                 )
                 self.frontend_watcher.start()
+                # noinspection PyUnresolvedReferences
                 mask = (
                         pyinotify.IN_DELETE | pyinotify.IN_CREATE | pyinotify.IN_CLOSE_WRITE
                 )

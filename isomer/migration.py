@@ -57,7 +57,7 @@ def make_migrations(schema=None):
     entrypoints = {}
     old = {}
 
-    def apply_migrations(migrations, new_model):
+    def _apply_migrations(migrations, new_model):
         """Apply migration data to compile an up to date model"""
 
         def get_path(raw_path):
@@ -214,7 +214,7 @@ def make_migrations(schema=None):
                 if len(migrations) == 0:
                     raise ImportError
                 pprint(migrations)
-                model = apply_migrations(migrations, new_model)
+                model = _apply_migrations(migrations, new_model)
                 write_migration(schema, len(migrations) + 1, path, model, new_model)
             except ImportError as e:
                 log("No previous migrations for", schema, e, type(e), exc=True)
