@@ -155,6 +155,9 @@ class Maintenance(ConfigurableComponent):
                         self.log("error with file:  " + join(item[0], file), folder_size_e)
             return total_size
 
+
+        total = 0
+
         for name, checkpoint in self.config.locations.items():
             try:
                 stats = statvfs(get_path(name, ""))
@@ -163,6 +166,7 @@ class Maintenance(ConfigurableComponent):
                 continue
             free_space = stats.f_frsize * stats.f_bavail
             used_space = get_folder_size(get_path(name, "")) / 1024.0 / 1024
+            total += used_space
 
             self.log("Location %s uses %.2f MB" % (name, used_space))
 
@@ -172,6 +176,8 @@ class Maintenance(ConfigurableComponent):
                     % (name, free_space / 1024.0 / 1024 / 1024),
                     lvl=warn,
                 )
+
+        self.log("Total space consumption: %.2f MB" % total)
 
 
 class BackupManager(ConfigurableComponent):
