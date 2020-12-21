@@ -33,17 +33,21 @@ import pkg_resources
 import click
 import os
 import shutil
+import json
 
 from pprint import pprint
 from click_didyoumean import DYMGroup
 from collections import OrderedDict, namedtuple
 from operator import attrgetter
 
-from isomer.tool import log, ask, debug, verbose, warn
-from isomer.misc.std import std_table
+from isomer.tool import log, ask, run_process, finish
 from isomer.tool.templates import write_template_file
+from isomer.logger import debug, verbose, warn
+from isomer.misc.std import std_table
 from isomer.error import abort
 from isomer.ui.store.inventory import populate_store, get_inventory
+from isomer.ui.builder import get_components
+from isomer.events.system import generate_asyncapi
 
 paths = [
     "isomer",
@@ -174,7 +178,7 @@ def generate_api(ctx, filename):
         print(api)
     else:
         with open(filename, "w") as f:
-            dump(api, f, indent=4)
+            json.dump(api, f, indent=4)
 
 
 @dev.command(short_help="list known events")
