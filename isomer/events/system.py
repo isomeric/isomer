@@ -33,7 +33,7 @@ from copy import copy
 from typing import Dict
 
 from circuits.core import Event
-from isomer.logger import isolog, events
+from isomer.logger import isolog, events, debug, verbose, hilight
 
 # from isomer.ui.clientobjects import User
 
