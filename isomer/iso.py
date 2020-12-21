@@ -31,19 +31,16 @@ Isomer instances.
 import sys
 import warnings
 
-from isomer.error import abort
+from isomer.error import abort, EXIT_INVALID_INTERPRETER, EXIT_CANNOT_IMPORT_INSTALLER, \
+    EXIT_CANNOT_IMPORT_TOOL
 
 if sys.version_info.major < 3:
-    print(
-        "The iso tool has been evoked with an older Python version. "
-        "Please restart the iso tool in a valid environment."
-    )
-    abort(50053)
+    abort(EXIT_INVALID_INTERPRETER)
 
 if not sys.warnoptions:
-
     def warn(*args, **kwargs):
         pass
+
 
     warnings.warn = warn
 
@@ -58,14 +55,8 @@ except ImportError as e:
     # python3-dev
     # python3-cffi, libffi-dev, libssl-dev (for spur)
     # python3-pip
-    print("Cannot run iso-tool:", e, type(e))
-    print(
-        'Please run "python3 setup.py install" first.\n'
-        "If you get an error about setuptools, install python3 setuptools for your distribution.\n\n"
-        "For more information, please read the manual installation instructions:\n"
-        "https://isomer.readthedocs.io/en/latest/start/installing.html#manual"
-    )
-    abort(50050)
+    print("\033[1;33;41mCannot run iso-tool:", e, type(e), "\033[0m")
+    abort(EXIT_CANNOT_IMPORT_INSTALLER)
 
 
 # TODO: Document zsh/bash autocompletion for iso tool
@@ -81,17 +72,20 @@ def main():
     try:
         from isomer.tool.tool import isotool
     except ImportError as import_exception:
-        print(type(import_exception), ":", import_exception)
+        print(
+            "\033[1;33;41mIsomer startup error! Please check your Isomer/Python installation.\033[0m")
+        print(type(import_exception), ":", import_exception, "\n")
+
         if not ask(
-            "Dependencies not installed, do you want to try to install them",
-            default=False,
-            data_type="bool",
-            show_hint=True,
+                "Maybe the dependencies not installed, do you want to try to install them",
+                default=False,
+                data_type="bool",
+                show_hint=True,
         ):
-            abort(50051)
+            abort(EXIT_CANNOT_IMPORT_TOOL)
 
         install_isomer()
-        print("Please restart the tool")
+        print("Please restart the tool now.")
         sys.exit()
 
     isotool(obj={}, auto_envvar_prefix="ISOMER")
