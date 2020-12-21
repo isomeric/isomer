@@ -161,8 +161,8 @@ class Maintenance(ConfigurableComponent):
         for name, checkpoint in self.config.locations.items():
             try:
                 stats = statvfs(get_path(name, ""))
-            except (OSError, PermissionError) as e:
-                self.log("Location unavailable:", name, e, type(e), lvl=error, exc=True)
+            except (OSError, PermissionError, KeyError) as e:
+                self.log("Location unavailable:", name, e, type(e), lvl=warn, exc=True)
                 continue
             free_space = stats.f_frsize * stats.f_bavail
             used_space = get_folder_size(get_path(name, "")) / 1024.0 / 1024
