@@ -88,7 +88,8 @@ def make_migrations(schema=None):
                 for remove in removes:
                     path = get_path(remove)
                     amount = dpath.util.delete(result, path)
-                    assert amount == 1
+                    if amount != 1:
+                        log("Not exactly one removed!", path, remove, lvl=warn)
                 return result
 
             def apply_additions(additions, result):
@@ -124,9 +125,11 @@ def make_migrations(schema=None):
                         " to",
                         change[item]["new_value"],
                     )
-                    assert dpath.util.get(result, path) == change[item]["old_value"]
+                    if dpath.util.get(result, path) != change[item]["old_value"]:
+                        log("Value change did not work!", lvl=warn)
                     amount = dpath.util.set(result, path, change[item]["new_value"])
-                    assert amount == 1
+                    if amount != 1:
+                        log("Not exactly one changed!", path, item, lvl=warn)
 
             return result
 

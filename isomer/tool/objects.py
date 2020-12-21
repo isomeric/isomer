@@ -379,7 +379,8 @@ def illegalcheck(ctx, schema, delete_duplicates, fix, test):
                 if fix:
                     _id = item._fields["_id"]
                     item._fields["_id"] = bson.objectid.ObjectId(_id)
-                    assert isinstance(item._fields["_id"], bson.objectid.ObjectId)
+                    if not isinstance(item._fields["_id"], bson.objectid.ObjectId):
+                        log("Object mongo ID field not valid!", lvl=warn)
                     item.save()
                     database.objectmodels[thing].find_one({"_id": _id}).delete()
     finish(ctx)
