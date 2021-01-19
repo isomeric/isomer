@@ -411,7 +411,7 @@ class ComponentDisabled(Exception):
 class LoggingComponent(LoggingMeta, Component):
     """Logging capable component for simple Isomer components"""
 
-    def __init__(self, uniquename, *args, **kwargs):
+    def __init__(self, uniquename=None, *args, **kwargs):
         Component.__init__(self, *args, **kwargs)
         LoggingMeta.__init__(self, uniquename=uniquename, *args, **kwargs)
 
@@ -419,7 +419,7 @@ class LoggingComponent(LoggingMeta, Component):
 class ConfigurableController(ConfigurableMeta, Controller):
     """Configurable controller for direct web access"""
 
-    def __init__(self, uniquename, *args, **kwargs):
+    def __init__(self, uniquename=None, *args, **kwargs):
         Controller.__init__(self, *args, **kwargs)
         ConfigurableMeta.__init__(self, uniquename=uniquename, *args, **kwargs)
 
