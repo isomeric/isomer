@@ -38,8 +38,11 @@ from isomer.version import version_info
 
 
 @cli.command(short_help="Start interactive management shell")
-def shell():
+@click.pass_context
+def shell(ctx):
     """Open an shell to work with the manage tool interactively."""
+
+    ctx.obj['interactive'] = True
 
     print(
         """Isomer - Management Tool Interactive Prompt

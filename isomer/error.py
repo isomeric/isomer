@@ -128,19 +128,21 @@ def abort(error_object, ctx=None):
     if ctx is not None:
         parent = ctx.parent
         commands = ctx.info_name
-        while parent is not None:
+        while parent is not None and parent.info_name is not None:
             commands = parent.info_name + " " + commands
             parent = parent.parent
         log("Abort:", commands)
 
     url = "https://isomer.readthedocs.io/en/latest/manual/Administration/Errors/%i.html"
+    code = -1
+
     if isinstance(error_object, int):
         log("Unknown error code.")
         log(
             "You might be able to find more information above or here:",
             url % error_object,
         )
-        sys.exit(error_object)
+        code = error_object
     else:
         log(
             error_object.get(
@@ -152,7 +154,10 @@ def abort(error_object, ctx=None):
             url % error_object.get("code", "no_code"),
             "for more information on this error.",
         )
-        sys.exit(error_object["code"])
+        code = error_object["code"]
+
+    if not ctx.obj.get('interactive', False):
+        sys.exit(code)
 
 
 def warn_error(error_object):
