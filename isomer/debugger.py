@@ -508,9 +508,9 @@ class MemoryLogger(ConfigurableComponent):
         if self.context.params['debug'] is True:
             self.log('Debug flag set, decreasing memory logger measurement '
                      'interval to 20 seconds')
-            interval = 20
+            self.interval = 20
         else:
-            interval = self.config.interval
+            self.interval = self.config.interval
 
         self.size = 0
         self.snapshot_diffs = deque(maxlen=self.config.snapshot_diffs)
@@ -539,7 +539,7 @@ class MemoryLogger(ConfigurableComponent):
         try:
             self.tracker = tracker.SummaryTracker()
             self.tracking_timer = Timer(
-                interval, Event.create("memlog-timer"), persist=True
+                self.interval, Event.create("memlog-timer"), persist=True
             ).register(self)
 
         except AttributeError:
@@ -648,8 +648,8 @@ class MemoryLogger(ConfigurableComponent):
             "Memory consumption (%i measurements, "
             "%i seconds interval, %3.0f minutes total)" % (
                 length,
-                self.config.interval,
-                (length * self.config.interval / 60.0)
+                self.interval,
+                (length * self.interval / 60.0)
             )
         )
         self.log("\n%s" % asciichartpy.plot(size_k, config), nc=True)
