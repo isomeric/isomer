@@ -444,7 +444,7 @@ class CrudOperations(CliManager):
                     client_data["uuid"] = std_uuid()
 
         if validated is False:
-            raise ValidationError
+            raise ValidationError("Could not validate object")
 
         return client_data
 
