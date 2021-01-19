@@ -161,6 +161,8 @@ todo_include_todos = devel is not False
 
 blockdiag_fontpath = seqdiag_fontpath = nwdiag_fontpath = actdiag_fontpath = 'source/fonts/clearsans/ClearSans-Medium.ttf'
 
+bibtex_bibfiles = ["refs.bib"]
+
 # Required theme setup
 html_theme = 'sphinx_material'
 
