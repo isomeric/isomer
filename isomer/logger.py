@@ -52,6 +52,7 @@ from traceback import format_exception
 
 
 import time
+import datetime
 import sys
 import inspect
 
@@ -344,8 +345,8 @@ def isolog(*what, **kwargs):
         else:
             callee = kwargs["sourceloc"]
 
-    now = time.asctime()
-    msg = "[%s]:[%s]: %5s : %.5f : %3i : [%5s]" % (
+    now = datetime.datetime.now().isoformat()
+    msg = "[%s]:[%s]:%s:%.5f:%3i: [%5s]" % (
         now,
         process_identifier,
         level_data[lvl][0],
