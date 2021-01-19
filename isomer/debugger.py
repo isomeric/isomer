@@ -30,6 +30,7 @@ Debugger overlord
 """
 
 import json
+import shutil
 from collections import deque
 from itertools import islice
 from uuid import uuid4
@@ -565,7 +566,7 @@ class MemoryLogger(ConfigurableComponent):
             self.log('Memory growth exceeded 10%!', lvl=warn)
             log_level = warn
         self.log("Memory: total %i growth %i (in %i seconds)" % (
-            self.size, growth, self.config.interval), lvl=log_level)
+            self.size, growth, self.interval), lvl=log_level)
 
     @handler("cli_mem_summary")
     def cli_mem_summary(self, event):
@@ -605,6 +606,9 @@ class MemoryLogger(ConfigurableComponent):
     def cli_mem_chart(self, *args):
         """Output memory consumption chart"""
 
+        # Subtract 11 columns for the chart axis
+        width = shutil.get_terminal_size().columns - 11
+
         config = {
             'colors': [
                 asciichartpy.blue,
@@ -623,7 +627,12 @@ class MemoryLogger(ConfigurableComponent):
 
         if count > total_length:
             self.log('Only %i measurements available!' % total_length, lvl=warn)
-            return
+            count = total_length
+
+        if count > width:
+            self.log('Clipping %i values due to terminal width of only '
+                     '%i columns!' % (count - width, width), lvl=warn)
+            count = width
 
         size_k = [x / 1024.0 for x in islice(
             self.size_diffs, len(self.size_diffs) - count, len(self.size_diffs)
