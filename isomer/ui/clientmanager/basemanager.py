@@ -33,6 +33,7 @@ import json
 from base64 import b64decode
 from time import time
 from uuid import uuid4
+from socket import socket
 
 from circuits.net.events import write
 from isomer.component import ConfigurableComponent, handler
@@ -61,6 +62,9 @@ class ClientBaseManager(ConfigurableComponent):
         self._users = {}
         self._count = 0
         self._user_mapping = {}
+
+        self._erroneous_clients = {}
+        self._bans = {}
 
     @handler("disconnect", channel="wsserver")
     def disconnect(self, sock):
@@ -287,8 +291,21 @@ class ClientBaseManager(ConfigurableComponent):
             user_uuid = request_data = request_action = None
 
         try:
-            sock, msg = args[0], args[1]
+            sock = args[0]  # type: socket
+            msg = args[1]
+
             # self.log("", msg)
+
+            # TODO: Harmonize this with flood protection and other still to do
+            #  protections and optimize administrative
+            ip = sock.getpeername()[0]
+            if ip in self._bans:
+                return
+
+            if self._erroneous_clients.get(ip, 0) > 5:
+                self.log('Ignoring erroneous client that sent too much garbage before', lvl=warn)
+                self._bans[ip] = time()
+                return
 
             client_uuid = self._sockets[sock].clientuuid
         except Exception as e:
@@ -307,6 +324,12 @@ class ClientBaseManager(ConfigurableComponent):
             self.log("Message from client received: ", msg, lvl=network)
         except Exception as e:
             self.log("JSON Decoding failed! %s (%s of %s)" % (msg, e, type(e)))
+            ip = sock.getpeername()[0]
+            if ip in self._erroneous_clients:
+                self._erroneous_clients[ip] += 1
+            else:
+                self._erroneous_clients[ip] = 1
+
             return
 
         try:
