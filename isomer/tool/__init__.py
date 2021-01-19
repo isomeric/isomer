@@ -93,9 +93,11 @@ def finish(ctx):
     """
     parent = ctx.parent
     commands = ctx.info_name
-    while parent is not None:
+
+    while parent is not None and parent.info_name is not None:
         commands = parent.info_name + " " + commands
         parent = parent.parent
+
     log("Done:", commands)
 
 
