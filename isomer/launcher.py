@@ -391,10 +391,11 @@ class Core(ConfigurableComponent):
             Timer(5, Event.create("stop_core")).register(self)
 
     @handler("stop_core")
-    def stop_core(self):
+    def stop_core(self, event):
         """Stop execution and exit"""
 
-        self.log("Stopping execution")
+        self.log("Stopping execution.")
+        self.log("Source:", event, lvl=verbose)
 
         self.stop()
         sys.exit()
