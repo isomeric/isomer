@@ -35,6 +35,7 @@ from ast import literal_eval
 from click_didyoumean import DYMGroup
 
 from formal import model_factory
+from isomer.logger import warn
 from isomer.tool import log, finish
 
 
@@ -73,8 +74,8 @@ def modify(ctx, component, field, value):
     log("Configuration found, modifying")
     try:
         new_value = literal_eval(value)
-    except ValueError:
-        log("Interpreting value as string")
+    except (ValueError, SyntaxError):
+        log("Interpreting value as string", lvl=warn)
         new_value = str(value)
 
     configuration._fields[field] = new_value
