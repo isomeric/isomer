@@ -115,10 +115,10 @@ LiveLog = []
 start = time.time()
 
 
-def set_color():
+def set_color(value: bool = True):
     """Activate colorful logging"""
     global color
-    color = True
+    color = value
 
 
 def set_verbosity(global_level: int, console_level: int = None, file_level: int = None):
