@@ -36,7 +36,7 @@ from uuid import uuid4
 
 SystemConfiguration = {
     "uuid": str(uuid4()),
-    "salt": std_salt(),
+    "salt": std_salt().decode('ascii'),
     "active": True,
     "name": "Default System Configuration",
     "description": "Default System description",

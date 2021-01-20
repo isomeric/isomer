@@ -156,7 +156,9 @@ def abort(error_object, ctx=None):
         )
         code = error_object["code"]
 
-    if not ctx.obj.get('interactive', False):
+    if ctx is None or ctx.obj.get('interactive', False) is False:
+        # We're not running interactively because there is no context or it is
+        # explicitly not interactive, so quit:
         sys.exit(code)
 
 

@@ -38,5 +38,6 @@ __all__ = [
     "configurator",
     "objectmanager",
     "schemamanager",
+    "store",
     "syslog",
 ]
