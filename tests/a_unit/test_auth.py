@@ -53,16 +53,19 @@ new_user = objectmodels['user']({
 
 new_user.name = 'TESTER'
 
-new_user.passhash = std_hash('PASSWORD', gensalt().decode("utf-8"))
+salt = gensalt().decode("ascii")
+
+new_user.passhash = std_hash('PASSWORD', salt)
 new_user.save()
 
 system_config = objectmodels['systemconfig']({
     'uuid': std_uuid(),
     'active': True,
-    'salt': 'SALT'
+    'salt': salt
 })
 
-system_config.save()
+auth.systemconfig = system_config
+auth.salt = salt
 
 
 def test_instantiate():
@@ -121,7 +124,7 @@ def test_user_auth():
         def getpeername(self):
             """Mock function to return a fake peer name"""
 
-            return "localhost"
+            return ["localhost"]
 
     m.start()
 
@@ -136,11 +139,6 @@ def test_user_auth():
     )
 
     result = transmit('authentication', 'auth', event, 'auth', 0.5)
-
-    # TODO: IMPORTANT|Investigation pending for 1.0.1 ff.
-    # Rest of the test deactivated due to strange problems on travis.ci.
-
-    return True
 
     assert isinstance(result, authentication)
     assert result.username == 'TESTER'

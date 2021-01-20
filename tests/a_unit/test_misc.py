@@ -81,6 +81,13 @@ def test_uuid():
     assert isinstance(uuid, str)
     assert re.match(r'(\w{8}(-\w{4}){3}-\w{12}?)', uuid)
 
+def test_std_salt():
+    test_salt = std_salt()
+    # b'$2b$12$CFbqPr4m0sE5OTvVVxTyWO'
+
+    assert isinstance(test_salt, bytes) is True
+    assert test_salt[0:7].decode('ascii') == '$2b$12$'
+
 
 def test_std_now():
     now = std_now()

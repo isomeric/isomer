@@ -69,17 +69,22 @@ class Authenticator(ConfigurableComponent):
         super(Authenticator, self).__init__("AUTH", *args)
         # self.log(objectmodels['systemconfig'], lvl=error)
 
+        # TODO: Move to client manager, if possible - it already has flooding and
+        #  erroneous request protection.
         self.failing_clients = {}
 
         systemconfig = objectmodels["systemconfig"].find_one({"active": True})
 
-        # TODO: Decouple systemconfig creation from authenticator
+        if systemconfig is None:
+            self.log("WARNING! NO SYSTEMCONFIG! THIS WON'T WORK WELL", lvl=error)
+
         try:
             salt = systemconfig.salt.encode("ascii")
             self.log("Using active systemconfig salt")
         except (KeyError, AttributeError):
-            self.log("No active system configuration found!", lvl=error)
-            salt = std_salt().encode("ascii")
+            self.log("No active system configuration found! "
+                     "Generating temporary salt. THIS WON'T WORK WELL", lvl=error)
+            salt = std_salt()
 
         self.salt = salt
         self.systemconfig = systemconfig
@@ -220,8 +225,9 @@ class Authenticator(ConfigurableComponent):
             self._fail(event, "Account deactivated.")
             return
 
-        if compare_digest(std_hash(event.password, self.salt), user_account.passhash) \
-                is False:
+        trying_passhash = std_hash(event.password, self.salt)
+
+        if compare_digest(trying_passhash, user_account.passhash) is False:
             self.log("Password was wrong!", lvl=warn)
             self._fail(event)
             return

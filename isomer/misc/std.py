@@ -38,7 +38,7 @@ def std_salt() -> str:
     """Generates a secure cryptographical salt
     """
 
-    return bcrypt.gensalt().decode("utf-8")
+    return bcrypt.gensalt()
 
 
 def std_hash(word: AnyStr, salt: AnyStr):
@@ -51,7 +51,7 @@ def std_hash(word: AnyStr, salt: AnyStr):
         password = word
 
     if isinstance(salt, str):
-        salt_bytes = salt.encode("utf-8")
+        salt_bytes = salt.encode("ascii")
     else:
         salt_bytes = salt
 
