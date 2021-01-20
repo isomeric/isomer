@@ -134,7 +134,10 @@ setup(
         "isomer.provisions",
         "isomer.schemata",
         "isomer.tool",
-        "isomer.ui"
+        "isomer.ui",
+        "isomer.ui.clientmanager",
+        "isomer.ui.objectmanager",
+        "isomer.ui.store",
     ],
     namespace_packages=["isomer"],
     long_description=readme,
