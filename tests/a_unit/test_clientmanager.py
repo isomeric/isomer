@@ -67,12 +67,25 @@ def transmit(event_in, channel_in, event_out, channel_out):
 def test_auth_request():
     """Test if clientmanager fires an authentication-request on login"""
 
+
+    test_uuid = std_uuid()
+
     m.start()
 
     # TODO: Rebuild this, to actually connect a fake socket via cm.connect(socket, IP)
+    class sock():
+        """Mock socket"""
 
-    uuid = std_uuid()
-    socket = Socket('127.0.0.1', uuid)
+        @staticmethod
+        def getpeername():
+            """Mock function to return a fake peer name"""
+
+            return ["localhost"]
+
+        def clientuuid(self):
+            return test_uuid
+
+    socket = sock
     cm._sockets[socket] = socket
 
     data = {
@@ -95,11 +108,24 @@ def test_auth_request():
 def test_auto_auth_request():
     """Tests if automatic authentication requests work"""
 
-    m.start()
-    # TODO: Rebuild this, to actually connect a fake socket via cm.connect(socket, IP)
+    test_uuid = std_uuid()
 
-    uuid = std_uuid()
-    socket = Socket('127.0.0.1', uuid)
+    m.start()
+
+    # TODO: Rebuild this, to actually connect a fake socket via cm.connect(socket, IP)
+    class sock():
+        """Mock socket"""
+
+        @staticmethod
+        def getpeername():
+            """Mock function to return a fake peer name"""
+
+            return ["localhost"]
+
+        def clientuuid(self):
+            return test_uuid
+
+    socket = sock
     cm._sockets[socket] = socket
 
     client_config_uuid = std_uuid()
@@ -117,7 +143,7 @@ def test_auto_auth_request():
 
     result = transmit('authenticationrequest', 'auth', event, 'wsserver')
 
-    pprint(result.__dict__)
+    #pprint(result.__dict__)
     assert result.auto is True
     assert result.requestedclientuuid['uuid'] == client_config_uuid
 
