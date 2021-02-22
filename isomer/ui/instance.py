@@ -29,8 +29,7 @@ Instance management component.
 
 
 import requests
-
-from json.decoder import JSONDecodeError
+from simplejson.errors import JSONDecodeError
 from urllib.parse import urljoin
 
 from isomer.events.system import system_stop
