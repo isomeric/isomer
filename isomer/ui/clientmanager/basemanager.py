@@ -41,9 +41,12 @@ from isomer.database import objectmodels
 from isomer.events.client import clientdisconnect, userlogout, send
 
 from isomer.logger import debug, critical, verbose, error, warn, network
-from isomer.ui.clientobjects import Socket, Client
+from isomer.ui.clientobjects import Socket, Client, User
 
 from isomer.ui.clientmanager.encoder import ComplexEncoder
+
+
+from isomer.events.objectmanager import search, get
 
 
 class ClientBaseManager(ConfigurableComponent):
@@ -56,6 +59,10 @@ class ClientBaseManager(ConfigurableComponent):
 
     def __init__(self, *args, **kwargs):
         super(ClientBaseManager, self).__init__("CM", *args, **kwargs)
+
+        self._public_access = True
+
+        self._public_access_events = [search, get]
 
         self._clients = {}
         self._sockets = {}
@@ -369,6 +376,7 @@ class ClientBaseManager(ConfigurableComponent):
     ):
         """Determine what exactly to do with the event and forward it to its
         destination"""
+
         try:
             client = self._clients[client_uuid]
         except KeyError as e:
@@ -411,7 +419,20 @@ class ClientBaseManager(ConfigurableComponent):
                     and request_component == "isomer.ui.clientmanager.latency"
                 ):
                     self.log("User not logged in.", lvl=warn)
+                user = None
 
+            if user is None:
+                if self._public_access is True:
+                    self.log("Setting anonymous guest user")
+                    tempory_account = objectmodels['user']({
+                        "name": "Guest",
+                        "uuid": str(uuid4()),
+                        "roles": ["public"]
+                    })
+                    user = User(tempory_account, {}, uuid4())
+
+            if user is None:
+                self.log("Public access is deactivated and user is not logged in")
                 return
 
             self.log("Handling event:", request_component, request_action, lvl=verbose)

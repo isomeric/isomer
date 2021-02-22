@@ -245,7 +245,7 @@ class AuthenticationManager(ClientBaseManager):
 
             if not user and component in self.authorized_events.keys():
                 self.log(
-                    "Unknown client tried to do an authenticated " "operation: %s",
+                    "Unknown client tried to do an authenticated operation: %s",
                     component,
                     action,
                     data,
@@ -308,6 +308,12 @@ class AuthenticationManager(ClientBaseManager):
 
     def _check_permissions(self, user, event):
         """Checks if the user has in any role that allows to fire the event."""
+
+        if "public" in user.account.roles and type(event) in self._public_access_events:
+            self.log("Public access granted", lvl=warn)
+            return True
+        else:
+            self.log(self._public_access_events, user.account.roles, pretty=True)
 
         for role in user.account.roles:
             if role in event.roles:
