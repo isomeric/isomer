@@ -20,11 +20,12 @@
 
 """Schemastore builder"""
 
-from copy import deepcopy
-from pkg_resources import iter_entry_points, DistributionNotFound
-
 import formal
 import jsonschema
+
+from copy import deepcopy
+from pkg_resources import iter_entry_points, DistributionNotFound
+from json import dumps
 
 from isomer.logger import isolog, verbose, warn, debug
 from isomer.misc import all_languages, i18n as _
@@ -164,7 +165,16 @@ def build_schemastore_new():
         "Found", len(available), "schemata: ", sorted(available.keys()), lvl=debug
     )
 
+    validate_schemastore(available)
+
     return available
+
+def validate_schemastore(store):
+    for key, item in store.items():
+        try:
+            _ = dumps(item)
+        except Exception as e:
+            schemata_log("Schema did not validate:", key, e, pretty=True, lvl=warn)
 
 
 def build_l10n_schemastore(available):
