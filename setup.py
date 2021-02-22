@@ -22,7 +22,7 @@ import os
 import sys
 
 try:
-    from setuptools import setup
+    from setuptools import setup, find_namespace_packages
 except ImportError:
     # TODO: See if this can be sorted out by isomer.error.bail()
     print(
@@ -126,20 +126,7 @@ setup(
         "Topic :: Software Development :: User Interfaces",
         "Topic :: System :: Distributed Computing"
     ],
-    packages=[
-        "isomer",
-        "isomer.database",
-        "isomer.events",
-        "isomer.misc",
-        "isomer.provisions",
-        "isomer.schemata",
-        "isomer.tool",
-        "isomer.ui",
-        "isomer.ui.clientmanager",
-        "isomer.ui.objectmanager",
-        "isomer.ui.store",
-    ],
-    namespace_packages=["isomer"],
+    packages= find_namespace_packages(),
     long_description=readme,
     long_description_content_type="text/x-rst",
     dependency_links=[
