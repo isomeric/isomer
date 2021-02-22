@@ -128,7 +128,7 @@ class SubscriptionOperations(RoleOperations):
             # pprint(self.subscriptions)
 
             for client, recipient in self.subscriptions[update_object.uuid].items():
-                if not self._check_permissions(recipient, "read", update_object):
+                if not self._check_permissions(update_schema, recipient, "read", update_object):
                     continue
 
                 self.log("Notifying subscriber: ", client, recipient, lvl=verbose)

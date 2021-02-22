@@ -51,21 +51,40 @@ class ObjectBaseManager(ConfigurableComponent):
 
         self.log("Started")
 
-    def _check_permissions(self, subject, action, obj):
-        # self.log('Roles of user:', subject.account.roles, lvl=verbose)
+    def _check_permissions(self, schema, subject, action, obj):
+        # TODO:
+        #  * Clean up
+        #  * Rewrite (simplify?) administrative access
+        #  * Write testsuite
 
+        self.log('Roles of user:', subject.account.roles, lvl=verbose)
+        schema_object = schemastore[schema]['schema']
+        self.log('Schema:', schema_object, lvl=verbose, pretty=True)
+
+        # First check administrative access, it overrides everything
         if "perms" not in obj._fields:
             if "admin" in subject.account.roles:
-                # self.log('Access to administrative object granted', lvl=verbose)
+                self.log('Access to administrative object granted', lvl=verbose)
                 return True
             else:
-                # self.log('Access to administrative object failed', lvl=verbose)
+                self.log('Access to administrative object failed', lvl=verbose)
                 return False
 
+        # Secondly check special functionality (like moderation)
+        specials = schemastore[schema].get('specials', None)
+        if specials is not None:
+            action_check = specials.get(action, None)
+
+            if action_check is not None:
+                if action_check(obj, subject.roles) is False:
+                    self.log("Action check failed for", action)
+                    return False
+
+        # Third: Check if user is the owner
         if "owner" in obj.perms[action]:
             try:
                 if subject.uuid == obj.owner:
-                    # self.log('Access granted via ownership', lvl=verbose)
+                    self.log('Access granted via ownership', lvl=verbose)
                     return True
             except AttributeError as e:
                 self.log(
@@ -73,9 +92,11 @@ class ObjectBaseManager(ConfigurableComponent):
                     obj._schema["name"],
                     lvl=verbose,
                 )
+
+        # Fourth: Check if general RBAC rules allow accessing this object
         for role in subject.account.roles:
             if role in obj.perms[action]:
-                # self.log('Access granted', lvl=verbose)
+                self.log('Access granted', lvl=verbose)
                 return True
 
         self.log("Access denied", lvl=verbose)
