@@ -38,6 +38,7 @@ def schemata_log(*args, **kwargs):
 
 schemastore = {}
 l10n_schemastore = {}
+restrictions = {}
 configschemastore = {}
 
 
@@ -97,7 +98,20 @@ def build_schemastore_new():
 
         return insert_form
 
+    def _get_field_restrictions(item):
+        result = {}
+
+        for key, thing in item['schema']['properties'].items():
+            if 'roles' in thing:
+                # schemata_log(thing)
+                result[key] = thing['roles']
+
+        return result
+
     for key, item in available.items():
+        restrictions[key] = _get_field_restrictions(item)
+        schemata_log("Schema", key, "restrictions:", restrictions[key], lvl=debug)
+
         extends = item.get("extends", None)
         if extends is not None:
             schemata_log(key, "extends:", extends, pretty=True, lvl=verbose)
