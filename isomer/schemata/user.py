@@ -40,7 +40,12 @@ UserSchema = base_object("user", roles_list=["crew"])
 UserSchema["properties"].update(
     {
         "passhash": {"type": "string"},
-        "roles": {"type": "array", "items": {"type": "string"}, "default": ["crew"]},
+        "roles": {
+            "type": "array",
+            "items": {"type": "string"},
+            "default": ["crew"],
+            "roles": {"write": "admin"},
+        },
         "needs_password_change": {"type": "boolean", "default": False},
         # TODO: Decide if this should be an extension of the enrol module
         "mail": {"type": "string"},

@@ -138,7 +138,7 @@ def test_user_auth():
         auto=False
     )
 
-    result = transmit('authentication', 'auth', event, 'auth', 0.5)
+    result = transmit('authentication', 'auth', event, 'auth', 1.0)
 
     assert isinstance(result, authentication)
     assert result.username == 'TESTER'

@@ -20,11 +20,12 @@
 
 """Schemastore builder"""
 
-from copy import deepcopy
-from pkg_resources import iter_entry_points, DistributionNotFound
-
 import formal
 import jsonschema
+
+from copy import deepcopy
+from pkg_resources import iter_entry_points, DistributionNotFound
+from json import dumps
 
 from isomer.logger import isolog, verbose, warn, debug
 from isomer.misc import all_languages, i18n as _
@@ -38,6 +39,7 @@ def schemata_log(*args, **kwargs):
 
 schemastore = {}
 l10n_schemastore = {}
+restrictions = {}
 configschemastore = {}
 
 
@@ -97,7 +99,20 @@ def build_schemastore_new():
 
         return insert_form
 
+    def _get_field_restrictions(item):
+        result = {}
+
+        for key, thing in item['schema']['properties'].items():
+            if 'roles' in thing:
+                # schemata_log(thing)
+                result[key] = thing['roles']
+
+        return result
+
     for key, item in available.items():
+        restrictions[key] = _get_field_restrictions(item)
+        schemata_log("Schema", key, "restrictions:", restrictions[key], lvl=debug)
+
         extends = item.get("extends", None)
         if extends is not None:
             schemata_log(key, "extends:", extends, pretty=True, lvl=verbose)
@@ -150,7 +165,16 @@ def build_schemastore_new():
         "Found", len(available), "schemata: ", sorted(available.keys()), lvl=debug
     )
 
+    validate_schemastore(available)
+
     return available
+
+def validate_schemastore(store):
+    for key, item in store.items():
+        try:
+            _ = dumps(item)
+        except Exception as e:
+            schemata_log("Schema did not validate:", key, e, pretty=True, lvl=warn)
 
 
 def build_l10n_schemastore(available):

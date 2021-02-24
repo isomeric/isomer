@@ -109,7 +109,7 @@ class CrudOperations(CliManager):
         if storage_object:
             self.log("Object found, checking permissions: ", data, lvl=verbose)
 
-            if not self._check_permissions(user, "read", storage_object):
+            if not self._check_permissions(schema, user, "read", storage_object):
                 self._cancel_by_permission(schema, data, event)
                 return
 
@@ -227,7 +227,7 @@ class CrudOperations(CliManager):
         cursor = objectmodels[schema].find(object_filter, **get_options())
 
         for item in cursor:
-            if not self._check_permissions(user, "list", item):
+            if not self._check_permissions(schema, user, "list", item):
                 continue
             self.log("Search found item: ", item, lvl=verbose)
 
@@ -303,7 +303,7 @@ class CrudOperations(CliManager):
         try:
             for item in objectmodels[schema].find(object_filter):
                 try:
-                    if not self._check_permissions(user, "list", item):
+                    if not self._check_permissions(schema, user, "list", item):
                         continue
                     if fields in ("*", ["*"]):
                         item_fields = item.serializablefields()
@@ -375,7 +375,7 @@ class CrudOperations(CliManager):
             self._cancel_by_error(event, "not_found")
             return
 
-        if not self._check_permissions(user, "write", storage_object):
+        if not self._check_permissions(schema, user, "write", storage_object):
             self._cancel_by_permission(schema, data, event)
             return
 
@@ -477,6 +477,7 @@ class CrudOperations(CliManager):
 
             if uuid != "create":
                 storage_object = model.find_one({"uuid": uuid})
+
             if uuid == "create" or model.count({"uuid": uuid}) == 0:
                 if uuid == "create":
                     uuid = str(uuid4())
@@ -484,12 +485,13 @@ class CrudOperations(CliManager):
                 client_object["uuid"] = uuid
                 client_object["owner"] = user.uuid
                 storage_object = model(client_object)
+
                 if not self._check_create_permission(user, schema):
                     self._cancel_by_permission(schema, data, event)
                     return
 
             if storage_object is not None:
-                if not self._check_permissions(user, "write", storage_object):
+                if not self._check_permissions(schema, user, "write", storage_object):
                     self._cancel_by_permission(schema, data, event)
                     return
 
@@ -498,7 +500,7 @@ class CrudOperations(CliManager):
 
             else:
                 storage_object = model(client_object)
-                if not self._check_permissions(user, "write", storage_object):
+                if not self._check_permissions(schema, user, "write", storage_object):
                     self._cancel_by_permission(schema, data, event)
                     return
 
@@ -576,7 +578,7 @@ class CrudOperations(CliManager):
 
                 self.log("Found object.", lvl=debug)
 
-                if not self._check_permissions(user, "write", storage_object):
+                if not self._check_permissions(schema, user, "write", storage_object):
                     self._cancel_by_permission(schema, data, event)
                     return
 

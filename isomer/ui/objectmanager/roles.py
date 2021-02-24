@@ -59,7 +59,7 @@ class RoleOperations(CrudOperations):
         for item in uuid:
             obj = objectmodels[schema].find_one({"uuid": item})
 
-            if not self._check_permissions(user, "write", obj):
+            if not self._check_permissions(schema, user, "write", obj):
                 self.log("Revoking role not possible due to insufficient permissions.")
                 return
 
@@ -98,7 +98,7 @@ class RoleOperations(CrudOperations):
         for item in uuid:
             obj = objectmodels[schema].find_one({"uuid": item})
 
-            if not self._check_permissions(user, "write", obj):
+            if not self._check_permissions(schema, user, "write", obj):
                 self.log("Adding role not possible due to insufficient permissions.")
                 return
 
